@@ -1,73 +1,113 @@
-# Welcome to your Lovable project
+# Crypto Multi-Timeframe Dashboard
 
-## Project info
+Dashboard profesional de análisis técnico para criptomonedas (Bitcoin y Ethereum) con análisis multi-timeframe y múltiples indicadores técnicos.
 
-**URL**: https://lovable.dev/projects/c4aeb43d-b228-4836-9add-3d00b90ad88a
+## 🚀 Características
 
-## How can I edit this code?
+- **Análisis Multi-Timeframe**: Compara tendencia macro (1D/1W) con señales operativas micro (1H/4H)
+- **Indicadores Técnicos**:
+  - EMA 20 / EMA 50 (Exponential Moving Averages)
+  - RSI 14 (Relative Strength Index)
+  - MACD (12, 26, 9) (Moving Average Convergence Divergence)
+  - ATR 14 (Average True Range)
+  - Supertrend (10, 3)
+- **Sistema de Scoring Inteligente**: Combina todos los indicadores para generar señales BUY/SELL/HOLD
+- **Análisis Combinado**: Identifica cuando macro y micro están alineados para señales fuertes
+- **Visualización Avanzada**: Gráficos de velas con EMAs, cards de KPIs y tabla detallada
+- **Auto-refresh**: Actualización automática cada 60 segundos
+- **Exportar CSV**: Descarga últimas 200 velas con todos los indicadores
+- **Persistencia**: Guarda preferencias en localStorage
 
-There are several ways of editing your application.
+## 🛠️ Instalación
 
-**Use Lovable**
+```bash
+# Instalar dependencias
+npm install
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c4aeb43d-b228-4836-9add-3d00b90ad88a) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Iniciar servidor de desarrollo
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+La aplicación estará disponible en `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📊 Fuente de Datos
 
-**Use GitHub Codespaces**
+Utiliza la API pública de Binance (sin necesidad de API key):
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```
+https://api.binance.com/api/v3/klines
+```
 
-## What technologies are used for this project?
+**Símbolos disponibles:**
+- BTCUSDT (Bitcoin)
+- ETHUSDT (Ethereum)
 
-This project is built with:
+**Intervalos disponibles:**
+- 1h (1 hora)
+- 4h (4 horas)
+- 1d (1 día)
+- 1w (1 semana)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 📈 Interpretación de Indicadores
 
-## How can I deploy this project?
+### EMA (Exponential Moving Average)
+- **EMA 20 > EMA 50**: Tendencia alcista (+2 puntos)
+- **EMA 20 < EMA 50**: Tendencia bajista (-2 puntos)
 
-Simply open [Lovable](https://lovable.dev/projects/c4aeb43d-b228-4836-9add-3d00b90ad88a) and click on Share -> Publish.
+### RSI (Relative Strength Index)
+- **RSI < 40**: Momentum alcista (+1 punto)
+- **RSI > 60**: Momentum bajista (-1 punto)
+- **RSI < 30**: Zona de sobreventa
+- **RSI > 70**: Zona de sobrecompra
 
-## Can I connect a custom domain to my Lovable project?
+### MACD (Moving Average Convergence Divergence)
+- **MACD > Signal**: Momentum positivo (+1 punto)
+- **MACD < Signal**: Momentum negativo (-1 punto)
 
-Yes, you can!
+### ATR (Average True Range)
+- Mide la volatilidad del activo
+- ATR alto = mayor volatilidad = stops más amplios
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Supertrend
+- **Verde (uptrend)**: Señal alcista (+1 punto)
+- **Rojo (downtrend)**: Señal bajista (-1 punto)
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 🎯 Sistema de Señales
+
+**Score Total**: Suma de todos los indicadores (rango: -5 a +5)
+
+- **Score ≥ +3**: 🟢 **BUY** - Señal de compra
+- **Score ≤ -3**: 🔴 **SELL** - Señal de venta
+- **-3 < Score < +3**: 🟡 **HOLD** - Mantener / esperar
+
+**Señales Combinadas:**
+- **Strong BUY 🔥**: Macro BUY + Micro BUY
+- **Strong SELL ⚠️**: Macro SELL + Micro SELL
+- **Mixed 🤔**: Divergencia entre macro y micro
+
+## ⚠️ Disclaimer
+
+**IMPORTANTE**: Este dashboard es una herramienta de análisis educativa y no ejecuta órdenes de trading. Las señales generadas NO constituyen asesoramiento financiero.
+
+- No se ejecutan operaciones automáticas
+- Los datos son informativos únicamente
+- Siempre realiza tu propia investigación (DYOR)
+- El trading de criptomonedas implica riesgos significativos
+- Solo invierte lo que puedas permitirte perder
+
+## 🏗️ Tecnologías
+
+- **React 18** con TypeScript
+- **Vite** para build ultrarrápido
+- **Tailwind CSS** para diseño moderno
+- **shadcn/ui** componentes profesionales
+- **TanStack Query** para gestión de datos
+- **Binance API** datos en tiempo real
+
+## 📝 Licencia
+
+MIT
+
+---
+
+**Desarrollado con ❤️ para la comunidad crypto**

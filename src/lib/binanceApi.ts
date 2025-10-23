@@ -49,7 +49,7 @@ function intervalToYahoo(interval: Interval): { range: string; granularity: stri
 }
 
 /**
- * Fetch candlestick data from Yahoo Finance (for stocks, indices, ETFs)
+ * Fetch candlestick data from Yahoo Finance via backend (for stocks, indices, ETFs)
  */
 async function fetchYahooCandles(
   symbol: Symbol,
@@ -57,43 +57,30 @@ async function fetchYahooCandles(
   limit: number = 500
 ): Promise<Candle[]> {
   try {
-    const { range, granularity } = intervalToYahoo(interval);
-    const url = `${YAHOO_FINANCE_API}/${symbol}?range=${range}&interval=${granularity}`;
-    
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0',
-      },
-    });
+    // Use edge function as proxy to avoid CORS issues
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-stock-data`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ symbol, interval }),
+      }
+    );
     
     if (!response.ok) {
-      throw new Error(`Yahoo Finance API error! status: ${response.status}`);
+      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(errorData.error || `Backend error: ${response.status}`);
     }
     
-    const data = await response.json();
-    const result = data.chart.result[0];
-    
-    if (!result || !result.timestamp) {
-      throw new Error('Invalid Yahoo Finance response');
-    }
-    
-    const timestamps = result.timestamp;
-    const quotes = result.indicators.quote[0];
-    
-    const candles: Candle[] = timestamps.map((time: number, i: number) => ({
-      openTime: time * 1000,
-      open: quotes.open[i] || 0,
-      high: quotes.high[i] || 0,
-      low: quotes.low[i] || 0,
-      close: quotes.close[i] || 0,
-      volume: quotes.volume[i] || 0,
-      closeTime: time * 1000 + 60000,
-    })).filter((c: Candle) => c.close > 0); // Filter out invalid candles
+    const candles = await response.json();
     
     // Return the last 'limit' candles
     return candles.slice(-limit);
   } catch (error) {
-    console.error('Error fetching Yahoo Finance data:', error);
+    console.error('Error fetching stock data:', error);
     throw error;
   }
 }
@@ -166,8 +153,8 @@ export async function getCurrentPrice(symbol: Symbol): Promise<number> {
       const data = await response.json();
       return parseFloat(data.price);
     } else {
-      // For stocks, get the last candle
-      const candles = await fetchYahooCandles(symbol, '1d', 1);
+      // For stocks, get the last candle from the fetched data
+      const candles = await fetchYahooCandles(symbol, '1d', 5);
       return candles[candles.length - 1]?.close || 0;
     }
   } catch (error) {

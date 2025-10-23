@@ -7,7 +7,17 @@ import CombinedSignal from "@/components/CombinedSignal";
 import IndicatorPanel from "@/components/IndicatorPanel";
 import MiniChart from "@/components/MiniChart";
 import CandleTable from "@/components/CandleTable";
-import { fetchCandles, Symbol, Interval, Candle } from "@/lib/binanceApi";
+import GroupRanking, { GroupSymbolData } from "@/components/GroupRanking";
+import { 
+  fetchCandles, 
+  Symbol, 
+  Interval, 
+  Candle, 
+  AssetType, 
+  GroupKey, 
+  getGroupSymbols,
+  getSymbolsByType 
+} from "@/lib/binanceApi";
 import {
   ema,
   rsi,
@@ -43,7 +53,14 @@ export default function Index() {
     return null;
   };
 
-  const [symbol, setSymbol] = useState<Symbol>(() => loadSettings()?.symbol || "BTCUSDT");
+  const [assetType, setAssetType] = useState<AssetType>(() => loadSettings()?.assetType || "crypto");
+  const [symbol, setSymbol] = useState<Symbol>(() => {
+    const saved = loadSettings();
+    if (saved?.symbol) return saved.symbol;
+    const symbols = getSymbolsByType(assetType);
+    return symbols[0] || "BTCUSDT";
+  });
+  const [selectedGroup, setSelectedGroup] = useState<GroupKey | null>(null);
   const [macroInterval, setMacroInterval] = useState<Interval>(() => loadSettings()?.macroInterval || "1d");
   const [microInterval, setMicroInterval] = useState<Interval>(() => loadSettings()?.microInterval || "1h");
   const [autoRefresh, setAutoRefresh] = useState(false);
@@ -51,14 +68,15 @@ export default function Index() {
   
   const [macroData, setMacroData] = useState<DashboardData | null>(null);
   const [microData, setMicroData] = useState<DashboardData | null>(null);
+  const [groupData, setGroupData] = useState<GroupSymbolData[]>([]);
 
   // Save settings to localStorage
   useEffect(() => {
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ symbol, macroInterval, microInterval })
+      JSON.stringify({ assetType, symbol, macroInterval, microInterval })
     );
-  }, [symbol, macroInterval, microInterval]);
+  }, [assetType, symbol, macroInterval, microInterval]);
 
   const calculateIndicators = useCallback((candles: Candle[]): DashboardData => {
     const closes = candles.map(c => c.close);
@@ -99,22 +117,54 @@ export default function Index() {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [macroCandles, microCandles] = await Promise.all([
-        fetchCandles(symbol, macroInterval, 500),
-        fetchCandles(symbol, microInterval, 500),
-      ]);
+      if (selectedGroup) {
+        // Fetch data for all symbols in the group
+        const groupSymbols = getGroupSymbols(selectedGroup);
+        const groupResults: GroupSymbolData[] = [];
 
-      setMacroData(calculateIndicators(macroCandles));
-      setMicroData(calculateIndicators(microCandles));
+        for (const sym of groupSymbols) {
+          try {
+            const [macroCandles, microCandles] = await Promise.all([
+              fetchCandles(sym, macroInterval, 500),
+              fetchCandles(sym, microInterval, 500),
+            ]);
 
-      toast.success("Datos actualizados correctamente");
+            const macroResult = calculateIndicators(macroCandles);
+            const microResult = calculateIndicators(microCandles);
+
+            groupResults.push({
+              symbol: sym,
+              score: microResult.score,
+              signal: microResult.signal,
+              price: microCandles[microCandles.length - 1]?.close || 0,
+              macroSignal: macroResult.signal,
+            });
+          } catch (error) {
+            console.error(`Error fetching data for ${sym}:`, error);
+          }
+        }
+
+        setGroupData(groupResults);
+        toast.success(`Datos del grupo actualizados (${groupResults.length}/${groupSymbols.length})`);
+      } else {
+        // Fetch data for single symbol
+        const [macroCandles, microCandles] = await Promise.all([
+          fetchCandles(symbol, macroInterval, 500),
+          fetchCandles(symbol, microInterval, 500),
+        ]);
+
+        setMacroData(calculateIndicators(macroCandles));
+        setMicroData(calculateIndicators(microCandles));
+
+        toast.success("Datos actualizados correctamente");
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
-      toast.error("Error al obtener datos de Binance. Intenta nuevamente.");
+      toast.error("Error al obtener datos. Intenta nuevamente.");
     } finally {
       setIsLoading(false);
     }
-  }, [symbol, macroInterval, microInterval, calculateIndicators]);
+  }, [symbol, selectedGroup, macroInterval, microInterval, calculateIndicators]);
 
   // Initial fetch
   useEffect(() => {
@@ -169,6 +219,25 @@ export default function Index() {
     toast.success("CSV exportado correctamente");
   };
 
+  // Handle asset type change
+  const handleAssetTypeChange = (type: AssetType) => {
+    setAssetType(type);
+    setSelectedGroup(null);
+    const symbols = getSymbolsByType(type);
+    setSymbol(symbols[0]);
+  };
+
+  // Handle group change
+  const handleGroupChange = (group: GroupKey | null) => {
+    setSelectedGroup(group);
+    if (group) {
+      setMacroData(null);
+      setMicroData(null);
+    } else {
+      setGroupData([]);
+    }
+  };
+
   const currentPrice = microData?.candles[microData.candles.length - 1]?.close || 0;
 
   return (
@@ -176,25 +245,36 @@ export default function Index() {
       <div className="max-w-[1800px] mx-auto space-y-6">
         <DashboardHeader
           symbol={symbol}
+          assetType={assetType}
+          selectedGroup={selectedGroup}
           macroInterval={macroInterval}
           microInterval={microInterval}
           autoRefresh={autoRefresh}
           isLoading={isLoading}
           onSymbolChange={setSymbol}
+          onAssetTypeChange={handleAssetTypeChange}
+          onGroupChange={handleGroupChange}
           onMacroIntervalChange={setMacroInterval}
           onMicroIntervalChange={setMicroInterval}
           onAutoRefreshChange={setAutoRefresh}
           onRefresh={fetchData}
         />
 
-        {macroData && microData && (
-          <>
-            <CombinedSignal
-              macroSignal={macroData.signal}
-              microSignal={microData.signal}
-              macroScore={macroData.score}
-              microScore={microData.score}
-            />
+        {selectedGroup ? (
+          <GroupRanking
+            groupName={selectedGroup === "magnificent_seven" ? "Magnificent Seven" : selectedGroup}
+            data={groupData}
+            isLoading={isLoading}
+          />
+        ) : (
+          macroData && microData && (
+            <>
+              <CombinedSignal
+                macroSignal={macroData.signal}
+                microSignal={microData.signal}
+                macroScore={macroData.score}
+                microScore={microData.score}
+              />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-card rounded-2xl p-6 shadow-lg border border-border">
@@ -243,9 +323,10 @@ export default function Index() {
               <CandleTable candles={microData.candles} limit={20} />
             </div>
           </>
+        )
         )}
 
-        {!macroData && !microData && !isLoading && (
+        {!selectedGroup && !macroData && !microData && !isLoading && (
           <div className="text-center py-20">
             <p className="text-muted-foreground">Cargando datos iniciales...</p>
           </div>

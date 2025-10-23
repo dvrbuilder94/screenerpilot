@@ -1,9 +1,11 @@
-# Crypto Multi-Timeframe Dashboard
+# Crypto & Stock Multi-Timeframe Dashboard
 
-Dashboard profesional de análisis técnico para criptomonedas (Bitcoin y Ethereum) con análisis multi-timeframe y múltiples indicadores técnicos.
+Dashboard profesional de análisis técnico para criptomonedas y acciones con análisis multi-timeframe y múltiples indicadores técnicos.
 
 ## 🚀 Características
 
+- **Multi-Asset Support**: Analiza criptomonedas, acciones, índices y ETFs
+- **Magnificent Seven**: Análisis grupal de las 7 magníficas (AAPL, MSFT, NVDA, AMZN, GOOGL, META, TSLA)
 - **Análisis Multi-Timeframe**: Compara tendencia macro (1D/1W) con señales operativas micro (1H/4H)
 - **Indicadores Técnicos**:
   - EMA 20 / EMA 50 (Exponential Moving Averages)
@@ -13,10 +15,40 @@ Dashboard profesional de análisis técnico para criptomonedas (Bitcoin y Ethere
   - Supertrend (10, 3)
 - **Sistema de Scoring Inteligente**: Combina todos los indicadores para generar señales BUY/SELL/HOLD
 - **Análisis Combinado**: Identifica cuando macro y micro están alineados para señales fuertes
+- **Ranking de Grupos**: Vista de ranking para analizar múltiples símbolos simultáneamente
 - **Visualización Avanzada**: Gráficos de velas con EMAs, cards de KPIs y tabla detallada
 - **Auto-refresh**: Actualización automática cada 60 segundos
 - **Exportar CSV**: Descarga últimas 200 velas con todos los indicadores
 - **Persistencia**: Guarda preferencias en localStorage
+
+## 📊 Activos Disponibles
+
+### Criptomonedas (Binance)
+- BTCUSDT (Bitcoin)
+- ETHUSDT (Ethereum)
+
+### Acciones (Yahoo Finance)
+**Magnificent Seven:**
+- AAPL (Apple)
+- MSFT (Microsoft)
+- NVDA (NVIDIA)
+- AMZN (Amazon)
+- GOOGL (Google/Alphabet)
+- META (Meta/Facebook)
+- TSLA (Tesla)
+
+**Otras acciones destacadas:**
+BMNR, FIGS, ADBE, FIG, BRK-B, AVGO, LLY, V, UNH, XOM, WMT, JNJ, ORCL, COST, MA, PG
+
+### Índices
+- ^GSPC (S&P 500)
+- ^RUT (Russell 2000)
+- ^NDX (Nasdaq 100)
+
+### ETFs
+- SPY (S&P 500 ETF)
+- IWM (Russell 2000 ETF)
+- QQQ (Nasdaq 100 ETF)
 
 ## 🛠️ Instalación
 
@@ -30,17 +62,19 @@ npm run dev
 
 La aplicación estará disponible en `http://localhost:8080`
 
-## 📊 Fuente de Datos
+## 📊 Fuentes de Datos
 
-Utiliza la API pública de Binance (sin necesidad de API key):
-
+### Criptomonedas
+API pública de Binance (sin necesidad de API key):
 ```
 https://api.binance.com/api/v3/klines
 ```
 
-**Símbolos disponibles:**
-- BTCUSDT (Bitcoin)
-- ETHUSDT (Ethereum)
+### Acciones, Índices y ETFs
+API pública de Yahoo Finance:
+```
+https://query1.finance.yahoo.com/v8/finance/chart
+```
 
 **Intervalos disponibles:**
 - 1h (1 hora)
@@ -85,6 +119,22 @@ https://api.binance.com/api/v3/klines
 - **Strong SELL ⚠️**: Macro SELL + Micro SELL
 - **Mixed 🤔**: Divergencia entre macro y micro
 
+## 🎯 Análisis de Grupos
+
+### Magnificent Seven
+El modo de grupo permite analizar las 7 magníficas simultáneamente:
+
+1. **Ranking por Score**: Ordenadas de mejor a peor señal operativa (micro)
+2. **Resumen Macro**: Tendencia general de cada acción
+3. **Resumen del Grupo**: Contadores de BUY/HOLD/SELL
+
+**Cómo usar:**
+1. Seleccionar "Stocks" como tipo de activo
+2. Elegir "Magnificent Seven" en el selector de grupos
+3. Ver el ranking y análisis comparativo
+
+Los datos se actualizan para todos los símbolos del grupo simultáneamente.
+
 ## ⚠️ Disclaimer
 
 **IMPORTANTE**: Este dashboard es una herramienta de análisis educativa y no ejecuta órdenes de trading. Las señales generadas NO constituyen asesoramiento financiero.
@@ -102,7 +152,26 @@ https://api.binance.com/api/v3/klines
 - **Tailwind CSS** para diseño moderno
 - **shadcn/ui** componentes profesionales
 - **TanStack Query** para gestión de datos
-- **Binance API** datos en tiempo real
+- **Binance API** datos crypto en tiempo real
+- **Yahoo Finance API** datos de acciones e índices
+
+## 🔧 Configuración de Presets
+
+Los símbolos disponibles se configuran en `src/config/presets.json`:
+
+```json
+{
+  "crypto": ["BTCUSDT", "ETHUSDT"],
+  "groups": {
+    "magnificent_seven": ["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "TSLA"]
+  },
+  "stocks": [...],
+  "indices": ["^GSPC", "^RUT", "^NDX"],
+  "etf_alt": ["SPY", "IWM", "QQQ"]
+}
+```
+
+Puedes agregar más símbolos o crear nuevos grupos editando este archivo.
 
 ## 📝 Licencia
 
@@ -110,4 +179,4 @@ MIT
 
 ---
 
-**Desarrollado con ❤️ para la comunidad crypto**
+**Desarrollado con ❤️ para traders e inversores**

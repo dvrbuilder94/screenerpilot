@@ -3,15 +3,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RefreshCw } from "lucide-react";
-import { Symbol, Interval } from "@/lib/binanceApi";
+import { Symbol, Interval, AssetType, GroupKey, getSymbolsByType, getPresets } from "@/lib/binanceApi";
 
 interface DashboardHeaderProps {
-  symbol: Symbol;
+  symbol: Symbol | null;
+  assetType: AssetType;
+  selectedGroup: GroupKey | null;
   macroInterval: Interval;
   microInterval: Interval;
   autoRefresh: boolean;
   isLoading: boolean;
   onSymbolChange: (symbol: Symbol) => void;
+  onAssetTypeChange: (type: AssetType) => void;
+  onGroupChange: (group: GroupKey | null) => void;
   onMacroIntervalChange: (interval: Interval) => void;
   onMicroIntervalChange: (interval: Interval) => void;
   onAutoRefreshChange: (enabled: boolean) => void;
@@ -20,16 +24,22 @@ interface DashboardHeaderProps {
 
 export default function DashboardHeader({
   symbol,
+  assetType,
+  selectedGroup,
   macroInterval,
   microInterval,
   autoRefresh,
   isLoading,
   onSymbolChange,
+  onAssetTypeChange,
+  onGroupChange,
   onMacroIntervalChange,
   onMicroIntervalChange,
   onAutoRefreshChange,
   onRefresh,
 }: DashboardHeaderProps) {
+  const presets = getPresets();
+  const symbols = getSymbolsByType(assetType);
   return (
     <div className="bg-card rounded-2xl p-6 shadow-lg border border-border">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -43,19 +53,59 @@ export default function DashboardHeader({
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
-          {/* Symbol selector */}
+          {/* Asset Type selector */}
           <div className="flex flex-col gap-2">
-            <Label className="text-xs text-muted-foreground">Símbolo</Label>
-            <Select value={symbol} onValueChange={(v) => onSymbolChange(v as Symbol)}>
+            <Label className="text-xs text-muted-foreground">Tipo</Label>
+            <Select value={assetType} onValueChange={(v) => onAssetTypeChange(v as AssetType)}>
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="BTCUSDT">BTC/USDT</SelectItem>
-                <SelectItem value="ETHUSDT">ETH/USDT</SelectItem>
+                <SelectItem value="crypto">Crypto</SelectItem>
+                <SelectItem value="stock">Stocks</SelectItem>
+                <SelectItem value="index">Índices</SelectItem>
+                <SelectItem value="etf">ETFs</SelectItem>
               </SelectContent>
             </Select>
           </div>
+
+          {/* Group selector (only for stocks) */}
+          {assetType === 'stock' && (
+            <div className="flex flex-col gap-2">
+              <Label className="text-xs text-muted-foreground">Grupo</Label>
+              <Select 
+                value={selectedGroup || "none"} 
+                onValueChange={(v) => onGroupChange(v === "none" ? null : v as GroupKey)}
+              >
+                <SelectTrigger className="w-44">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Símbolo individual</SelectItem>
+                  <SelectItem value="magnificent_seven">Magnificent Seven</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Symbol selector (only when no group selected) */}
+          {!selectedGroup && (
+            <div className="flex flex-col gap-2">
+              <Label className="text-xs text-muted-foreground">Símbolo</Label>
+              <Select value={symbol || ""} onValueChange={(v) => onSymbolChange(v as Symbol)}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {symbols.map((sym) => (
+                    <SelectItem key={sym} value={sym}>
+                      {sym}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Macro timeframe */}
           <div className="flex flex-col gap-2">

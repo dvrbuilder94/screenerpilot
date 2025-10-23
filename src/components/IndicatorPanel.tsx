@@ -31,13 +31,13 @@ export default function IndicatorPanel({
     return 'bg-neutral/10 border-neutral/30';
   };
 
-  const lastEma20 = indicators.ema20[indicators.ema20.length - 1];
-  const lastEma50 = indicators.ema50[indicators.ema50.length - 1];
-  const lastRsi = indicators.rsi[indicators.rsi.length - 1];
-  const lastMacd = indicators.macd.macd[indicators.macd.macd.length - 1];
-  const lastSignal = indicators.macd.signal[indicators.macd.signal.length - 1];
-  const lastAtr = indicators.atr[indicators.atr.length - 1];
-  const atrPercent = (lastAtr / currentPrice) * 100;
+  const lastEma20 = indicators.ema20[indicators.ema20.length - 1] || 0;
+  const lastEma50 = indicators.ema50[indicators.ema50.length - 1] || 0;
+  const lastRsi = indicators.rsi[indicators.rsi.length - 1] || 0;
+  const lastMacd = indicators.macd.macd[indicators.macd.macd.length - 1] || 0;
+  const lastSignal = indicators.macd.signal[indicators.macd.signal.length - 1] || 0;
+  const lastAtr = indicators.atr[indicators.atr.length - 1] || 0;
+  const atrPercent = currentPrice > 0 ? (lastAtr / currentPrice) * 100 : 0;
 
   return (
     <div className="space-y-4">

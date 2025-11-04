@@ -3,8 +3,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
-import CombinedSignal from "@/components/CombinedSignal";
-import IndicatorPanel from "@/components/IndicatorPanel";
+import EnhancedSignalCard from "@/components/EnhancedSignalCard";
+import WatchlistManager from "@/components/WatchlistManager";
+import TopSetupsPanel from "@/components/TopSetupsPanel";
+import FilterPanel from "@/components/FilterPanel";
 import MiniChart from "@/components/MiniChart";
 import CandleTable from "@/components/CandleTable";
 import GroupRanking, { GroupSymbolData } from "@/components/GroupRanking";
@@ -16,7 +18,8 @@ import {
   AssetType, 
   GroupKey, 
   getGroupSymbols,
-  getSymbolsByType 
+  getSymbolsByType,
+  getAssetType 
 } from "@/lib/binanceApi";
 import {
   ema,
@@ -24,19 +27,18 @@ import {
   macd,
   atr,
   supertrend,
-  calculateScore,
-  getSignal,
   IndicatorData,
-  Signal,
 } from "@/lib/indicators";
+import { calculateEnhancedSignal } from "@/lib/enhancedSignals";
+import { TradingSetup, FilterOptions, EnhancedSignal } from "@/types/trading";
 
 const STORAGE_KEY = "crypto-dashboard-settings";
 
 interface DashboardData {
   candles: Candle[];
   indicators: IndicatorData;
-  signal: Signal;
-  score: number;
+  enhancedSignal: EnhancedSignal;
+  currentPrice: number;
 }
 
 export default function Index() {
@@ -69,6 +71,13 @@ export default function Index() {
   const [macroData, setMacroData] = useState<DashboardData | null>(null);
   const [microData, setMicroData] = useState<DashboardData | null>(null);
   const [groupData, setGroupData] = useState<GroupSymbolData[]>([]);
+  const [tradingSetups, setTradingSetups] = useState<TradingSetup[]>([]);
+  const [filters, setFilters] = useState<FilterOptions>({
+    trend: 'ALL',
+    signalType: 'ALL',
+    assetType: 'ALL',
+    minConfidence: 0,
+  });
 
   // Save settings to localStorage
   useEffect(() => {
@@ -103,14 +112,20 @@ export default function Index() {
       supertrend: supertrendValues,
     };
 
-    const score = calculateScore(indicators);
-    const signal = getSignal(score);
+    const currentPrice = candles[candles.length - 1]?.close || 0;
+    const prevPrice = candles[candles.length - 2]?.close || currentPrice;
+
+    const enhancedSignal = calculateEnhancedSignal({
+      indicators,
+      currentPrice,
+      prevPrice,
+    });
 
     return {
       candles,
       indicators,
-      signal,
-      score,
+      enhancedSignal,
+      currentPrice,
     };
   }, []);
 
@@ -121,6 +136,7 @@ export default function Index() {
         // Fetch data for all symbols in the group
         const groupSymbols = getGroupSymbols(selectedGroup);
         const groupResults: GroupSymbolData[] = [];
+        const setupResults: TradingSetup[] = [];
 
         for (const sym of groupSymbols) {
           try {
@@ -134,10 +150,21 @@ export default function Index() {
 
             groupResults.push({
               symbol: sym,
-              score: microResult.score,
-              signal: microResult.signal,
-              price: microCandles[microCandles.length - 1]?.close || 0,
-              macroSignal: macroResult.signal,
+              score: microResult.enhancedSignal.score,
+              signal: microResult.enhancedSignal.signal as any,
+              price: microResult.currentPrice,
+              macroSignal: macroResult.enhancedSignal.signal as any,
+            });
+
+            // Create trading setup for ranking
+            setupResults.push({
+              symbol: sym,
+              assetType: getAssetType(sym),
+              currentPrice: microResult.currentPrice,
+              macroSignal: macroResult.enhancedSignal,
+              microSignal: microResult.enhancedSignal,
+              combinedConfidence: (macroResult.enhancedSignal.confidence + microResult.enhancedSignal.confidence) / 2,
+              lastUpdate: Date.now(),
             });
           } catch (error) {
             console.error(`Error fetching data for ${sym}:`, error);
@@ -145,6 +172,7 @@ export default function Index() {
         }
 
         setGroupData(groupResults);
+        setTradingSetups(setupResults);
         toast.success(`Datos del grupo actualizados (${groupResults.length}/${groupSymbols.length})`);
       } else {
         // Fetch data for single symbol
@@ -153,8 +181,23 @@ export default function Index() {
           fetchCandles(symbol, microInterval, 500),
         ]);
 
-        setMacroData(calculateIndicators(macroCandles));
-        setMicroData(calculateIndicators(microCandles));
+        const macroResult = calculateIndicators(macroCandles);
+        const microResult = calculateIndicators(microCandles);
+
+        setMacroData(macroResult);
+        setMicroData(microResult);
+
+        // Create single trading setup
+        const setup: TradingSetup = {
+          symbol,
+          assetType: getAssetType(symbol),
+          currentPrice: microResult.currentPrice,
+          macroSignal: macroResult.enhancedSignal,
+          microSignal: microResult.enhancedSignal,
+          combinedConfidence: (macroResult.enhancedSignal.confidence + microResult.enhancedSignal.confidence) / 2,
+          lastUpdate: Date.now(),
+        };
+        setTradingSetups([setup]);
 
         toast.success("Datos actualizados correctamente");
       }
@@ -181,6 +224,22 @@ export default function Index() {
 
     return () => clearInterval(interval);
   }, [autoRefresh, fetchData]);
+
+  // Filter trading setups
+  const filteredSetups = tradingSetups.filter((setup) => {
+    if (filters.trend !== 'ALL' && setup.macroSignal.trend !== filters.trend) return false;
+    if (filters.signalType !== 'ALL' && setup.microSignal.signal !== filters.signalType) return false;
+    if (filters.assetType !== 'ALL' && setup.assetType !== filters.assetType) return false;
+    if (setup.combinedConfidence < (filters.minConfidence || 0)) return false;
+    return true;
+  });
+
+  const activeFiltersCount = [
+    filters.trend !== 'ALL',
+    filters.signalType !== 'ALL',
+    filters.assetType !== 'ALL',
+    (filters.minConfidence || 0) > 0,
+  ].filter(Boolean).length;
 
   const exportToCsv = () => {
     if (!microData) return;
@@ -238,8 +297,6 @@ export default function Index() {
     }
   };
 
-  const currentPrice = microData?.candles[microData.candles.length - 1]?.close || 0;
-
   return (
     <div className="min-h-screen bg-background p-4 md:p-6 lg:p-8">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -260,6 +317,53 @@ export default function Index() {
           onRefresh={fetchData}
         />
 
+        {/* Watchlist & Filters - Always visible */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <WatchlistManager onSymbolSelect={(sym) => {
+            setSymbol(sym);
+            setSelectedGroup(null);
+          }} />
+          <FilterPanel
+            filters={filters}
+            onFiltersChange={setFilters}
+            activeFiltersCount={activeFiltersCount}
+          />
+          <div className="lg:col-span-1">
+            <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-4">
+              <h3 className="text-sm font-semibold mb-2">Resumen</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total setups:</span>
+                  <span className="font-bold">{tradingSetups.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Filtrados:</span>
+                  <span className="font-bold">{filteredSetups.length}</span>
+                </div>
+                {microData && (
+                  <div className="flex justify-between pt-2 border-t border-border/50">
+                    <span className="text-muted-foreground">Precio actual:</span>
+                    <span className="font-mono font-bold text-primary">
+                      ${microData.currentPrice.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Top Setups Panel */}
+        {filteredSetups.length > 0 && (
+          <TopSetupsPanel
+            setups={filteredSetups}
+            onSelectSetup={(sym) => {
+              setSymbol(sym as Symbol);
+              setSelectedGroup(null);
+            }}
+          />
+        )}
+
         {selectedGroup ? (
           <GroupRanking
             groupName={selectedGroup === "magnificent_seven" ? "Magnificent Seven" : selectedGroup}
@@ -269,61 +373,46 @@ export default function Index() {
         ) : (
           macroData && microData && (
             <>
-              <CombinedSignal
-                macroSignal={macroData.signal}
-                microSignal={microData.signal}
-                macroScore={macroData.score}
-                microScore={microData.score}
-              />
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-card rounded-2xl p-6 shadow-lg border border-border">
-                <IndicatorPanel
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <EnhancedSignalCard
                   title="🟢 Análisis Macro"
                   timeframe={macroInterval === "1d" ? "1 Día" : "1 Semana"}
-                  indicators={macroData.indicators}
-                  signal={macroData.signal}
-                  score={macroData.score}
-                  currentPrice={currentPrice}
+                  signal={macroData.enhancedSignal}
+                  currentPrice={macroData.currentPrice}
                 />
-              </div>
 
-              <div className="bg-card rounded-2xl p-6 shadow-lg border border-border">
-                <IndicatorPanel
+                <EnhancedSignalCard
                   title="🔵 Análisis Micro"
                   timeframe={microInterval === "1h" ? "1 Hora" : "4 Horas"}
-                  indicators={microData.indicators}
-                  signal={microData.signal}
-                  score={microData.score}
-                  currentPrice={currentPrice}
+                  signal={microData.enhancedSignal}
+                  currentPrice={microData.currentPrice}
                 />
               </div>
-            </div>
 
-            <div className="bg-card rounded-2xl p-6 shadow-lg border border-border space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-bold">Precio Actual</h3>
-                  <p className="text-3xl font-mono font-bold text-primary mt-2">
-                    ${currentPrice.toFixed(2)}
-                  </p>
+              <div className="bg-card rounded-2xl p-6 shadow-lg border border-border space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold">Gráfico y Datos</h3>
+                    <p className="text-3xl font-mono font-bold text-primary mt-2">
+                      ${microData.currentPrice.toFixed(2)}
+                    </p>
+                  </div>
+                  <Button onClick={exportToCsv} variant="outline" size="lg">
+                    <Download className="mr-2 h-4 w-4" />
+                    Exportar CSV
+                  </Button>
                 </div>
-                <Button onClick={exportToCsv} variant="outline" size="lg">
-                  <Download className="mr-2 h-4 w-4" />
-                  Exportar CSV
-                </Button>
+
+                <MiniChart
+                  candles={microData.candles}
+                  ema20={microData.indicators.ema20}
+                  ema50={microData.indicators.ema50}
+                />
+
+                <CandleTable candles={microData.candles} limit={20} />
               </div>
-
-              <MiniChart
-                candles={microData.candles}
-                ema20={microData.indicators.ema20}
-                ema50={microData.indicators.ema50}
-              />
-
-              <CandleTable candles={microData.candles} limit={20} />
-            </div>
-          </>
-        )
+            </>
+          )
         )}
 
         {!selectedGroup && !macroData && !microData && !isLoading && (

@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { SentimentData, getSentimentLevel } from '@/types/sentiment';
 
 /**
- * Hook to get market sentiment data
- * PLACEHOLDER: Currently returns demo data
- * TODO: Integrate with Fear & Greed Index API
+ * Hook to get market sentiment data from Fear & Greed Index API
+ * Data source: https://api.alternative.me/fng/
+ * Updates every 5 minutes with fallback to simulated data if API fails
  */
 export function useSentiment() {
   const [sentiment, setSentiment] = useState<SentimentData | null>(null);
@@ -17,35 +17,49 @@ export function useSentiment() {
       setError(null);
 
       try {
-        // TODO: Replace with actual API call
-        // Example: Fear & Greed Index for crypto
-        // const response = await fetch('https://api.alternative.me/fng/');
-        // const data = await response.json();
+        // Fetch real Fear & Greed Index data from alternative.me API
+        const response = await fetch('https://api.alternative.me/fng/?limit=1');
+        const data = await response.json();
         
-        // Demo data simulation
-        await new Promise(resolve => setTimeout(resolve, 500));
+        if (data && data.data && data.data[0]) {
+          const fngData = data.data[0];
+          const score = parseInt(fngData.value);
+          const level = getSentimentLevel(score);
+
+          const realSentiment: SentimentData = {
+            level,
+            score,
+            label: level.replace('_', ' ').toUpperCase(),
+            description: '', // Will be set by component based on language
+            timestamp: parseInt(fngData.timestamp) * 1000, // Convert to milliseconds
+            source: 'Fear & Greed Index',
+          };
+
+          setSentiment(realSentiment);
+        } else {
+          throw new Error('Invalid API response');
+        }
+      } catch (err) {
+        console.error('Sentiment fetch error:', err);
+        setError('Error loading market sentiment');
         
-        // Generate realistic simulated sentiment score (0-100)
+        // Fallback to simulated data if API fails
         const now = new Date();
         const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000);
         const hourFactor = now.getHours() / 24;
-        // Use sine waves for smooth variation: base 50 + day cycle + hour cycle
         const score = Math.round(50 + (Math.sin(dayOfYear / 7) * 30) + (Math.sin(hourFactor * Math.PI) * 20));
         const level = getSentimentLevel(score);
 
-        const mockSentiment: SentimentData = {
+        const fallbackSentiment: SentimentData = {
           level,
           score,
           label: level.replace('_', ' ').toUpperCase(),
-          description: '', // Will be set by component based on language
+          description: '',
           timestamp: Date.now(),
-          source: 'Fear & Greed Index',
+          source: 'Simulated Data',
         };
 
-        setSentiment(mockSentiment);
-      } catch (err) {
-        setError('Error loading market sentiment');
-        console.error('Sentiment fetch error:', err);
+        setSentiment(fallbackSentiment);
       } finally {
         setLoading(false);
       }

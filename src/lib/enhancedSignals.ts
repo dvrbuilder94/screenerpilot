@@ -12,7 +12,7 @@ interface SignalCalculationParams {
 }
 
 /**
- * Sistema de señales mejorado con confluencia y análisis de contexto
+ * Enhanced signal system with confluence and context analysis
  */
 export function calculateEnhancedSignal({
   indicators,
@@ -26,7 +26,7 @@ export function calculateEnhancedSignal({
   let score = 0;
   let confidence = 0;
 
-  // Obtener pesos del perfil de trading (por defecto: swing)
+  // Get trading profile weights (default: swing)
   const weights = tradingProfile?.weights || {
     trend: 1.2,
     momentum: 1.0,
@@ -35,7 +35,7 @@ export function calculateEnhancedSignal({
     confluence: 1.3,
   };
 
-  // Obtener últimos valores
+  // Get last values
   const lastEma20 = indicators.ema20[indicators.ema20.length - 1] || 0;
   const lastEma50 = indicators.ema50[indicators.ema50.length - 1] || 0;
   const lastRsi = indicators.rsi[indicators.rsi.length - 1] || 0;
@@ -46,99 +46,99 @@ export function calculateEnhancedSignal({
   const lastSupertrend = indicators.supertrend.trend[indicators.supertrend.trend.length - 1];
   const supertrendValue = indicators.supertrend.value[indicators.supertrend.value.length - 1] || 0;
 
-  // Valores anteriores para detectar cruces
+  // Previous values to detect crosses
   const prevMacd = indicators.macd.macd[indicators.macd.macd.length - 2] || lastMacd;
   const prevSignalLine = indicators.macd.signal[indicators.macd.signal.length - 2] || lastSignal;
   const prevRsi = indicators.rsi[indicators.rsi.length - 2] || lastRsi;
 
-  // ============= ANÁLISIS DE TENDENCIA (con peso ajustado) =============
+  // ============= TREND ANALYSIS (with adjusted weight) =============
   let trend: 'BULLISH' | 'BEARISH' | 'NEUTRAL' = 'NEUTRAL';
   
   if (lastEma20 > lastEma50 && currentPrice > lastEma20) {
     trend = 'BULLISH';
     score += 3 * weights.trend;
-    reasons.push("Tendencia alcista confirmada (EMA20 > EMA50)");
+    reasons.push("Bullish trend confirmed (EMA20 > EMA50)");
     confidence += 15;
   } else if (lastEma20 < lastEma50 && currentPrice < lastEma20) {
     trend = 'BEARISH';
     score -= 3 * weights.trend;
-    reasons.push("Tendencia bajista confirmada (EMA20 < EMA50)");
+    reasons.push("Bearish trend confirmed (EMA20 < EMA50)");
     confidence += 15;
   } else {
     trend = 'NEUTRAL';
-    warnings.push("Precio entre EMAs - sin tendencia clara");
+    warnings.push("Price between EMAs - no clear trend");
   }
 
-  // ============= SUPERTREND (con peso ajustado) =============
+  // ============= SUPERTREND (with adjusted weight) =============
   if (lastSupertrend) {
     score += 3 * weights.supertrend;
-    reasons.push("Supertrend alcista activo");
+    reasons.push("Bullish Supertrend active");
     confidence += 20;
   } else {
     score -= 3 * weights.supertrend;
-    reasons.push("Supertrend bajista activo");
+    reasons.push("Bearish Supertrend active");
     confidence += 20;
   }
 
-  // ============= RSI (Momentum con peso ajustado) =============
+  // ============= RSI (Momentum with adjusted weight) =============
   if (lastRsi > 55 && lastRsi < 75) {
     score += 2 * weights.momentum;
-    reasons.push(`RSI saludable (${lastRsi.toFixed(1)})`);
+    reasons.push(`Healthy RSI (${lastRsi.toFixed(1)})`);
     confidence += 10;
   } else if (lastRsi < 45 && lastRsi > 25) {
     score -= 2 * weights.momentum;
-    reasons.push(`RSI débil (${lastRsi.toFixed(1)})`);
+    reasons.push(`Weak RSI (${lastRsi.toFixed(1)})`);
     confidence += 10;
   } else if (lastRsi >= 75) {
-    warnings.push(`⚠️ Sobrecompra extrema (RSI ${lastRsi.toFixed(1)})`);
+    warnings.push(`⚠️ Extreme overbought (RSI ${lastRsi.toFixed(1)})`);
     score -= 1 * weights.momentum;
   } else if (lastRsi <= 25) {
-    warnings.push(`⚠️ Sobreventa extrema (RSI ${lastRsi.toFixed(1)})`);
+    warnings.push(`⚠️ Extreme oversold (RSI ${lastRsi.toFixed(1)})`);
     score += 1 * weights.momentum;
   }
 
-  // Divergencia RSI (señal avanzada con peso)
+  // RSI Divergence (advanced signal with weight)
   if (currentPrice > prevPrice && lastRsi < prevRsi) {
-    warnings.push("🔴 Divergencia bajista detectada (precio sube pero RSI baja)");
+    warnings.push("🔴 Bearish divergence detected (price rising but RSI falling)");
     score -= 2 * weights.momentum;
   } else if (currentPrice < prevPrice && lastRsi > prevRsi) {
-    reasons.push("🟢 Divergencia alcista detectada (precio baja pero RSI sube)");
+    reasons.push("🟢 Bullish divergence detected (price falling but RSI rising)");
     score += 2 * weights.momentum;
     confidence += 15;
   }
 
-  // ============= MACD (Confluencia con peso ajustado) =============
+  // ============= MACD (Confluence with adjusted weight) =============
   const macdCrossover = prevMacd <= prevSignalLine && lastMacd > lastSignal;
   const macdCrossunder = prevMacd >= prevSignalLine && lastMacd < lastSignal;
 
   if (macdCrossover) {
     score += 3 * weights.momentum;
-    reasons.push("🚀 MACD cruce alcista reciente");
+    reasons.push("🚀 Recent bullish MACD crossover");
     confidence += 20;
   } else if (macdCrossunder) {
     score -= 3 * weights.momentum;
-    reasons.push("📉 MACD cruce bajista reciente");
+    reasons.push("📉 Recent bearish MACD crossover");
     confidence += 20;
   } else if (lastMacd > lastSignal && lastHistogram > 0) {
     score += 1 * weights.momentum;
-    reasons.push("MACD por encima de señal");
+    reasons.push("MACD above signal line");
     confidence += 5;
   } else if (lastMacd < lastSignal && lastHistogram < 0) {
     score -= 1 * weights.momentum;
-    reasons.push("MACD por debajo de señal");
+    reasons.push("MACD below signal line");
     confidence += 5;
   }
 
-  // ============= ATR (Gestión de riesgo) =============
+  // ============= ATR (Risk management) =============
   const atrPercent = currentPrice > 0 ? (lastAtr / currentPrice) * 100 : 0;
   if (atrPercent > 5) {
-    warnings.push(`⚠️ Volatilidad extrema (ATR ${atrPercent.toFixed(1)}%)`);
+    warnings.push(`⚠️ Extreme volatility (ATR ${atrPercent.toFixed(1)}%)`);
     confidence -= 10;
   } else if (atrPercent < 1) {
-    warnings.push("Baja volatilidad - movimientos limitados esperados");
+    warnings.push("Low volatility - limited movements expected");
   }
 
-  // ============= CONFLUENCIA BONUS (con peso ajustado) =============
+  // ============= CONFLUENCE BONUS (with adjusted weight) =============
   const bullishIndicators = [
     lastEma20 > lastEma50,
     lastSupertrend,
@@ -155,20 +155,20 @@ export function calculateEnhancedSignal({
 
   if (bullishIndicators >= 3) {
     score += 2 * weights.confluence;
-    reasons.push(`✅ Confluencia alcista (${bullishIndicators}/4 indicadores)`);
+    reasons.push(`✅ Bullish confluence (${bullishIndicators}/4 indicators)`);
     confidence += 15;
   } else if (bearishIndicators >= 3) {
     score -= 2 * weights.confluence;
-    reasons.push(`❌ Confluencia bajista (${bearishIndicators}/4 indicadores)`);
+    reasons.push(`❌ Bearish confluence (${bearishIndicators}/4 indicators)`);
     confidence += 15;
   }
 
-  // ============= CALCULAR ZONAS DE ENTRADA Y STOP LOSS =============
+  // ============= CALCULATE ENTRY ZONES AND STOP LOSS =============
   const entryZone = calculateEntryZone(currentPrice, lastAtr, trend);
   const stopLoss = calculateStopLoss(currentPrice, lastAtr, supertrendValue, trend);
   const targets = calculateTargets(currentPrice, lastAtr, trend);
 
-  // ============= APLICAR IMPACTO DE SENTIMIENTO =============
+  // ============= APPLY SENTIMENT IMPACT =============
   if (sentiment) {
     const signalType = trend === 'BULLISH' ? 'bullish' : trend === 'BEARISH' ? 'bearish' : 'bullish';
     const sentimentImpact = getSentimentImpact(sentiment, signalType);
@@ -181,10 +181,10 @@ export function calculateEnhancedSignal({
     }
   }
 
-  // ============= DETERMINAR SEÑAL FINAL =============
+  // ============= DETERMINE FINAL SIGNAL =============
   const signal = getSignalFromScore(score);
   
-  // Ajustar confidence máximo a 100
+  // Adjust confidence maximum to 100
   confidence = Math.min(Math.max(confidence, 0), 100);
 
   return {
@@ -215,7 +215,7 @@ function calculateEntryZone(
 ): { min: number; max: number } | undefined {
   if (trend === 'NEUTRAL') return undefined;
 
-  const zone = atr * 0.5; // 50% del ATR como zona de entrada
+  const zone = atr * 0.5; // 50% of ATR as entry zone
   
   if (trend === 'BULLISH') {
     return {
@@ -238,7 +238,7 @@ function calculateStopLoss(
 ): number | undefined {
   if (trend === 'NEUTRAL') return undefined;
 
-  // Usar Supertrend como stop loss preferido, o 2x ATR como fallback
+  // Use Supertrend as preferred stop loss, or 2x ATR as fallback
   if (supertrendValue > 0) {
     return supertrendValue;
   }

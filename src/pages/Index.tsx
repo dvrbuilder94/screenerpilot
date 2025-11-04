@@ -7,6 +7,8 @@ import EnhancedSignalCard from "@/components/EnhancedSignalCard";
 import WatchlistManager from "@/components/WatchlistManager";
 import TopSetupsPanel from "@/components/TopSetupsPanel";
 import FilterPanel from "@/components/FilterPanel";
+import { TradingStyleSelector } from "@/components/TradingStyleSelector";
+import { MarketSentiment } from "@/components/MarketSentiment";
 import MiniChart from "@/components/MiniChart";
 import CandleTable from "@/components/CandleTable";
 import GroupRanking, { GroupSymbolData } from "@/components/GroupRanking";
@@ -31,6 +33,8 @@ import {
 } from "@/lib/indicators";
 import { calculateEnhancedSignal } from "@/lib/enhancedSignals";
 import { TradingSetup, FilterOptions, EnhancedSignal } from "@/types/trading";
+import { TradingStyle, TRADING_PROFILES } from "@/types/tradingProfile";
+import { useSentiment } from "@/hooks/useSentiment";
 
 const STORAGE_KEY = "crypto-dashboard-settings";
 
@@ -79,13 +83,22 @@ export default function Index() {
     minConfidence: 0,
   });
 
+  // Trading profile state
+  const [tradingStyle, setTradingStyle] = useState<TradingStyle>(() => {
+    const saved = loadSettings()?.tradingStyle;
+    return saved || 'swing';
+  });
+
+  // Market sentiment hook
+  const { sentiment, loading: sentimentLoading } = useSentiment();
+
   // Save settings to localStorage
   useEffect(() => {
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ assetType, symbol, macroInterval, microInterval })
+      JSON.stringify({ assetType, symbol, macroInterval, microInterval, tradingStyle })
     );
-  }, [assetType, symbol, macroInterval, microInterval]);
+  }, [assetType, symbol, macroInterval, microInterval, tradingStyle]);
 
   const calculateIndicators = useCallback((candles: Candle[]): DashboardData => {
     const closes = candles.map(c => c.close);
@@ -119,6 +132,8 @@ export default function Index() {
       indicators,
       currentPrice,
       prevPrice,
+      tradingProfile: TRADING_PROFILES[tradingStyle],
+      sentiment: sentiment,
     });
 
     return {
@@ -207,7 +222,7 @@ export default function Index() {
     } finally {
       setIsLoading(false);
     }
-  }, [symbol, selectedGroup, macroInterval, microInterval, calculateIndicators]);
+  }, [symbol, selectedGroup, macroInterval, microInterval, calculateIndicators, tradingStyle, sentiment]);
 
   // Initial fetch
   useEffect(() => {
@@ -317,7 +332,20 @@ export default function Index() {
           onRefresh={fetchData}
         />
 
-        {/* Watchlist & Filters - Always visible */}
+        {/* Trading Style & Market Sentiment */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <TradingStyleSelector
+              selectedStyle={tradingStyle}
+              onStyleChange={setTradingStyle}
+            />
+          </div>
+          <div className="lg:col-span-1">
+            <MarketSentiment sentiment={sentiment} loading={sentimentLoading} />
+          </div>
+        </div>
+
+        {/* Watchlist & Filters */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <WatchlistManager onSymbolSelect={(sym) => {
             setSymbol(sym);

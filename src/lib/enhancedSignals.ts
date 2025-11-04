@@ -1,10 +1,14 @@
 import { IndicatorData } from "./indicators";
 import { EnhancedSignal, SignalType } from "@/types/trading";
+import { TradingProfile } from "@/types/tradingProfile";
+import { SentimentData, getSentimentImpact } from "@/types/sentiment";
 
 interface SignalCalculationParams {
   indicators: IndicatorData;
   currentPrice: number;
   prevPrice?: number;
+  tradingProfile?: TradingProfile;
+  sentiment?: SentimentData | null;
 }
 
 /**
@@ -14,11 +18,22 @@ export function calculateEnhancedSignal({
   indicators,
   currentPrice,
   prevPrice = currentPrice,
+  tradingProfile,
+  sentiment,
 }: SignalCalculationParams): EnhancedSignal {
   const reasons: string[] = [];
   const warnings: string[] = [];
   let score = 0;
   let confidence = 0;
+
+  // Obtener pesos del perfil de trading (por defecto: swing)
+  const weights = tradingProfile?.weights || {
+    trend: 1.2,
+    momentum: 1.0,
+    supertrend: 1.2,
+    volatility: 1.0,
+    confluence: 1.3,
+  };
 
   // Obtener últimos valores
   const lastEma20 = indicators.ema20[indicators.ema20.length - 1] || 0;
@@ -36,17 +51,17 @@ export function calculateEnhancedSignal({
   const prevSignalLine = indicators.macd.signal[indicators.macd.signal.length - 2] || lastSignal;
   const prevRsi = indicators.rsi[indicators.rsi.length - 2] || lastRsi;
 
-  // ============= ANÁLISIS DE TENDENCIA =============
+  // ============= ANÁLISIS DE TENDENCIA (con peso ajustado) =============
   let trend: 'BULLISH' | 'BEARISH' | 'NEUTRAL' = 'NEUTRAL';
   
   if (lastEma20 > lastEma50 && currentPrice > lastEma20) {
     trend = 'BULLISH';
-    score += 3;
+    score += 3 * weights.trend;
     reasons.push("Tendencia alcista confirmada (EMA20 > EMA50)");
     confidence += 15;
   } else if (lastEma20 < lastEma50 && currentPrice < lastEma20) {
     trend = 'BEARISH';
-    score -= 3;
+    score -= 3 * weights.trend;
     reasons.push("Tendencia bajista confirmada (EMA20 < EMA50)");
     confidence += 15;
   } else {
@@ -54,62 +69,62 @@ export function calculateEnhancedSignal({
     warnings.push("Precio entre EMAs - sin tendencia clara");
   }
 
-  // ============= SUPERTREND (alta fiabilidad) =============
+  // ============= SUPERTREND (con peso ajustado) =============
   if (lastSupertrend) {
-    score += 3;
+    score += 3 * weights.supertrend;
     reasons.push("Supertrend alcista activo");
     confidence += 20;
   } else {
-    score -= 3;
+    score -= 3 * weights.supertrend;
     reasons.push("Supertrend bajista activo");
     confidence += 20;
   }
 
-  // ============= RSI (Momentum) =============
+  // ============= RSI (Momentum con peso ajustado) =============
   if (lastRsi > 55 && lastRsi < 75) {
-    score += 2;
+    score += 2 * weights.momentum;
     reasons.push(`RSI saludable (${lastRsi.toFixed(1)})`);
     confidence += 10;
   } else if (lastRsi < 45 && lastRsi > 25) {
-    score -= 2;
+    score -= 2 * weights.momentum;
     reasons.push(`RSI débil (${lastRsi.toFixed(1)})`);
     confidence += 10;
   } else if (lastRsi >= 75) {
     warnings.push(`⚠️ Sobrecompra extrema (RSI ${lastRsi.toFixed(1)})`);
-    score -= 1;
+    score -= 1 * weights.momentum;
   } else if (lastRsi <= 25) {
     warnings.push(`⚠️ Sobreventa extrema (RSI ${lastRsi.toFixed(1)})`);
-    score += 1;
+    score += 1 * weights.momentum;
   }
 
-  // Divergencia RSI (señal avanzada)
+  // Divergencia RSI (señal avanzada con peso)
   if (currentPrice > prevPrice && lastRsi < prevRsi) {
     warnings.push("🔴 Divergencia bajista detectada (precio sube pero RSI baja)");
-    score -= 2;
+    score -= 2 * weights.momentum;
   } else if (currentPrice < prevPrice && lastRsi > prevRsi) {
     reasons.push("🟢 Divergencia alcista detectada (precio baja pero RSI sube)");
-    score += 2;
+    score += 2 * weights.momentum;
     confidence += 15;
   }
 
-  // ============= MACD (Confluencia) =============
+  // ============= MACD (Confluencia con peso ajustado) =============
   const macdCrossover = prevMacd <= prevSignalLine && lastMacd > lastSignal;
   const macdCrossunder = prevMacd >= prevSignalLine && lastMacd < lastSignal;
 
   if (macdCrossover) {
-    score += 3;
+    score += 3 * weights.momentum;
     reasons.push("🚀 MACD cruce alcista reciente");
     confidence += 20;
   } else if (macdCrossunder) {
-    score -= 3;
+    score -= 3 * weights.momentum;
     reasons.push("📉 MACD cruce bajista reciente");
     confidence += 20;
   } else if (lastMacd > lastSignal && lastHistogram > 0) {
-    score += 1;
+    score += 1 * weights.momentum;
     reasons.push("MACD por encima de señal");
     confidence += 5;
   } else if (lastMacd < lastSignal && lastHistogram < 0) {
-    score -= 1;
+    score -= 1 * weights.momentum;
     reasons.push("MACD por debajo de señal");
     confidence += 5;
   }
@@ -123,7 +138,7 @@ export function calculateEnhancedSignal({
     warnings.push("Baja volatilidad - movimientos limitados esperados");
   }
 
-  // ============= CONFLUENCIA BONUS =============
+  // ============= CONFLUENCIA BONUS (con peso ajustado) =============
   const bullishIndicators = [
     lastEma20 > lastEma50,
     lastSupertrend,
@@ -139,11 +154,11 @@ export function calculateEnhancedSignal({
   ].filter(Boolean).length;
 
   if (bullishIndicators >= 3) {
-    score += 2;
+    score += 2 * weights.confluence;
     reasons.push(`✅ Confluencia alcista (${bullishIndicators}/4 indicadores)`);
     confidence += 15;
   } else if (bearishIndicators >= 3) {
-    score -= 2;
+    score -= 2 * weights.confluence;
     reasons.push(`❌ Confluencia bajista (${bearishIndicators}/4 indicadores)`);
     confidence += 15;
   }
@@ -152,6 +167,19 @@ export function calculateEnhancedSignal({
   const entryZone = calculateEntryZone(currentPrice, lastAtr, trend);
   const stopLoss = calculateStopLoss(currentPrice, lastAtr, supertrendValue, trend);
   const targets = calculateTargets(currentPrice, lastAtr, trend);
+
+  // ============= APLICAR IMPACTO DE SENTIMIENTO =============
+  if (sentiment) {
+    const signalType = trend === 'BULLISH' ? 'bullish' : trend === 'BEARISH' ? 'bearish' : 'bullish';
+    const sentimentImpact = getSentimentImpact(sentiment, signalType);
+    
+    score += sentimentImpact.scoreModifier;
+    confidence += sentimentImpact.confidenceModifier;
+    
+    if (sentimentImpact.warning) {
+      warnings.push(sentimentImpact.warning);
+    }
+  }
 
   // ============= DETERMINAR SEÑAL FINAL =============
   const signal = getSignalFromScore(score);

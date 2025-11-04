@@ -118,7 +118,7 @@ export default function DashboardHeader({
 
           {/* Macro timeframe */}
           <div className="flex flex-col gap-2">
-            <Label className="text-xs text-muted-foreground">{language === 'es' ? 'Macro (Tendencia)' : 'Macro (Trend)'}</Label>
+            <Label className="text-xs text-muted-foreground">{t.macro} ({t.trend})</Label>
             <Select value={macroInterval} onValueChange={(v) => onMacroIntervalChange(v as Interval)}>
               <SelectTrigger className="w-32">
                 <SelectValue />

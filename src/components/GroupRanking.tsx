@@ -2,6 +2,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Signal } from "@/lib/indicators";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translations } from "@/lib/translations";
 
 export interface GroupSymbolData {
   symbol: string;
@@ -18,11 +20,14 @@ interface GroupRankingProps {
 }
 
 export default function GroupRanking({ groupName, data, isLoading }: GroupRankingProps) {
+  const { language } = useLanguage();
+  const t = translations[language];
+
   if (isLoading) {
     return (
       <Card className="p-6">
         <h2 className="text-2xl font-bold mb-4">{groupName}</h2>
-        <p className="text-muted-foreground">Cargando datos del grupo...</p>
+        <p className="text-muted-foreground">{t.loadingGroupData}</p>
       </Card>
     );
   }
@@ -60,7 +65,7 @@ export default function GroupRanking({ groupName, data, isLoading }: GroupRankin
           📊 {groupName}
         </h2>
         <p className="text-muted-foreground text-sm mt-1">
-          Ranking por score micro (operativa)
+          {t.rankingByMicroScore}
         </p>
       </div>
 
@@ -80,9 +85,9 @@ export default function GroupRanking({ groupName, data, isLoading }: GroupRankin
                   {getSignalIcon(item.signal)}
                 </div>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs text-muted-foreground">Macro:</span>
+                  <span className="text-xs text-muted-foreground">{t.macro}:</span>
                   {getSignalBadge(item.macroSignal)}
-                  <span className="text-xs text-muted-foreground">Micro:</span>
+                  <span className="text-xs text-muted-foreground">{t.micro}:</span>
                   {getSignalBadge(item.signal)}
                 </div>
               </div>
@@ -113,25 +118,25 @@ export default function GroupRanking({ groupName, data, isLoading }: GroupRankin
       </div>
 
       <div className="mt-6 p-4 bg-muted/30 rounded-xl border border-border">
-        <h3 className="font-semibold text-sm mb-2">📈 Resumen del Grupo</h3>
+        <h3 className="font-semibold text-sm mb-2">{t.groupSummary}</h3>
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
             <div className="text-2xl font-bold text-success">
               {sortedData.filter((d) => d.signal === "BUY").length}
             </div>
-            <div className="text-xs text-muted-foreground">Compra</div>
+            <div className="text-xs text-muted-foreground">{t.buy}</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-warning">
               {sortedData.filter((d) => d.signal === "HOLD").length}
             </div>
-            <div className="text-xs text-muted-foreground">Mantener</div>
+            <div className="text-xs text-muted-foreground">{t.hold}</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-danger">
               {sortedData.filter((d) => d.signal === "SELL").length}
             </div>
-            <div className="text-xs text-muted-foreground">Venta</div>
+            <div className="text-xs text-muted-foreground">{t.sell}</div>
           </div>
         </div>
       </div>

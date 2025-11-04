@@ -147,7 +147,7 @@ export default function Index() {
       enhancedSignal,
       currentPrice,
     };
-  }, []);
+  }, [tradingStyle, sentiment]);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);

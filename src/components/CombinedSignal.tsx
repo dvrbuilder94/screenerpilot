@@ -1,5 +1,7 @@
 import { Signal } from "@/lib/indicators";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translations } from "@/lib/translations";
 
 interface CombinedSignalProps {
   macroSignal: Signal;
@@ -14,67 +16,70 @@ export default function CombinedSignal({
   macroScore,
   microScore,
 }: CombinedSignalProps) {
+  const { language } = useLanguage();
+  const t = translations[language];
+
   const getCombinedSignal = () => {
     if (macroSignal === 'BUY' && microSignal === 'BUY') {
       return {
-        text: 'STRONG BUY 🔥',
+        text: t.strongBuy,
         color: 'bullish',
         gradient: 'from-bullish to-bullish-light',
         icon: TrendingUp,
-        description: 'Tendencia macro y señal micro alcistas. Alto potencial.',
+        description: t.strongBuyDesc,
       };
     }
     if (macroSignal === 'SELL' && microSignal === 'SELL') {
       return {
-        text: 'STRONG SELL ⚠️',
+        text: t.strongSell,
         color: 'bearish',
         gradient: 'from-bearish to-bearish-light',
         icon: TrendingDown,
-        description: 'Tendencia macro y señal micro bajistas. Evitar posiciones largas.',
+        description: t.strongSellDesc,
       };
     }
     if (macroSignal === 'BUY' && microSignal === 'HOLD') {
       return {
-        text: 'TENDENCIA ALCISTA - Esperar entrada 📊',
+        text: t.bullishTrendWaitEntry,
         color: 'neutral',
         gradient: 'from-neutral to-neutral-light',
         icon: TrendingUp,
-        description: 'Macro alcista pero micro neutral. Buscar mejores puntos de entrada.',
+        description: t.bullishTrendDesc,
       };
     }
     if (macroSignal === 'SELL' && microSignal === 'HOLD') {
       return {
-        text: 'TENDENCIA BAJISTA - Evitar largos 📉',
+        text: t.bearishTrendAvoidLongs,
         color: 'neutral',
         gradient: 'from-neutral to-bearish-light',
         icon: TrendingDown,
-        description: 'Macro bajista. Esperar cambio de tendencia para comprar.',
+        description: t.bearishTrendDesc,
       };
     }
     if (macroSignal === 'BUY' && microSignal === 'SELL') {
       return {
-        text: 'SEÑALES MIXTAS - Retroceso en tendencia alcista 🤔',
+        text: t.mixedSignalsPullback,
         color: 'muted',
         gradient: 'from-muted to-accent',
         icon: Minus,
-        description: 'Macro alcista pero micro bajista. Posible corrección a corto plazo.',
+        description: t.mixedSignalsPullbackDesc,
       };
     }
     if (macroSignal === 'SELL' && microSignal === 'BUY') {
       return {
-        text: 'SEÑALES MIXTAS - Rebote en tendencia bajista 🤔',
+        text: t.mixedSignalsBounce,
         color: 'muted',
         gradient: 'from-muted to-accent',
         icon: Minus,
-        description: 'Macro bajista pero micro alcista. Posible rebote temporal.',
+        description: t.mixedSignalsBounceDesc,
       };
     }
     return {
-      text: 'NEUTRAL - Sin señal clara 💤',
+      text: t.neutralNoSignal,
       color: 'muted',
       gradient: 'from-muted to-muted-foreground',
       icon: Minus,
-      description: 'Sin señales claras. Esperar confirmación de tendencia.',
+      description: t.neutralNoSignalDesc,
     };
   };
 
@@ -94,11 +99,11 @@ export default function CombinedSignal({
           </div>
         </div>
         <div className="text-right bg-background/20 backdrop-blur-sm rounded-xl p-4">
-          <div className="text-white/70 text-xs mb-1">Scores</div>
+          <div className="text-white/70 text-xs mb-1">{t.scores}</div>
           <div className="text-2xl font-mono font-bold text-white">
             {macroScore > 0 ? '+' : ''}{macroScore} / {microScore > 0 ? '+' : ''}{microScore}
           </div>
-          <div className="text-white/70 text-xs mt-1">Macro / Micro</div>
+          <div className="text-white/70 text-xs mt-1">{t.macro} / {t.micro}</div>
         </div>
       </div>
     </div>

@@ -1,6 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { IndicatorData, Signal } from "@/lib/indicators";
 import { TrendingUp, TrendingDown, Activity, BarChart3, Zap } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translations } from "@/lib/translations";
 
 interface IndicatorPanelProps {
   title: string;
@@ -19,6 +21,9 @@ export default function IndicatorPanel({
   score,
   currentPrice,
 }: IndicatorPanelProps) {
+  const { language } = useLanguage();
+  const t = translations[language];
+
   const getSignalColor = () => {
     if (signal === 'BUY') return 'text-bullish';
     if (signal === 'SELL') return 'text-bearish';
@@ -47,10 +52,10 @@ export default function IndicatorPanel({
           <p className="text-sm text-muted-foreground">{timeframe}</p>
         </div>
         <div className={`px-4 py-2 rounded-xl border ${getSignalBg()}`}>
-          <div className="text-xs text-muted-foreground mb-1">Señal</div>
+          <div className="text-xs text-muted-foreground mb-1">{t.signalLabel}</div>
           <div className={`text-2xl font-bold ${getSignalColor()}`}>{signal}</div>
           <div className="text-xs text-muted-foreground mt-1">
-            Score: {score > 0 ? '+' : ''}{score}
+            {t.score}: {score > 0 ? '+' : ''}{score}
           </div>
         </div>
       </div>
@@ -64,8 +69,8 @@ export default function IndicatorPanel({
                 <TrendingUp className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">EMA</p>
-                <p className="text-sm font-semibold">Tendencia</p>
+                <p className="text-xs text-muted-foreground">{t.ema}</p>
+                <p className="text-sm font-semibold">{t.trend}</p>
               </div>
             </div>
           </div>
@@ -80,7 +85,7 @@ export default function IndicatorPanel({
             </div>
             <div className="pt-2 border-t border-border/50">
               <div className={`text-xs font-semibold ${lastEma20 > lastEma50 ? 'text-bullish' : 'text-bearish'}`}>
-                {lastEma20 > lastEma50 ? '↑ Alcista' : '↓ Bajista'}
+                {lastEma20 > lastEma50 ? t.bullishTrend : t.bearishTrend}
               </div>
             </div>
           </div>
@@ -94,8 +99,8 @@ export default function IndicatorPanel({
                 <Activity className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">RSI</p>
-                <p className="text-sm font-semibold">Momentum</p>
+                <p className="text-xs text-muted-foreground">{t.rsi}</p>
+                <p className="text-sm font-semibold">{t.momentum}</p>
               </div>
             </div>
           </div>
@@ -110,7 +115,7 @@ export default function IndicatorPanel({
               />
             </div>
             <div className="text-xs text-muted-foreground">
-              {lastRsi > 70 ? 'Sobrecomprado' : lastRsi < 30 ? 'Sobrevendido' : 'Neutral'}
+              {lastRsi > 70 ? t.overbought : lastRsi < 30 ? t.oversold : t.neutral}
             </div>
           </div>
         </Card>
@@ -123,8 +128,8 @@ export default function IndicatorPanel({
                 <BarChart3 className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">MACD</p>
-                <p className="text-sm font-semibold">Convergencia</p>
+                <p className="text-xs text-muted-foreground">{t.macd}</p>
+                <p className="text-sm font-semibold">{t.convergence}</p>
               </div>
             </div>
           </div>
@@ -139,7 +144,7 @@ export default function IndicatorPanel({
             </div>
             <div className="pt-2 border-t border-border/50">
               <div className={`text-xs font-semibold ${lastMacd > lastSignal ? 'text-bullish' : 'text-bearish'}`}>
-                {lastMacd > lastSignal ? '↑ Positivo' : '↓ Negativo'}
+                {lastMacd > lastSignal ? t.positive : t.negative}
               </div>
             </div>
           </div>
@@ -153,20 +158,20 @@ export default function IndicatorPanel({
                 <Zap className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">ATR</p>
-                <p className="text-sm font-semibold">Volatilidad</p>
+                <p className="text-xs text-muted-foreground">{t.atr}</p>
+                <p className="text-sm font-semibold">{t.volatility}</p>
               </div>
             </div>
           </div>
           <div className="space-y-2">
             <div className="text-2xl font-mono font-bold">${lastAtr.toFixed(2)}</div>
             <div className="flex justify-between items-center">
-              <span className="text-xs text-muted-foreground">Porcentaje</span>
+              <span className="text-xs text-muted-foreground">{t.percentage}</span>
               <span className="font-mono font-semibold">{atrPercent.toFixed(2)}%</span>
             </div>
             <div className="pt-2 border-t border-border/50">
               <div className="text-xs text-muted-foreground">
-                {atrPercent > 3 ? 'Alta volatilidad' : atrPercent > 1.5 ? 'Volatilidad media' : 'Baja volatilidad'}
+                {atrPercent > 3 ? t.highVolatility : atrPercent > 1.5 ? t.mediumVolatility : t.lowVolatility}
               </div>
             </div>
           </div>

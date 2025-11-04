@@ -142,6 +142,41 @@ export const translations = {
     groupDataUpdated: 'Group data updated',
     csvExported: 'CSV exported successfully',
     cryptocurrencies: 'Cryptocurrencies',
+    
+    // Combined Signal
+    strongBuyDesc: 'Macro trend and micro signal bullish. High potential.',
+    strongSellDesc: 'Macro trend and micro signal bearish. Avoid long positions.',
+    bullishTrendWaitEntry: 'BULLISH TREND - Wait for entry 📊',
+    bullishTrendDesc: 'Macro bullish but micro neutral. Look for better entry points.',
+    bearishTrendAvoidLongs: 'BEARISH TREND - Avoid longs 📉',
+    bearishTrendDesc: 'Macro bearish. Wait for trend change to buy.',
+    mixedSignalsPullback: 'MIXED SIGNALS - Pullback in bullish trend 🤔',
+    mixedSignalsPullbackDesc: 'Macro bullish but micro bearish. Possible short-term correction.',
+    mixedSignalsBounce: 'MIXED SIGNALS - Bounce in bearish trend 🤔',
+    mixedSignalsBounceDesc: 'Macro bearish but micro bullish. Possible temporary bounce.',
+    neutralNoSignal: 'NEUTRAL - No clear signal 💤',
+    neutralNoSignalDesc: 'No clear signals. Wait for trend confirmation.',
+    scores: 'Scores',
+    macro: 'Macro',
+    micro: 'Micro',
+    
+    // Group Ranking
+    loadingGroupData: 'Loading group data...',
+    rankingByMicroScore: 'Ranking by micro score (trading)',
+    groupSummary: '📈 Group Summary',
+    
+    // Indicator Panel
+    signalLabel: 'Signal',
+    bullishTrend: '↑ Bullish',
+    bearishTrend: '↓ Bearish',
+    momentum: 'Momentum',
+    convergence: 'Convergence',
+    positive: '↑ Positive',
+    negative: '↓ Negative',
+    percentage: 'Percentage',
+    highVolatility: 'High volatility',
+    mediumVolatility: 'Medium volatility',
+    lowVolatility: 'Low volatility',
   },
   es: {
     // Header
@@ -284,6 +319,41 @@ export const translations = {
     groupDataUpdated: 'Datos del grupo actualizados',
     csvExported: 'CSV exportado correctamente',
     cryptocurrencies: 'Criptomonedas',
+    
+    // Combined Signal
+    strongBuyDesc: 'Tendencia macro y señal micro alcistas. Alto potencial.',
+    strongSellDesc: 'Tendencia macro y señal micro bajistas. Evitar posiciones largas.',
+    bullishTrendWaitEntry: 'TENDENCIA ALCISTA - Esperar entrada 📊',
+    bullishTrendDesc: 'Macro alcista pero micro neutral. Buscar mejores puntos de entrada.',
+    bearishTrendAvoidLongs: 'TENDENCIA BAJISTA - Evitar largos 📉',
+    bearishTrendDesc: 'Macro bajista. Esperar cambio de tendencia para comprar.',
+    mixedSignalsPullback: 'SEÑALES MIXTAS - Retroceso en tendencia alcista 🤔',
+    mixedSignalsPullbackDesc: 'Macro alcista pero micro bajista. Posible corrección a corto plazo.',
+    mixedSignalsBounce: 'SEÑALES MIXTAS - Rebote en tendencia bajista 🤔',
+    mixedSignalsBounceDesc: 'Macro bajista pero micro alcista. Posible rebote temporal.',
+    neutralNoSignal: 'NEUTRAL - Sin señal clara 💤',
+    neutralNoSignalDesc: 'Sin señales claras. Esperar confirmación de tendencia.',
+    scores: 'Scores',
+    macro: 'Macro',
+    micro: 'Micro',
+    
+    // Group Ranking
+    loadingGroupData: 'Cargando datos del grupo...',
+    rankingByMicroScore: 'Ranking por score micro (operativa)',
+    groupSummary: '📈 Resumen del Grupo',
+    
+    // Indicator Panel
+    signalLabel: 'Señal',
+    bullishTrend: '↑ Alcista',
+    bearishTrend: '↓ Bajista',
+    momentum: 'Momentum',
+    convergence: 'Convergencia',
+    positive: '↑ Positivo',
+    negative: '↓ Negativo',
+    percentage: 'Porcentaje',
+    highVolatility: 'Alta volatilidad',
+    mediumVolatility: 'Volatilidad media',
+    lowVolatility: 'Baja volatilidad',
   },
 };
 

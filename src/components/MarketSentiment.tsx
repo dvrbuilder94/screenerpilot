@@ -2,6 +2,8 @@ import { SentimentData, SentimentLevel } from "@/types/sentiment";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingDown, TrendingUp, Minus, AlertTriangle, Smile } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translations } from "@/lib/translations";
 
 interface MarketSentimentProps {
   sentiment: SentimentData | null;
@@ -9,44 +11,73 @@ interface MarketSentimentProps {
 }
 
 const sentimentConfig: Record<SentimentLevel, {
-  label: string;
   color: string;
   bgColor: string;
   icon: any;
 }> = {
   extreme_fear: {
-    label: "Miedo Extremo",
     color: "text-red-600 dark:text-red-400",
     bgColor: "bg-red-100 dark:bg-red-950",
     icon: AlertTriangle,
   },
   fear: {
-    label: "Miedo",
     color: "text-orange-600 dark:text-orange-400",
     bgColor: "bg-orange-100 dark:bg-orange-950",
     icon: TrendingDown,
   },
   neutral: {
-    label: "Neutral",
     color: "text-gray-600 dark:text-gray-400",
     bgColor: "bg-gray-100 dark:bg-gray-800",
     icon: Minus,
   },
   greed: {
-    label: "Codicia",
     color: "text-green-600 dark:text-green-400",
     bgColor: "bg-green-100 dark:bg-green-950",
     icon: TrendingUp,
   },
   extreme_greed: {
-    label: "Codicia Extrema",
     color: "text-emerald-600 dark:text-emerald-400",
     bgColor: "bg-emerald-100 dark:bg-emerald-950",
     icon: Smile,
   },
 };
 
+function getSentimentLabel(level: SentimentLevel, lang: 'en' | 'es'): string {
+  const labels = {
+    en: {
+      extreme_fear: "Extreme Fear",
+      fear: "Fear",
+      neutral: "Neutral",
+      greed: "Greed",
+      extreme_greed: "Extreme Greed",
+    },
+    es: {
+      extreme_fear: "Miedo Extremo",
+      fear: "Miedo",
+      neutral: "Neutral",
+      greed: "Codicia",
+      extreme_greed: "Codicia Extrema",
+    },
+  };
+  return labels[lang][level];
+}
+
+function getSentimentDescription(level: SentimentLevel, lang: 'en' | 'es'): string {
+  const t = translations[lang];
+  const descriptions = {
+    extreme_fear: t.extremeFearDesc,
+    fear: t.fearDesc,
+    neutral: t.neutralDesc,
+    greed: t.greedDesc,
+    extreme_greed: t.extremeGreedDesc,
+  };
+  return descriptions[level];
+}
+
 export function MarketSentiment({ sentiment, loading }: MarketSentimentProps) {
+  const { language } = useLanguage();
+  const t = translations[language];
+
   if (loading) {
     return (
       <Card className="p-4">
@@ -62,8 +93,8 @@ export function MarketSentiment({ sentiment, loading }: MarketSentimentProps) {
     return (
       <Card className="p-4 border-dashed">
         <div className="text-center text-sm text-muted-foreground">
-          <p>Sentimiento de mercado no disponible</p>
-          <p className="text-xs mt-1">(Próximamente: Fear & Greed Index)</p>
+          <p>{t.sentimentNotAvailable}</p>
+          <p className="text-xs mt-1">{t.sentimentComingSoon}</p>
         </div>
       </Card>
     );
@@ -71,12 +102,14 @@ export function MarketSentiment({ sentiment, loading }: MarketSentimentProps) {
 
   const config = sentimentConfig[sentiment.level];
   const Icon = config.icon;
+  const label = getSentimentLabel(sentiment.level, language);
+  const description = getSentimentDescription(sentiment.level, language);
 
   return (
     <Card className="p-4">
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium">Sentimiento de Mercado</h3>
+          <h3 className="text-sm font-medium">{t.marketSentiment}</h3>
           {sentiment.source && (
             <Badge variant="outline" className="text-xs">
               {sentiment.source}
@@ -89,14 +122,14 @@ export function MarketSentiment({ sentiment, loading }: MarketSentimentProps) {
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <span className={`font-semibold ${config.color}`}>
-                {config.label}
+                {label}
               </span>
               <Badge variant="secondary" className="text-xs">
                 {sentiment.score}/100
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {sentiment.description}
+              {description}
             </p>
           </div>
         </div>
@@ -120,9 +153,9 @@ export function MarketSentiment({ sentiment, loading }: MarketSentimentProps) {
         </div>
 
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>Miedo</span>
-          <span>Neutral</span>
-          <span>Codicia</span>
+          <span>{t.fear}</span>
+          <span>{t.neutral}</span>
+          <span>{t.greed}</span>
         </div>
       </div>
     </Card>

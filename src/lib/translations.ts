@@ -28,9 +28,9 @@ export const translations = {
     scalping: 'Scalping',
     swing: 'Swing',
     investment: 'Investment',
-    scalpingDesc: 'Minutes to hours',
-    swingDesc: 'Days to weeks',
-    investmentDesc: 'Weeks to months',
+    scalpingDesc: 'Fast operations in short timeframes (5m-15m)',
+    swingDesc: 'Operations from days to weeks (1h-4h-1d)',
+    investmentDesc: 'Positions from weeks to months (1d-1w)',
     
     // Filters
     filters: 'Filters',
@@ -96,6 +96,52 @@ export const translations = {
     loading: 'Loading...',
     error: 'Error',
     noData: 'No data available',
+    
+    // Enhanced Signal Card
+    reasons: 'Reasons',
+    warnings: 'Warnings',
+    riskManagement: 'Risk Management',
+    entryZone: 'Entry Zone',
+    targets: 'Targets',
+    target: 'Target',
+    trendLabel: 'Trend',
+    score: 'Score',
+    
+    // Top Setups
+    topSetupsTitle: 'Top Daily Setups',
+    topSetupsDesc: 'Best technical opportunities ranked by confidence',
+    noSetupsAvailable: 'No setups available. Select a group to analyze.',
+    
+    // Watchlist
+    noSymbolsInWatchlist: 'No symbols in your watchlist.',
+    clickToAdd: 'Click + to add.',
+    
+    // Filter Panel
+    allTrends: 'All',
+    allSignals: 'All',
+    allAssets: 'All',
+    stocks: 'Stocks',
+    indices: 'Indices',
+    etfs: 'ETFs',
+    hold: 'Hold',
+    strongBuy: 'Strong Buy',
+    strongSell: 'Strong Sell',
+    
+    // Dashboard
+    summary: 'Summary',
+    totalSetups: 'Total setups',
+    filtered: 'Filtered',
+    currentPrice: 'Current price',
+    macroAnalysis: '🟢 Macro Analysis',
+    microAnalysis: '🔵 Micro Analysis',
+    chartAndData: 'Chart and Data',
+    exportCsv: 'Export CSV',
+    loadingInitialData: 'Loading initial data...',
+    dataUpdated: 'Data updated successfully',
+    errorFetchingData: 'Error fetching data. Please try again.',
+    groupDataUpdated: 'Group data updated',
+    csvExported: 'CSV exported successfully',
+    cryptocurrencies: 'Cryptocurrencies',
   },
   es: {
     // Header
@@ -192,6 +238,52 @@ export const translations = {
     loading: 'Cargando...',
     error: 'Error',
     noData: 'No hay datos disponibles',
+    
+    // Enhanced Signal Card
+    reasons: 'Razones',
+    warnings: 'Advertencias',
+    riskManagement: 'Gestión de Riesgo',
+    entryZone: 'Zona de entrada',
+    targets: 'Objetivos',
+    target: 'Target',
+    trendLabel: 'Tendencia',
+    score: 'Score',
+    
+    // Top Setups
+    topSetupsTitle: 'Mejores Setups del Día',
+    topSetupsDesc: 'Mejores oportunidades técnicas ordenadas por confianza',
+    noSetupsAvailable: 'No hay setups disponibles. Selecciona un grupo para analizar.',
+    
+    // Watchlist
+    noSymbolsInWatchlist: 'No hay símbolos en tu watchlist.',
+    clickToAdd: 'Haz clic en + para agregar.',
+    
+    // Filter Panel
+    allTrends: 'Todas',
+    allSignals: 'Todas',
+    allAssets: 'Todos',
+    stocks: 'Acciones',
+    indices: 'Índices',
+    etfs: 'ETFs',
+    hold: 'Hold',
+    strongBuy: 'Strong Buy',
+    strongSell: 'Strong Sell',
+    
+    // Dashboard
+    summary: 'Resumen',
+    totalSetups: 'Total setups',
+    filtered: 'Filtrados',
+    currentPrice: 'Precio actual',
+    macroAnalysis: '🟢 Análisis Macro',
+    microAnalysis: '🔵 Análisis Micro',
+    chartAndData: 'Gráfico y Datos',
+    exportCsv: 'Exportar CSV',
+    loadingInitialData: 'Cargando datos iniciales...',
+    dataUpdated: 'Datos actualizados correctamente',
+    errorFetchingData: 'Error al obtener datos. Intenta nuevamente.',
+    groupDataUpdated: 'Datos del grupo actualizados',
+    csvExported: 'CSV exportado correctamente',
+    cryptocurrencies: 'Criptomonedas',
   },
 };
 

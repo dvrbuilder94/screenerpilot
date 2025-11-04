@@ -2,6 +2,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TradingSetup } from "@/types/trading";
 import { Trophy, TrendingUp, TrendingDown } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translations } from "@/lib/translations";
 
 interface TopSetupsPanelProps {
   setups: TradingSetup[];
@@ -9,6 +11,9 @@ interface TopSetupsPanelProps {
 }
 
 export default function TopSetupsPanel({ setups, onSelectSetup }: TopSetupsPanelProps) {
+  const { language } = useLanguage();
+  const t = translations[language];
+
   // Ordenar por confidence combinada
   const topSetups = [...setups]
     .sort((a, b) => b.combinedConfidence - a.combinedConfidence)
@@ -30,17 +35,17 @@ export default function TopSetupsPanel({ setups, onSelectSetup }: TopSetupsPanel
     <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/50">
       <div className="flex items-center gap-2 mb-4">
         <Trophy className="h-6 w-6 text-yellow-500" />
-        <h2 className="text-2xl font-bold">Top Setups del Día</h2>
+        <h2 className="text-2xl font-bold">{t.topSetupsTitle}</h2>
       </div>
 
       <p className="text-sm text-muted-foreground mb-6">
-        Mejores oportunidades técnicas ordenadas por confianza
+        {t.topSetupsDesc}
       </p>
 
       <div className="space-y-3">
         {topSetups.length === 0 ? (
           <p className="text-center text-muted-foreground py-8">
-            No hay setups disponibles. Selecciona un grupo para analizar.
+            {t.noSetupsAvailable}
           </p>
         ) : (
           topSetups.map((setup, index) => (
@@ -91,7 +96,7 @@ export default function TopSetupsPanel({ setups, onSelectSetup }: TopSetupsPanel
                     {setup.combinedConfidence.toFixed(0)}%
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    Confianza
+                    {t.confidence}
                   </div>
                 </div>
 

@@ -25,9 +25,12 @@ export function useSentiment() {
         // Demo data simulation
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Generate simulated sentiment based on day
-        const dayScore = (new Date().getDate() * 3.33) % 100;
-        const score = Math.round(dayScore);
+        // Generate realistic simulated sentiment score (0-100)
+        const now = new Date();
+        const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000);
+        const hourFactor = now.getHours() / 24;
+        // Use sine waves for smooth variation: base 50 + day cycle + hour cycle
+        const score = Math.round(50 + (Math.sin(dayOfYear / 7) * 30) + (Math.sin(hourFactor * Math.PI) * 20));
         const level = getSentimentLevel(score);
 
         const mockSentiment: SentimentData = {

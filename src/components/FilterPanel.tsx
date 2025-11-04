@@ -2,6 +2,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FilterOptions } from "@/types/trading";
 import { Filter } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translations } from "@/lib/translations";
 import {
   Select,
   SelectContent,
@@ -18,12 +20,15 @@ interface FilterPanelProps {
 }
 
 export default function FilterPanel({ filters, onFiltersChange, activeFiltersCount }: FilterPanelProps) {
+  const { language } = useLanguage();
+  const t = translations[language];
+
   return (
     <Card className="p-4 bg-card/50 backdrop-blur-sm border-border/50">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Filter className="h-5 w-5" />
-          <h3 className="text-lg font-bold">Filtros</h3>
+          <h3 className="text-lg font-bold">{t.filters}</h3>
           {activeFiltersCount > 0 && (
             <Badge variant="secondary">{activeFiltersCount}</Badge>
           )}
@@ -33,7 +38,7 @@ export default function FilterPanel({ filters, onFiltersChange, activeFiltersCou
       <div className="space-y-4">
         {/* Trend Filter */}
         <div>
-          <label className="text-sm font-medium mb-2 block">Tendencia</label>
+          <label className="text-sm font-medium mb-2 block">{t.trend}</label>
           <Select
             value={filters.trend || 'ALL'}
             onValueChange={(value) => onFiltersChange({ ...filters, trend: value as any })}
@@ -42,17 +47,17 @@ export default function FilterPanel({ filters, onFiltersChange, activeFiltersCou
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">Todas</SelectItem>
-              <SelectItem value="BULLISH">📈 Alcista</SelectItem>
-              <SelectItem value="BEARISH">📉 Bajista</SelectItem>
-              <SelectItem value="NEUTRAL">➡️ Neutral</SelectItem>
+              <SelectItem value="ALL">{t.allTrends}</SelectItem>
+              <SelectItem value="BULLISH">📈 {t.bullish}</SelectItem>
+              <SelectItem value="BEARISH">📉 {t.bearish}</SelectItem>
+              <SelectItem value="NEUTRAL">➡️ {t.neutral}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Signal Type Filter */}
         <div>
-          <label className="text-sm font-medium mb-2 block">Tipo de Señal</label>
+          <label className="text-sm font-medium mb-2 block">{t.signalType}</label>
           <Select
             value={filters.signalType || 'ALL'}
             onValueChange={(value) => onFiltersChange({ ...filters, signalType: value as any })}
@@ -61,19 +66,19 @@ export default function FilterPanel({ filters, onFiltersChange, activeFiltersCou
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">Todas</SelectItem>
-              <SelectItem value="STRONG_BUY">🚀 Strong Buy</SelectItem>
-              <SelectItem value="BUY">📈 Buy</SelectItem>
-              <SelectItem value="HOLD">➡️ Hold</SelectItem>
-              <SelectItem value="SELL">📉 Sell</SelectItem>
-              <SelectItem value="STRONG_SELL">⚠️ Strong Sell</SelectItem>
+              <SelectItem value="ALL">{t.allSignals}</SelectItem>
+              <SelectItem value="STRONG_BUY">🚀 {t.strongBuy}</SelectItem>
+              <SelectItem value="BUY">📈 {t.buy}</SelectItem>
+              <SelectItem value="HOLD">➡️ {t.hold}</SelectItem>
+              <SelectItem value="SELL">📉 {t.sell}</SelectItem>
+              <SelectItem value="STRONG_SELL">⚠️ {t.strongSell}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Asset Type Filter */}
         <div>
-          <label className="text-sm font-medium mb-2 block">Tipo de Activo</label>
+          <label className="text-sm font-medium mb-2 block">{t.assetTypeFilter}</label>
           <Select
             value={filters.assetType || 'ALL'}
             onValueChange={(value) => onFiltersChange({ ...filters, assetType: value as any })}
@@ -82,11 +87,11 @@ export default function FilterPanel({ filters, onFiltersChange, activeFiltersCou
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">Todos</SelectItem>
-              <SelectItem value="crypto">Criptomonedas</SelectItem>
-              <SelectItem value="stock">Acciones</SelectItem>
-              <SelectItem value="index">Índices</SelectItem>
-              <SelectItem value="etf">ETFs</SelectItem>
+              <SelectItem value="ALL">{t.allAssets}</SelectItem>
+              <SelectItem value="crypto">{t.cryptocurrencies}</SelectItem>
+              <SelectItem value="stock">{t.stocks}</SelectItem>
+              <SelectItem value="index">{t.indices}</SelectItem>
+              <SelectItem value="etf">{t.etfs}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -94,7 +99,7 @@ export default function FilterPanel({ filters, onFiltersChange, activeFiltersCou
         {/* Min Confidence Slider */}
         <div>
           <div className="flex justify-between items-center mb-2">
-            <label className="text-sm font-medium">Confianza Mínima</label>
+            <label className="text-sm font-medium">{t.minConfidence}</label>
             <span className="text-sm font-bold text-primary">{filters.minConfidence || 0}%</span>
           </div>
           <Slider

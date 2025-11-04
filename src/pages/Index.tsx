@@ -35,6 +35,8 @@ import { calculateEnhancedSignal } from "@/lib/enhancedSignals";
 import { TradingSetup, FilterOptions, EnhancedSignal } from "@/types/trading";
 import { TradingStyle, TRADING_PROFILES } from "@/types/tradingProfile";
 import { useSentiment } from "@/hooks/useSentiment";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translations } from "@/lib/translations";
 
 const STORAGE_KEY = "crypto-dashboard-settings";
 
@@ -46,6 +48,9 @@ interface DashboardData {
 }
 
 export default function Index() {
+  const { language } = useLanguage();
+  const t = translations[language];
+
   // Load settings from localStorage
   const loadSettings = () => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -188,7 +193,7 @@ export default function Index() {
 
         setGroupData(groupResults);
         setTradingSetups(setupResults);
-        toast.success(`Datos del grupo actualizados (${groupResults.length}/${groupSymbols.length})`);
+        toast.success(`${t.groupDataUpdated} (${groupResults.length}/${groupSymbols.length})`);
       } else {
         // Fetch data for single symbol
         const [macroCandles, microCandles] = await Promise.all([
@@ -214,11 +219,11 @@ export default function Index() {
         };
         setTradingSetups([setup]);
 
-        toast.success("Datos actualizados correctamente");
+        toast.success(t.dataUpdated);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-      toast.error("Error al obtener datos. Intenta nuevamente.");
+      toast.error(t.errorFetchingData);
     } finally {
       setIsLoading(false);
     }
@@ -290,7 +295,7 @@ export default function Index() {
     a.click();
     URL.revokeObjectURL(url);
 
-    toast.success("CSV exportado correctamente");
+    toast.success(t.csvExported);
   };
 
   // Handle asset type change
@@ -358,19 +363,19 @@ export default function Index() {
           />
           <div className="lg:col-span-1">
             <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-4">
-              <h3 className="text-sm font-semibold mb-2">Resumen</h3>
+              <h3 className="text-sm font-semibold mb-2">{t.summary}</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Total setups:</span>
+                  <span className="text-muted-foreground">{t.totalSetups}:</span>
                   <span className="font-bold">{tradingSetups.length}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Filtrados:</span>
+                  <span className="text-muted-foreground">{t.filtered}:</span>
                   <span className="font-bold">{filteredSetups.length}</span>
                 </div>
                 {microData && (
                   <div className="flex justify-between pt-2 border-t border-border/50">
-                    <span className="text-muted-foreground">Precio actual:</span>
+                    <span className="text-muted-foreground">{t.currentPrice}:</span>
                     <span className="font-mono font-bold text-primary">
                       ${microData.currentPrice.toFixed(2)}
                     </span>
@@ -403,15 +408,15 @@ export default function Index() {
             <>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <EnhancedSignalCard
-                  title="🟢 Análisis Macro"
-                  timeframe={macroInterval === "1d" ? "1 Día" : "1 Semana"}
+                  title={t.macroAnalysis}
+                  timeframe={t[macroInterval] || macroInterval}
                   signal={macroData.enhancedSignal}
                   currentPrice={macroData.currentPrice}
                 />
 
                 <EnhancedSignalCard
-                  title="🔵 Análisis Micro"
-                  timeframe={microInterval === "1h" ? "1 Hora" : "4 Horas"}
+                  title={t.microAnalysis}
+                  timeframe={t[microInterval] || microInterval}
                   signal={microData.enhancedSignal}
                   currentPrice={microData.currentPrice}
                 />
@@ -420,14 +425,14 @@ export default function Index() {
               <div className="bg-card rounded-2xl p-6 shadow-lg border border-border space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xl font-bold">Gráfico y Datos</h3>
+                    <h3 className="text-xl font-bold">{t.chartAndData}</h3>
                     <p className="text-3xl font-mono font-bold text-primary mt-2">
                       ${microData.currentPrice.toFixed(2)}
                     </p>
                   </div>
                   <Button onClick={exportToCsv} variant="outline" size="lg">
                     <Download className="mr-2 h-4 w-4" />
-                    Exportar CSV
+                    {t.exportCsv}
                   </Button>
                 </div>
 
@@ -445,7 +450,7 @@ export default function Index() {
 
         {!selectedGroup && !macroData && !microData && !isLoading && (
           <div className="text-center py-20">
-            <p className="text-muted-foreground">Cargando datos iniciales...</p>
+            <p className="text-muted-foreground">{t.loadingInitialData}</p>
           </div>
         )}
       </div>

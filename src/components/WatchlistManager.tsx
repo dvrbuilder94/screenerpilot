@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Star, Plus, X } from "lucide-react";
 import { Symbol } from "@/lib/binanceApi";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translations } from "@/lib/translations";
 import {
   Select,
   SelectContent,
@@ -18,6 +20,9 @@ interface WatchlistManagerProps {
 }
 
 export default function WatchlistManager({ onSymbolSelect }: WatchlistManagerProps) {
+  const { language } = useLanguage();
+  const t = translations[language];
+  
   const [watchlist, setWatchlist] = useState<Symbol[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [selectedAssetType, setSelectedAssetType] = useState<'crypto' | 'stock' | 'index' | 'etf'>('crypto');
@@ -58,7 +63,7 @@ export default function WatchlistManager({ onSymbolSelect }: WatchlistManagerPro
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Star className="h-5 w-5 text-yellow-500" fill="currentColor" />
-          <h3 className="text-lg font-bold">Watchlist</h3>
+          <h3 className="text-lg font-bold">{t.watchlist}</h3>
           <Badge variant="secondary">{watchlist.length}</Badge>
         </div>
         <Button
@@ -80,10 +85,10 @@ export default function WatchlistManager({ onSymbolSelect }: WatchlistManagerPro
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="crypto">Criptomonedas</SelectItem>
-              <SelectItem value="stock">Acciones</SelectItem>
-              <SelectItem value="index">Índices</SelectItem>
-              <SelectItem value="etf">ETFs</SelectItem>
+              <SelectItem value="crypto">{t.cryptocurrencies}</SelectItem>
+              <SelectItem value="stock">{t.stocks}</SelectItem>
+              <SelectItem value="index">{t.indices}</SelectItem>
+              <SelectItem value="etf">{t.etfs}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -107,9 +112,9 @@ export default function WatchlistManager({ onSymbolSelect }: WatchlistManagerPro
 
       {watchlist.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-4">
-          No hay símbolos en tu watchlist.
+          {t.noSymbolsInWatchlist}
           <br />
-          Haz clic en + para agregar.
+          {t.clickToAdd}
         </p>
       ) : (
         <div className="space-y-2">

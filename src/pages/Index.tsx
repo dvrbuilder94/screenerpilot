@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Download, LogOut, Wallet } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import DashboardHeader from "@/components/DashboardHeader";
 import EnhancedSignalCard from "@/components/EnhancedSignalCard";
 import TopSetupsPanel from "@/components/TopSetupsPanel";
@@ -48,6 +51,27 @@ interface DashboardData {
 
 export default function Index() {
   const { language } = useLanguage();
+  const { user, profile, subscription, loading, signOut, connectWallet, disconnectWallet } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth');
+    }
+  }, [user, loading, navigate]);
+
+  // Don't render until auth is checked
+  if (loading || !user || !subscription) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Load settings from localStorage
   const loadSettings = () => {
@@ -146,6 +170,8 @@ export default function Index() {
   // Scan all tickers in background
   const scanAllTickers = useCallback(async () => {
     setIsScanningAll(true);
+    
+    // Get all available tickers
     const allTickers: Symbol[] = [
       ...presets.crypto,
       ...presets.stocks,
@@ -153,8 +179,18 @@ export default function Index() {
       ...presets.etf_alt,
     ];
 
+    // Apply tier restrictions
+    const maxTickers = subscription?.max_tickers || 10;
+    const tickersToScan = subscription?.tier === 'free' 
+      ? allTickers.slice(0, maxTickers)
+      : allTickers;
+
+    if (subscription?.tier === 'free' && allTickers.length > maxTickers) {
+      toast.info(`Free tier limited to ${maxTickers} tickers. Upgrade to Pro for unlimited access!`);
+    }
+
     const results = await Promise.allSettled(
-      allTickers.map(async (ticker) => {
+      tickersToScan.map(async (ticker) => {
         try {
           const assetType = getAssetType(ticker);
           const macroCandles = await fetchCandles(ticker, macroInterval, 200);
@@ -400,6 +436,42 @@ export default function Index() {
       <div className="flex-1 overflow-auto">
         <div className="p-4 md:p-6 lg:p-8">
           <div className="max-w-[1800px] mx-auto space-y-6">
+            {/* User Header */}
+            <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-border shadow-sm">
+              <div className="flex items-center gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Welcome back,</p>
+                  <p className="font-semibold text-foreground">{profile?.display_name || profile?.email}</p>
+                </div>
+                <Badge variant={subscription?.tier === 'free' ? 'secondary' : 'default'}>
+                  {subscription?.tier.toUpperCase()} {subscription?.tier === 'free' ? `(${subscription.max_tickers} tickers)` : '(Unlimited)'}
+                </Badge>
+                {profile?.wallet_address && (
+                  <Badge variant="outline" className="font-mono text-xs">
+                    <Wallet className="w-3 h-3 mr-1" />
+                    {profile.wallet_address.slice(0, 6)}...{profile.wallet_address.slice(-4)}
+                  </Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {!profile?.wallet_address && (
+                  <Button variant="outline" size="sm" onClick={connectWallet}>
+                    <Wallet className="w-4 h-4 mr-2" />
+                    Connect Wallet
+                  </Button>
+                )}
+                {profile?.wallet_address && (
+                  <Button variant="ghost" size="sm" onClick={disconnectWallet}>
+                    Disconnect Wallet
+                  </Button>
+                )}
+                <Button variant="ghost" size="sm" onClick={signOut}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
+            </div>
+
             {/* Current Symbol Badge */}
             <div className="flex items-center gap-2 p-3 bg-accent rounded-lg border border-border">
               <span className="text-sm text-muted-foreground">Viewing:</span>

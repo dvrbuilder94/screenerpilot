@@ -8,7 +8,7 @@ import WatchlistManager from "@/components/WatchlistManager";
 import TopSetupsPanel from "@/components/TopSetupsPanel";
 import FilterPanel from "@/components/FilterPanel";
 import { TradingStyleSelector } from "@/components/TradingStyleSelector";
-import { MarketSentiment } from "@/components/MarketSentiment";
+import StockNews from "@/components/StockNews";
 import MiniChart from "@/components/MiniChart";
 import CandleTable from "@/components/CandleTable";
 import GroupRanking, { GroupSymbolData } from "@/components/GroupRanking";
@@ -34,7 +34,6 @@ import {
 import { calculateEnhancedSignal } from "@/lib/enhancedSignals";
 import { TradingSetup, FilterOptions, EnhancedSignal } from "@/types/trading";
 import { TradingStyle, TRADING_PROFILES } from "@/types/tradingProfile";
-import { useSentiment } from "@/hooks/useSentiment";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/lib/translations";
 
@@ -94,9 +93,6 @@ export default function Index() {
     return saved || 'swing';
   });
 
-  // Market sentiment hook
-  const { sentiment, loading: sentimentLoading } = useSentiment();
-
   // Save settings to localStorage
   useEffect(() => {
     localStorage.setItem(
@@ -138,7 +134,7 @@ export default function Index() {
       currentPrice,
       prevPrice,
       tradingProfile: TRADING_PROFILES[tradingStyle],
-      sentiment: sentiment,
+      sentiment: null,
     });
 
     return {
@@ -147,7 +143,7 @@ export default function Index() {
       enhancedSignal,
       currentPrice,
     };
-  }, [tradingStyle, sentiment]);
+  }, [tradingStyle]);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -227,7 +223,7 @@ export default function Index() {
     } finally {
       setIsLoading(false);
     }
-  }, [symbol, selectedGroup, macroInterval, microInterval, calculateIndicators, tradingStyle, sentiment]);
+  }, [symbol, selectedGroup, macroInterval, microInterval, calculateIndicators, tradingStyle]);
 
   // Initial fetch
   useEffect(() => {
@@ -346,7 +342,7 @@ export default function Index() {
             />
           </div>
           <div className="lg:col-span-1">
-            <MarketSentiment sentiment={sentiment} loading={sentimentLoading} />
+            <StockNews symbol={symbol} />
           </div>
         </div>
 

@@ -6,6 +6,7 @@ import DashboardHeader from "@/components/DashboardHeader";
 import EnhancedSignalCard from "@/components/EnhancedSignalCard";
 import TopSetupsPanel from "@/components/TopSetupsPanel";
 import SignalsList from "@/components/SignalsList";
+import { SignalsSidebar } from "@/components/SignalsSidebar";
 import { TradingStyleSelector } from "@/components/TradingStyleSelector";
 import StockNews from "@/components/StockNews";
 import MiniChart from "@/components/MiniChart";
@@ -34,6 +35,7 @@ import { calculateEnhancedSignal } from "@/lib/enhancedSignals";
 import { TradingSetup, EnhancedSignal } from "@/types/trading";
 import { TradingStyle, TRADING_PROFILES } from "@/types/tradingProfile";
 import { useLanguage } from "@/contexts/LanguageContext";
+import presets from "@/config/presets.json";
 
 const STORAGE_KEY = "crypto-dashboard-settings";
 
@@ -77,6 +79,11 @@ export default function Index() {
   const [microData, setMicroData] = useState<DashboardData | null>(null);
   const [groupData, setGroupData] = useState<GroupSymbolData[]>([]);
   const [tradingSetups, setTradingSetups] = useState<TradingSetup[]>([]);
+
+  // New state for all signals
+  const [allSignals, setAllSignals] = useState<TradingSetup[]>([]);
+  const [isScanningAll, setIsScanningAll] = useState(false);
+  const [lastScanTime, setLastScanTime] = useState<number>();
 
   // Trading profile state
   const [tradingStyle, setTradingStyle] = useState<TradingStyle>(() => {
@@ -163,17 +170,19 @@ export default function Index() {
           const tradingProfile = TRADING_PROFILES[tradingStyle];
 
           const macroSignal = calculateEnhancedSignal({
-            indicators: macroIndicators,
+            indicators: macroIndicators.indicators,
             currentPrice: macroCandles[macroCandles.length - 1].close,
             prevPrice: macroCandles[macroCandles.length - 2]?.close || macroCandles[macroCandles.length - 1].close,
             tradingProfile,
+            sentiment: null,
           });
 
           const microSignal = calculateEnhancedSignal({
-            indicators: microIndicators,
+            indicators: microIndicators.indicators,
             currentPrice: microCandles[microCandles.length - 1].close,
             prevPrice: microCandles[microCandles.length - 2]?.close || microCandles[microCandles.length - 1].close,
             tradingProfile,
+            sentiment: null,
           });
 
           const combinedConfidence = Math.round((macroSignal.confidence + microSignal.confidence) / 2);
@@ -205,7 +214,7 @@ export default function Index() {
     setIsScanningAll(false);
 
     toast.success(`Scanned ${validSetups.length} tickers successfully`);
-  }, [macroInterval, microInterval, tradingStyle]);
+  }, [macroInterval, microInterval, tradingStyle, calculateIndicators]);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -290,7 +299,17 @@ export default function Index() {
   // Initial fetch
   useEffect(() => {
     fetchData();
-  }, []);
+    scanAllTickers(); // Initial scan of all tickers
+  }, [fetchData, scanAllTickers]);
+
+  // Auto-refresh all signals every 10 minutes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      scanAllTickers();
+    }, 10 * 60 * 1000); // 10 minutes
+
+    return () => clearInterval(interval);
+  }, [scanAllTickers]);
 
   // Auto-refresh
   useEffect(() => {
@@ -361,105 +380,100 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6 lg:p-8">
-      <div className="max-w-[1800px] mx-auto space-y-6">
-        <DashboardHeader
-          symbol={symbol}
-          assetType={assetType}
-          selectedGroup={selectedGroup}
-          macroInterval={macroInterval}
-          microInterval={microInterval}
-          autoRefresh={autoRefresh}
-          isLoading={isLoading}
-          onSymbolChange={setSymbol}
-          onAssetTypeChange={handleAssetTypeChange}
-          onGroupChange={handleGroupChange}
-          onMacroIntervalChange={setMacroInterval}
-          onMicroIntervalChange={setMicroInterval}
-          onAutoRefreshChange={setAutoRefresh}
-          onRefresh={fetchData}
+    <div className="flex h-screen w-full bg-background">
+      {/* Signals Sidebar */}
+      <div className="w-80 flex-shrink-0">
+        <SignalsSidebar
+          allSignals={allSignals}
+          selectedSymbol={symbol}
+          onSelectSymbol={(newSymbol) => {
+            setSymbol(newSymbol as Symbol);
+            setAssetType(getAssetType(newSymbol as Symbol));
+            setSelectedGroup(null);
+          }}
+          isLoading={isScanningAll}
+          lastUpdate={lastScanTime}
         />
+      </div>
 
-        {/* Trading Style & Market Sentiment */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <TradingStyleSelector
-              selectedStyle={tradingStyle}
-              onStyleChange={setTradingStyle}
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto">
+        <div className="p-4 md:p-6 lg:p-8">
+          <div className="max-w-[1800px] mx-auto space-y-6">
+            {/* Current Symbol Badge */}
+            <div className="flex items-center gap-2 p-3 bg-accent rounded-lg border border-border">
+              <span className="text-sm text-muted-foreground">Viewing:</span>
+              <span className="font-semibold text-lg text-foreground">{symbol}</span>
+              <span className="text-sm text-muted-foreground">({assetType})</span>
+            </div>
+
+            <DashboardHeader
+              symbol={symbol}
+              assetType={assetType}
+              selectedGroup={selectedGroup}
+              macroInterval={macroInterval}
+              microInterval={microInterval}
+              autoRefresh={autoRefresh}
+              isLoading={isLoading}
+              onSymbolChange={setSymbol}
+              onAssetTypeChange={handleAssetTypeChange}
+              onGroupChange={handleGroupChange}
+              onMacroIntervalChange={setMacroInterval}
+              onMicroIntervalChange={setMicroInterval}
+              onAutoRefreshChange={setAutoRefresh}
+              onRefresh={fetchData}
             />
-          </div>
-          <div className="lg:col-span-1">
-            <StockNews symbol={symbol} />
+
+            {/* Trading Style & Market Sentiment */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <TradingStyleSelector
+                  selectedStyle={tradingStyle}
+                  onStyleChange={setTradingStyle}
+                />
+              </div>
+              <div className="lg:col-span-1">
+                <StockNews symbol={symbol} />
+              </div>
+            </div>
+
+            {selectedGroup ? (
+              <GroupRanking data={groupData} />
+            ) : (
+              <>
+                {macroData && microData && (
+                  <>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <EnhancedSignalCard
+                        title={`Macro Analysis (${macroInterval})`}
+                        signal={macroData.enhancedSignal}
+                      />
+                      <EnhancedSignalCard
+                        title={`Micro Analysis (${microInterval})`}
+                        signal={microData.enhancedSignal}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <MiniChart
+                        candles={macroData.candles}
+                        title={`Chart ${macroInterval}`}
+                        indicators={macroData.indicators}
+                      />
+                      <MiniChart
+                        candles={microData.candles}
+                        title={`Chart ${microInterval}`}
+                        indicators={microData.indicators}
+                      />
+                    </div>
+
+                    <CandleTable candles={microData.candles} onExport={exportToCsv} />
+                  </>
+                )}
+              </>
+            )}
           </div>
         </div>
-
-        {/* Signals by Type */}
-        {tradingSetups.length > 0 && (
-          <SignalsList
-            setups={tradingSetups}
-            onSelectSetup={(sym) => {
-              setSymbol(sym as Symbol);
-              setSelectedGroup(null);
-            }}
-          />
-        )}
-
-        {selectedGroup ? (
-          <GroupRanking
-            groupName={selectedGroup === "magnificent_seven" ? "Magnificent Seven" : selectedGroup}
-            data={groupData}
-            isLoading={isLoading}
-          />
-        ) : (
-          macroData && microData && (
-            <>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <EnhancedSignalCard
-                  title="Macro Analysis"
-                  timeframe={macroInterval}
-                  signal={macroData.enhancedSignal}
-                  currentPrice={macroData.currentPrice}
-                />
-
-                <EnhancedSignalCard
-                  title="Micro Analysis"
-                  timeframe={microInterval}
-                  signal={microData.enhancedSignal}
-                  currentPrice={microData.currentPrice}
-                />
-              </div>
-
-              <div className="bg-card rounded-2xl p-6 shadow-lg border border-border space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xl font-bold">Chart & Data</h3>
-                    <p className="text-3xl font-mono font-bold text-primary mt-2">
-                      ${microData.currentPrice.toFixed(2)}
-                    </p>
-                  </div>
-                  <Button onClick={exportToCsv} variant="outline" size="lg">
-                    <Download className="mr-2 h-4 w-4" />
-                    Export CSV
-                  </Button>
-                </div>
-
-                <MiniChart
-                  candles={microData.candles}
-                  ema20={microData.indicators.ema20}
-                  ema50={microData.indicators.ema50}
-                />
-
-                <CandleTable candles={microData.candles} limit={20} />
-              </div>
-            </>
-          )
-        )}
-
-        {!selectedGroup && !macroData && !microData && !isLoading && (
-          <div className="text-center py-20">
-            <p className="text-muted-foreground">Loading initial data...</p>
-          </div>
-        )}
       </div>
     </div>
   );

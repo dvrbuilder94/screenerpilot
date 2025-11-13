@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
 import EnhancedSignalCard from "@/components/EnhancedSignalCard";
-import WatchlistManager from "@/components/WatchlistManager";
 import TopSetupsPanel from "@/components/TopSetupsPanel";
-import FilterPanel from "@/components/FilterPanel";
+import SignalsList from "@/components/SignalsList";
 import { TradingStyleSelector } from "@/components/TradingStyleSelector";
 import StockNews from "@/components/StockNews";
 import MiniChart from "@/components/MiniChart";
@@ -32,10 +31,9 @@ import {
   IndicatorData,
 } from "@/lib/indicators";
 import { calculateEnhancedSignal } from "@/lib/enhancedSignals";
-import { TradingSetup, FilterOptions, EnhancedSignal } from "@/types/trading";
+import { TradingSetup, EnhancedSignal } from "@/types/trading";
 import { TradingStyle, TRADING_PROFILES } from "@/types/tradingProfile";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { translations } from "@/lib/translations";
 
 const STORAGE_KEY = "crypto-dashboard-settings";
 
@@ -48,7 +46,6 @@ interface DashboardData {
 
 export default function Index() {
   const { language } = useLanguage();
-  const t = translations[language];
 
   // Load settings from localStorage
   const loadSettings = () => {
@@ -80,12 +77,6 @@ export default function Index() {
   const [microData, setMicroData] = useState<DashboardData | null>(null);
   const [groupData, setGroupData] = useState<GroupSymbolData[]>([]);
   const [tradingSetups, setTradingSetups] = useState<TradingSetup[]>([]);
-  const [filters, setFilters] = useState<FilterOptions>({
-    trend: 'ALL',
-    signalType: 'ALL',
-    assetType: 'ALL',
-    minConfidence: 0,
-  });
 
   // Trading profile state
   const [tradingStyle, setTradingStyle] = useState<TradingStyle>(() => {
@@ -189,7 +180,7 @@ export default function Index() {
 
         setGroupData(groupResults);
         setTradingSetups(setupResults);
-        toast.success(`${t.groupDataUpdated} (${groupResults.length}/${groupSymbols.length})`);
+        toast.success(`Group data updated (${groupResults.length}/${groupSymbols.length})`);
       } else {
         // Fetch data for single symbol
         const [macroCandles, microCandles] = await Promise.all([
@@ -215,11 +206,11 @@ export default function Index() {
         };
         setTradingSetups([setup]);
 
-        toast.success(t.dataUpdated);
+        toast.success("Data updated successfully");
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-      toast.error(t.errorFetchingData);
+      toast.error("Error fetching data. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -241,21 +232,6 @@ export default function Index() {
     return () => clearInterval(interval);
   }, [autoRefresh, fetchData]);
 
-  // Filter trading setups
-  const filteredSetups = tradingSetups.filter((setup) => {
-    if (filters.trend !== 'ALL' && setup.macroSignal.trend !== filters.trend) return false;
-    if (filters.signalType !== 'ALL' && setup.microSignal.signal !== filters.signalType) return false;
-    if (filters.assetType !== 'ALL' && setup.assetType !== filters.assetType) return false;
-    if (setup.combinedConfidence < (filters.minConfidence || 0)) return false;
-    return true;
-  });
-
-  const activeFiltersCount = [
-    filters.trend !== 'ALL',
-    filters.signalType !== 'ALL',
-    filters.assetType !== 'ALL',
-    (filters.minConfidence || 0) > 0,
-  ].filter(Boolean).length;
 
   const exportToCsv = () => {
     if (!microData) return;
@@ -291,7 +267,7 @@ export default function Index() {
     a.click();
     URL.revokeObjectURL(url);
 
-    toast.success(t.csvExported);
+    toast.success("CSV exported successfully");
   };
 
   // Handle asset type change
@@ -346,46 +322,10 @@ export default function Index() {
           </div>
         </div>
 
-        {/* Watchlist & Filters */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <WatchlistManager onSymbolSelect={(sym) => {
-            setSymbol(sym);
-            setSelectedGroup(null);
-          }} />
-          <FilterPanel
-            filters={filters}
-            onFiltersChange={setFilters}
-            activeFiltersCount={activeFiltersCount}
-          />
-          <div className="lg:col-span-1">
-            <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-4">
-              <h3 className="text-sm font-semibold mb-2">{t.summary}</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t.totalSetups}:</span>
-                  <span className="font-bold">{tradingSetups.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t.filtered}:</span>
-                  <span className="font-bold">{filteredSetups.length}</span>
-                </div>
-                {microData && (
-                  <div className="flex justify-between pt-2 border-t border-border/50">
-                    <span className="text-muted-foreground">{t.currentPrice}:</span>
-                    <span className="font-mono font-bold text-primary">
-                      ${microData.currentPrice.toFixed(2)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Top Setups Panel */}
-        {filteredSetups.length > 0 && (
-          <TopSetupsPanel
-            setups={filteredSetups}
+        {/* Signals by Type */}
+        {tradingSetups.length > 0 && (
+          <SignalsList
+            setups={tradingSetups}
             onSelectSetup={(sym) => {
               setSymbol(sym as Symbol);
               setSelectedGroup(null);
@@ -404,15 +344,15 @@ export default function Index() {
             <>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <EnhancedSignalCard
-                  title={t.macroAnalysis}
-                  timeframe={t[macroInterval] || macroInterval}
+                  title="Macro Analysis"
+                  timeframe={macroInterval}
                   signal={macroData.enhancedSignal}
                   currentPrice={macroData.currentPrice}
                 />
 
                 <EnhancedSignalCard
-                  title={t.microAnalysis}
-                  timeframe={t[microInterval] || microInterval}
+                  title="Micro Analysis"
+                  timeframe={microInterval}
                   signal={microData.enhancedSignal}
                   currentPrice={microData.currentPrice}
                 />
@@ -421,14 +361,14 @@ export default function Index() {
               <div className="bg-card rounded-2xl p-6 shadow-lg border border-border space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xl font-bold">{t.chartAndData}</h3>
+                    <h3 className="text-xl font-bold">Chart & Data</h3>
                     <p className="text-3xl font-mono font-bold text-primary mt-2">
                       ${microData.currentPrice.toFixed(2)}
                     </p>
                   </div>
                   <Button onClick={exportToCsv} variant="outline" size="lg">
                     <Download className="mr-2 h-4 w-4" />
-                    {t.exportCsv}
+                    Export CSV
                   </Button>
                 </div>
 
@@ -446,7 +386,7 @@ export default function Index() {
 
         {!selectedGroup && !macroData && !microData && !isLoading && (
           <div className="text-center py-20">
-            <p className="text-muted-foreground">{t.loadingInitialData}</p>
+            <p className="text-muted-foreground">Loading initial data...</p>
           </div>
         )}
       </div>

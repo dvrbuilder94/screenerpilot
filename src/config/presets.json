@@ -6,7 +6,8 @@
   "stocks": [
     "AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "TSLA",
     "BMNR", "FIGS", "ADBE", "FIG",
-    "BRK-B", "AVGO", "LLY", "V", "UNH", "XOM", "WMT", "JNJ", "ORCL", "COST", "MA", "PG"
+    "BRK-B", "AVGO", "LLY", "V", "UNH", "XOM", "WMT", "JNJ", "ORCL", "COST", "MA", "PG",
+    "XPEV", "RIVN", "SOFI"
   ],
   "indices": ["^GSPC", "^RUT", "^NDX"],
   "etf_alt": ["SPY", "IWM", "QQQ"]

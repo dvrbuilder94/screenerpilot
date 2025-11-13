@@ -49,43 +49,25 @@ interface DashboardData {
   currentPrice: number;
 }
 
+// Load settings from localStorage - moved outside component
+const loadSettings = () => {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      return JSON.parse(saved);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+};
+
 export default function Index() {
   const { language } = useLanguage();
   const { user, profile, subscription, loading, signOut, connectWallet, disconnectWallet } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect to auth if not logged in
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth');
-    }
-  }, [user, loading, navigate]);
-
-  // Don't render until auth is checked
-  if (loading || !user || !subscription) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Load settings from localStorage
-  const loadSettings = () => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return null;
-      }
-    }
-    return null;
-  };
-
+  // All hooks must be at the top before any conditional returns
   const [assetType, setAssetType] = useState<AssetType>(() => loadSettings()?.assetType || "crypto");
   const [symbol, setSymbol] = useState<Symbol>(() => {
     const saved = loadSettings();
@@ -114,6 +96,13 @@ export default function Index() {
     const saved = loadSettings()?.tradingStyle;
     return saved || 'swing';
   });
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth');
+    }
+  }, [user, loading, navigate]);
 
   // Save settings to localStorage
   useEffect(() => {
@@ -358,6 +347,17 @@ export default function Index() {
     return () => clearInterval(interval);
   }, [autoRefresh, fetchData]);
 
+  // Don't render until auth is checked
+  if (loading || !user || !subscription) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const exportToCsv = () => {
     if (!microData) return;

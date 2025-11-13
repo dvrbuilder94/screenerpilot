@@ -438,7 +438,11 @@ export default function Index() {
             </div>
 
             {selectedGroup ? (
-              <GroupRanking data={groupData} />
+              <GroupRanking 
+                groupName={selectedGroup} 
+                data={groupData} 
+                isLoading={isLoading}
+              />
             ) : (
               <>
                 {macroData && microData && (
@@ -446,28 +450,32 @@ export default function Index() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       <EnhancedSignalCard
                         title={`Macro Analysis (${macroInterval})`}
+                        timeframe={macroInterval}
                         signal={macroData.enhancedSignal}
+                        currentPrice={macroData.currentPrice}
                       />
                       <EnhancedSignalCard
                         title={`Micro Analysis (${microInterval})`}
+                        timeframe={microInterval}
                         signal={microData.enhancedSignal}
+                        currentPrice={microData.currentPrice}
                       />
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       <MiniChart
                         candles={macroData.candles}
-                        title={`Chart ${macroInterval}`}
-                        indicators={macroData.indicators}
+                        ema20={macroData.indicators.ema20}
+                        ema50={macroData.indicators.ema50}
                       />
                       <MiniChart
                         candles={microData.candles}
-                        title={`Chart ${microInterval}`}
-                        indicators={microData.indicators}
+                        ema20={microData.indicators.ema20}
+                        ema50={microData.indicators.ema50}
                       />
                     </div>
 
-                    <CandleTable candles={microData.candles} onExport={exportToCsv} />
+                    <CandleTable candles={microData.candles} limit={50} />
                   </>
                 )}
               </>

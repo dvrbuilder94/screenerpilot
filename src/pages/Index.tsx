@@ -136,6 +136,77 @@ export default function Index() {
     };
   }, [tradingStyle]);
 
+  // Scan all tickers in background
+  const scanAllTickers = useCallback(async () => {
+    setIsScanningAll(true);
+    const allTickers: Symbol[] = [
+      ...presets.crypto,
+      ...presets.stocks,
+      ...presets.indices,
+      ...presets.etf_alt,
+    ];
+
+    const results = await Promise.allSettled(
+      allTickers.map(async (ticker) => {
+        try {
+          const assetType = getAssetType(ticker);
+          const macroCandles = await fetchCandles(ticker, macroInterval, 200);
+          const microCandles = await fetchCandles(ticker, microInterval, 200);
+
+          if (!macroCandles.length || !microCandles.length) {
+            return null;
+          }
+
+          const macroIndicators = calculateIndicators(macroCandles);
+          const microIndicators = calculateIndicators(microCandles);
+
+          const tradingProfile = TRADING_PROFILES[tradingStyle];
+
+          const macroSignal = calculateEnhancedSignal({
+            indicators: macroIndicators,
+            currentPrice: macroCandles[macroCandles.length - 1].close,
+            prevPrice: macroCandles[macroCandles.length - 2]?.close || macroCandles[macroCandles.length - 1].close,
+            tradingProfile,
+          });
+
+          const microSignal = calculateEnhancedSignal({
+            indicators: microIndicators,
+            currentPrice: microCandles[microCandles.length - 1].close,
+            prevPrice: microCandles[microCandles.length - 2]?.close || microCandles[microCandles.length - 1].close,
+            tradingProfile,
+          });
+
+          const combinedConfidence = Math.round((macroSignal.confidence + microSignal.confidence) / 2);
+
+          return {
+            symbol: ticker,
+            assetType,
+            currentPrice: macroCandles[macroCandles.length - 1].close,
+            macroSignal,
+            microSignal,
+            combinedConfidence,
+            lastUpdate: Date.now(),
+          } as TradingSetup;
+        } catch (error) {
+          console.error(`Error scanning ${ticker}:`, error);
+          return null;
+        }
+      })
+    );
+
+    const validSetups = results
+      .filter((result): result is PromiseFulfilledResult<TradingSetup | null> => 
+        result.status === "fulfilled" && result.value !== null
+      )
+      .map((result) => result.value as TradingSetup);
+
+    setAllSignals(validSetups);
+    setLastScanTime(Date.now());
+    setIsScanningAll(false);
+
+    toast.success(`Scanned ${validSetups.length} tickers successfully`);
+  }, [macroInterval, microInterval, tradingStyle]);
+
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {

@@ -1,5 +1,7 @@
 import { Candle } from "@/lib/binanceApi";
 import { useMemo } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translations } from "@/lib/translations";
 
 interface MiniChartProps {
   candles: Candle[];
@@ -9,6 +11,9 @@ interface MiniChartProps {
 }
 
 export default function MiniChart({ candles, ema20, ema50, height = 200 }: MiniChartProps) {
+  const { language } = useLanguage();
+  const t = translations[language];
+  
   const chartData = useMemo(() => {
     if (!candles.length) return null;
 
@@ -44,7 +49,7 @@ export default function MiniChart({ candles, ema20, ema50, height = 200 }: MiniC
 
   return (
     <div className="bg-card rounded-xl p-4 border border-border/50">
-      <h4 className="text-sm font-semibold mb-2 text-muted-foreground">Gráfico de Velas (últimas 100)</h4>
+      <h4 className="text-sm font-semibold mb-2 text-muted-foreground">{t.candleChart.chartTitle}</h4>
       <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
         {/* Grid lines */}
         {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {

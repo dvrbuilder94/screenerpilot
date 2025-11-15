@@ -3,8 +3,8 @@ import { Language } from '@/contexts/LanguageContext';
 export const translations = {
   en: {
     // Header
-    title: 'Crypto Multi-Timeframe Dashboard',
-    subtitle: 'Advanced Technical Analysis',
+    title: 'ScreenerPilot',
+    subtitle: 'Advanced Trading Analysis',
     
     // Market Sentiment
     marketSentiment: 'Market Sentiment',
@@ -88,6 +88,19 @@ export const translations = {
     '4h': '4 Hours',
     '1d': '1 Day',
     '1w': '1 Week',
+    
+    // Candle Chart
+    candleChart: {
+      lastCandles: 'Last {n} Candles',
+      chartTitle: 'Candlestick Chart (last 100)',
+      date: 'Date',
+      open: 'Open',
+      high: 'High',
+      low: 'Low',
+      close: 'Close',
+      volume: 'Volume',
+      change: 'Change %',
+    },
     
     // Asset types
     assetType: 'Asset Type',
@@ -180,8 +193,8 @@ export const translations = {
   },
   es: {
     // Header
-    title: 'Dashboard Cripto Multi-Timeframe',
-    subtitle: 'Análisis Técnico Avanzado',
+    title: 'ScreenerPilot',
+    subtitle: 'Análisis Avanzado de Trading',
     
     // Market Sentiment
     marketSentiment: 'Sentimiento de Mercado',
@@ -265,6 +278,19 @@ export const translations = {
     '4h': '4 Horas',
     '1d': '1 Día',
     '1w': '1 Semana',
+    
+    // Candle Chart
+    candleChart: {
+      lastCandles: 'Últimas {n} Velas',
+      chartTitle: 'Gráfico de Velas (últimas 100)',
+      date: 'Fecha',
+      open: 'Apertura',
+      high: 'Máximo',
+      low: 'Mínimo',
+      close: 'Cierre',
+      volume: 'Volumen',
+      change: 'Cambio %',
+    },
     
     // Asset types
     assetType: 'Tipo de Activo',

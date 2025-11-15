@@ -1,7 +1,1 @@
 project_id = "qceatovcjqhiqdpgfdzm"
-
-[functions.fetch-stock-data]
-verify_jwt = false
-
-[functions.trading-ai-chat]
-verify_jwt = false

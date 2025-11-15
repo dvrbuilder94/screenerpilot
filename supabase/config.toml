@@ -1,1 +1,13 @@
 project_id = "qceatovcjqhiqdpgfdzm"
+
+[functions.fetch-news]
+verify_jwt = true
+
+[functions.fetch-stock-data]
+verify_jwt = true
+
+[functions.trading-ai-chat]
+verify_jwt = true
+
+[functions.market-collector]
+verify_jwt = false

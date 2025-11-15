@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Wallet, Settings, LogOut, User, LogIn } from "lucide-react";
+import { Wallet, Settings, LogOut, User, LogIn, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const AccountDropdown = () => {
@@ -103,6 +103,16 @@ export const AccountDropdown = () => {
             </div>
           </DropdownMenuItem>
         ) : null}
+        
+        <DropdownMenuSeparator />
+        
+        <DropdownMenuItem 
+          onClick={() => navigate('/pricing')}
+          className="cursor-pointer hover:bg-secondary/50 transition-smooth"
+        >
+          <CreditCard className="w-4 h-4 mr-2 text-primary" />
+          <span>Upgrade Plan</span>
+        </DropdownMenuItem>
         
         <DropdownMenuSeparator />
         

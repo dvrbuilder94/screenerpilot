@@ -14,6 +14,153 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_usage: {
+        Row: {
+          created_at: string
+          endpoint: string
+          id: string
+          request_count: number
+          updated_at: string
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          id?: string
+          request_count?: number
+          updated_at?: string
+          user_id: string
+          window_start?: string
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          id?: string
+          request_count?: number
+          updated_at?: string
+          user_id?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      asset_candles: {
+        Row: {
+          asset_type: string
+          close: number
+          created_at: string
+          high: number
+          id: string
+          interval: string
+          low: number
+          open: number
+          symbol: string
+          timestamp: number
+          volume: number
+        }
+        Insert: {
+          asset_type: string
+          close: number
+          created_at?: string
+          high: number
+          id?: string
+          interval: string
+          low: number
+          open: number
+          symbol: string
+          timestamp: number
+          volume: number
+        }
+        Update: {
+          asset_type?: string
+          close?: number
+          created_at?: string
+          high?: number
+          id?: string
+          interval?: string
+          low?: number
+          open?: number
+          symbol?: string
+          timestamp?: number
+          volume?: number
+        }
+        Relationships: []
+      }
+      asset_snapshots: {
+        Row: {
+          asset_type: string
+          atr: number | null
+          calculated_at: string
+          confidence: number | null
+          created_at: string
+          current_price: number
+          ema_200: number | null
+          ema_21: number | null
+          ema_50: number | null
+          ema_9: number | null
+          id: string
+          interval: string
+          macd: number | null
+          macd_histogram: number | null
+          macd_signal: number | null
+          rsi: number | null
+          signal_score: number | null
+          signal_type: string | null
+          supertrend: number | null
+          supertrend_direction: string | null
+          symbol: string
+          trend: string | null
+        }
+        Insert: {
+          asset_type: string
+          atr?: number | null
+          calculated_at?: string
+          confidence?: number | null
+          created_at?: string
+          current_price: number
+          ema_200?: number | null
+          ema_21?: number | null
+          ema_50?: number | null
+          ema_9?: number | null
+          id?: string
+          interval: string
+          macd?: number | null
+          macd_histogram?: number | null
+          macd_signal?: number | null
+          rsi?: number | null
+          signal_score?: number | null
+          signal_type?: string | null
+          supertrend?: number | null
+          supertrend_direction?: string | null
+          symbol: string
+          trend?: string | null
+        }
+        Update: {
+          asset_type?: string
+          atr?: number | null
+          calculated_at?: string
+          confidence?: number | null
+          created_at?: string
+          current_price?: number
+          ema_200?: number | null
+          ema_21?: number | null
+          ema_50?: number | null
+          ema_9?: number | null
+          id?: string
+          interval?: string
+          macd?: number | null
+          macd_histogram?: number | null
+          macd_signal?: number | null
+          rsi?: number | null
+          signal_score?: number | null
+          signal_type?: string | null
+          supertrend?: number | null
+          supertrend_direction?: string | null
+          symbol?: string
+          trend?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -127,7 +274,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_tier: { Args: { p_user_id: string }; Returns: string }
     }
     Enums: {
       subscription_tier: "free" | "pro" | "premium"

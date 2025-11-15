@@ -37,7 +37,7 @@ export const AltseasonPanel = () => {
           <div>
             <CardTitle>Altseason Index</CardTitle>
             <CardDescription>
-              % de altcoins superando a BTC en rendimiento
+              % of altcoins outperforming BTC
             </CardDescription>
           </div>
         </div>
@@ -66,7 +66,7 @@ export const AltseasonPanel = () => {
 
         {error && (
           <div className="text-center py-8 text-destructive">
-            Error cargando datos. Intenta de nuevo.
+            Error loading data. Please try again.
           </div>
         )}
 
@@ -78,7 +78,7 @@ export const AltseasonPanel = () => {
                 {data.value}
               </div>
               <div className="text-sm text-muted-foreground mt-2">
-                {data.altsOutperforming} de {data.totalAlts} alts superan a BTC
+                {data.altsOutperforming} of {data.totalAlts} alts outperform BTC
               </div>
             </div>
 
@@ -102,20 +102,20 @@ export const AltseasonPanel = () => {
               <p className="text-sm leading-relaxed">
                 {data.value < 25 && (
                   <span>
-                    <strong className="text-bearish">Bitcoin Season:</strong> BTC está dominando el mercado. 
-                    Las altcoins están rezagadas. Momento favorable para BTC.
+                    <strong className="text-bearish">Bitcoin Season:</strong> BTC is dominating the market. 
+                    Most altcoins are underperforming. Better wait for clearer signals before entering alts.
                   </span>
                 )}
                 {data.value >= 25 && data.value < 75 && (
                   <span>
-                    <strong className="text-neutral">Fase Neutral:</strong> El mercado está equilibrado. 
-                    Algunas alts superan a BTC pero no hay tendencia clara dominante.
+                    <strong className="text-neutral">Neutral Phase:</strong> Mixed market. Some altcoins are 
+                    performing well, but no clear altseason yet. Careful selection is key.
                   </span>
                 )}
                 {data.value >= 75 && (
                   <span>
-                    <strong className="text-bullish">Altseason:</strong> Las altcoins están en auge. 
-                    La mayoría supera a BTC en rendimiento. Capital rotando hacia alts.
+                    <strong className="text-bullish">Altseason:</strong> Strong altcoin performance! Majority are 
+                    outperforming BTC. Optimal time for selected alt positions.
                   </span>
                 )}
               </p>

@@ -1,12 +1,15 @@
 import { AltseasonPanel } from '@/components/AltseasonPanel';
 import { EthVsBtcPanel } from '@/components/EthVsBtcPanel';
 import { CryptoRiskMeter } from '@/components/CryptoRiskMeter';
+import { EthUpsidePanel } from '@/components/EthUpsidePanel';
+import { AltseasonIndexPanel } from '@/components/AltseasonIndexPanel';
+import { DominancePanel } from '@/components/DominancePanel';
 import { useAuth } from '@/contexts/AuthContext';
 import { Lock } from 'lucide-react';
 
 export default function CryptoMacro() {
   const { user } = useAuth();
-  const requiresPro = false; // Flag para futuras restricciones Pro
+  const requiresPro = false; // Flag for future Pro restrictions
 
   return (
     <div className="min-h-screen bg-background">
@@ -25,13 +28,13 @@ export default function CryptoMacro() {
             )}
           </div>
           <p className="text-muted-foreground">
-            Vista macro del mercado crypto: Altseason Index, ETH vs BTC, y Risk Regime
+            Comprehensive crypto market macro analysis: Altseason, ETH/BTC, Risk Regime & Quantitative Signals
           </p>
         </div>
 
         {/* Panels Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Altseason Index - Ancho completo en mobile, mitad en desktop */}
+          {/* Original Altseason Index - Full width on mobile, half on desktop */}
           <div className="lg:col-span-2">
             <AltseasonPanel />
           </div>
@@ -45,12 +48,27 @@ export default function CryptoMacro() {
           <div className="lg:col-span-1">
             <CryptoRiskMeter />
           </div>
+
+          {/* NEW: ETH Upside Probability */}
+          <div className="lg:col-span-1">
+            <EthUpsidePanel />
+          </div>
+
+          {/* NEW: Advanced Altseason Index */}
+          <div className="lg:col-span-1">
+            <AltseasonIndexPanel />
+          </div>
+
+          {/* NEW: BTC Dominance Panel - Full width */}
+          <div className="lg:col-span-2">
+            <DominancePanel />
+          </div>
         </div>
 
         {/* Footer note */}
         <div className="mt-8 p-4 rounded-lg bg-muted/50 border border-border/50">
           <p className="text-xs text-muted-foreground text-center">
-            Los datos se actualizan cada 5 minutos. Métricas calculadas usando datos de Binance.
+            Data updates every 5 minutes. Metrics calculated using Binance data.
           </p>
         </div>
       </main>

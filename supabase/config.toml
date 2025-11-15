@@ -4,7 +4,7 @@ project_id = "qceatovcjqhiqdpgfdzm"
 verify_jwt = true
 
 [functions.fetch-stock-data]
-verify_jwt = true
+verify_jwt = false
 
 [functions.trading-ai-chat]
 verify_jwt = true

@@ -47,17 +47,9 @@ export default function DashboardHeader({
   const symbols = getSymbolsByType(assetType);
   
   return (
-    <div className="bg-card rounded-2xl p-6 shadow-lg border border-border">
+    <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-4 shadow-lg">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              {t.title}
-            </h1>
-            <p className="text-muted-foreground">
-              {t.subtitle}
-            </p>
-          </div>
           <LanguageToggle />
         </div>
 

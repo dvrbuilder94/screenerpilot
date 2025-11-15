@@ -11,7 +11,7 @@ export const AltseasonPanel = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['altseason-index', lookbackDays],
     queryFn: () => calculateAltseasonIndex(lookbackDays),
-    staleTime: 5 * 60 * 1000, // 5 minutos
+    staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false
   });
 
@@ -43,7 +43,6 @@ export const AltseasonPanel = () => {
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Selector de ventana temporal */}
         <div className="flex gap-2">
           {[30, 60, 90].map((days) => (
             <Button
@@ -72,7 +71,6 @@ export const AltseasonPanel = () => {
 
         {data && (
           <>
-            {/* Valor principal */}
             <div className="text-center">
               <div className={`text-6xl font-bold ${getTextColor(data.value)}`}>
                 {data.value}
@@ -82,7 +80,6 @@ export const AltseasonPanel = () => {
               </div>
             </div>
 
-            {/* Barra de progreso */}
             <div className="space-y-2">
               <div className="w-full bg-secondary rounded-full h-4 overflow-hidden">
                 <div
@@ -97,7 +94,6 @@ export const AltseasonPanel = () => {
               </div>
             </div>
 
-            {/* Interpretación */}
             <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
               <p className="text-sm leading-relaxed">
                 {data.value < 25 && (

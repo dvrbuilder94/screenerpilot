@@ -8,66 +8,75 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 222 47% 8%;
+    /* Base colors - Ultra deep sophisticated background */
+    --background: 230 25% 6%;
     --foreground: 210 40% 98%;
-
-    --card: 222 45% 12%;
+    
+    /* Card colors - Elevated surfaces with refined contrast */
+    --card: 228 22% 10%;
     --card-foreground: 210 40% 98%;
-
-    --popover: 222 45% 12%;
+    
+    /* Popover colors */
+    --popover: 228 22% 10%;
     --popover-foreground: 210 40% 98%;
-
-    --primary: 220 90% 56%;
-    --primary-foreground: 222 47% 8%;
-
-    --secondary: 217 20% 25%;
+    
+    /* Primary colors - Electric blue with rich saturation */
+    --primary: 215 95% 62%;
+    --primary-foreground: 210 40% 98%;
+    
+    /* Secondary colors - Sophisticated slate with depth */
+    --secondary: 220 18% 22%;
     --secondary-foreground: 210 40% 98%;
-
-    --muted: 217 20% 25%;
-    --muted-foreground: 215 20% 65%;
-
-    --accent: 180 85% 55%;
-    --accent-foreground: 222 47% 8%;
-
-    --destructive: 0 84% 60%;
+    
+    /* Muted colors - Refined balanced neutrals */
+    --muted: 220 16% 16%;
+    --muted-foreground: 215 15% 60%;
+    
+    /* Accent colors - Vibrant cyan with energy */
+    --accent: 185 90% 58%;
+    --accent-foreground: 230 25% 6%;
+    
+    /* Destructive colors - Refined red */
+    --destructive: 0 72% 62%;
     --destructive-foreground: 210 40% 98%;
+    
+    /* Border colors - Ultra refined subtle borders */
+    --border: 220 20% 18%;
+    --input: 220 20% 18%;
+    --ring: 215 95% 62%;
+    
+    --radius: 0.75rem;
 
-    --border: 217 25% 20%;
-    --input: 217 25% 20%;
-    --ring: 220 90% 56%;
-
-    --radius: 1rem;
-
-    /* Trading specific colors - More elegant */
-    --bullish: 158 64% 52%;
-    --bullish-light: 158 70% 65%;
+    /* Premium Trading colors with more vibrancy */
+    --bullish: 158 70% 50%;
+    --bullish-light: 158 70% 62%;
     --bullish-foreground: 210 40% 98%;
     
-    --bearish: 0 65% 58%;
-    --bearish-light: 0 70% 70%;
+    --bearish: 0 72% 62%;
+    --bearish-light: 0 72% 72%;
     --bearish-foreground: 210 40% 98%;
     
-    --neutral: 220 90% 56%;
-    --neutral-light: 220 90% 70%;
-    --neutral-foreground: 222 47% 8%;
+    --neutral: 220 15% 60%;
+    --neutral-light: 220 20% 70%;
+    --neutral-foreground: 230 25% 6%;
 
-    /* Elegant Gradients */
-    --gradient-bullish: linear-gradient(135deg, hsl(158 64% 52%), hsl(158 70% 65%));
-    --gradient-bearish: linear-gradient(135deg, hsl(0 65% 58%), hsl(0 70% 70%));
-    --gradient-neutral: linear-gradient(135deg, hsl(220 90% 56%), hsl(220 90% 70%));
-    --gradient-card: linear-gradient(135deg, hsl(222 45% 12%), hsl(222 45% 14%));
-    --gradient-premium: linear-gradient(135deg, hsl(220 90% 56%), hsl(180 85% 55%));
+    /* Premium gradients with more depth */
+    --gradient-primary: linear-gradient(135deg, hsl(215 95% 62%), hsl(185 90% 58%));
+    --gradient-bullish: linear-gradient(135deg, hsl(158 70% 50%), hsl(158 70% 62%));
+    --gradient-bearish: linear-gradient(135deg, hsl(0 72% 62%), hsl(0 72% 72%));
+    --gradient-subtle: linear-gradient(180deg, hsl(228 22% 10%), hsl(228 22% 8%));
+    --gradient-premium: linear-gradient(135deg, hsl(215 95% 62%), hsl(185 90% 58%));
 
-    /* Elegant Shadows with glassmorphism */
-    --shadow-bullish: 0 10px 40px -10px hsl(158 64% 52% / 0.4);
-    --shadow-bearish: 0 10px 40px -10px hsl(0 65% 58% / 0.4);
-    --shadow-card: 0 10px 30px -10px hsl(222 84% 4% / 0.5);
-    --shadow-elevated: 0 20px 60px -15px hsl(222 84% 4% / 0.7);
-    --shadow-glow: 0 0 30px hsl(220 90% 56% / 0.3);
+    /* Sophisticated shadows with more presence */
+    --shadow-glow: 0 0 50px hsl(215 95% 62% / 0.35);
+    --shadow-glow-bullish: 0 0 35px hsl(158 70% 50% / 0.3);
+    --shadow-glow-bearish: 0 0 35px hsl(0 72% 62% / 0.3);
+    --shadow-elevated: 0 12px 48px -14px hsl(230 25% 3% / 0.6);
+    --shadow-card: 0 8px 32px -10px hsl(230 25% 3% / 0.5);
 
-    /* Animation */
+    /* Buttery smooth transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 

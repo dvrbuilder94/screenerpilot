@@ -17,7 +17,7 @@ export const CryptoRiskMeter = () => {
       case 'risk_on':
         return {
           label: 'RISK-ON',
-          description: 'Mercado en modo agresivo',
+          description: 'Aggressive market mode',
           color: 'text-bullish',
           bgColor: 'bg-bullish/10',
           borderColor: 'border-bullish/30',
@@ -26,7 +26,7 @@ export const CryptoRiskMeter = () => {
       case 'risk_off':
         return {
           label: 'RISK-OFF',
-          description: 'Mercado en modo defensivo',
+          description: 'Defensive market mode',
           color: 'text-bearish',
           bgColor: 'bg-bearish/10',
           borderColor: 'border-bearish/30',
@@ -35,7 +35,7 @@ export const CryptoRiskMeter = () => {
       default:
         return {
           label: 'NEUTRAL',
-          description: 'Sin tendencia clara',
+          description: 'No clear trend',
           color: 'text-neutral',
           bgColor: 'bg-neutral/10',
           borderColor: 'border-neutral/30',
@@ -57,7 +57,7 @@ export const CryptoRiskMeter = () => {
           <div>
             <CardTitle>Crypto Risk Regime</CardTitle>
             <CardDescription>
-              Medidor de apetito por riesgo en el mercado
+              Market risk appetite indicator
             </CardDescription>
           </div>
         </div>
@@ -71,7 +71,7 @@ export const CryptoRiskMeter = () => {
 
         {error && (
           <div className="text-center py-8 text-destructive">
-            Error cargando datos. Intenta de nuevo.
+            Error loading data. Please try again.
           </div>
         )}
 
@@ -90,9 +90,9 @@ export const CryptoRiskMeter = () => {
               </p>
             </div>
 
-            {/* Razones */}
+            {/* Key Factors */}
             <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-foreground">Factores clave:</h4>
+              <h4 className="text-sm font-semibold text-foreground">Key factors:</h4>
               <ul className="space-y-2">
                 {data.reasons.map((reason, idx) => (
                   <li key={idx} className="flex items-start gap-2">
@@ -103,10 +103,10 @@ export const CryptoRiskMeter = () => {
               </ul>
             </div>
 
-            {/* Métrica adicional */}
+            {/* Additional Metric */}
             <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Alts promedio 7d:</span>
+                <span className="text-sm text-muted-foreground">Alts avg 7d return:</span>
                 <Badge 
                   variant="outline" 
                   className={data.altsAvgReturn7d >= 0 ? 'border-bullish text-bullish' : 'border-bearish text-bearish'}

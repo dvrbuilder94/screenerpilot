@@ -119,6 +119,49 @@ export function macd(
 }
 
 /**
+ * Calculate Bollinger Bands
+ */
+export interface BollingerBand {
+  upper: number;
+  middle: number;
+  lower: number;
+}
+
+export function bollingerBands(
+  closes: number[],
+  period: number = 20,
+  multiplier: number = 2
+): BollingerBand[] {
+  if (closes.length < period) return [];
+  
+  const result: BollingerBand[] = [];
+  
+  for (let i = period - 1; i < closes.length; i++) {
+    // Calculate SMA (middle band)
+    let sum = 0;
+    for (let j = 0; j < period; j++) {
+      sum += closes[i - j];
+    }
+    const middle = sum / period;
+    
+    // Calculate standard deviation
+    let variance = 0;
+    for (let j = 0; j < period; j++) {
+      variance += Math.pow(closes[i - j] - middle, 2);
+    }
+    const stdDev = Math.sqrt(variance / period);
+    
+    // Calculate upper and lower bands
+    const upper = middle + multiplier * stdDev;
+    const lower = middle - multiplier * stdDev;
+    
+    result.push({ upper, middle, lower });
+  }
+  
+  return result;
+}
+
+/**
  * Calculate Average True Range (ATR)
  */
 export function atr(ohlc: OHLC[], period: number = 14): number[] {

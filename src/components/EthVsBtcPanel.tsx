@@ -22,7 +22,7 @@ export const EthVsBtcPanel = () => {
           <div>
             <CardTitle>ETH vs BTC</CardTitle>
             <CardDescription>
-              Comparación Risk/Reward en 90 días
+              Risk/Reward comparison over 90 days
             </CardDescription>
           </div>
         </div>
@@ -36,7 +36,7 @@ export const EthVsBtcPanel = () => {
 
         {error && (
           <div className="text-center py-8 text-destructive">
-            Error cargando datos. Intenta de nuevo.
+            Error loading data. Please try again.
           </div>
         )}
 
@@ -50,19 +50,19 @@ export const EthVsBtcPanel = () => {
                   <h3 className="text-lg font-bold">BTC</h3>
                   {data.winner === 'BTC' && (
                     <Badge variant="default" className="bg-bullish text-bullish-foreground">
-                      Mejor R/R
+                      Better R/R
                     </Badge>
                   )}
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Retorno 90d:</span>
+                    <span className="text-muted-foreground">90d Return:</span>
                     <span className={`font-semibold ${data.btc.returns >= 0 ? 'text-bullish' : 'text-bearish'}`}>
                       {data.btc.returns >= 0 ? '+' : ''}{data.btc.returns.toFixed(2)}%
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Volatilidad:</span>
+                    <span className="text-muted-foreground">Volatility:</span>
                     <span className="font-semibold">{data.btc.volatility.toFixed(2)}%</span>
                   </div>
                   <div className="flex justify-between">
@@ -84,19 +84,19 @@ export const EthVsBtcPanel = () => {
                   <h3 className="text-lg font-bold">ETH</h3>
                   {data.winner === 'ETH' && (
                     <Badge variant="default" className="bg-bullish text-bullish-foreground">
-                      Mejor R/R
+                      Better R/R
                     </Badge>
                   )}
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Retorno 90d:</span>
+                    <span className="text-muted-foreground">90d Return:</span>
                     <span className={`font-semibold ${data.eth.returns >= 0 ? 'text-bullish' : 'text-bearish'}`}>
                       {data.eth.returns >= 0 ? '+' : ''}{data.eth.returns.toFixed(2)}%
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Volatilidad:</span>
+                    <span className="text-muted-foreground">Volatility:</span>
                     <span className="font-semibold">{data.eth.volatility.toFixed(2)}%</span>
                   </div>
                   <div className="flex justify-between">
@@ -113,10 +113,10 @@ export const EthVsBtcPanel = () => {
               </div>
             </div>
 
-            {/* Conclusión */}
+            {/* Conclusion */}
             <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
               <p className="text-sm leading-relaxed">
-                <strong className="text-foreground">Conclusión:</strong> {data.conclusion}
+                <strong className="text-foreground">Conclusion:</strong> {data.conclusion}
               </p>
             </div>
           </div>

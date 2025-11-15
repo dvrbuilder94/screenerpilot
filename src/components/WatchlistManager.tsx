@@ -14,6 +14,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getSymbolsByType, getAssetType } from "@/lib/binanceApi";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface WatchlistManagerProps {
   onSymbolSelect: (symbol: Symbol) => void;
@@ -22,38 +25,114 @@ interface WatchlistManagerProps {
 export default function WatchlistManager({ onSymbolSelect }: WatchlistManagerProps) {
   const { language } = useLanguage();
   const t = translations[language];
+  const { user } = useAuth();
+  const { toast } = useToast();
   
   const [watchlist, setWatchlist] = useState<Symbol[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [selectedAssetType, setSelectedAssetType] = useState<'crypto' | 'stock' | 'index' | 'etf'>('crypto');
+  const [loading, setLoading] = useState(true);
 
-  // Load watchlist from localStorage
+  // Load watchlist from Supabase
   useEffect(() => {
-    const saved = localStorage.getItem('trading-watchlist');
-    if (saved) {
-      try {
-        setWatchlist(JSON.parse(saved));
-      } catch (error) {
-        console.error('Error loading watchlist:', error);
-      }
-    }
-  }, []);
+    loadWatchlist();
+  }, [user]);
 
-  // Save watchlist to localStorage
-  const saveWatchlist = (newWatchlist: Symbol[]) => {
-    setWatchlist(newWatchlist);
-    localStorage.setItem('trading-watchlist', JSON.stringify(newWatchlist));
+  const loadWatchlist = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('user_watchlists')
+        .select('symbol')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setWatchlist(data?.map(item => item.symbol as Symbol) || []);
+    } catch (error) {
+      console.error('Error loading watchlist:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load watchlist",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const addToWatchlist = (symbol: Symbol) => {
-    if (!watchlist.includes(symbol)) {
-      saveWatchlist([...watchlist, symbol]);
+  const addToWatchlist = async (symbol: Symbol) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to manage your watchlist",
+        variant: "destructive",
+      });
+      return;
     }
-    setIsAdding(false);
+
+    if (watchlist.includes(symbol)) {
+      setIsAdding(false);
+      return;
+    }
+
+    try {
+      const assetType = getAssetType(symbol);
+      const { error } = await supabase
+        .from('user_watchlists')
+        .insert({
+          user_id: user.id,
+          symbol,
+          asset_type: assetType,
+        });
+
+      if (error) throw error;
+
+      setWatchlist([...watchlist, symbol]);
+      setIsAdding(false);
+      toast({
+        title: "Added to watchlist",
+        description: `${symbol} has been added to your watchlist`,
+      });
+    } catch (error) {
+      console.error('Error adding to watchlist:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add symbol to watchlist",
+        variant: "destructive",
+      });
+    }
   };
 
-  const removeFromWatchlist = (symbol: Symbol) => {
-    saveWatchlist(watchlist.filter(s => s !== symbol));
+  const removeFromWatchlist = async (symbol: Symbol) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('user_watchlists')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('symbol', symbol);
+
+      if (error) throw error;
+
+      setWatchlist(watchlist.filter(s => s !== symbol));
+      toast({
+        title: "Removed from watchlist",
+        description: `${symbol} has been removed from your watchlist`,
+      });
+    } catch (error) {
+      console.error('Error removing from watchlist:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove symbol from watchlist",
+        variant: "destructive",
+      });
+    }
   };
 
   const availableSymbols = getSymbolsByType(selectedAssetType);
@@ -110,7 +189,11 @@ export default function WatchlistManager({ onSymbolSelect }: WatchlistManagerPro
         </div>
       )}
 
-      {watchlist.length === 0 ? (
+      {loading ? (
+        <p className="text-sm text-muted-foreground text-center py-4">
+          Loading watchlist...
+        </p>
+      ) : watchlist.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-4">
           {t.noSymbolsInWatchlist}
           <br />

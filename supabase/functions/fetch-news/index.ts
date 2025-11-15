@@ -6,6 +6,22 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Mapping of crypto symbols to their full names to avoid stock ticker conflicts
+const CRYPTO_SYMBOL_MAP: Record<string, string> = {
+  'BTC': 'Bitcoin',
+  'ETH': 'Ethereum',
+  'BNB': 'Binance Coin',
+  'SOL': 'Solana',
+  'ADA': 'Cardano',
+  'XRP': 'Ripple',
+  'DOT': 'Polkadot',
+  'DOGE': 'Dogecoin',
+  'AVAX': 'Avalanche',
+  'MATIC': 'Polygon',
+  'LINK': 'Chainlink',
+  'UNI': 'Uniswap',
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -40,16 +56,24 @@ serve(async (req) => {
 
     // Clean the symbol for API request
     let cleanSymbol = symbol.replace(/USDT$/, '').replace(/^[\^]/, '');
+    const isCrypto = symbol.endsWith('USDT');
     
     // Build Marketaux API URL
     const url = new URL('https://api.marketaux.com/v1/news/all');
-    url.searchParams.append('symbols', cleanSymbol);
+    
+    // Use full name for crypto symbols to avoid stock ticker conflicts (e.g., ETH = Ethan Allen stock)
+    if (isCrypto && CRYPTO_SYMBOL_MAP[cleanSymbol]) {
+      url.searchParams.append('search', CRYPTO_SYMBOL_MAP[cleanSymbol]);
+      console.log('Fetching news from Marketaux for crypto:', CRYPTO_SYMBOL_MAP[cleanSymbol]);
+    } else {
+      url.searchParams.append('symbols', cleanSymbol);
+      console.log('Fetching news from Marketaux for symbol:', cleanSymbol);
+    }
+    
     url.searchParams.append('filter_entities', 'true');
     url.searchParams.append('language', 'en');
     url.searchParams.append('limit', '5');
     url.searchParams.append('api_token', NEWS_API_KEY);
-
-    console.log('Fetching news from Marketaux for symbol:', cleanSymbol);
 
     const response = await fetch(url.toString());
     

@@ -15,9 +15,9 @@ interface Message {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trading-ai-chat`;
 
-const FREE_DAILY_LIMIT = 3;
-const PRO_DAILY_LIMIT = 50;
-const PREMIUM_DAILY_LIMIT = 999;
+const FREE_DAILY_LIMIT = 10;
+const PRO_DAILY_LIMIT = 100;
+const PREMIUM_DAILY_LIMIT = 500;
 
 export const TradingAIWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -108,13 +108,23 @@ const [dailyLimit, setDailyLimit] = useState(FREE_DAILY_LIMIT);
         const error = await resp.json();
         
         if (resp.status === 429) {
-          toast.error(`Daily limit reached (${dailyLimit} messages). Upgrade to send more.`);
+          const tier = subscription?.tier || 'free';
+          const upgradeMsg = tier === 'free' 
+            ? 'Upgrade to Pro for unlimited AI access!' 
+            : 'Rate limit reached. Please wait a moment.';
+          toast.error(upgradeMsg);
           setMessages(prev => prev.slice(0, -1));
           setIsLoading(false);
           return;
         }
         
         throw new Error(error.error || "Failed to get AI response");
+      }
+
+      // Update rate limit info from headers
+      const remaining = resp.headers.get('X-Rate-Limit-Remaining');
+      if (remaining) {
+        setDailyCount(getMessageLimit() - parseInt(remaining));
       }
 
       if (!resp.body) throw new Error("No response body");

@@ -1,4 +1,3 @@
-import { AppHeader } from '@/components/AppHeader';
 import { AltseasonPanel } from '@/components/AltseasonPanel';
 import { EthVsBtcPanel } from '@/components/EthVsBtcPanel';
 import { CryptoRiskMeter } from '@/components/CryptoRiskMeter';
@@ -11,9 +10,7 @@ export default function CryptoMacro() {
 
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader />
-      
-      <main className="container mx-auto px-4 pt-24 pb-12">
+      <main className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">

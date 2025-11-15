@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Download } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { AppHeader } from "@/components/AppHeader";
 import { TradingAIWidget } from "@/components/TradingAIWidget";
 import DashboardHeader from "@/components/DashboardHeader";
 import EnhancedSignalCard from "@/components/EnhancedSignalCard";

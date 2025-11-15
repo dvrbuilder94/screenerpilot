@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sparkles, X, Send, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   role: "user" | "assistant";
@@ -23,7 +24,8 @@ export const TradingAIWidget = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [dailyCount, setDailyCount] = useState(0);
+const [dailyCount, setDailyCount] = useState(0);
+const [dailyLimit, setDailyLimit] = useState(FREE_DAILY_LIMIT);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { subscription } = useAuth();
 
@@ -47,25 +49,36 @@ export const TradingAIWidget = () => {
   }, [messages]);
 
   useEffect(() => {
-    const stored = localStorage.getItem("tradeaix-ai-count");
-    const storedDate = localStorage.getItem("tradeaix-ai-date");
-    const today = new Date().toDateString();
+    const fetchUsage = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
 
-    if (storedDate === today && stored) {
-      setDailyCount(parseInt(stored));
-    } else {
-      localStorage.setItem("tradeaix-ai-date", today);
-      localStorage.setItem("tradeaix-ai-count", "0");
-      setDailyCount(0);
-    }
+      const today = new Date().toISOString().split('T')[0];
+      const { data: usage } = await supabase
+        .from('user_ai_usage')
+        .select('message_count')
+        .eq('user_id', session.user.id)
+        .eq('date', today)
+        .single();
+
+      const { data: subscription } = await supabase
+        .from('user_subscriptions')
+        .select('tier')
+        .eq('user_id', session.user.id)
+        .single();
+
+      const tier = subscription?.tier || 'free';
+      const limit = tier === 'premium' ? PREMIUM_DAILY_LIMIT : 
+                    tier === 'pro' ? PRO_DAILY_LIMIT : FREE_DAILY_LIMIT;
+
+      setDailyLimit(limit);
+      setDailyCount(usage?.message_count || 0);
+    };
+
+    fetchUsage();
   }, []);
 
   const streamChat = async (userMessage: string) => {
-    if (!canSendMessage()) {
-      toast.error(`Daily limit reached (${getMessageLimit()} messages). Upgrade to send more.`);
-      return;
-    }
-
     const newUserMsg: Message = { role: "user", content: userMessage };
     setMessages(prev => [...prev, newUserMsg]);
     setInput("");
@@ -74,17 +87,33 @@ export const TradingAIWidget = () => {
     let assistantContent = "";
     
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please sign in to use the AI assistant.");
+        setMessages(prev => prev.slice(0, -1));
+        setIsLoading(false);
+        return;
+      }
+
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ messages: [...messages, newUserMsg] }),
       });
 
       if (!resp.ok) {
         const error = await resp.json();
+        
+        if (resp.status === 429) {
+          toast.error(`Daily limit reached (${dailyLimit} messages). Upgrade to send more.`);
+          setMessages(prev => prev.slice(0, -1));
+          setIsLoading(false);
+          return;
+        }
+        
         throw new Error(error.error || "Failed to get AI response");
       }
 
@@ -135,9 +164,8 @@ export const TradingAIWidget = () => {
         }
       }
 
-      const newCount = dailyCount + 1;
-      setDailyCount(newCount);
-      localStorage.setItem("tradeaix-ai-count", newCount.toString());
+      // Update count after successful message
+      setDailyCount(prev => prev + 1);
     } catch (error) {
       console.error("AI chat error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to get response");

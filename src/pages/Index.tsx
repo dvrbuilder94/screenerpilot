@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Download, LogOut, Wallet } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { TradingAIWidget } from "@/components/TradingAIWidget";
 import DashboardHeader from "@/components/DashboardHeader";
 import EnhancedSignalCard from "@/components/EnhancedSignalCard";
 import TopSetupsPanel from "@/components/TopSetupsPanel";
@@ -416,9 +417,11 @@ export default function Index() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-background">
-      {/* Signals Sidebar */}
-      <div className="w-80 flex-shrink-0">
+    <>
+      <TradingAIWidget />
+      <div className="flex h-screen w-full bg-background">
+        {/* Signals Sidebar */}
+        <div className="w-80 flex-shrink-0">
         <SignalsSidebar
           allSignals={allSignals}
           selectedSymbol={symbol}
@@ -556,5 +559,6 @@ export default function Index() {
         </div>
       </div>
     </div>
+    </>
   );
 }

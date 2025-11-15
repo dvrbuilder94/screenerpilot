@@ -13,7 +13,7 @@ const requestSchema = z.object({
   symbol: z.string()
     .min(1, 'Symbol required')
     .max(20, 'Symbol too long')
-    .regex(/^[\^]?[A-Z0-9]+(?:USDT)?$/, 'Invalid symbol format')
+    .regex(/^[\^]?[A-Z0-9\-]+(?:USDT)?$/, 'Invalid symbol format')
 });
 
 // Mapping of crypto symbols to their full names
@@ -81,28 +81,31 @@ serve(async (req) => {
   }
 
   try {
-    // Authenticate user
+    // Optional authentication - allow both authenticated and anonymous access
     const authHeader = req.headers.get('authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    let user = null;
+    let tier = 'free';
 
-    if (authError || !user) {
-      console.error('Auth error:', authError);
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user: authenticatedUser }, error: authError } = await supabase.auth.getUser(token);
+      
+      if (!authError && authenticatedUser) {
+        user = authenticatedUser;
+        
+        // Get user tier if authenticated
+        const { data: subscription } = await supabase
+          .from('user_subscriptions')
+          .select('tier')
+          .eq('user_id', user.id)
+          .single();
+        
+        tier = subscription?.tier || 'free';
+      }
     }
 
     // Validate input
@@ -121,22 +124,12 @@ serve(async (req) => {
 
     const { symbol } = validationResult.data;
 
-    // Get user tier
-    const { data: subscription } = await supabase
-      .from('user_subscriptions')
-      .select('tier')
-      .eq('user_id', user.id)
-      .single();
-
-    const tier = subscription?.tier || 'free';
-
-    // Check rate limit
-    const rateLimitCheck = await checkAndIncrementRateLimit(
-      supabase,
-      user.id,
-      tier,
-      'fetch-news'
-    );
+    // Check rate limit only for authenticated users
+    let rateLimitCheck = { allowed: true, remaining: 999 };
+    
+    if (user) {
+      rateLimitCheck = await checkAndIncrementRateLimit(supabase, user.id, tier, 'fetch-news');
+    }
 
     if (!rateLimitCheck.allowed) {
       return new Response(JSON.stringify({ 

@@ -12,7 +12,7 @@ const requestSchema = z.object({
   symbol: z.string()
     .min(1, 'Symbol required')
     .max(20, 'Symbol too long')
-    .regex(/^[\^]?[A-Z0-9]+(?:USDT)?$/, 'Invalid symbol format'),
+    .regex(/^[\^]?[A-Z0-9\-]+(?:USDT)?$/, 'Invalid symbol format'),
   interval: z.enum(['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w', '1M'], {
     errorMap: () => ({ message: 'Invalid interval' })
   })

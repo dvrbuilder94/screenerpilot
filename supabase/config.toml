@@ -1,7 +1,7 @@
 project_id = "qceatovcjqhiqdpgfdzm"
 
 [functions.fetch-news]
-verify_jwt = true
+verify_jwt = false
 
 [functions.fetch-stock-data]
 verify_jwt = false

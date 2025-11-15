@@ -28,10 +28,17 @@ const YAHOO_FINANCE_API = 'https://query1.finance.yahoo.com/v8/finance/chart';
  * Detect asset type from symbol
  */
 export function getAssetType(symbol: Symbol): AssetType {
+  // Check if it's a crypto pair (ends with USDT, BUSD, etc.)
+  if (symbol.endsWith('USDT') || symbol.endsWith('BUSD') || symbol.endsWith('BTC') || symbol.endsWith('ETH')) {
+    return 'crypto';
+  }
+  
+  // Check presets
   if (presets.crypto.includes(symbol as any)) return 'crypto';
   if (presets.stocks.includes(symbol as any)) return 'stock';
   if (presets.indices.includes(symbol as any)) return 'index';
   if (presets.etf_alt.includes(symbol as any)) return 'etf';
+  
   return 'stock'; // default
 }
 

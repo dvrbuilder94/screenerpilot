@@ -64,8 +64,11 @@ export default {
         },
       },
       boxShadow: {
-        'glow': 'var(--shadow-glow)',
-        'elevated': 'var(--shadow-elevated)',
+        glow: "var(--shadow-glow)",
+        "glow-bullish": "var(--shadow-glow-bullish)",
+        "glow-bearish": "var(--shadow-glow-bearish)",
+        elevated: "var(--shadow-elevated)",
+        card: "var(--shadow-card)",
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],

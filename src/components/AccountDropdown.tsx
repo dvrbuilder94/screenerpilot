@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -9,11 +10,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Wallet, Settings, LogOut, User } from "lucide-react";
+import { Wallet, Settings, LogOut, User, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const AccountDropdown = () => {
-  const { profile, subscription, signOut, connectWallet, disconnectWallet } = useAuth();
+  const { user, profile, subscription, signOut, connectWallet, disconnectWallet } = useAuth();
+  const navigate = useNavigate();
 
   const tierColors = {
     free: "bg-muted text-muted-foreground",
@@ -30,6 +32,20 @@ export const AccountDropdown = () => {
       .toUpperCase()
       .slice(0, 2);
   };
+
+  // If no user, show login button
+  if (!user) {
+    return (
+      <Button 
+        onClick={() => navigate('/auth')}
+        variant="default"
+        className="flex items-center gap-2 bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-smooth shadow-glow"
+      >
+        <LogIn className="w-4 h-4" />
+        <span className="font-medium">Iniciar Sesión</span>
+      </Button>
+    );
+  }
 
   return (
     <DropdownMenu>

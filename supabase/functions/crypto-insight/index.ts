@@ -24,7 +24,7 @@ serve(async (req) => {
 - Dominance Change (7d): ${dominanceChange > 0 ? '+' : ''}${dominanceChange.toFixed(2)}%
 - Fear & Greed: ${fearGreedValue}/100
 
-Keep it neutral, no investment advice, and MUST end with a question. Be brief and professional.`;
+Keep it neutral, no investment advice. Be brief and professional.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -36,7 +36,7 @@ Keep it neutral, no investment advice, and MUST end with a question. Be brief an
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: "Generate a brief market insight ending with a question." }
+          { role: "user", content: "Generate a brief market insight." }
         ],
         max_tokens: 60,
         temperature: 0.7
@@ -62,7 +62,7 @@ Keep it neutral, no investment advice, and MUST end with a question. Be brief an
     }
 
     const data = await response.json();
-    const insight = data.choices?.[0]?.message?.content || "Markets showing mixed signals. Monitor key levels?";
+    const insight = data.choices?.[0]?.message?.content || "Markets showing mixed signals across metrics.";
 
     return new Response(
       JSON.stringify({ insight }),
@@ -72,7 +72,7 @@ Keep it neutral, no investment advice, and MUST end with a question. Be brief an
     console.error("Error generating insight:", error);
     return new Response(
       JSON.stringify({ 
-        insight: "Markets showing mixed signals across metrics. Monitor key levels closely?"
+        insight: "Markets showing mixed signals across metrics."
       }),
       { 
         status: 200, 

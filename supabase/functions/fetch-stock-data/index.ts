@@ -62,73 +62,93 @@ serve(async (req) => {
     
     console.log(`Yahoo Finance URL: ${url}`);
 
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      },
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-    if (!response.ok) {
-      console.error(`Yahoo Finance error: ${response.status} ${response.statusText}`);
-      return new Response(
-        JSON.stringify({ error: `Yahoo Finance API error: ${response.status}` }), 
-        { 
-          status: response.status, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        },
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
 
-    const data = await response.json();
-    
-    if (!data.chart?.result?.[0]) {
-      console.error('Invalid Yahoo Finance response structure');
-      return new Response(
-        JSON.stringify({ error: 'Invalid response from Yahoo Finance' }), 
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-
-    const result = data.chart.result[0];
-    
-    if (!result.timestamp || !result.indicators?.quote?.[0]) {
-      console.error('Missing data in Yahoo Finance response');
-      return new Response(
-        JSON.stringify({ error: 'Incomplete data from Yahoo Finance' }), 
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-
-    const timestamps = result.timestamp;
-    const quotes = result.indicators.quote[0];
-    
-    // Transform to our Candle format
-    const candles = timestamps
-      .map((time: number, i: number) => ({
-        openTime: time * 1000,
-        open: quotes.open[i] || 0,
-        high: quotes.high[i] || 0,
-        low: quotes.low[i] || 0,
-        close: quotes.close[i] || 0,
-        volume: quotes.volume[i] || 0,
-        closeTime: time * 1000 + 60000,
-      }))
-      .filter((c: any) => c.close > 0);
-
-    console.log(`Successfully fetched ${candles.length} candles for ${symbol}`);
-
-    return new Response(
-      JSON.stringify(candles), 
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      if (!response.ok) {
+        console.error(`Yahoo Finance error: ${response.status} ${response.statusText}`);
+        return new Response(
+          JSON.stringify({ error: `Yahoo Finance API error: ${response.status}` }), 
+          { 
+            status: response.status, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
       }
-    );
+
+      const data = await response.json();
+      
+      if (!data.chart?.result?.[0]) {
+        console.error('Invalid Yahoo Finance response structure');
+        return new Response(
+          JSON.stringify({ error: 'Invalid response from Yahoo Finance' }), 
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      const result = data.chart.result[0];
+      
+      if (!result.timestamp || !result.indicators?.quote?.[0]) {
+        console.error('Missing data in Yahoo Finance response');
+        return new Response(
+          JSON.stringify({ error: 'Incomplete data from Yahoo Finance' }), 
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      const timestamps = result.timestamp;
+      const quotes = result.indicators.quote[0];
+      
+      // Transform to our Candle format
+      const candles = timestamps
+        .map((time: number, i: number) => ({
+          openTime: time * 1000,
+          open: quotes.open[i] || 0,
+          high: quotes.high[i] || 0,
+          low: quotes.low[i] || 0,
+          close: quotes.close[i] || 0,
+          volume: quotes.volume[i] || 0,
+          closeTime: time * 1000 + 60000,
+        }))
+        .filter((c: any) => c.close > 0);
+
+      console.log(`Successfully fetched ${candles.length} candles for ${symbol}`);
+
+      return new Response(
+        JSON.stringify(candles), 
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        console.error(`Request timeout for ${symbol}`);
+        return new Response(
+          JSON.stringify({ error: 'Request timeout - Yahoo Finance took too long to respond' }), 
+          { 
+            status: 504, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+      throw fetchError;
+    }
   } catch (error) {
     console.error('Error in fetch-stock-data function:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

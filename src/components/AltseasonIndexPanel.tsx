@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Sparkles } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { getAltseasonIndex } from '@/lib/cryptoSignals';
+import { getAltseasonIndex } from '@/lib/cryptoMetrics';
 
 export const AltseasonIndexPanel = () => {
   const [lookbackDays, setLookbackDays] = useState(30);
@@ -120,27 +120,20 @@ export const AltseasonIndexPanel = () => {
               </div>
 
               {/* ETHBTC Trend */}
-              <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
+              <div className="p-3 rounded-lg bg-muted/50 border border-border/50">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">ETH/BTC Trend</span>
+                  <span className="text-sm text-muted-foreground">ETH/BTC Trend</span>
                   <Badge variant={getTrendBadgeVariant(data.ethbtcTrend)}>
-                    {data.ethbtcTrend === 'Bullish' && '↑ Bullish'}
-                    {data.ethbtcTrend === 'Bearish' && '↓ Bearish'}
-                    {data.ethbtcTrend === 'Neutral' && '→ Neutral'}
+                    {data.ethbtcTrend}
                   </Badge>
                 </div>
               </div>
 
-              {/* BTC Dominance Change */}
-              <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
+              {/* BTC Dominance Arrow */}
+              <div className="p-3 rounded-lg bg-muted/50 border border-border/50">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">BTC Dominance (7d)</span>
-                  <Badge variant="secondary">
-                    → Neutral
-                  </Badge>
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  (Real dominance data not available)
+                  <span className="text-sm text-muted-foreground">BTC Dominance</span>
+                  <span className="text-2xl">{data.dominanceArrow}</span>
                 </div>
               </div>
             </div>

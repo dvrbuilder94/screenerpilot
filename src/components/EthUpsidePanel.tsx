@@ -2,7 +2,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Loader2, TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { getEthUpsideScore } from '@/lib/cryptoSignals';
+import { getEthUpsideScore } from '@/lib/cryptoMetrics';
 
 export const EthUpsidePanel = () => {
   const { data, isLoading, error } = useQuery({
@@ -99,34 +99,45 @@ export const EthUpsidePanel = () => {
               </div>
             </div>
 
-            {/* Factors Analysis */}
-            <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
-              <div className="text-sm font-medium mb-3">Signal Factors</div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Above EMA50</span>
-                  <Badge variant={data.factors.aboveEma50 ? 'default' : 'secondary'}>
-                    {data.factors.aboveEma50 ? '✓ Yes' : '✗ No'}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Above EMA200</span>
-                  <Badge variant={data.factors.aboveEma200 ? 'default' : 'secondary'}>
-                    {data.factors.aboveEma200 ? '✓ Yes' : '✗ No'}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">BB Compressed</span>
-                  <Badge variant={data.factors.compressed ? 'default' : 'secondary'}>
-                    {data.factors.compressed ? '✓ Yes' : '✗ No'}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">RSI Rising (14)</span>
-                  <Badge variant={data.factors.rsiRising ? 'default' : 'secondary'}>
-                    {data.rsi.toFixed(1)} {data.factors.rsiRising ? '↑' : '↓'}
-                  </Badge>
-                </div>
+            {/* Status Tags */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="p-2 rounded bg-muted/30 text-xs text-center">
+                <span className="text-muted-foreground">EMA Trend: </span>
+                <span className="font-medium">{data.emaTrend}</span>
+              </div>
+              <div className="p-2 rounded bg-muted/30 text-xs text-center">
+                <span className="text-muted-foreground">Volatility: </span>
+                <span className="font-medium">{data.volatilityState}</span>
+              </div>
+              <div className="p-2 rounded bg-muted/30 text-xs text-center">
+                <span className="text-muted-foreground">RSI: </span>
+                <span className="font-medium">{data.rsiState}</span>
+              </div>
+              <div className="p-2 rounded bg-muted/30 text-xs text-center">
+                <span className="text-muted-foreground">Slope: </span>
+                <span className="font-medium">{data.slopeSign}</span>
+              </div>
+            </div>
+
+            {/* Signal Factors */}
+            <div className="space-y-2">
+              <div className="text-xs font-medium text-muted-foreground mb-2">Signal Factors</div>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant={data.factors.aboveEma50 ? 'default' : 'secondary'}>
+                  {data.factors.aboveEma50 ? '✓' : '✗'} Above EMA50 (+25)
+                </Badge>
+                <Badge variant={data.factors.aboveEma200 ? 'default' : 'secondary'}>
+                  {data.factors.aboveEma200 ? '✓' : '✗'} Above EMA200 (+25)
+                </Badge>
+                <Badge variant={data.factors.compressed ? 'default' : 'secondary'}>
+                  {data.factors.compressed ? '✓' : '✗'} BB Compressed (+20)
+                </Badge>
+                <Badge variant={data.factors.rsiRising ? 'default' : 'secondary'}>
+                  {data.factors.rsiRising ? '✓' : '✗'} RSI Rising (+20)
+                </Badge>
+                <Badge variant={data.factors.positiveSlope ? 'default' : 'secondary'}>
+                  {data.factors.positiveSlope ? '✓' : '✗'} Positive Slope (+10)
+                </Badge>
               </div>
             </div>
           </div>

@@ -4,6 +4,8 @@ import { CryptoRiskMeter } from '@/components/CryptoRiskMeter';
 import { EthUpsidePanel } from '@/components/EthUpsidePanel';
 import { AltseasonIndexPanel } from '@/components/AltseasonIndexPanel';
 import { DominancePanel } from '@/components/DominancePanel';
+import { FearGreedPanel } from '@/components/FearGreedPanel';
+import { CryptoMacroInsight } from '@/components/CryptoMacroInsight';
 import { useAuth } from '@/contexts/AuthContext';
 import { Lock } from 'lucide-react';
 
@@ -32,6 +34,11 @@ export default function CryptoMacro() {
           </p>
         </div>
 
+        {/* AI Insight */}
+        <div className="mb-6">
+          <CryptoMacroInsight />
+        </div>
+
         {/* Panels Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Original Altseason Index - Full width on mobile, half on desktop */}
@@ -49,18 +56,23 @@ export default function CryptoMacro() {
             <CryptoRiskMeter />
           </div>
 
-          {/* NEW: ETH Upside Probability */}
+          {/* ETH Upside Probability */}
           <div className="lg:col-span-1">
             <EthUpsidePanel />
           </div>
 
-          {/* NEW: Advanced Altseason Index */}
+          {/* Advanced Altseason Index */}
           <div className="lg:col-span-1">
             <AltseasonIndexPanel />
           </div>
 
-          {/* NEW: BTC Dominance Panel - Full width */}
-          <div className="lg:col-span-2">
+          {/* Fear & Greed Index */}
+          <div className="lg:col-span-1">
+            <FearGreedPanel />
+          </div>
+
+          {/* BTC Dominance Panel - takes remaining space */}
+          <div className="lg:col-span-1">
             <DominancePanel />
           </div>
         </div>

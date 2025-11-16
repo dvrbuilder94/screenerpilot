@@ -9,5 +9,8 @@ verify_jwt = false
 [functions.trading-ai-chat]
 verify_jwt = true
 
+[functions.crypto-insight]
+verify_jwt = false
+
 [functions.market-collector]
 verify_jwt = false

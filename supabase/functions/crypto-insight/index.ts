@@ -1,9 +1,47 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation schema
+const requestSchema = z.object({
+  ethUpsideScore: z.number().min(0).max(100),
+  altseasonIndex: z.number().min(0).max(100),
+  dominanceChange: z.number().min(-100).max(100),
+  fearGreedValue: z.number().min(0).max(100)
+});
+
+// Simple IP-based rate limiter (10 requests per hour per IP)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 10;
+const RATE_WINDOW = 60 * 60 * 1000; // 1 hour
+
+function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+  
+  // Clean up expired entries
+  if (record && now > record.resetTime) {
+    rateLimitMap.delete(ip);
+  }
+  
+  const current = rateLimitMap.get(ip);
+  
+  if (!current) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_WINDOW });
+    return { allowed: true, remaining: RATE_LIMIT - 1 };
+  }
+  
+  if (current.count >= RATE_LIMIT) {
+    return { allowed: false, remaining: 0 };
+  }
+  
+  current.count++;
+  return { allowed: true, remaining: RATE_LIMIT - current.count };
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -11,7 +49,42 @@ serve(async (req) => {
   }
 
   try {
-    const { ethUpsideScore, altseasonIndex, dominanceChange, fearGreedValue } = await req.json();
+    // Rate limiting by IP
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+    const rateLimit = checkRateLimit(ip);
+    
+    if (!rateLimit.allowed) {
+      console.warn(`Rate limit exceeded for IP: ${ip}`);
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+        { 
+          status: 429, 
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json",
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": String(Date.now() + RATE_WINDOW)
+          } 
+        }
+      );
+    }
+
+    // Validate input
+    const body = await req.json();
+    const validationResult = requestSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      console.error('Validation failed:', validationResult.error);
+      return new Response(
+        JSON.stringify({ error: "Invalid request parameters" }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+    
+    const { ethUpsideScore, altseasonIndex, dominanceChange, fearGreedValue } = validationResult.data;
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -66,7 +139,13 @@ Keep it neutral, no investment advice. Be brief and professional.`;
 
     return new Response(
       JSON.stringify({ insight }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { 
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "application/json",
+          "X-RateLimit-Remaining": String(rateLimit.remaining)
+        } 
+      }
     );
   } catch (error) {
     console.error("Error generating insight:", error);

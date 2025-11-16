@@ -1,4 +1,3 @@
-import { AltseasonPanel } from '@/components/AltseasonPanel';
 import { EthVsBtcPanel } from '@/components/EthVsBtcPanel';
 import { CryptoRiskMeter } from '@/components/CryptoRiskMeter';
 import { EthUpsidePanel } from '@/components/EthUpsidePanel';
@@ -41,11 +40,6 @@ export default function CryptoMacro() {
 
         {/* Panels Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Original Altseason Index - Full width on mobile, half on desktop */}
-          <div className="lg:col-span-2">
-            <AltseasonPanel />
-          </div>
-
           {/* ETH vs BTC */}
           <div className="lg:col-span-1">
             <EthVsBtcPanel />
@@ -61,7 +55,7 @@ export default function CryptoMacro() {
             <EthUpsidePanel />
           </div>
 
-          {/* Advanced Altseason Index */}
+          {/* Altseason Index */}
           <div className="lg:col-span-1">
             <AltseasonIndexPanel />
           </div>
@@ -71,7 +65,7 @@ export default function CryptoMacro() {
             <FearGreedPanel />
           </div>
 
-          {/* BTC Dominance Panel - takes remaining space */}
+          {/* BTC Dominance Panel */}
           <div className="lg:col-span-1">
             <DominancePanel />
           </div>

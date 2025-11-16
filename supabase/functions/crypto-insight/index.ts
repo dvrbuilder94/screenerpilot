@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { ethUpsideScore, altseasonIndex, dominanceRegime, fearGreedValue } = await req.json();
+    const { ethUpsideScore, altseasonIndex, dominanceChange, fearGreedValue } = await req.json();
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -21,7 +21,7 @@ serve(async (req) => {
     const systemPrompt = `You are a neutral crypto market analyst. Generate a concise insight (max 25 words) based on the following metrics:
 - ETH Upside Score: ${ethUpsideScore}/100
 - Altseason Index: ${altseasonIndex}/100
-- Dominance Regime: ${dominanceRegime}
+- Dominance Change (7d): ${dominanceChange > 0 ? '+' : ''}${dominanceChange.toFixed(2)}%
 - Fear & Greed: ${fearGreedValue}/100
 
 Keep it neutral, no investment advice, and MUST end with a question. Be brief and professional.`;

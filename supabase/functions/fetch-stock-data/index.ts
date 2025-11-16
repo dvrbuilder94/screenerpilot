@@ -18,22 +18,67 @@ const requestSchema = z.object({
   })
 });
 
+// IP-based rate limiter (100 requests per hour per IP)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 100;
+const RATE_WINDOW = 60 * 60 * 1000; // 1 hour
+
+function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+  
+  if (record && now > record.resetTime) {
+    rateLimitMap.delete(ip);
+  }
+  
+  const current = rateLimitMap.get(ip);
+  
+  if (!current) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_WINDOW });
+    return { allowed: true, remaining: RATE_LIMIT - 1 };
+  }
+  
+  if (current.count >= RATE_LIMIT) {
+    return { allowed: false, remaining: 0 };
+  }
+  
+  current.count++;
+  return { allowed: true, remaining: RATE_LIMIT - current.count };
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Public function - no authentication required for basic stock data
+    // IP-based rate limiting
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+    const rateLimit = checkRateLimit(ip);
+    
+    if (!rateLimit.allowed) {
+      console.warn(`Rate limit exceeded for IP: ${ip}`);
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+        { 
+          status: 429, 
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json",
+            "X-RateLimit-Remaining": "0"
+          } 
+        }
+      );
+    }
 
     // Validate input
     const body = await req.json();
     const validationResult = requestSchema.safeParse(body);
     
     if (!validationResult.success) {
+      console.error('Validation failed:', validationResult.error);
       return new Response(JSON.stringify({ 
-        error: 'Invalid input', 
-        details: validationResult.error.issues 
+        error: 'Invalid request parameters'
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

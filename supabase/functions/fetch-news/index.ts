@@ -39,6 +39,34 @@ const TIER_LIMITS = {
   premium: 1000
 };
 
+// Anonymous IP-based rate limiter (20 requests per hour per IP)
+const anonRateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const ANON_RATE_LIMIT = 20;
+const RATE_WINDOW = 60 * 60 * 1000; // 1 hour
+
+function checkAnonRateLimit(ip: string): { allowed: boolean; remaining: number } {
+  const now = Date.now();
+  const record = anonRateLimitMap.get(ip);
+  
+  if (record && now > record.resetTime) {
+    anonRateLimitMap.delete(ip);
+  }
+  
+  const current = anonRateLimitMap.get(ip);
+  
+  if (!current) {
+    anonRateLimitMap.set(ip, { count: 1, resetTime: now + RATE_WINDOW });
+    return { allowed: true, remaining: ANON_RATE_LIMIT - 1 };
+  }
+  
+  if (current.count >= ANON_RATE_LIMIT) {
+    return { allowed: false, remaining: 0 };
+  }
+  
+  current.count++;
+  return { allowed: true, remaining: ANON_RATE_LIMIT - current.count };
+}
+
 async function checkAndIncrementRateLimit(
   supabase: any,
   userId: string,
@@ -113,9 +141,9 @@ serve(async (req) => {
     const validationResult = requestSchema.safeParse(body);
     
     if (!validationResult.success) {
+      console.error('Validation failed:', validationResult.error);
       return new Response(JSON.stringify({ 
-        error: 'Invalid input', 
-        details: validationResult.error.issues 
+        error: 'Invalid request parameters'
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -124,11 +152,41 @@ serve(async (req) => {
 
     const { symbol } = validationResult.data;
 
-    // Check rate limit only for authenticated users
+    // Check rate limit
     let rateLimitCheck = { allowed: true, remaining: 999 };
     
     if (user) {
+      // Authenticated user - use tier-based rate limiting
       rateLimitCheck = await checkAndIncrementRateLimit(supabase, user.id, tier, 'fetch-news');
+      
+      if (!rateLimitCheck.allowed) {
+        return new Response(JSON.stringify({ 
+          error: 'Rate limit exceeded', 
+          tier,
+          limit: TIER_LIMITS[tier as keyof typeof TIER_LIMITS]
+        }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+    } else {
+      // Anonymous user - use IP-based rate limiting
+      const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+      rateLimitCheck = checkAnonRateLimit(ip);
+      
+      if (!rateLimitCheck.allowed) {
+        console.warn(`Anonymous rate limit exceeded for IP: ${ip}`);
+        return new Response(JSON.stringify({ 
+          error: 'Rate limit exceeded. Please try again later.'
+        }), {
+          status: 429,
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json',
+            'X-RateLimit-Remaining': '0'
+          }
+        });
+      }
     }
 
     if (!rateLimitCheck.allowed) {

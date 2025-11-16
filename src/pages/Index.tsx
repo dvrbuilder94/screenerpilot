@@ -38,6 +38,7 @@ import { TradingSetup, EnhancedSignal } from "@/types/trading";
 import { TradingStyle, TRADING_PROFILES } from "@/types/tradingProfile";
 import { useLanguage } from "@/contexts/LanguageContext";
 import presets from "@/config/presets.json";
+import { AdBanner } from "@/components/AdBanner";
 
 const STORAGE_KEY = "crypto-dashboard-settings";
 
@@ -445,6 +446,9 @@ export default function Index() {
                 <StockNews symbol={symbol} />
               </div>
             </div>
+
+            {/* Ad Banner */}
+            <AdBanner />
 
             {selectedGroup ? (
               <GroupRanking 

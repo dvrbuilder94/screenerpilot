@@ -322,23 +322,51 @@ export async function getAltseasonIndex(lookbackDays: number = 30): Promise<Alts
 }
 
 // ============================================
-// 3) BTC Dominance Panel (0-100)
+// 3) BTC Dominance Panel (Simplified)
 // ============================================
 
 export interface DominanceData {
   dominance: number;
   change7d: number;
-  rsi: number;
-  regime: 'Risk-On' | 'Neutral' | 'Risk-Off';
 }
 
 export async function getDominanceData(): Promise<DominanceData> {
-  // Using BTC market cap proxy calculation
-  const btcCandles = await fetchCandles('BTCUSDT', '1d', 100);
-  const ethCandles = await fetchCandles('ETHUSDT', '1d', 100);
+  try {
+    // Fetch BTC and total market cap from CoinGecko
+    const response = await fetch('https://api.coingecko.com/api/v3/global');
+    const data = await response.json();
+    
+    if (data.data) {
+      const currentDominance = data.data.market_cap_percentage.btc;
+      
+      // For 7-day change, we'll use a proxy calculation
+      const btcCandles = await fetchCandles('BTCUSDT', '1d', 10);
+      const ethCandles = await fetchCandles('ETHUSDT', '1d', 10);
+      
+      const btcPrice = btcCandles[btcCandles.length - 1].close;
+      const ethPrice = ethCandles[ethCandles.length - 1].close;
+      const btcPrice7d = btcCandles[btcCandles.length - 8].close;
+      const ethPrice7d = ethCandles[ethCandles.length - 8].close;
+      
+      const btcChange = ((btcPrice - btcPrice7d) / btcPrice7d) * 100;
+      const ethChange = ((ethPrice - ethPrice7d) / ethPrice7d) * 100;
+      
+      // Estimate dominance change based on relative performance
+      const change7d = (btcChange - ethChange) * 0.05; // Approximate dominance shift
+      
+      return {
+        dominance: currentDominance,
+        change7d
+      };
+    }
+  } catch (error) {
+    console.error('Failed to fetch dominance data:', error);
+  }
   
-  // Simple dominance proxy: BTC/(BTC+ETH) * 100
-  // This is a simplified version - real dominance would need total market cap
+  // Fallback calculation using BTC/ETH proxy
+  const btcCandles = await fetchCandles('BTCUSDT', '1d', 10);
+  const ethCandles = await fetchCandles('ETHUSDT', '1d', 10);
+  
   const btcPrice = btcCandles[btcCandles.length - 1].close;
   const ethPrice = ethCandles[ethCandles.length - 1].close;
   const btcVolume = btcCandles[btcCandles.length - 1].volume;
@@ -346,9 +374,8 @@ export async function getDominanceData(): Promise<DominanceData> {
   
   const btcMarketWeight = btcPrice * btcVolume;
   const ethMarketWeight = ethPrice * ethVolume;
-  const currentDominance = (btcMarketWeight / (btcMarketWeight + ethMarketWeight * 20)) * 100; // ETH weighted
+  const currentDominance = (btcMarketWeight / (btcMarketWeight + ethMarketWeight * 15)) * 100;
   
-  // Calculate 7 days ago
   const btcPrice7d = btcCandles[btcCandles.length - 8].close;
   const ethPrice7d = ethCandles[ethCandles.length - 8].close;
   const btcVolume7d = btcCandles[btcCandles.length - 8].volume;
@@ -356,40 +383,18 @@ export async function getDominanceData(): Promise<DominanceData> {
   
   const btcMarketWeight7d = btcPrice7d * btcVolume7d;
   const ethMarketWeight7d = ethPrice7d * ethVolume7d;
-  const dominance7d = (btcMarketWeight7d / (btcMarketWeight7d + ethMarketWeight7d * 20)) * 100;
+  const dominance7d = (btcMarketWeight7d / (btcMarketWeight7d + ethMarketWeight7d * 15)) * 100;
   
   const change7d = currentDominance - dominance7d;
   
-  // Create dominance time series for RSI
-  const dominanceSeries: number[] = [];
-  for (let i = 0; i < btcCandles.length; i++) {
-    const btcW = btcCandles[i].close * btcCandles[i].volume;
-    const ethW = ethCandles[i].close * ethCandles[i].volume;
-    dominanceSeries.push((btcW / (btcW + ethW * 20)) * 100);
-  }
-  
-  // Calculate RSI on dominance
-  const rsiValues = calculateRSI(dominanceSeries, 14);
-  const rsi = rsiValues[rsiValues.length - 1];
-  
-  // Determine regime
-  let regime: 'Risk-On' | 'Neutral' | 'Risk-Off' = 'Neutral';
-  if (change7d > 0 && rsi > 55) {
-    regime = 'Risk-Off';
-  } else if (change7d < 0 && rsi < 45) {
-    regime = 'Risk-On';
-  }
-  
   return {
     dominance: currentDominance,
-    change7d,
-    rsi,
-    regime
+    change7d
   };
 }
 
 // ============================================
-// 4) Fear & Greed Index
+// 4) Fear & Greed Index (Real API Data)
 // ============================================
 
 export interface FearGreedData {
@@ -399,38 +404,37 @@ export interface FearGreedData {
 }
 
 export async function getFearGreedIndex(): Promise<FearGreedData> {
-  // Mock implementation - in production, use Alternative.me API or similar
-  // For now, derive from market conditions
-  const ethUpside = await getEthUpsideScore();
-  const altseason = await getAltseasonIndex();
-  const dominance = await getDominanceData();
+  try {
+    // Use Alternative.me Crypto Fear & Greed Index API
+    const response = await fetch('https://api.alternative.me/fng/?limit=1');
+    const data = await response.json();
+    
+    if (data.data && data.data[0]) {
+      const value = parseInt(data.data[0].value);
+      const timestamp = parseInt(data.data[0].timestamp) * 1000;
+      
+      // Determine category based on value
+      let category: 'Extreme Fear' | 'Fear' | 'Neutral' | 'Greed' | 'Extreme Greed';
+      if (value <= 25) category = 'Extreme Fear';
+      else if (value <= 44) category = 'Fear';
+      else if (value <= 54) category = 'Neutral';
+      else if (value <= 74) category = 'Greed';
+      else category = 'Extreme Greed';
+      
+      return {
+        value,
+        category,
+        updatedAt: new Date(timestamp)
+      };
+    }
+  } catch (error) {
+    console.error('Failed to fetch Fear & Greed Index:', error);
+  }
   
-  // Simple formula combining metrics
-  let value = 50; // Start neutral
-  
-  // Adjust based on upside score
-  value += (ethUpside.score - 50) * 0.3;
-  
-  // Adjust based on altseason
-  value += (altseason.index - 50) * 0.2;
-  
-  // Adjust based on dominance regime
-  if (dominance.regime === 'Risk-On') value += 15;
-  if (dominance.regime === 'Risk-Off') value -= 15;
-  
-  value = Math.max(0, Math.min(100, Math.round(value)));
-  
-  // Determine category
-  let category: 'Extreme Fear' | 'Fear' | 'Neutral' | 'Greed' | 'Extreme Greed';
-  if (value <= 25) category = 'Extreme Fear';
-  else if (value <= 44) category = 'Fear';
-  else if (value <= 54) category = 'Neutral';
-  else if (value <= 74) category = 'Greed';
-  else category = 'Extreme Greed';
-  
+  // Fallback to neutral if API fails
   return {
-    value,
-    category,
+    value: 50,
+    category: 'Neutral',
     updatedAt: new Date()
   };
 }

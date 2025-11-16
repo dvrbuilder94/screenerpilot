@@ -16,7 +16,7 @@ async function generateInsight() {
     body: {
       ethUpsideScore: ethUpside.score,
       altseasonIndex: altseason.index,
-      dominanceRegime: dominance.regime,
+      dominanceChange: dominance.change7d,
       fearGreedValue: fearGreed.value
     }
   });

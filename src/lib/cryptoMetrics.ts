@@ -363,33 +363,30 @@ export async function getDominanceData(): Promise<DominanceData> {
     console.error('Failed to fetch dominance data:', error);
   }
   
-  // Fallback calculation using BTC/ETH proxy
+  // Fallback: use historical average BTC dominance (~55-58%) with slight variation
   const btcCandles = await fetchCandles('BTCUSDT', '1d', 10);
   const ethCandles = await fetchCandles('ETHUSDT', '1d', 10);
   
   const btcPrice = btcCandles[btcCandles.length - 1].close;
   const ethPrice = ethCandles[ethCandles.length - 1].close;
-  const btcVolume = btcCandles[btcCandles.length - 1].volume;
-  const ethVolume = ethCandles[ethCandles.length - 1].volume;
-  
-  const btcMarketWeight = btcPrice * btcVolume;
-  const ethMarketWeight = ethPrice * ethVolume;
-  const currentDominance = (btcMarketWeight / (btcMarketWeight + ethMarketWeight * 15)) * 100;
-  
   const btcPrice7d = btcCandles[btcCandles.length - 8].close;
   const ethPrice7d = ethCandles[ethCandles.length - 8].close;
-  const btcVolume7d = btcCandles[btcCandles.length - 8].volume;
-  const ethVolume7d = ethCandles[ethCandles.length - 8].volume;
   
-  const btcMarketWeight7d = btcPrice7d * btcVolume7d;
-  const ethMarketWeight7d = ethPrice7d * ethVolume7d;
-  const dominance7d = (btcMarketWeight7d / (btcMarketWeight7d + ethMarketWeight7d * 15)) * 100;
+  const btcChange = ((btcPrice - btcPrice7d) / btcPrice7d) * 100;
+  const ethChange = ((ethPrice - ethPrice7d) / ethPrice7d) * 100;
   
-  const change7d = currentDominance - dominance7d;
+  // Base dominance around historical average (57%)
+  const baseDominance = 57;
+  // Adjust based on relative performance (if BTC outperforms, dominance increases)
+  const relativePerformance = btcChange - ethChange;
+  const currentDominance = baseDominance + (relativePerformance * 0.1);
+  
+  // Estimate 7-day change
+  const change7d = relativePerformance * 0.05;
   
   return {
-    dominance: currentDominance,
-    change7d
+    dominance: Math.max(50, Math.min(65, currentDominance)), // Keep within realistic range 50-65%
+    change7d: Math.max(-5, Math.min(5, change7d)) // Keep change within -5% to +5%
   };
 }
 
@@ -431,10 +428,51 @@ export async function getFearGreedIndex(): Promise<FearGreedData> {
     console.error('Failed to fetch Fear & Greed Index:', error);
   }
   
-  // Fallback to neutral if API fails
-  return {
-    value: 50,
-    category: 'Neutral',
-    updatedAt: new Date()
-  };
+  // Fallback: estimate sentiment based on recent BTC price action
+  try {
+    const btcCandles = await fetchCandles('BTCUSDT', '1d', 30);
+    const recentCandles = btcCandles.slice(-7); // Last 7 days
+    
+    // Calculate price change
+    const startPrice = recentCandles[0].close;
+    const endPrice = recentCandles[recentCandles.length - 1].close;
+    const priceChange = ((endPrice - startPrice) / startPrice) * 100;
+    
+    // Calculate volatility
+    let sumSquaredDiff = 0;
+    const avgPrice = recentCandles.reduce((sum, c) => sum + c.close, 0) / recentCandles.length;
+    recentCandles.forEach(c => {
+      sumSquaredDiff += Math.pow(c.close - avgPrice, 2);
+    });
+    const volatility = Math.sqrt(sumSquaredDiff / recentCandles.length) / avgPrice * 100;
+    
+    // Estimate fear & greed (50 = neutral baseline)
+    let value = 50;
+    value += priceChange * 2; // Price up = more greed, price down = more fear
+    value -= volatility * 5; // High volatility = more fear
+    
+    // Clamp between 0-100
+    value = Math.max(0, Math.min(100, value));
+    
+    let category: 'Extreme Fear' | 'Fear' | 'Neutral' | 'Greed' | 'Extreme Greed';
+    if (value <= 25) category = 'Extreme Fear';
+    else if (value <= 44) category = 'Fear';
+    else if (value <= 54) category = 'Neutral';
+    else if (value <= 74) category = 'Greed';
+    else category = 'Extreme Greed';
+    
+    return {
+      value: Math.round(value),
+      category,
+      updatedAt: new Date()
+    };
+  } catch (fallbackError) {
+    console.error('Fallback calculation failed:', fallbackError);
+    // Last resort fallback
+    return {
+      value: 50,
+      category: 'Neutral',
+      updatedAt: new Date()
+    };
+  }
 }

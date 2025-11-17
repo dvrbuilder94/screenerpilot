@@ -1,4 +1,4 @@
-import { Home, BarChart3, Megaphone, Trophy } from "lucide-react";
+import { Home, BarChart3, Megaphone, Trophy, Coins } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import {
   Sidebar,
@@ -27,6 +27,11 @@ const menuItems = [
     title: "Achievements",
     url: "/achievements",
     icon: Trophy,
+  },
+  {
+    title: "AlexAI Presale",
+    url: "/alexai-presale",
+    icon: Coins,
   },
   {
     title: "Advertise With Us",

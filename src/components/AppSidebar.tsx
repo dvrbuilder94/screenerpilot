@@ -1,4 +1,4 @@
-import { Home, BarChart3, Megaphone } from "lucide-react";
+import { Home, BarChart3, Megaphone, Trophy } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import {
   Sidebar,
@@ -22,6 +22,11 @@ const menuItems = [
     title: "Crypto Macro",
     url: "/crypto-macro",
     icon: BarChart3,
+  },
+  {
+    title: "Achievements",
+    url: "/achievements",
+    icon: Trophy,
   },
   {
     title: "Advertise With Us",

@@ -41,16 +41,31 @@ export default function StockNews({ symbol }: StockNewsProps) {
         body: { symbol }
       });
 
-      if (functionError) throw functionError;
+      if (functionError) {
+        // Check if it's a quota/rate limit error
+        const errorMessage = functionError.message || '';
+        if (errorMessage.includes('402') || errorMessage.includes('usage_limit') || errorMessage.includes('rate limit')) {
+          setError('quota_exceeded');
+          return;
+        }
+        throw functionError;
+      }
       
-      if (data.articles && data.articles.length > 0) {
+      if (data?.articles && data.articles.length > 0) {
         setArticles(data.articles);
+      } else if (data?.error && (data.error.includes('402') || data.error.includes('usage_limit'))) {
+        setError('quota_exceeded');
       } else {
-        setError('No news available');
+        setError('no_news');
       }
     } catch (err: any) {
       console.error('Error fetching news:', err);
-      setError(err.message || 'Failed to load news');
+      const errorMessage = err.message || '';
+      if (errorMessage.includes('402') || errorMessage.includes('usage_limit') || errorMessage.includes('rate limit')) {
+        setError('quota_exceeded');
+      } else {
+        setError('error');
+      }
     } finally {
       setLoading(false);
     }
@@ -91,8 +106,29 @@ export default function StockNews({ symbol }: StockNewsProps) {
       )}
 
       {error && (
-        <div className="text-center py-4 text-muted-foreground">
-          <p className="text-sm">{error}</p>
+        <div className="text-center py-6 text-muted-foreground">
+          {error === 'quota_exceeded' ? (
+            <div className="space-y-2">
+              <p className="text-sm font-medium">
+                {language === 'en' 
+                  ? 'News service temporarily unavailable' 
+                  : 'Servicio de noticias temporalmente no disponible'}
+              </p>
+              <p className="text-xs opacity-70">
+                {language === 'en' 
+                  ? 'API quota exceeded. News will be available again soon.' 
+                  : 'Cuota de API excedida. Las noticias estarán disponibles pronto.'}
+              </p>
+            </div>
+          ) : error === 'no_news' ? (
+            <p className="text-sm">
+              {language === 'en' ? 'No news available' : 'No hay noticias disponibles'}
+            </p>
+          ) : (
+            <p className="text-sm">
+              {language === 'en' ? 'Unable to load news' : 'No se pudieron cargar las noticias'}
+            </p>
+          )}
         </div>
       )}
 

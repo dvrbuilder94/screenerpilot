@@ -42,7 +42,7 @@ export const EthVsBtcPanel = () => {
 
         {data && (
           <div className="space-y-6">
-            {/* Comparación lado a lado */}
+            {/* Side-by-side comparison */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* BTC */}
               <div className={`p-4 rounded-lg border ${data.winner === 'BTC' ? 'border-bullish/50 bg-bullish/5' : 'border-border/50 bg-muted/30'}`}>

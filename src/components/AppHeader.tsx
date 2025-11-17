@@ -2,6 +2,8 @@ import { TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AccountDropdown } from "./AccountDropdown";
 import { SidebarTrigger } from "./ui/sidebar";
+import GamificationBadge from "./GamificationBadge";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const AppHeader = () => {
   return (
@@ -20,8 +22,11 @@ export const AppHeader = () => {
           </Link>
         </div>
 
-        {/* Right section: Account */}
-        <AccountDropdown />
+        {/* Right section: Gamification + Account */}
+        <div className="flex items-center gap-4">
+          {useAuth().user && <GamificationBadge />}
+          <AccountDropdown />
+        </div>
       </div>
     </header>
   );

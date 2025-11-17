@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import Pricing from "./pages/Pricing";
 import CryptoMacro from "./pages/CryptoMacro";
 import Advertise from "./pages/Advertise";
+import Achievements from "./pages/Achievements";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/crypto-macro" element={<CryptoMacro />} />
                 <Route path="/advertise" element={<Advertise />} />
+                <Route path="/achievements" element={<Achievements />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

@@ -254,11 +254,18 @@ function calculateTargets(
 ): number[] | undefined {
   if (trend === 'NEUTRAL') return undefined;
 
-  const multiplier = trend === 'BULLISH' ? 1 : -1;
-  
-  return [
-    price + (atr * 2 * multiplier),  // Target 1: 2x ATR
-    price + (atr * 4 * multiplier),  // Target 2: 4x ATR
-    price + (atr * 6 * multiplier),  // Target 3: 6x ATR
-  ];
+  if (trend === 'BULLISH') {
+    return [
+      price + (atr * 2),  // Target 1: 2x ATR above
+      price + (atr * 4),  // Target 2: 4x ATR above
+      price + (atr * 6),  // Target 3: 6x ATR above
+    ];
+  } else {
+    // BEARISH: targets should be below current price
+    return [
+      price - (atr * 2),  // Target 1: 2x ATR below
+      price - (atr * 4),  // Target 2: 4x ATR below
+      price - (atr * 6),  // Target 3: 6x ATR below
+    ];
+  }
 }

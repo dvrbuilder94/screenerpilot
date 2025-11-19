@@ -1,5 +1,11 @@
 {
-  "crypto": ["BTCUSDT", "ETHUSDT"],
+  "crypto": [
+    "BTCUSDT", "ETHUSDT", "XRPUSDT", "BNBUSDT", "SOLUSDT", 
+    "ADAUSDT", "DOGEUSDT", "TRXUSDT", "AVAXUSDT", "LINKUSDT",
+    "DOTUSDT", "MATICUSDT", "UNIUSDT", "LTCUSDT", "XLMUSDT",
+    "ATOMUSDT", "FILUSDT", "NEARUSDT", "APTUSDT", "SUIUSDT",
+    "CRVUSDT", "AAVEUSDT", "XRPUSDT", "EIGENUSDT", "RNDRUSDT"
+  ],
   "groups": {
     "magnificent_seven": ["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "TSLA"]
   },

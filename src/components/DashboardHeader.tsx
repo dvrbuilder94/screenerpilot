@@ -4,9 +4,6 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RefreshCw } from "lucide-react";
 import { Symbol, Interval, AssetType, GroupKey, getSymbolsByType, getPresets } from "@/lib/binanceApi";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { translations } from "@/lib/translations";
-import { LanguageToggle } from "./LanguageToggle";
 
 interface DashboardHeaderProps {
   symbol: Symbol | null;
@@ -41,30 +38,24 @@ export default function DashboardHeader({
   onAutoRefreshChange,
   onRefresh,
 }: DashboardHeaderProps) {
-  const { language } = useLanguage();
-  const t = translations[language];
   const presets = getPresets();
   const symbols = getSymbolsByType(assetType);
   
   return (
-    <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-4 shadow-lg">
+    <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <LanguageToggle />
-        </div>
-
         <div className="flex flex-wrap items-center gap-4">
           {/* Asset Type selector */}
           <div className="flex flex-col gap-2">
-            <Label className="text-xs text-muted-foreground">{t.assetType}</Label>
+            <Label className="text-xs text-muted-foreground">Asset Type</Label>
             <Select value={assetType} onValueChange={(v) => onAssetTypeChange(v as AssetType)}>
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="crypto">{t.crypto}</SelectItem>
+                <SelectItem value="crypto">Crypto</SelectItem>
                 <SelectItem value="stock">Stocks</SelectItem>
-                <SelectItem value="index">{language === 'es' ? 'Índices' : 'Indices'}</SelectItem>
+                <SelectItem value="index">Indices</SelectItem>
                 <SelectItem value="etf">ETFs</SelectItem>
               </SelectContent>
             </Select>
@@ -73,7 +64,7 @@ export default function DashboardHeader({
           {/* Group selector (only for stocks) */}
           {assetType === 'stock' && (
             <div className="flex flex-col gap-2">
-              <Label className="text-xs text-muted-foreground">{language === 'es' ? 'Grupo' : 'Group'}</Label>
+              <Label className="text-xs text-muted-foreground">Group</Label>
               <Select 
                 value={selectedGroup || "none"} 
                 onValueChange={(v) => onGroupChange(v === "none" ? null : v as GroupKey)}
@@ -82,7 +73,7 @@ export default function DashboardHeader({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">{language === 'es' ? 'Símbolo individual' : 'Individual Symbol'}</SelectItem>
+                  <SelectItem value="none">Individual Symbol</SelectItem>
                   <SelectItem value="magnificent_seven">Magnificent Seven</SelectItem>
                 </SelectContent>
               </Select>
@@ -92,7 +83,7 @@ export default function DashboardHeader({
           {/* Symbol selector (only when no group selected) */}
           {!selectedGroup && (
             <div className="flex flex-col gap-2">
-              <Label className="text-xs text-muted-foreground">{language === 'es' ? 'Símbolo' : 'Symbol'}</Label>
+              <Label className="text-xs text-muted-foreground">Symbol</Label>
               <Select value={symbol || ""} onValueChange={(v) => onSymbolChange(v as Symbol)}>
                 <SelectTrigger className="w-32">
                   <SelectValue />
@@ -110,28 +101,28 @@ export default function DashboardHeader({
 
           {/* Macro timeframe */}
           <div className="flex flex-col gap-2">
-            <Label className="text-xs text-muted-foreground">{t.macro} ({t.trend})</Label>
+            <Label className="text-xs text-muted-foreground">Macro (Trend)</Label>
             <Select value={macroInterval} onValueChange={(v) => onMacroIntervalChange(v as Interval)}>
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1d">{t['1d']}</SelectItem>
-                <SelectItem value="1w">{t['1w']}</SelectItem>
+                <SelectItem value="1d">1 Day</SelectItem>
+                <SelectItem value="1w">1 Week</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* Micro timeframe */}
           <div className="flex flex-col gap-2">
-            <Label className="text-xs text-muted-foreground">{language === 'es' ? 'Micro (Operativa)' : 'Micro (Execution)'}</Label>
+            <Label className="text-xs text-muted-foreground">Micro (Execution)</Label>
             <Select value={microInterval} onValueChange={(v) => onMicroIntervalChange(v as Interval)}>
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1h">{t['1h']}</SelectItem>
-                <SelectItem value="4h">{t['4h']}</SelectItem>
+                <SelectItem value="1h">1 Hour</SelectItem>
+                <SelectItem value="4h">4 Hours</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -144,7 +135,7 @@ export default function DashboardHeader({
               onCheckedChange={onAutoRefreshChange}
             />
             <Label htmlFor="auto-refresh" className="text-sm cursor-pointer">
-              {t.autoRefresh} 60s
+              Auto-refresh 60s
             </Label>
           </div>
 
@@ -156,7 +147,7 @@ export default function DashboardHeader({
             size="lg"
           >
             <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-            {t.refresh}
+            Refresh
           </Button>
         </div>
       </div>

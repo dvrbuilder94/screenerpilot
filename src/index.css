@@ -4,78 +4,78 @@
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
+Fintech White Clean Design
 */
 
 @layer base {
   :root {
-    /* Base colors - Ultra deep sophisticated background */
-    --background: 230 25% 6%;
-    --foreground: 210 40% 98%;
+    /* Base colors - Clean white fintech style */
+    --background: 0 0% 98%;
+    --foreground: 220 20% 15%;
     
-    /* Card colors - Elevated surfaces with refined contrast */
-    --card: 228 22% 10%;
-    --card-foreground: 210 40% 98%;
+    /* Card colors - Pure white with subtle elevation */
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 15%;
     
     /* Popover colors */
-    --popover: 228 22% 10%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 15%;
     
-    /* Primary colors - Electric blue with rich saturation */
-    --primary: 215 95% 62%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary colors - Professional blue */
+    --primary: 215 90% 50%;
+    --primary-foreground: 0 0% 100%;
     
-    /* Secondary colors - Sophisticated slate with depth */
-    --secondary: 220 18% 22%;
-    --secondary-foreground: 210 40% 98%;
+    /* Secondary colors - Light gray */
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 20% 15%;
     
-    /* Muted colors - Refined balanced neutrals */
-    --muted: 220 16% 16%;
-    --muted-foreground: 215 15% 60%;
+    /* Muted colors - Subtle grays */
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 10% 45%;
     
-    /* Accent colors - Vibrant cyan with energy */
-    --accent: 185 90% 58%;
-    --accent-foreground: 230 25% 6%;
+    /* Accent colors - Subtle blue accent */
+    --accent: 215 90% 95%;
+    --accent-foreground: 215 90% 50%;
     
     /* Destructive colors - Refined red */
-    --destructive: 0 72% 62%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
     
-    /* Border colors - Ultra refined subtle borders */
-    --border: 220 20% 18%;
-    --input: 220 20% 18%;
-    --ring: 215 95% 62%;
+    /* Border colors - Very subtle borders */
+    --border: 220 14% 90%;
+    --input: 220 14% 90%;
+    --ring: 215 90% 50%;
     
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    /* Premium Trading colors with more vibrancy */
-    --bullish: 158 70% 50%;
-    --bullish-light: 158 70% 62%;
-    --bullish-foreground: 210 40% 98%;
+    /* Trading colors - Refined and professional */
+    --bullish: 145 60% 42%;
+    --bullish-light: 145 60% 95%;
+    --bullish-foreground: 0 0% 100%;
     
-    --bearish: 0 72% 62%;
-    --bearish-light: 0 72% 72%;
-    --bearish-foreground: 210 40% 98%;
+    --bearish: 0 70% 55%;
+    --bearish-light: 0 70% 95%;
+    --bearish-foreground: 0 0% 100%;
     
-    --neutral: 220 15% 60%;
-    --neutral-light: 220 20% 70%;
-    --neutral-foreground: 230 25% 6%;
+    --neutral: 220 10% 55%;
+    --neutral-light: 220 10% 95%;
+    --neutral-foreground: 0 0% 100%;
 
-    /* Premium gradients with more depth */
-    --gradient-primary: linear-gradient(135deg, hsl(215 95% 62%), hsl(185 90% 58%));
-    --gradient-bullish: linear-gradient(135deg, hsl(158 70% 50%), hsl(158 70% 62%));
-    --gradient-bearish: linear-gradient(135deg, hsl(0 72% 62%), hsl(0 72% 72%));
-    --gradient-subtle: linear-gradient(180deg, hsl(228 22% 10%), hsl(228 22% 8%));
-    --gradient-premium: linear-gradient(135deg, hsl(215 95% 62%), hsl(185 90% 58%));
+    /* Clean subtle gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(215 90% 50%), hsl(215 90% 60%));
+    --gradient-bullish: linear-gradient(135deg, hsl(145 60% 42%), hsl(145 60% 52%));
+    --gradient-bearish: linear-gradient(135deg, hsl(0 70% 55%), hsl(0 70% 65%));
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(220 14% 98%));
 
-    /* Sophisticated shadows with more presence */
-    --shadow-glow: 0 0 50px hsl(215 95% 62% / 0.35);
-    --shadow-glow-bullish: 0 0 35px hsl(158 70% 50% / 0.3);
-    --shadow-glow-bearish: 0 0 35px hsl(0 72% 62% / 0.3);
-    --shadow-elevated: 0 12px 48px -14px hsl(230 25% 3% / 0.6);
-    --shadow-card: 0 8px 32px -10px hsl(230 25% 3% / 0.5);
+    /* Professional shadows */
+    --shadow-glow: 0 0 20px hsl(215 90% 50% / 0.15);
+    --shadow-glow-bullish: 0 0 15px hsl(145 60% 42% / 0.15);
+    --shadow-glow-bearish: 0 0 15px hsl(0 70% 55% / 0.15);
+    --shadow-elevated: 0 4px 20px -4px hsl(220 20% 15% / 0.08);
+    --shadow-card: 0 1px 3px hsl(220 20% 15% / 0.06), 0 1px 2px hsl(220 20% 15% / 0.04);
 
-    /* Buttery smooth transitions */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Smooth transitions */
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
@@ -89,22 +89,22 @@ All colors MUST be HSL.
     @apply bg-background text-foreground font-sans antialiased;
   }
 
-  /* Scrollbar styling */
+  /* Scrollbar styling - Subtle */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-secondary;
+    @apply bg-transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground rounded-lg;
+    @apply bg-border rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-primary;
+    @apply bg-muted-foreground/30;
   }
 }
 
@@ -120,11 +120,11 @@ All colors MUST be HSL.
   }
 
   .shadow-glow-bullish {
-    box-shadow: var(--shadow-bullish);
+    box-shadow: var(--shadow-glow-bullish);
   }
 
   .shadow-glow-bearish {
-    box-shadow: var(--shadow-bearish);
+    box-shadow: var(--shadow-glow-bearish);
   }
 
   .transition-smooth {

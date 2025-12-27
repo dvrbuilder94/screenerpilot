@@ -110,23 +110,19 @@ export default function StockNews({ symbol }: StockNewsProps) {
           {error === 'quota_exceeded' ? (
             <div className="space-y-2">
               <p className="text-sm font-medium">
-                {language === 'en' 
-                  ? 'News service temporarily unavailable' 
-                  : 'Servicio de noticias temporalmente no disponible'}
+                News service temporarily unavailable
               </p>
               <p className="text-xs opacity-70">
-                {language === 'en' 
-                  ? 'API quota exceeded. News will be available again soon.' 
-                  : 'Cuota de API excedida. Las noticias estarán disponibles pronto.'}
+                API quota exceeded. News will be available again soon.
               </p>
             </div>
           ) : error === 'no_news' ? (
             <p className="text-sm">
-              {language === 'en' ? 'No news available' : 'No hay noticias disponibles'}
+              No news available
             </p>
           ) : (
             <p className="text-sm">
-              {language === 'en' ? 'Unable to load news' : 'No se pudieron cargar las noticias'}
+              Unable to load news
             </p>
           )}
         </div>

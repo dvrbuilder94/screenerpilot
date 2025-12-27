@@ -6,6 +6,20 @@
     "ATOMUSDT", "FILUSDT", "NEARUSDT", "APTUSDT", "SUIUSDT",
     "CRVUSDT", "AAVEUSDT", "EIGENUSDT", "RNDRUSDT"
   ],
+  "metals": [
+    "XAUUSD", "XAGUSD", "XPTUSD", "XPDUSD", "XCUUSD"
+  ],
+  "rare_earths": [
+    "MP", "LYSCF", "ILHMF", "REMX"
+  ],
+  "commodity_ratios": [
+    { "name": "Copper/Gold", "numerator": "HG=F", "denominator": "GC=F" },
+    { "name": "Gold/Silver", "numerator": "GC=F", "denominator": "SI=F" },
+    { "name": "Silver/Oil", "numerator": "SI=F", "denominator": "CL=F" },
+    { "name": "Gold/Oil", "numerator": "GC=F", "denominator": "CL=F" },
+    { "name": "Platinum/Gold", "numerator": "PL=F", "denominator": "GC=F" },
+    { "name": "Palladium/Gold", "numerator": "PA=F", "denominator": "GC=F" }
+  ],
   "groups": {
     "magnificent_seven": ["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "TSLA"]
   },

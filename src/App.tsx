@@ -8,11 +8,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import Pricing from "./pages/Pricing";
 import CryptoMacro from "./pages/CryptoMacro";
-import Advertise from "./pages/Advertise";
-import Achievements from "./pages/Achievements";
-import AlexAIPresale from "./pages/AlexAIPresale";
+import CommodityRatios from "./pages/CommodityRatios";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,11 +26,8 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/pricing" element={<Pricing />} />
                 <Route path="/crypto-macro" element={<CryptoMacro />} />
-                <Route path="/advertise" element={<Advertise />} />
-                <Route path="/achievements" element={<Achievements />} />
-                <Route path="/alexai-presale" element={<AlexAIPresale />} />
+                <Route path="/commodity-ratios" element={<CommodityRatios />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

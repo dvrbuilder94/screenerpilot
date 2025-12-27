@@ -12,8 +12,8 @@ export interface SentimentData {
 }
 
 export interface SentimentImpact {
-  scoreModifier: number;    // Ajuste al score base (-3 a +3)
-  confidenceModifier: number; // Ajuste a la confianza (-20 a +20)
+  scoreModifier: number;    // Adjustment to base score (-3 to +3)
+  confidenceModifier: number; // Adjustment to confidence (-20 to +20)
   warning?: string;
 }
 
@@ -31,43 +31,43 @@ export function getSentimentImpact(
 ): SentimentImpact {
   const { level, score } = sentiment;
 
-  // Lógica contrarian: miedo extremo puede ser oportunidad de compra
+  // Contrarian logic: extreme fear may be a buying opportunity
   if (level === 'extreme_fear' && signalType === 'bullish') {
     return {
       scoreModifier: 2,
       confidenceModifier: 15,
-      warning: '💡 Sentimiento de miedo extremo - posible oportunidad contrarian',
+      warning: '💡 Extreme fear sentiment - possible contrarian opportunity',
     };
   }
 
-  // Euforia extrema: ser cauteloso con compras
+  // Extreme euphoria: be cautious with buys
   if (level === 'extreme_greed' && signalType === 'bullish') {
     return {
       scoreModifier: -2,
       confidenceModifier: -15,
-      warning: '⚠️ Euforia extrema - precaución con nuevas entradas alcistas',
+      warning: '⚠️ Extreme euphoria - caution with new bullish entries',
     };
   }
 
-  // Miedo extremo y señal bajista: puede estar sobreextendido
+  // Extreme fear with bearish signal: may be overextended
   if (level === 'extreme_fear' && signalType === 'bearish') {
     return {
       scoreModifier: -1,
       confidenceModifier: -10,
-      warning: '⚠️ Ya hay miedo extremo - cuidado con shorts en suelo',
+      warning: '⚠️ Already extreme fear - caution with shorts at bottom',
     };
   }
 
-  // Euforia y señal bajista: buen timing para ventas
+  // Euphoria with bearish signal: good timing for sells
   if (level === 'extreme_greed' && signalType === 'bearish') {
     return {
       scoreModifier: 1,
       confidenceModifier: 10,
-      warning: '💡 Euforia extrema - buen timing para posiciones bajistas',
+      warning: '💡 Extreme euphoria - good timing for bearish positions',
     };
   }
 
-  // Niveles intermedios: menor impacto
+  // Intermediate levels: less impact
   if (level === 'fear' && signalType === 'bullish') {
     return { scoreModifier: 1, confidenceModifier: 5 };
   }
@@ -76,6 +76,6 @@ export function getSentimentImpact(
     return { scoreModifier: 1, confidenceModifier: 5 };
   }
 
-  // Neutral o no hay confluencia clara
+  // Neutral or no clear confluence
   return { scoreModifier: 0, confidenceModifier: 0 };
 }

@@ -42,7 +42,7 @@ export const AccountDropdown = () => {
         className="flex items-center gap-2 bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-smooth shadow-glow"
       >
         <LogIn className="w-4 h-4" />
-        <span className="font-medium">Iniciar Sesión</span>
+        <span className="font-medium">Sign In</span>
       </Button>
     );
   }
@@ -61,7 +61,7 @@ export const AccountDropdown = () => {
           </Avatar>
           <div className="flex flex-col items-start">
             <span className="text-sm font-medium text-foreground leading-none mb-1">
-              {profile?.display_name || "Usuario"}
+              {profile?.display_name || "User"}
             </span>
             <Badge 
               variant="secondary" 
@@ -80,7 +80,7 @@ export const AccountDropdown = () => {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-2">
             <p className="text-sm font-medium text-foreground">
-              {profile?.display_name || "Usuario"}
+              {profile?.display_name || "User"}
             </p>
             {profile?.email && (
               <p className="text-xs text-muted-foreground truncate">
@@ -96,7 +96,7 @@ export const AccountDropdown = () => {
           <DropdownMenuItem className="flex items-center gap-2 cursor-pointer hover:bg-secondary/50 transition-smooth">
             <Wallet className="w-4 h-4 text-accent" />
             <div className="flex flex-col flex-1 min-w-0">
-              <span className="text-xs text-muted-foreground">Wallet conectada</span>
+              <span className="text-xs text-muted-foreground">Connected Wallet</span>
               <span className="text-xs font-mono truncate text-foreground">
                 {profile.wallet_address.slice(0, 6)}...{profile.wallet_address.slice(-4)}
               </span>
@@ -118,7 +118,7 @@ export const AccountDropdown = () => {
         
         <DropdownMenuItem className="cursor-pointer hover:bg-secondary/50 transition-smooth">
           <User className="w-4 h-4 mr-2" />
-          Perfil
+          Profile
         </DropdownMenuItem>
         
         {profile?.wallet_address ? (
@@ -127,7 +127,7 @@ export const AccountDropdown = () => {
             className="cursor-pointer hover:bg-secondary/50 transition-smooth"
           >
             <Wallet className="w-4 h-4 mr-2" />
-            Desconectar Wallet
+            Disconnect Wallet
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem 
@@ -135,13 +135,13 @@ export const AccountDropdown = () => {
             className="cursor-pointer hover:bg-secondary/50 transition-smooth"
           >
             <Wallet className="w-4 h-4 mr-2" />
-            Conectar Wallet
+            Connect Wallet
           </DropdownMenuItem>
         )}
         
         <DropdownMenuItem className="cursor-pointer hover:bg-secondary/50 transition-smooth">
           <Settings className="w-4 h-4 mr-2" />
-          Configuración
+          Settings
         </DropdownMenuItem>
         
         <DropdownMenuSeparator />
@@ -151,7 +151,7 @@ export const AccountDropdown = () => {
           className="cursor-pointer text-destructive hover:bg-destructive/10 transition-smooth"
         >
           <LogOut className="w-4 h-4 mr-2" />
-          Cerrar sesión
+          Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

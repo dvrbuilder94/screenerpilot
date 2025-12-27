@@ -243,8 +243,8 @@ const [dailyLimit, setDailyLimit] = useState(FREE_DAILY_LIMIT);
               {messages.length === 0 && (
                 <div className="text-center text-muted-foreground text-sm space-y-2 mt-8">
                   <Sparkles className="h-12 w-12 mx-auto text-emerald-400/50" />
-                  <p>¡Hola! Soy AlexIA, tu asistente de trading.</p>
-                  <p className="text-xs">Pregúntame sobre análisis técnico, indicadores o cualquier activo.</p>
+                  <p>Hello! I'm AlexIA, your trading assistant.</p>
+                  <p className="text-xs">Ask me about technical analysis, indicators, or any asset.</p>
                 </div>
               )}
               

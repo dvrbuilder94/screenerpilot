@@ -9,7 +9,7 @@ import { AppLayout } from "@/components/AppLayout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import CryptoMacro from "./pages/CryptoMacro";
-import CommodityRatios from "./pages/CommodityRatios";
+import Commodities from "./pages/Commodities";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,7 +27,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/crypto-macro" element={<CryptoMacro />} />
-                <Route path="/commodity-ratios" element={<CommodityRatios />} />
+                <Route path="/commodities" element={<Commodities />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

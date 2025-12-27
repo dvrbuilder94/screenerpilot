@@ -24,8 +24,8 @@ const menuItems = [
     icon: BarChart3,
   },
   {
-    title: "Commodity Ratios",
-    url: "/commodity-ratios",
+    title: "Commodities",
+    url: "/commodities",
     icon: Scale,
   },
 ];

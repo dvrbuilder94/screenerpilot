@@ -4,9 +4,10 @@ import { TrendingUp, TrendingDown, Minus, Scale, DollarSign, BarChart3, RefreshC
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import MiniChart from "@/components/MiniChart";
-import { fetchCandles, Candle, Interval } from "@/lib/binanceApi";
+import { Candle, Interval } from "@/lib/binanceApi";
 import { ema } from "@/lib/indicators";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import presets from "@/config/presets.json";
 
 interface RatioData {
@@ -17,6 +18,7 @@ interface RatioData {
 
 interface CommodityData {
   symbol: string;
+  yahooSymbol: string;
   name: string;
   price: number;
   change: number;
@@ -26,12 +28,15 @@ interface CommodityData {
   ema50?: number[];
 }
 
-const commoditySymbols: { symbol: string; name: string; unit: string; binanceSymbol?: string }[] = [
-  { symbol: "XAUUSD", name: "Gold", unit: "oz", binanceSymbol: "PAXGUSDT" },
-  { symbol: "XAGUSD", name: "Silver", unit: "oz" },
-  { symbol: "XPTUSD", name: "Platinum", unit: "oz" },
-  { symbol: "XPDUSD", name: "Palladium", unit: "oz" },
-  { symbol: "XCUUSD", name: "Copper", unit: "lb" },
+// Yahoo Finance commodity futures symbols
+const commoditySymbols: CommodityData[] = [
+  { symbol: "Gold", yahooSymbol: "GC=F", name: "Gold", price: 0, change: 0, unit: "oz" },
+  { symbol: "Silver", yahooSymbol: "SI=F", name: "Silver", price: 0, change: 0, unit: "oz" },
+  { symbol: "Platinum", yahooSymbol: "PL=F", name: "Platinum", price: 0, change: 0, unit: "oz" },
+  { symbol: "Palladium", yahooSymbol: "PA=F", name: "Palladium", price: 0, change: 0, unit: "oz" },
+  { symbol: "Copper", yahooSymbol: "HG=F", name: "Copper", price: 0, change: 0, unit: "lb" },
+  { symbol: "Crude Oil", yahooSymbol: "CL=F", name: "Crude Oil", price: 0, change: 0, unit: "bbl" },
+  { symbol: "Natural Gas", yahooSymbol: "NG=F", name: "Natural Gas", price: 0, change: 0, unit: "MMBtu" },
 ];
 
 const ratioDescriptions: Record<string, string> = {
@@ -43,15 +48,6 @@ const ratioDescriptions: Record<string, string> = {
   "Palladium/Gold": "Reflects industrial demand vs safe haven"
 };
 
-const historicalAverages: Record<string, number> = {
-  "Copper/Gold": 0.00018,
-  "Gold/Silver": 70,
-  "Silver/Oil": 0.35,
-  "Gold/Oil": 25,
-  "Platinum/Gold": 1.2,
-  "Palladium/Gold": 0.8
-};
-
 const rareEarthsData = [
   { symbol: "MP", name: "MP Materials", description: "Largest rare earth producer in Western Hemisphere" },
   { symbol: "LYSCF", name: "Lynas Rare Earths", description: "Australian rare earths mining company" },
@@ -59,51 +55,99 @@ const rareEarthsData = [
   { symbol: "REMX", name: "VanEck Rare Earth ETF", description: "ETF tracking rare earth and strategic metals" },
 ];
 
+async function fetchCommodityCandles(yahooSymbol: string, interval: Interval): Promise<Candle[]> {
+  try {
+    const { data, error } = await supabase.functions.invoke('fetch-stock-data', {
+      body: { symbol: yahooSymbol, interval }
+    });
+
+    if (error) {
+      console.error(`Error fetching ${yahooSymbol}:`, error);
+      return [];
+    }
+
+    return data || [];
+  } catch (err) {
+    console.error(`Failed to fetch ${yahooSymbol}:`, err);
+    return [];
+  }
+}
+
 export default function Commodities() {
-  const [selectedCommodity, setSelectedCommodity] = useState<string>("PAXGUSDT");
+  const [selectedCommodity, setSelectedCommodity] = useState<string>("GC=F");
   const [interval, setInterval] = useState<Interval>("1d");
-  const [commodityData, setCommodityData] = useState<CommodityData[]>([]);
+  const [commodityData, setCommodityData] = useState<CommodityData[]>(commoditySymbols);
   const [chartData, setChartData] = useState<{ candles: Candle[]; ema20: number[]; ema50: number[] } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [ratioValues, setRatioValues] = useState<Record<string, number>>({});
 
   const ratios: RatioData[] = presets.commodity_ratios || [];
 
-  // Fetch commodity prices using available crypto pairs as proxies
-  const fetchCommodityPrices = useCallback(async () => {
+  // Fetch all commodity prices
+  const fetchAllPrices = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Use PAXG (gold-backed token) as gold proxy
-      const goldCandles = await fetchCandles("PAXGUSDT", interval, 100);
-      const goldPrice = goldCandles[goldCandles.length - 1]?.close || 0;
-      const goldPrevPrice = goldCandles[goldCandles.length - 2]?.close || goldPrice;
-      const goldChange = ((goldPrice - goldPrevPrice) / goldPrevPrice) * 100;
+      const promises = commoditySymbols.map(async (commodity) => {
+        const candles = await fetchCommodityCandles(commodity.yahooSymbol, interval);
+        if (candles.length > 0) {
+          const currentPrice = candles[candles.length - 1]?.close || 0;
+          const prevPrice = candles[candles.length - 2]?.close || currentPrice;
+          const change = prevPrice > 0 ? ((currentPrice - prevPrice) / prevPrice) * 100 : 0;
+          
+          const closes = candles.map(c => c.close);
+          const ema20Values = ema(closes, 20);
+          const ema50Values = ema(closes, 50);
 
-      const closes = goldCandles.map(c => c.close);
-      const ema20 = ema(closes, 20);
-      const ema50 = ema(closes, 50);
+          return {
+            ...commodity,
+            price: currentPrice,
+            change,
+            candles,
+            ema20: ema20Values,
+            ema50: ema50Values
+          };
+        }
+        return commodity;
+      });
 
-      const commodities: CommodityData[] = [
-        { 
-          symbol: "PAXGUSDT", 
-          name: "Gold (PAXG)", 
-          price: goldPrice, 
-          change: goldChange, 
-          unit: "oz",
-          candles: goldCandles,
-          ema20,
-          ema50
-        },
-        { symbol: "XAGUSD", name: "Silver", price: goldPrice / 85, change: goldChange * 1.2, unit: "oz" },
-        { symbol: "XPTUSD", name: "Platinum", price: goldPrice * 0.37, change: goldChange * 0.8, unit: "oz" },
-        { symbol: "XPDUSD", name: "Palladium", price: goldPrice * 0.39, change: goldChange * 1.1, unit: "oz" },
-        { symbol: "XCUUSD", name: "Copper", price: 4.25, change: 0.22, unit: "lb" },
-      ];
+      const results = await Promise.all(promises);
+      setCommodityData(results);
 
-      setCommodityData(commodities);
-      
-      // Set initial chart data
-      if (goldCandles.length > 0) {
-        setChartData({ candles: goldCandles, ema20, ema50 });
+      // Calculate ratios based on fetched prices
+      const priceMap: Record<string, number> = {};
+      results.forEach(r => {
+        priceMap[r.name] = r.price;
+      });
+
+      const calculatedRatios: Record<string, number> = {};
+      if (priceMap["Copper"] && priceMap["Gold"]) {
+        calculatedRatios["Copper/Gold"] = priceMap["Copper"] / priceMap["Gold"];
+      }
+      if (priceMap["Gold"] && priceMap["Silver"]) {
+        calculatedRatios["Gold/Silver"] = priceMap["Gold"] / priceMap["Silver"];
+      }
+      if (priceMap["Silver"] && priceMap["Crude Oil"]) {
+        calculatedRatios["Silver/Oil"] = priceMap["Silver"] / priceMap["Crude Oil"];
+      }
+      if (priceMap["Gold"] && priceMap["Crude Oil"]) {
+        calculatedRatios["Gold/Oil"] = priceMap["Gold"] / priceMap["Crude Oil"];
+      }
+      if (priceMap["Platinum"] && priceMap["Gold"]) {
+        calculatedRatios["Platinum/Gold"] = priceMap["Platinum"] / priceMap["Gold"];
+      }
+      if (priceMap["Palladium"] && priceMap["Gold"]) {
+        calculatedRatios["Palladium/Gold"] = priceMap["Palladium"] / priceMap["Gold"];
+      }
+      setRatioValues(calculatedRatios);
+
+      // Set chart for selected commodity
+      const selected = results.find(r => r.yahooSymbol === selectedCommodity);
+      if (selected?.candles?.length) {
+        setChartData({
+          candles: selected.candles,
+          ema20: selected.ema20 || [],
+          ema50: selected.ema50 || []
+        });
       }
 
       toast.success("Commodity prices updated");
@@ -113,43 +157,60 @@ export default function Commodities() {
     } finally {
       setIsLoading(false);
     }
-  }, [interval]);
+  }, [interval, selectedCommodity]);
 
   // Fetch chart data for selected commodity
-  const fetchChartData = useCallback(async (symbol: string) => {
-    try {
-      const candles = await fetchCandles(symbol as any, interval, 200);
-      const closes = candles.map(c => c.close);
-      const ema20Values = ema(closes, 20);
-      const ema50Values = ema(closes, 50);
-      
-      setChartData({ candles, ema20: ema20Values, ema50: ema50Values });
-    } catch (error) {
-      console.error("Error fetching chart data:", error);
+  const fetchChartData = useCallback(async (yahooSymbol: string) => {
+    const commodity = commodityData.find(c => c.yahooSymbol === yahooSymbol);
+    if (commodity?.candles?.length) {
+      setChartData({
+        candles: commodity.candles,
+        ema20: commodity.ema20 || [],
+        ema50: commodity.ema50 || []
+      });
+    } else {
+      const candles = await fetchCommodityCandles(yahooSymbol, interval);
+      if (candles.length > 0) {
+        const closes = candles.map(c => c.close);
+        const ema20Values = ema(closes, 20);
+        const ema50Values = ema(closes, 50);
+        setChartData({ candles, ema20: ema20Values, ema50: ema50Values });
+      }
     }
-  }, [interval]);
+  }, [commodityData, interval]);
 
   useEffect(() => {
-    fetchCommodityPrices();
-  }, [fetchCommodityPrices]);
+    fetchAllPrices();
+  }, [fetchAllPrices]);
 
   useEffect(() => {
     if (selectedCommodity) {
       fetchChartData(selectedCommodity);
     }
-  }, [selectedCommodity, interval, fetchChartData]);
+  }, [selectedCommodity, fetchChartData]);
 
-  const handleCommoditySelect = (symbol: string) => {
-    setSelectedCommodity(symbol);
+  const handleCommoditySelect = (yahooSymbol: string) => {
+    setSelectedCommodity(yahooSymbol);
   };
 
-  const getRatioStatus = (name: string): { status: 'neutral' | 'high' | 'low' } => {
+  const selectedCommodityInfo = commodityData.find(c => c.yahooSymbol === selectedCommodity);
+
+  const getRatioStatus = (name: string, currentValue: number): 'neutral' | 'high' | 'low' => {
+    const historicalAverages: Record<string, number> = {
+      "Copper/Gold": 0.00018,
+      "Gold/Silver": 70,
+      "Silver/Oil": 0.35,
+      "Gold/Oil": 25,
+      "Platinum/Gold": 1.2,
+      "Palladium/Gold": 0.8
+    };
     const avg = historicalAverages[name];
-    if (!avg) return { status: 'neutral' };
-    return { status: 'neutral' };
+    if (!avg || !currentValue) return 'neutral';
+    const deviation = (currentValue - avg) / avg;
+    if (deviation > 0.15) return 'high';
+    if (deviation < -0.15) return 'low';
+    return 'neutral';
   };
-
-  const selectedCommodityInfo = commodityData.find(c => c.symbol === selectedCommodity);
 
   return (
     <div className="min-h-screen bg-background">
@@ -180,7 +241,7 @@ export default function Commodities() {
             <Button 
               variant="outline" 
               size="icon"
-              onClick={fetchCommodityPrices}
+              onClick={fetchAllPrices}
               disabled={isLoading}
             >
               <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -194,20 +255,20 @@ export default function Commodities() {
             <DollarSign className="h-5 w-5" />
             Spot Prices
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
             {commodityData.map((commodity) => (
               <Card 
-                key={commodity.symbol} 
+                key={commodity.yahooSymbol} 
                 className={`cursor-pointer transition-all hover:shadow-md ${
-                  selectedCommodity === commodity.symbol 
+                  selectedCommodity === commodity.yahooSymbol 
                     ? 'ring-2 ring-primary border-primary' 
                     : 'border-border'
                 }`}
-                onClick={() => handleCommoditySelect(commodity.symbol)}
+                onClick={() => handleCommoditySelect(commodity.yahooSymbol)}
               >
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start mb-2">
-                    <span className="font-mono text-xs text-muted-foreground">{commodity.symbol}</span>
+                    <span className="font-mono text-xs text-muted-foreground">{commodity.yahooSymbol}</span>
                     {commodity.change >= 0 ? (
                       <TrendingUp className="h-4 w-4 text-bullish" />
                     ) : (
@@ -217,12 +278,12 @@ export default function Commodities() {
                   <p className="font-medium text-foreground text-sm">{commodity.name}</p>
                   <div className="flex items-baseline gap-1 mt-1">
                     <span className="text-lg font-bold text-foreground">
-                      ${commodity.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      ${commodity.price > 0 ? commodity.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '--'}
                     </span>
                     <span className="text-xs text-muted-foreground">/{commodity.unit}</span>
                   </div>
                   <span className={`text-sm font-medium ${commodity.change >= 0 ? 'text-bullish' : 'text-bearish'}`}>
-                    {commodity.change >= 0 ? '+' : ''}{commodity.change.toFixed(2)}%
+                    {commodity.price > 0 ? `${commodity.change >= 0 ? '+' : ''}${commodity.change.toFixed(2)}%` : '--'}
                   </span>
                 </CardContent>
               </Card>
@@ -231,7 +292,7 @@ export default function Commodities() {
         </section>
 
         {/* Chart Section */}
-        {chartData && selectedCommodityInfo && (
+        {chartData && chartData.candles.length > 0 && selectedCommodityInfo && (
           <section>
             <h2 className="text-xl font-semibold mb-4 text-foreground flex items-center gap-2">
               <BarChart3 className="h-5 w-5" />
@@ -255,25 +316,26 @@ export default function Commodities() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {ratios.map((ratio) => {
-              const status = getRatioStatus(ratio.name);
+              const currentValue = ratioValues[ratio.name] || 0;
+              const status = getRatioStatus(ratio.name, currentValue);
               
               return (
                 <Card key={ratio.name} className="border-border hover:shadow-sm transition-all">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center justify-between text-base">
                       <span>{ratio.name}</span>
-                      {status.status === 'high' && <TrendingUp className="h-4 w-4 text-bullish" />}
-                      {status.status === 'low' && <TrendingDown className="h-4 w-4 text-bearish" />}
-                      {status.status === 'neutral' && <Minus className="h-4 w-4 text-muted-foreground" />}
+                      {status === 'high' && <TrendingUp className="h-4 w-4 text-bullish" />}
+                      {status === 'low' && <TrendingDown className="h-4 w-4 text-bearish" />}
+                      {status === 'neutral' && <Minus className="h-4 w-4 text-muted-foreground" />}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <div className="flex items-baseline gap-2">
                       <span className="text-xl font-bold text-foreground">
-                        {historicalAverages[ratio.name]?.toFixed(4) || '--'}
+                        {currentValue > 0 ? currentValue.toFixed(4) : '--'}
                       </span>
                       <span className="text-sm text-muted-foreground">
-                        (historical avg)
+                        (current)
                       </span>
                     </div>
                     
@@ -318,7 +380,7 @@ export default function Commodities() {
         </section>
 
         <p className="text-xs text-muted-foreground text-center pt-4 border-t border-border">
-          Reference data. Gold price proxied via PAXG token. Prices may not reflect exact spot market values.
+          Live futures prices from Yahoo Finance. Prices may differ slightly from spot market values.
         </p>
       </div>
     </div>

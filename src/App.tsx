@@ -8,7 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import CryptoMacro from "./pages/CryptoMacro";
+import Macro from "./pages/Macro";
 import Commodities from "./pages/Commodities";
 import NotFound from "./pages/NotFound";
 
@@ -26,7 +26,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/crypto-macro" element={<CryptoMacro />} />
+                <Route path="/macro" element={<Macro />} />
                 <Route path="/commodities" element={<Commodities />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

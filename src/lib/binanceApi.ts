@@ -16,9 +16,10 @@ export type CryptoSymbol = typeof presets.crypto[number];
 export type StockSymbol = typeof presets.stocks[number];
 export type IndexSymbol = typeof presets.indices[number];
 export type ETFSymbol = typeof presets.etf_alt[number];
-export type Symbol = CryptoSymbol | StockSymbol | IndexSymbol | ETFSymbol;
+export type CommoditySymbol = 'GC=F' | 'SI=F' | 'PL=F' | 'PA=F' | 'HG=F' | 'CL=F' | 'NG=F';
+export type Symbol = CryptoSymbol | StockSymbol | IndexSymbol | ETFSymbol | CommoditySymbol;
 export type Interval = '1h' | '4h' | '1d' | '1w';
-export type AssetType = 'crypto' | 'stock' | 'index' | 'etf';
+export type AssetType = 'crypto' | 'stock' | 'index' | 'etf' | 'commodity';
 export type GroupKey = keyof typeof presets.groups;
 
 const BINANCE_API_BASE = 'https://api.binance.com/api/v3';
@@ -27,11 +28,16 @@ const YAHOO_FINANCE_API = 'https://query1.finance.yahoo.com/v8/finance/chart';
 /**
  * Detect asset type from symbol
  */
+const COMMODITY_SYMBOLS = ['GC=F', 'SI=F', 'PL=F', 'PA=F', 'HG=F', 'CL=F', 'NG=F'];
+
 export function getAssetType(symbol: Symbol): AssetType {
   // Check if it's a crypto pair (ends with USDT, BUSD, etc.)
   if (symbol.endsWith('USDT') || symbol.endsWith('BUSD') || symbol.endsWith('BTC') || symbol.endsWith('ETH')) {
     return 'crypto';
   }
+  
+  // Check if it's a commodity (futures symbol)
+  if (COMMODITY_SYMBOLS.includes(symbol)) return 'commodity';
   
   // Check presets
   if (presets.crypto.includes(symbol as any)) return 'crypto';
@@ -190,6 +196,8 @@ export function getSymbolsByType(type: AssetType): Symbol[] {
       return presets.indices as Symbol[];
     case 'etf':
       return presets.etf_alt as Symbol[];
+    case 'commodity':
+      return COMMODITY_SYMBOLS as Symbol[];
     default:
       return [];
   }

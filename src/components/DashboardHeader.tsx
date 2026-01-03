@@ -57,6 +57,7 @@ export default function DashboardHeader({
                 <SelectItem value="stock">Stocks</SelectItem>
                 <SelectItem value="index">Indices</SelectItem>
                 <SelectItem value="etf">ETFs</SelectItem>
+                <SelectItem value="commodity">Commodities</SelectItem>
               </SelectContent>
             </Select>
           </div>

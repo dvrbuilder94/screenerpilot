@@ -19,8 +19,8 @@ const menuItems = [
     icon: Home,
   },
   {
-    title: "Crypto Macro",
-    url: "/crypto-macro",
+    title: "Macro Analysis",
+    url: "/macro",
     icon: BarChart3,
   },
   {

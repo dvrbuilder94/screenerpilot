@@ -16,7 +16,7 @@ export interface EnhancedSignal {
 
 export interface TradingSetup {
   symbol: string;
-  assetType: 'crypto' | 'stock' | 'index' | 'etf';
+  assetType: 'crypto' | 'stock' | 'index' | 'etf' | 'commodity';
   currentPrice: number;
   macroSignal: EnhancedSignal;
   microSignal: EnhancedSignal;
@@ -27,6 +27,6 @@ export interface TradingSetup {
 export interface FilterOptions {
   trend?: 'BULLISH' | 'BEARISH' | 'NEUTRAL' | 'ALL';
   signalType?: SignalType | 'ALL';
-  assetType?: 'crypto' | 'stock' | 'index' | 'etf' | 'ALL';
+  assetType?: 'crypto' | 'stock' | 'index' | 'etf' | 'commodity' | 'ALL';
   minConfidence?: number;
 }

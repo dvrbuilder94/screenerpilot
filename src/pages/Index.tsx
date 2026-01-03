@@ -38,7 +38,7 @@ import { TradingSetup, EnhancedSignal } from "@/types/trading";
 import { TradingStyle, TRADING_PROFILES } from "@/types/tradingProfile";
 import { useLanguage } from "@/contexts/LanguageContext";
 import presets from "@/config/presets.json";
-import { AdBanner } from "@/components/AdBanner";
+
 
 const STORAGE_KEY = "crypto-dashboard-settings";
 
@@ -68,7 +68,7 @@ export default function Index() {
   const navigate = useNavigate();
 
   // All hooks must be at the top before any conditional returns
-  const [assetType, setAssetType] = useState<AssetType>(() => loadSettings()?.assetType || "crypto");
+  const [assetType, setAssetType] = useState<AssetType>(() => loadSettings()?.assetType || "stock");
   const [symbol, setSymbol] = useState<Symbol>(() => {
     const saved = loadSettings();
     if (saved?.symbol) return saved.symbol;
@@ -447,8 +447,6 @@ export default function Index() {
               </div>
             </div>
 
-            {/* Ad Banner */}
-            <AdBanner />
 
             {selectedGroup ? (
               <GroupRanking 

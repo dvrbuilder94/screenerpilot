@@ -16,19 +16,19 @@ export default function Macro() {
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+      <main className="container mx-auto px-4 py-6 max-w-7xl">
+        {/* Hero Header */}
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight">
             Macro Analysis
           </h1>
-          <p className="text-muted-foreground">
-            Comprehensive market macro analysis across Crypto, Commodities, Stocks, and Federal Reserve indicators
+          <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
+            Real-time macro indicators across Crypto, Stocks, Commodities, and Federal Reserve data
           </p>
         </div>
 
-        {/* Category Tabs */}
-        <div className="mb-6">
+        {/* Category Tabs - Prominent */}
+        <div className="mb-8">
           <MacroCategoryTabs 
             activeCategory={activeCategory} 
             onCategoryChange={setActiveCategory} 
@@ -36,22 +36,28 @@ export default function Macro() {
         </div>
 
         {/* Category Content */}
-        <div className="space-y-6">
+        <div className="min-h-[60vh]">
           {activeCategory === 'crypto' && (
-            <>
-              {/* AI Insight */}
+            <div className="space-y-6">
+              {/* AI Insight - Full width hero */}
               <CryptoMacroInsight />
 
-              {/* Crypto Panels Grid */}
+              {/* Primary Metrics - 2 column hero */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <EthVsBtcPanel />
-                <CryptoRiskMeter />
-                <EthUpsidePanel />
-                <AltseasonIndexPanel />
                 <FearGreedPanel />
+                <AltseasonIndexPanel />
+              </div>
+
+              {/* Secondary Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <EthVsBtcPanel />
+                <EthUpsidePanel />
                 <DominancePanel />
               </div>
-            </>
+
+              {/* Risk Meter - Full width */}
+              <CryptoRiskMeter />
+            </div>
           )}
 
           {activeCategory === 'commodities' && (
@@ -68,9 +74,9 @@ export default function Macro() {
         </div>
 
         {/* Footer note */}
-        <div className="mt-8 p-4 rounded-lg bg-muted/50 border border-border/50">
+        <div className="mt-10 py-4 border-t border-border/50">
           <p className="text-xs text-muted-foreground text-center">
-            Data updates every 5 minutes. Crypto metrics use Binance data. Stocks and commodities use Yahoo Finance.
+            Data updates in real-time. Crypto via Binance. Stocks, commodities, and Fed indicators via Yahoo Finance.
           </p>
         </div>
       </main>

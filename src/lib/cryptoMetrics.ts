@@ -189,18 +189,26 @@ export async function getEthUpsideScore(): Promise<EthUpsideData> {
   // Calculate 7-day slope
   const slope7d = calculate7DaySlope(closes);
   
-  // Scoring system (0-100)
+  // Scoring system (0-100) - adjusted for more realistic scoring
   let score = 0;
   const aboveEma50 = currentPrice > ema50;
   const aboveEma200 = currentPrice > ema200;
-  const compressed = bbWidth < 0.10;
+  // BB Width threshold adjusted: 0.05 is truly compressed for ETHBTC (5% band width)
+  const compressed = bbWidth < 0.05;
   const positiveSlope = slope7d > 0;
   
-  if (aboveEma50) score += 25;
-  if (aboveEma200) score += 25;
-  if (compressed) score += 20;
-  if (isRsiRising) score += 20;
+  // Weighted scoring - each factor contributes realistically
+  if (aboveEma50) score += 20;
+  if (aboveEma200) score += 20;
+  // Compression is rare and valuable - only add if truly compressed
+  if (compressed) score += 15;
+  // RSI rising from oversold is more significant
+  if (isRsiRising && currentRSI < 60) score += 15;
+  else if (isRsiRising) score += 10;
+  // Positive slope
   if (positiveSlope) score += 10;
+  // Bonus for strong EMA alignment (golden cross setup)
+  if (aboveEma50 && aboveEma200 && ema50 > ema200) score += 10;
   
   // Determine states
   let emaTrend: 'Bullish' | 'Neutral' | 'Bearish' = 'Neutral';

@@ -60,18 +60,18 @@ export function FedMacro() {
   const yield5y = marketData['^FVX'];
 
   const getDxyInterpretation = (value: number) => {
-    if (value > 105) return { text: 'Strong Dollar', trend: 'bearish' as const, note: 'Headwind for commodities & emerging markets' };
-    if (value > 100) return { text: 'Neutral-Strong', trend: 'neutral' as const, note: 'Dollar holding above key level' };
-    if (value > 95) return { text: 'Neutral-Weak', trend: 'neutral' as const, note: 'Dollar in consolidation zone' };
-    return { text: 'Weak Dollar', trend: 'bullish' as const, note: 'Tailwind for commodities & risk assets' };
+    if (value > 105) return { text: 'Strong Dollar', trend: 'bearish' as const };
+    if (value > 100) return { text: 'Neutral-Strong', trend: 'neutral' as const };
+    if (value > 95) return { text: 'Neutral-Weak', trend: 'neutral' as const };
+    return { text: 'Weak Dollar', trend: 'bullish' as const };
   };
 
   const getYieldCurve = () => {
     if (!yield10y || !yield5y) return null;
     const spread = yield10y - yield5y;
-    if (spread < 0) return { text: 'Inverted', status: 'warning', note: 'Historically signals recession risk' };
-    if (spread < 0.25) return { text: 'Flat', status: 'caution', note: 'Economic uncertainty' };
-    return { text: 'Normal', status: 'healthy', note: 'Healthy economic conditions' };
+    if (spread < 0) return { text: 'Inverted', status: 'warning' as const, spread };
+    if (spread < 0.25) return { text: 'Flat', status: 'caution' as const, spread };
+    return { text: 'Normal', status: 'healthy' as const, spread };
   };
 
   const dxyStatus = dxy ? getDxyInterpretation(dxy) : null;
@@ -79,122 +79,104 @@ export function FedMacro() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {[1, 2, 3, 4].map((i) => (
-          <Card key={i} className="border border-border">
-            <CardHeader>
-              <Skeleton className="h-6 w-32" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-20 w-full" />
-            </CardContent>
-          </Card>
-        ))}
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Skeleton className="h-48" />
+          <Skeleton className="h-48" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* DXY Panel */}
-      <Card className="border border-border">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-foreground">
-            <DollarSign className="h-5 w-5 text-primary" />
-            US Dollar Index (DXY)
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-4xl font-bold text-foreground">{dxy?.toFixed(2) || '—'}</p>
-              {dxyStatus && (
-                <>
-                  <Badge 
-                    variant={dxyStatus.trend === 'bullish' ? 'default' : dxyStatus.trend === 'bearish' ? 'destructive' : 'secondary'}
-                    className="mt-2"
-                  >
-                    {dxyStatus.trend === 'bullish' && <TrendingUp className="h-3 w-3 mr-1" />}
-                    {dxyStatus.trend === 'bearish' && <TrendingDown className="h-3 w-3 mr-1" />}
-                    {dxyStatus.text}
-                  </Badge>
-                  <p className="text-sm text-muted-foreground mt-2">{dxyStatus.note}</p>
-                </>
-              )}
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-muted-foreground">Key Levels</p>
-              <div className="space-y-1 mt-1">
-                <Badge variant="outline" className="text-xs block">Support: 100</Badge>
-                <Badge variant="outline" className="text-xs block">Resistance: 107</Badge>
+    <div className="space-y-8">
+      {/* Hero Row - DXY and Yield Curve */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* DXY Panel */}
+        <Card className="border-2 border-border bg-gradient-to-br from-card to-muted/30">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <DollarSign className="h-5 w-5 text-primary" />
+              US Dollar Index (DXY)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-5xl font-bold tracking-tight">{dxy?.toFixed(2) || '—'}</p>
+                {dxyStatus && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge 
+                      variant={dxyStatus.trend === 'bullish' ? 'default' : dxyStatus.trend === 'bearish' ? 'destructive' : 'secondary'}
+                    >
+                      {dxyStatus.trend === 'bullish' && <TrendingUp className="h-3 w-3 mr-1" />}
+                      {dxyStatus.trend === 'bearish' && <TrendingDown className="h-3 w-3 mr-1" />}
+                      {dxyStatus.text}
+                    </Badge>
+                  </div>
+                )}
+              </div>
+              <div className="text-right text-sm text-muted-foreground">
+                <p>Support: 100</p>
+                <p>Resistance: 107</p>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Treasury Yields */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border border-border">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">5Y Treasury Yield</p>
-            <p className="text-2xl font-bold text-foreground">{yield5y?.toFixed(2) || '—'}%</p>
-          </CardContent>
-        </Card>
-        <Card className="border border-border">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">10Y Treasury Yield</p>
-            <p className="text-2xl font-bold text-foreground">{yield10y?.toFixed(2) || '—'}%</p>
-          </CardContent>
-        </Card>
-        <Card className="border border-border">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">30Y Treasury Yield</p>
-            <p className="text-2xl font-bold text-foreground">{yield30y?.toFixed(2) || '—'}%</p>
+        {/* Yield Curve Panel */}
+        <Card className="border-2 border-border bg-gradient-to-br from-card to-muted/30">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Landmark className="h-5 w-5 text-primary" />
+              Yield Curve (10Y-5Y)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-end justify-between">
+              <div>
+                {yieldCurve && (
+                  <>
+                    <Badge 
+                      variant={yieldCurve.status === 'healthy' ? 'default' : yieldCurve.status === 'warning' ? 'destructive' : 'secondary'}
+                      className="text-xl px-4 py-2 mb-2"
+                    >
+                      {yieldCurve.text}
+                    </Badge>
+                    <p className="text-3xl font-bold mt-2">
+                      {(yieldCurve.spread * 100).toFixed(0)} bps
+                    </p>
+                  </>
+                )}
+              </div>
+              <div className="text-right text-sm text-muted-foreground">
+                <p>{yieldCurve?.status === 'warning' ? 'Recession signal' : yieldCurve?.status === 'caution' ? 'Economic uncertainty' : 'Healthy conditions'}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Yield Curve Analysis */}
-      {yieldCurve && (
-        <Card className="border border-border">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-foreground">
-              <Landmark className="h-5 w-5 text-primary" />
-              Yield Curve Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <Badge 
-                  variant={yieldCurve.status === 'healthy' ? 'default' : yieldCurve.status === 'warning' ? 'destructive' : 'secondary'}
-                  className="text-lg px-4 py-1"
-                >
-                  {yieldCurve.text}
-                </Badge>
-                <p className="text-sm text-muted-foreground mt-2">{yieldCurve.note}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">10Y-5Y Spread</p>
-                <p className="text-xl font-bold text-foreground">
-                  {yield10y && yield5y ? ((yield10y - yield5y) * 100).toFixed(0) : '—'} bps
-                </p>
-              </div>
+      {/* Treasury Yields */}
+      <Card className="border-2 border-border">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg">Treasury Yields</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-6">
+            <div className="text-center p-4 bg-muted/30 rounded-lg">
+              <p className="text-sm text-muted-foreground">5Y Yield</p>
+              <p className="text-3xl font-bold">{yield5y?.toFixed(2) || '—'}%</p>
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Fed Insight */}
-      <Card className="border border-border bg-muted/20">
-        <CardContent className="p-4">
-          <p className="text-sm text-muted-foreground">
-            <strong className="text-foreground">Monetary Policy Context:</strong> Rising yields typically indicate 
-            expectations of higher rates or inflation, which can pressure growth stocks and support financials. 
-            A strong dollar tends to be a headwind for commodities and emerging markets while benefiting 
-            domestic-focused companies.
-          </p>
+            <div className="text-center p-4 bg-muted/30 rounded-lg">
+              <p className="text-sm text-muted-foreground">10Y Yield</p>
+              <p className="text-3xl font-bold">{yield10y?.toFixed(2) || '—'}%</p>
+            </div>
+            <div className="text-center p-4 bg-muted/30 rounded-lg">
+              <p className="text-sm text-muted-foreground">30Y Yield</p>
+              <p className="text-3xl font-bold">{yield30y?.toFixed(2) || '—'}%</p>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

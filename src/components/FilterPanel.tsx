@@ -92,6 +92,7 @@ export default function FilterPanel({ filters, onFiltersChange, activeFiltersCou
               <SelectItem value="stock">{t.stocks}</SelectItem>
               <SelectItem value="index">{t.indices}</SelectItem>
               <SelectItem value="etf">{t.etfs}</SelectItem>
+              <SelectItem value="commodity">{t.commodities}</SelectItem>
             </SelectContent>
           </Select>
         </div>

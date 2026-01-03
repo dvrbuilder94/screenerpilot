@@ -158,6 +158,7 @@ export default function Index() {
     // Get all available tickers
     const allTickers: Symbol[] = [
       ...presets.crypto,
+      ...(presets.commodities || []),
       ...presets.stocks,
       ...presets.indices,
       ...presets.etf_alt,

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { TradingSetup, SignalType } from "@/types/trading";
 import { cn } from "@/lib/utils";
+import { getAssetName } from "@/lib/assetNames";
 
 interface SignalsSidebarProps {
   allSignals: TradingSetup[];
@@ -23,7 +24,7 @@ interface SignalsSidebarProps {
 }
 
 type SortOption = "confidence" | "signal" | "alphabetical" | "price";
-type FilterAssetType = "ALL" | "crypto" | "stock" | "index" | "etf";
+type FilterAssetType = "ALL" | "crypto" | "stock" | "index" | "etf" | "commodity";
 
 export function SignalsSidebar({
   allSignals,
@@ -121,6 +122,7 @@ export function SignalsSidebar({
               <SelectItem value="ALL">All Assets</SelectItem>
               <SelectItem value="crypto">Crypto</SelectItem>
               <SelectItem value="stock">Stocks</SelectItem>
+              <SelectItem value="commodity">Commodities</SelectItem>
               <SelectItem value="index">Indices</SelectItem>
               <SelectItem value="etf">ETFs</SelectItem>
             </SelectContent>
@@ -178,6 +180,7 @@ export function SignalsSidebar({
                     ${setup.currentPrice.toFixed(2)}
                   </span>
                 </div>
+                <p className="text-xs text-muted-foreground mb-1">{getAssetName(setup.symbol)}</p>
 
                 <div className="flex items-center gap-2">
                   <Badge className={getSignalBadgeClass(setup.macroSignal.signal)}>

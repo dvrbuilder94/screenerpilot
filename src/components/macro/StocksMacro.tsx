@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Activity, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react';
+import { SectorHeatmap } from './SectorHeatmap';
 
 interface SectorData {
   symbol: string;
@@ -237,6 +238,9 @@ export function StocksMacro() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Sector Heatmap */}
+      <SectorHeatmap />
     </div>
   );
 }

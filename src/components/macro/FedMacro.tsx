@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Landmark, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
+import { EconomicCalendar } from './EconomicCalendar';
 
 export function FedMacro() {
   const [marketData, setMarketData] = useState<Record<string, number>>({});
@@ -179,6 +180,9 @@ export function FedMacro() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Economic Calendar */}
+      <EconomicCalendar />
     </div>
   );
 }

@@ -14,6 +14,7 @@ import {
 import { TradingSetup, SignalType } from "@/types/trading";
 import { cn } from "@/lib/utils";
 import { getAssetName } from "@/lib/assetNames";
+import { Sparkline } from "@/components/Sparkline";
 
 interface SignalsSidebarProps {
   allSignals: TradingSetup[];
@@ -169,26 +170,41 @@ export function SignalsSidebar({
                   selectedSymbol === setup.symbol && "bg-accent border-primary"
                 )}
               >
-                <div className="flex items-start justify-between mb-1">
+              <div className="flex items-start justify-between mb-1">
                   <div>
                     <span className="font-semibold text-foreground">{setup.symbol}</span>
                     <Badge variant="outline" className="ml-2 text-xs">
                       {setup.assetType}
                     </Badge>
                   </div>
-                  <span className="text-sm font-medium text-foreground">
-                    ${setup.currentPrice.toFixed(2)}
-                  </span>
+                  <div className="text-right">
+                    <span className="text-sm font-medium text-foreground">
+                      ${setup.currentPrice.toFixed(2)}
+                    </span>
+                    {setup.priceChange24h !== undefined && (
+                      <span className={cn(
+                        "block text-xs font-medium",
+                        setup.priceChange24h >= 0 ? "text-green-500" : "text-red-500"
+                      )}>
+                        {setup.priceChange24h >= 0 ? "+" : ""}{setup.priceChange24h.toFixed(2)}%
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground mb-1">{getAssetName(setup.symbol)}</p>
 
-                <div className="flex items-center gap-2">
-                  <Badge className={getSignalBadgeClass(setup.macroSignal.signal)}>
-                    {setup.macroSignal.signal.replace("_", " ")}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">
-                    {setup.combinedConfidence}% confidence
-                  </span>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Badge className={getSignalBadgeClass(setup.macroSignal.signal)}>
+                      {setup.macroSignal.signal.replace("_", " ")}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {setup.combinedConfidence}%
+                    </span>
+                  </div>
+                  {setup.recentPrices && setup.recentPrices.length > 1 && (
+                    <Sparkline data={setup.recentPrices} width={50} height={16} />
+                  )}
                 </div>
 
                 <div className="flex items-center gap-1 mt-1">

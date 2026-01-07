@@ -194,6 +194,82 @@ export type Database = {
         }
         Relationships: []
       }
+      prediction_votes: {
+        Row: {
+          choice: boolean
+          created_at: string
+          id: string
+          prediction_id: string
+          user_id: string
+        }
+        Insert: {
+          choice: boolean
+          created_at?: string
+          id?: string
+          prediction_id: string
+          user_id: string
+        }
+        Update: {
+          choice?: boolean
+          created_at?: string
+          id?: string
+          prediction_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prediction_votes_prediction_id_fkey"
+            columns: ["prediction_id"]
+            isOneToOne: false
+            referencedRelation: "predictions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      predictions: {
+        Row: {
+          condition: Json
+          created_at: string
+          id: string
+          resolve_at: string
+          result: boolean | null
+          season_id: string
+          status: string
+          symbol: string
+          title: string
+        }
+        Insert: {
+          condition: Json
+          created_at?: string
+          id?: string
+          resolve_at: string
+          result?: boolean | null
+          season_id: string
+          status?: string
+          symbol: string
+          title: string
+        }
+        Update: {
+          condition?: Json
+          created_at?: string
+          id?: string
+          resolve_at?: string
+          result?: boolean | null
+          season_id?: string
+          status?: string
+          symbol?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "predictions_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -221,6 +297,36 @@ export type Database = {
           updated_at?: string
           user_id?: string
           wallet_address?: string | null
+        }
+        Relationships: []
+      }
+      seasons: {
+        Row: {
+          created_at: string
+          description: string | null
+          ends_at: string
+          id: string
+          name: string
+          starts_at: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          ends_at: string
+          id?: string
+          name: string
+          starts_at: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          ends_at?: string
+          id?: string
+          name?: string
+          starts_at?: string
+          status?: string
         }
         Relationships: []
       }
@@ -316,6 +422,59 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_season_stats: {
+        Row: {
+          correct: number
+          season_id: string
+          total: number
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          correct?: number
+          season_id: string
+          total?: number
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          correct?: number
+          season_id?: string
+          total?: number
+          updated_at?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_season_stats_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_subscriptions: {
         Row: {
           created_at: string
@@ -374,8 +533,24 @@ export type Database = {
     Functions: {
       calculate_level: { Args: { points: number }; Returns: number }
       get_user_tier: { Args: { p_user_id: string }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      record_prediction_vote: {
+        Args: { p_choice: boolean; p_prediction_id: string }
+        Returns: undefined
+      }
+      resolve_prediction: {
+        Args: { p_prediction_id: string; p_result: boolean }
+        Returns: undefined
+      }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       subscription_tier: "free" | "pro" | "premium"
     }
     CompositeTypes: {
@@ -504,6 +679,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       subscription_tier: ["free", "pro", "premium"],
     },
   },

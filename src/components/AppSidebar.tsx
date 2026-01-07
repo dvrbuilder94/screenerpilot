@@ -1,4 +1,4 @@
-import { Home, BarChart3, Scale } from "lucide-react";
+import { Home, BarChart3, Scale, TrendingUp } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import {
   Sidebar,
@@ -17,6 +17,11 @@ const menuItems = [
     title: "Dashboard",
     url: "/",
     icon: Home,
+  },
+  {
+    title: "Predictions",
+    url: "/predictions",
+    icon: TrendingUp,
   },
   {
     title: "Macro Analysis",

@@ -22,6 +22,8 @@ export interface TradingSetup {
   microSignal: EnhancedSignal;
   combinedConfidence: number;
   lastUpdate: number;
+  priceChange24h?: number;
+  recentPrices?: number[];
 }
 
 export interface FilterOptions {

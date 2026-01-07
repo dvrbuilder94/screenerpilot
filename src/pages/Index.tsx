@@ -201,15 +201,26 @@ export default function Index() {
           });
 
           const combinedConfidence = Math.round((macroSignal.confidence + microSignal.confidence) / 2);
+          const currentPrice = macroCandles[macroCandles.length - 1].close;
+          
+          // Calculate 24h price change
+          const recentCandles = microCandles.slice(-24);
+          const price24hAgo = recentCandles[0]?.close || currentPrice;
+          const priceChange24h = ((currentPrice - price24hAgo) / price24hAgo) * 100;
+          
+          // Get recent prices for sparkline (last 24 points)
+          const recentPrices = microCandles.slice(-24).map(c => c.close);
 
           return {
             symbol: ticker,
             assetType,
-            currentPrice: macroCandles[macroCandles.length - 1].close,
+            currentPrice,
             macroSignal,
             microSignal,
             combinedConfidence,
             lastUpdate: Date.now(),
+            priceChange24h,
+            recentPrices,
           } as TradingSetup;
         } catch (error) {
           console.error(`Error scanning ${ticker}:`, error);

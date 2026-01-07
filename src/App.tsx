@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import Macro from "./pages/Macro";
 import Commodities from "./pages/Commodities";
 import NotFound from "./pages/NotFound";
+import { PredictionsPage } from "./modules/predictions/PredictionsPage";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/macro" element={<Macro />} />
                 <Route path="/commodities" element={<Commodities />} />
+                <Route path="/predictions" element={<PredictionsPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

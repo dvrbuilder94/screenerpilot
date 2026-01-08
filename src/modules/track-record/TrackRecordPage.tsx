@@ -8,6 +8,7 @@ import { SignalHistory } from './SignalHistory';
 
 export function TrackRecordPage() {
   const [horizon, setHorizon] = useState<'1w' | '1m' | '3m'>('1w');
+  const [assetFilter, setAssetFilter] = useState<string>('ALL');
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-6">
@@ -36,6 +37,21 @@ export function TrackRecordPage() {
         {/* Global Stats */}
         <TrackRecordStats />
 
+        {/* Asset Type Filter */}
+        <div className="flex flex-wrap items-center gap-4">
+          <span className="text-sm text-muted-foreground">Asset Type:</span>
+          <Tabs value={assetFilter} onValueChange={setAssetFilter}>
+            <TabsList className="bg-muted/50 flex-wrap h-auto">
+              <TabsTrigger value="ALL" className="text-sm">All</TabsTrigger>
+              <TabsTrigger value="crypto" className="text-sm">Crypto</TabsTrigger>
+              <TabsTrigger value="stock" className="text-sm">Stocks</TabsTrigger>
+              <TabsTrigger value="index" className="text-sm">Indices</TabsTrigger>
+              <TabsTrigger value="etf" className="text-sm">ETFs</TabsTrigger>
+              <TabsTrigger value="commodity" className="text-sm">Commodities</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
         {/* Horizon Selector */}
         <div className="flex items-center gap-4">
           <span className="text-sm text-muted-foreground">Horizon:</span>
@@ -52,7 +68,7 @@ export function TrackRecordPage() {
         <TrackRecordSummary horizon={horizon} />
 
         {/* Signal History */}
-        <SignalHistory />
+        <SignalHistory assetFilter={assetFilter} />
       </div>
     </div>
   );

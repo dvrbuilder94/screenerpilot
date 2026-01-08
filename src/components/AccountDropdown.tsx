@@ -10,11 +10,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Wallet, Settings, LogOut, User, LogIn, CreditCard } from "lucide-react";
+import { Settings, LogOut, User, LogIn, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const AccountDropdown = () => {
-  const { user, profile, subscription, signOut, connectWallet, disconnectWallet } = useAuth();
+  const { user, profile, subscription, signOut } = useAuth();
   const navigate = useNavigate();
 
   const tierColors = {
@@ -92,19 +92,6 @@ export const AccountDropdown = () => {
         
         <DropdownMenuSeparator />
         
-        {profile?.wallet_address ? (
-          <DropdownMenuItem className="flex items-center gap-2 cursor-pointer hover:bg-secondary/50 transition-smooth">
-            <Wallet className="w-4 h-4 text-accent" />
-            <div className="flex flex-col flex-1 min-w-0">
-              <span className="text-xs text-muted-foreground">Connected Wallet</span>
-              <span className="text-xs font-mono truncate text-foreground">
-                {profile.wallet_address.slice(0, 6)}...{profile.wallet_address.slice(-4)}
-              </span>
-            </div>
-          </DropdownMenuItem>
-        ) : null}
-        
-        <DropdownMenuSeparator />
         
         <DropdownMenuItem 
           onClick={() => navigate('/pricing')}
@@ -120,24 +107,6 @@ export const AccountDropdown = () => {
           <User className="w-4 h-4 mr-2" />
           Profile
         </DropdownMenuItem>
-        
-        {profile?.wallet_address ? (
-          <DropdownMenuItem 
-            onClick={disconnectWallet}
-            className="cursor-pointer hover:bg-secondary/50 transition-smooth"
-          >
-            <Wallet className="w-4 h-4 mr-2" />
-            Disconnect Wallet
-          </DropdownMenuItem>
-        ) : (
-          <DropdownMenuItem 
-            onClick={connectWallet}
-            className="cursor-pointer hover:bg-secondary/50 transition-smooth"
-          >
-            <Wallet className="w-4 h-4 mr-2" />
-            Connect Wallet
-          </DropdownMenuItem>
-        )}
         
         <DropdownMenuItem className="cursor-pointer hover:bg-secondary/50 transition-smooth">
           <Settings className="w-4 h-4 mr-2" />

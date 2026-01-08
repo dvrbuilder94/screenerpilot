@@ -7,14 +7,12 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Wallet } from 'lucide-react';
-
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { signUp, signIn, signInWithGoogle, connectWallet, user } = useAuth();
+  const { signUp, signIn, signInWithGoogle, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -82,26 +80,6 @@ const Auth = () => {
       setIsLoading(false);
     }
     // No need to setIsLoading(false) on success - redirect happens
-  };
-
-  const handleWalletConnect = async () => {
-    setIsLoading(true);
-    const { error } = await connectWallet();
-
-    if (error) {
-      toast({
-        title: 'Error',
-        description: error,
-        variant: 'destructive',
-      });
-    } else {
-      toast({
-        title: 'Success',
-        description: 'Wallet connected!',
-      });
-    }
-
-    setIsLoading(false);
   };
 
   return (
@@ -229,15 +207,6 @@ const Auth = () => {
               Continue with Google
             </Button>
 
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleWalletConnect}
-              disabled={isLoading}
-            >
-              <Wallet className="mr-2 h-4 w-4" />
-              Connect Wallet (Web3)
-            </Button>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">

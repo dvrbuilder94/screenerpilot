@@ -48,6 +48,13 @@ const ratioDescriptions: Record<string, string> = {
   "Palladium/Gold": "Reflects industrial demand vs safe haven",
 };
 
+const rareEarthsData = [
+  { symbol: "MP", name: "MP Materials", description: "Largest rare earth producer in the Western Hemisphere" },
+  { symbol: "LYSCF", name: "Lynas Rare Earths", description: "Major rare earth miner and processor in Australia" },
+  { symbol: "ILHMF", name: "Iluka Resources", description: "Mineral sands and rare earth producer" },
+  { symbol: "REMX", name: "VanEck Rare Earth ETF", description: "ETF tracking rare earth and strategic metals companies" },
+];
+
 async function fetchCommodityCandles(yahooSymbol: string, interval: Interval): Promise<Candle[]> {
   try {
     const { data, error } = await supabase.functions.invoke("fetch-stock-data", {

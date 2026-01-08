@@ -54,8 +54,9 @@ export default function Performance() {
             <span>{t('performance.fullyAutomated', language)}</span>
             <span>·</span>
             <span>{t('performance.dailySignals', language)}</span>
-            <span>·</span>
-            <span>{t('performance.noLeverage', language)}</span>
+          </p>
+          <p className="text-xs text-muted-foreground/80 mt-2 italic">
+            {t('performance.disclaimer', language)}
           </p>
         </div>
 

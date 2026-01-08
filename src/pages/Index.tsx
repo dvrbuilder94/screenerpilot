@@ -121,14 +121,15 @@ export default function Index() {
     try {
       const allTickers: Symbol[] = [
         ...presets.crypto,
+        ...presets.etf,
+        ...presets.index,
         ...(presets.commodities || []),
         ...presets.stocks,
-        ...presets.index,
-        ...presets.etf,
       ];
 
-      // Increased max tickers to support larger stock universe
-      const maxTickers = 200;
+      // Increased max tickers to support larger asset universe
+      const maxTickers = 300;
+      const failedTickers: string[] = [];
       const tickersToScan = allTickers.slice(0, maxTickers);
 
       const results = await Promise.allSettled(
@@ -145,7 +146,8 @@ export default function Index() {
               ]);
             } catch (fetchError) {
               // Skip tickers that fail to fetch (404, timeout, etc.)
-              console.warn(`Skipping ${ticker}: fetch failed`);
+              console.warn(`Skipping ${ticker}: fetch failed`, fetchError);
+              failedTickers.push(ticker);
               return null;
             }
 
@@ -203,7 +205,12 @@ export default function Index() {
       }
 
       setAllSignals(validSetups);
-      toast.success(`Scanned ${validSetups.length} assets`);
+      
+      if (failedTickers.length > 0) {
+        console.warn(`Failed tickers (${failedTickers.length}):`, failedTickers.join(', '));
+      }
+      
+      toast.success(`Scanned ${validSetups.length} assets${failedTickers.length > 0 ? ` (${failedTickers.length} failed)` : ''}`);
     } catch (error) {
       console.error("Error in scanAllTickers:", error);
       toast.error("Error scanning assets");

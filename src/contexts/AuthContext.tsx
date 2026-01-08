@@ -25,7 +25,8 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signInWithGoogle: () => Promise<{ error: any }>;
+  verifyOtp: (email: string, token: string) => Promise<{ error: any }>;
+  resendOtp: (email: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -91,13 +92,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, displayName?: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl,
         data: {
           display_name: displayName || email.split('@')[0],
         },
@@ -116,13 +114,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { error };
   };
 
-  const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/`,
-      },
+  const verifyOtp = async (email: string, token: string) => {
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'signup',
     });
+    
+    return { error };
+  };
+
+  const resendOtp = async (email: string) => {
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+    });
+    
     return { error };
   };
 
@@ -142,7 +149,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         loading,
         signUp,
         signIn,
-        signInWithGoogle,
+        verifyOtp,
+        resendOtp,
         signOut,
       }}
     >

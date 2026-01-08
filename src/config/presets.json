@@ -52,8 +52,14 @@
     "CMG", "YUM", "DPZ", "DRI", "F", "GM", "HON", "GE", "CAT",
     "DE", "RTX", "LMT", "NOC", "BA", "UPS", "FDX",
     "NEE", "DUK", "SO", "D", "SRE", "PEG", "ED",
-    "WEC", "ES", "AWK", "ATO"
+    "WEC", "ES", "AWK", "ATO",
+    "FIGS", "XPEV", "RIVN", "SOFI", "ENPH", "SEDG", "WDC"
   ],
-  "indices": ["^GSPC", "^RUT", "^NDX"],
-  "etf_alt": ["SPY", "IWM", "QQQ"]
+  "index": ["^GSPC", "^RUT", "^NDX", "^DJI", "^VIX"],
+  "etf": [
+    "SPY", "IWM", "QQQ", "DIA", "XLF", "XLE", "XLK",
+    "IVV", "IEFA", "AGG", "IJH", "IJR", "EFA", "EEM",
+    "IWF", "IWD", "LQD", "HYG", "TIP", "IWB", "IWN", "IWO",
+    "IEMG", "ITOT", "IXUS", "SHY", "TLT", "GLD", "SLV"
+  ]
 }

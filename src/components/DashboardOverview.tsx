@@ -1,11 +1,13 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, ArrowRight, BarChart3, Activity, Target } from "lucide-react";
+import { TrendingUp, TrendingDown, ArrowRight, BarChart3, Activity, Target, ChevronUp, ChevronDown, Search } from "lucide-react";
 import { TradingSetup, SignalType } from "@/types/trading";
 import { Sparkline } from "@/components/Sparkline";
 import { getAssetName } from "@/lib/assetNames";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { CategoryFilterTabs } from "@/components/CategoryFilterTabs";
 import {
   Table,
   TableBody,
@@ -15,13 +17,26 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+type SortField = "symbol" | "price" | "change" | "signal" | "confidence" | "trend";
+type SortDirection = "asc" | "desc";
+
 interface DashboardOverviewProps {
   allSignals: TradingSetup[];
   onSelectSymbol: (symbol: string) => void;
   isLoading: boolean;
   searchQuery: string;
   category: string;
+  onSearchChange?: (query: string) => void;
+  onCategoryChange?: (category: string) => void;
 }
+
+const signalOrder: Record<SignalType, number> = {
+  STRONG_BUY: 5,
+  BUY: 4,
+  HOLD: 3,
+  SELL: 2,
+  STRONG_SELL: 1,
+};
 
 export function DashboardOverview({
   allSignals,
@@ -29,7 +44,12 @@ export function DashboardOverview({
   isLoading,
   searchQuery,
   category,
+  onSearchChange,
+  onCategoryChange,
 }: DashboardOverviewProps) {
+  const [sortField, setSortField] = useState<SortField>("confidence");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+
   // Filter signals by category and search
   const filteredSignals = useMemo(() => {
     let signals = allSignals;
@@ -71,13 +91,56 @@ export function DashboardOverview({
     };
   }, [filteredSignals]);
 
-  // Sort by combined confidence descending
+  // Sort signals
   const sortedSignals = useMemo(() => {
-    return [...filteredSignals].sort((a, b) => b.combinedConfidence - a.combinedConfidence);
-  }, [filteredSignals]);
+    return [...filteredSignals].sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortField) {
+        case "symbol":
+          comparison = a.symbol.localeCompare(b.symbol);
+          break;
+        case "price":
+          comparison = a.currentPrice - b.currentPrice;
+          break;
+        case "change":
+          comparison = (a.priceChange24h || 0) - (b.priceChange24h || 0);
+          break;
+        case "signal":
+          comparison = signalOrder[a.macroSignal.signal] - signalOrder[b.macroSignal.signal];
+          break;
+        case "confidence":
+          comparison = a.macroSignal.confidence - b.macroSignal.confidence;
+          break;
+        case "trend":
+          comparison = a.macroSignal.trend.localeCompare(b.macroSignal.trend);
+          break;
+      }
+      
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+  }, [filteredSignals, sortField, sortDirection]);
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("desc");
+    }
+  };
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return null;
+    return sortDirection === "asc" ? (
+      <ChevronUp className="h-3 w-3 inline ml-1" />
+    ) : (
+      <ChevronDown className="h-3 w-3 inline ml-1" />
+    );
+  };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Page Header */}
       <div>
         <h1 className="text-2xl font-semibold text-foreground">Market Overview</h1>
@@ -116,6 +179,31 @@ export function DashboardOverview({
         />
       </div>
 
+      {/* Filters Row (above table like Coinglass) */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        {/* Category Tabs */}
+        {onCategoryChange && (
+          <CategoryFilterTabs
+            category={category}
+            onCategoryChange={onCategoryChange}
+          />
+        )}
+
+        {/* Search */}
+        {onSearchChange && (
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search assets..."
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="pl-9 h-9 bg-muted/50 border-border/50 rounded-lg"
+            />
+          </div>
+        )}
+      </div>
+
       {/* Asset Table */}
       <Card className="border-border/50 shadow-sm">
         <CardHeader className="pb-4">
@@ -143,13 +231,43 @@ export function DashboardOverview({
                 <Table>
                   <TableHeader>
                     <TableRow className="hover:bg-transparent border-border/50">
-                      <TableHead className="w-[200px]">Asset</TableHead>
-                      <TableHead className="text-right">Price</TableHead>
-                      <TableHead className="text-right">24h %</TableHead>
+                      <TableHead 
+                        className="w-[200px] cursor-pointer hover:text-foreground"
+                        onClick={() => handleSort("symbol")}
+                      >
+                        Asset <SortIcon field="symbol" />
+                      </TableHead>
+                      <TableHead 
+                        className="text-right cursor-pointer hover:text-foreground"
+                        onClick={() => handleSort("price")}
+                      >
+                        Price <SortIcon field="price" />
+                      </TableHead>
+                      <TableHead 
+                        className="text-right cursor-pointer hover:text-foreground"
+                        onClick={() => handleSort("change")}
+                      >
+                        24h % <SortIcon field="change" />
+                      </TableHead>
                       <TableHead className="w-[80px]">Chart</TableHead>
-                      <TableHead className="text-center">Signal</TableHead>
-                      <TableHead className="text-center">Confidence</TableHead>
-                      <TableHead className="text-center">Trend</TableHead>
+                      <TableHead 
+                        className="text-center cursor-pointer hover:text-foreground"
+                        onClick={() => handleSort("signal")}
+                      >
+                        Signal <SortIcon field="signal" />
+                      </TableHead>
+                      <TableHead 
+                        className="text-center cursor-pointer hover:text-foreground"
+                        onClick={() => handleSort("confidence")}
+                      >
+                        Confidence <SortIcon field="confidence" />
+                      </TableHead>
+                      <TableHead 
+                        className="text-center cursor-pointer hover:text-foreground"
+                        onClick={() => handleSort("trend")}
+                      >
+                        Trend <SortIcon field="trend" />
+                      </TableHead>
                       <TableHead className="w-[40px]"></TableHead>
                     </TableRow>
                   </TableHeader>

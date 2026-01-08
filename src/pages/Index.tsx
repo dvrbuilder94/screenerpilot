@@ -272,16 +272,7 @@ export default function Index() {
     <>
       <TradingAIWidget />
       <div className="flex flex-col min-h-screen w-full bg-background">
-        {/* Header with search and category tabs */}
-        <AppHeader
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          assetCategory={assetCategory}
-          onCategoryChange={setAssetCategory}
-          showAssetFilters={true}
-        />
-
-        {/* Main Content - Full width, no sidebar */}
+        {/* Main Content - Full width, filters inside DashboardOverview */}
         <main className="flex-1 overflow-auto">
           <div className="p-4 md:p-6 lg:p-8">
             <div className="max-w-[1400px] mx-auto">
@@ -291,6 +282,8 @@ export default function Index() {
                 isLoading={isScanningAll}
                 searchQuery={searchQuery}
                 category={assetCategory}
+                onSearchChange={setSearchQuery}
+                onCategoryChange={setAssetCategory}
               />
             </div>
           </div>

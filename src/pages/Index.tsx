@@ -11,6 +11,7 @@ import SignalsList from "@/components/SignalsList";
 import { SignalsSidebar } from "@/components/SignalsSidebar";
 import { TradingStyleSelector } from "@/components/TradingStyleSelector";
 import StockNews from "@/components/StockNews";
+import { AssetSentiment } from "@/components/AssetSentiment";
 import MiniChart from "@/components/MiniChart";
 import CandleTable from "@/components/CandleTable";
 import GroupRanking, { GroupSymbolData } from "@/components/GroupRanking";
@@ -448,11 +449,14 @@ export default function Index() {
 
             {/* Trading Style & Market Sentiment */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-1">
                 <TradingStyleSelector
                   selectedStyle={tradingStyle}
                   onStyleChange={setTradingStyle}
                 />
+              </div>
+              <div className="lg:col-span-1">
+                <AssetSentiment symbol={symbol} />
               </div>
               <div className="lg:col-span-1">
                 <StockNews symbol={symbol} />

@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EquityCurve } from "@/components/performance/EquityCurve";
 import { MetricCard } from "@/components/performance/MetricCard";
 import { TradeHistory } from "@/components/performance/TradeHistory";
-import { usePerformanceData } from "@/hooks/usePerformanceData";
+import { usePerformanceData, filterEquityCurveForView } from "@/hooks/usePerformanceData";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { t } from "@/lib/translations";
 import {
@@ -16,8 +16,14 @@ import {
 
 export default function Performance() {
   const [timeRange, setTimeRange] = useState<"all" | "6m" | "3m">("all");
-  const { data, isLoading, error } = usePerformanceData(timeRange);
+  const { data, isLoading, error } = usePerformanceData();
   const { language } = useLanguage();
+
+  // Filter equity curve for display - data is fetched once, filtering happens on client
+  const filteredEquityCurve = useMemo(() => {
+    if (!data?.fullEquityCurve) return [];
+    return filterEquityCurveForView(data.fullEquityCurve, timeRange);
+  }, [data?.fullEquityCurve, timeRange]);
 
   if (error) {
     return (
@@ -60,7 +66,7 @@ export default function Performance() {
           </Card>
         ) : data ? (
           <EquityCurve
-            data={data.equityCurve}
+            data={filteredEquityCurve}
             timeRange={timeRange}
             onTimeRangeChange={setTimeRange}
           />

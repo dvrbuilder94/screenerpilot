@@ -12,7 +12,7 @@ export const assetCategories = [
   { value: "stock", label: "Stocks" },
   { value: "crypto", label: "Crypto" },
   { value: "etf", label: "ETFs" },
-  { value: "index", label: "Indices" },
+  { value: "index", label: "Index" },
   { value: "commodity", label: "Commodities" },
 ];
 

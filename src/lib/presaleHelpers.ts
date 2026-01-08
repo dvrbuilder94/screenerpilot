@@ -1,6 +1,9 @@
 import { ethers } from "ethers";
 import { PRESALE_CONFIG, UserContribution } from "@/types/presale";
 
+// Type for window.ethereum
+const getEthereum = () => (window as any).ethereum;
+
 /**
  * Fetches user contributions to the presale address
  * TODO: Integrate with Base chain explorer API (Basescan) or RPC provider
@@ -64,17 +67,18 @@ export async function validateBaseNetwork(provider: ethers.BrowserProvider): Pro
  * Prompts user to switch to Base network
  */
 export async function switchToBaseNetwork(): Promise<void> {
-  if (!window.ethereum) throw new Error("No wallet detected");
+  const ethereum = getEthereum();
+  if (!ethereum) throw new Error("No wallet detected");
   
   try {
-    await window.ethereum.request({
+    await ethereum.request({
       method: 'wallet_switchEthereumChain',
       params: [{ chainId: `0x${PRESALE_CONFIG.baseChainId.toString(16)}` }],
     });
   } catch (error: any) {
     // Chain not added, attempt to add it
     if (error.code === 4902) {
-      await window.ethereum.request({
+      await ethereum.request({
         method: 'wallet_addEthereumChain',
         params: [{
           chainId: `0x${PRESALE_CONFIG.baseChainId.toString(16)}`,

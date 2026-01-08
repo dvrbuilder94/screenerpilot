@@ -9,6 +9,9 @@ import { PRESALE_CONFIG } from "@/types/presale";
 import { fetchUserContributions, validateBaseNetwork, switchToBaseNetwork } from "@/lib/presaleHelpers";
 import type { UserContribution } from "@/types/presale";
 
+// Type-safe access to window.ethereum
+const getEthereum = () => (window as any).ethereum;
+
 export default function AlexAIPresale() {
   const { toast } = useToast();
   const [walletAddress, setWalletAddress] = useState<string>("");
@@ -25,7 +28,8 @@ export default function AlexAIPresale() {
   const [isBaseNetwork, setIsBaseNetwork] = useState(false);
 
   const connectWallet = async () => {
-    if (!window.ethereum) {
+    const ethereum = getEthereum();
+    if (!ethereum) {
       toast({
         title: "No Wallet Detected",
         description: "Please install MetaMask or another Web3 wallet",
@@ -36,7 +40,7 @@ export default function AlexAIPresale() {
 
     setIsConnecting(true);
     try {
-      const web3Provider = new ethers.BrowserProvider(window.ethereum);
+      const web3Provider = new ethers.BrowserProvider(ethereum);
       const accounts = await web3Provider.send("eth_requestAccounts", []);
       
       if (accounts.length > 0) {
@@ -112,9 +116,10 @@ export default function AlexAIPresale() {
   };
 
   useEffect(() => {
+    const ethereum = getEthereum();
     // Listen for account changes
-    if (window.ethereum) {
-      window.ethereum.on("accountsChanged", (accounts: string[]) => {
+    if (ethereum) {
+      ethereum.on("accountsChanged", (accounts: string[]) => {
         if (accounts.length > 0) {
           setWalletAddress(accounts[0]);
           if (provider) {
@@ -126,7 +131,7 @@ export default function AlexAIPresale() {
         }
       });
 
-      window.ethereum.on("chainChanged", () => {
+      ethereum.on("chainChanged", () => {
         window.location.reload();
       });
     }

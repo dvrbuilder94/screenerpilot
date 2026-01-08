@@ -1,96 +1,117 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SYSTEM_PROMPT = `You are a concise macro analyst. Generate a ONE sentence market insight (max 25 words) covering:
-- Overall risk sentiment (risk-on/risk-off)
-- Key cross-asset themes
+const SYSTEM_PROMPT = `
+You are a senior macro strategist at an institutional trading desk.
 
-Be actionable and data-driven. Never use bullet points. Start with the most important insight.`;
+Generate ONE concise weekly macro insight (max 25 words).
+Requirements:
+- Clearly state risk-on or risk-off
+- Integrate crypto, equities, commodities, volatility
+- Reference Fed stance or major macro events if relevant
+- Mention key upcoming or recent events only if impactful
+- Professional, neutral, no investment advice
+- No bullet points, one sentence only
+Start with the most important macro takeaway.
+`;
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
-    // Fetch latest snapshots for key assets
-    const { data: snapshots } = await supabase
-      .from('asset_snapshots')
-      .select('symbol, asset_type, signal_type, rsi, trend, current_price')
-      .in('symbol', ['BTCUSDT', 'ETHUSDT', '^GSPC', '^VIX', 'GC=F', 'CL=F'])
-      .eq('interval', '1d')
-      .order('calculated_at', { ascending: false })
-      .limit(6);
+    /* -------------------------------
+       1️⃣ FETCH LATEST ASSET SNAPSHOTS
+    --------------------------------*/
+    const { data: assets } = await supabase
+      .from("asset_snapshots")
+      .select("symbol, signal_type, rsi, trend")
+      .in("symbol", ["BTCUSDT", "ETHUSDT", "^GSPC", "^VIX", "GC=F", "CL=F"])
+      .eq("interval", "1d")
+      .order("calculated_at", { ascending: false });
 
-    // Build context for AI
-    let marketContext = "Current market data:\n";
-    
-    if (snapshots && snapshots.length > 0) {
-      for (const s of snapshots) {
-        marketContext += `- ${s.symbol}: ${s.signal_type || 'neutral'}, RSI ${s.rsi?.toFixed(0) || 'N/A'}, trend ${s.trend || 'N/A'}\n`;
+    /* -------------------------------
+       2️⃣ FETCH IMPORTANT MACRO EVENTS
+    --------------------------------*/
+    const { data: events } = await supabase
+      .from("macro_events")
+      .select("title, category, impact")
+      .gte("event_date", new Date(Date.now() - 7 * 86400000).toISOString())
+      .order("impact", { ascending: false })
+      .limit(5);
+
+    /* -------------------------------
+       3️⃣ BUILD STRUCTURED CONTEXT
+    --------------------------------*/
+    let context = "Cross-asset signals:\n";
+
+    if (assets && assets.length > 0) {
+      for (const a of assets) {
+        context += `${a.symbol}: ${a.signal_type || "neutral"}, trend ${a.trend || "flat"}, RSI ${Math.round(a.rsi ?? 0)}.\n`;
+      }
+    }
+
+    context += "\nMacro & policy context:\n";
+
+    if (events && events.length > 0) {
+      for (const e of events) {
+        context += `${e.category} event: ${e.title} (${e.impact} impact).\n`;
       }
     } else {
-      marketContext += "No recent data available. Provide a general market outlook.";
+      context += "No major scheduled macro events.\n";
     }
 
-    // Call AI gateway
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
-    }
-
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
+    /* -------------------------------
+       4️⃣ AI SYNTHESIS
+    --------------------------------*/
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: "google/gemini-2.5-flash",
+        temperature: 0.4,
+        max_tokens: 80,
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: marketContext }
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: context },
         ],
-        max_tokens: 100,
       }),
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('AI gateway error:', response.status, errorText);
-      
-      // Return fallback insight
-      return new Response(JSON.stringify({ 
-        insight: "Markets are showing mixed signals across asset classes. Monitor VIX and key support levels." 
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+      throw new Error("AI gateway error");
     }
 
     const data = await response.json();
-    const insight = data.choices?.[0]?.message?.content?.trim() || 
-      "Cross-asset analysis in progress. Check individual sectors for detailed signals.";
+    const insight =
+      data.choices?.[0]?.message?.content?.replace(/\n/g, " ")?.trim()?.slice(0, 200) ??
+      "Risk sentiment remains mixed as markets digest macro data and policy signals.";
 
     return new Response(JSON.stringify({ insight }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-
-  } catch (error) {
-    console.error('Error in dashboard-insight:', error);
-    return new Response(JSON.stringify({ 
-      insight: "Market analysis temporarily unavailable. Please check individual asset signals." 
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+  } catch (err) {
+    console.error(err);
+    return new Response(
+      JSON.stringify({
+        insight:
+          "Macro visibility remains limited as markets await clearer signals from policy and upcoming economic events.",
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
 });

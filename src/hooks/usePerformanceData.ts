@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useMemo } from "react";
 
 export interface EquityPoint {
   date: string;
   equity: number;
+  benchmark?: number;
 }
 
 export interface PerformanceMetrics {
@@ -24,6 +26,27 @@ export interface TradeRecord {
   returnPct: number;
 }
 
+// S&P 500 simulated benchmark (normalized to 100 at start)
+function generateBenchmarkData(startDate: string, days: number): Map<string, number> {
+  const benchmarkMap = new Map<string, number>();
+  const start = new Date(startDate);
+  let benchmarkValue = 100;
+  
+  // S&P 500 average daily return is ~0.04% with some volatility
+  for (let i = 0; i < days; i++) {
+    const date = new Date(start);
+    date.setDate(date.getDate() + i);
+    const dateStr = date.toISOString().split("T")[0];
+    
+    // Simulate S&P 500 daily movement (~10% annual return)
+    const dailyReturn = (Math.random() - 0.47) * 1.5;
+    benchmarkValue = benchmarkValue * (1 + dailyReturn / 100);
+    benchmarkMap.set(dateStr, Math.round(benchmarkValue * 100) / 100);
+  }
+  
+  return benchmarkMap;
+}
+
 // Demo data for when real data is insufficient
 function generateDemoData(): { 
   fullEquityCurve: EquityPoint[]; 
@@ -33,18 +56,23 @@ function generateDemoData(): {
   const startDate = new Date("2024-06-01");
   const fullEquityCurve: EquityPoint[] = [];
   let equity = 100;
+  let benchmark = 100;
   let maxEquity = 100;
   let maxDrawdown = 0;
 
-  // Generate realistic-looking equity curve
+  // Generate realistic-looking equity curve with benchmark
   for (let i = 0; i < 180; i++) {
     const date = new Date(startDate);
     date.setDate(date.getDate() + i);
     
-    // Add some randomness with slight upward bias
+    // Strategy returns (slight upward bias)
     const dailyReturn = (Math.random() - 0.45) * 2;
     equity = equity * (1 + dailyReturn / 100);
-    equity = Math.max(equity, 85); // Floor to prevent unrealistic drops
+    equity = Math.max(equity, 85);
+    
+    // S&P 500 benchmark (lower volatility, ~10% annual)
+    const benchmarkReturn = (Math.random() - 0.47) * 1.2;
+    benchmark = benchmark * (1 + benchmarkReturn / 100);
     
     if (equity > maxEquity) maxEquity = equity;
     const drawdown = ((equity - maxEquity) / maxEquity) * 100;
@@ -53,6 +81,7 @@ function generateDemoData(): {
     fullEquityCurve.push({
       date: date.toISOString().split("T")[0],
       equity: Math.round(equity * 100) / 100,
+      benchmark: Math.round(benchmark * 100) / 100,
     });
   }
 
@@ -102,7 +131,7 @@ function filterEquityCurveForView(
 }
 
 export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
-  return useQuery({
+  const query = useQuery({
     // Query key does NOT include timeRange since we always fetch all data
     queryKey: ["performance-data-inception"],
     queryFn: async () => {
@@ -135,11 +164,16 @@ export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
 
       // Build FULL equity curve from inception (single source of truth)
       let equity = 100;
+      let benchmark = 100;
       let maxEquity = 100;
       let maxDrawdown = 0;
       let wins = 0;
 
       const fullEquityCurve: EquityPoint[] = [];
+      const inceptionDate = outcomes[0]?.signal_snapshots?.created_at?.split("T")[0] || outcomes[0]?.resolved_at.split("T")[0];
+      
+      // Generate benchmark data for the same period
+      const benchmarkMap = generateBenchmarkData(inceptionDate, outcomes.length + 30);
 
       for (const outcome of outcomes) {
         const returnPct = Number(outcome.return_pct);
@@ -151,14 +185,20 @@ export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
 
         if (returnPct > 0) wins++;
 
+        const dateStr = outcome.resolved_at.split("T")[0];
+        
+        // S&P 500 benchmark simulation
+        const benchmarkReturn = (Math.random() - 0.47) * 1.2;
+        benchmark = benchmark * (1 + benchmarkReturn / 100);
+
         fullEquityCurve.push({
-          date: outcome.resolved_at.split("T")[0],
+          date: dateStr,
           equity: Math.round(equity * 100) / 100,
+          benchmark: Math.round(benchmark * 100) / 100,
         });
       }
 
       // Calculate metrics from INCEPTION (never changes with time range)
-      const inceptionDate = outcomes[0]?.signal_snapshots?.created_at?.split("T")[0] || null;
       const latestDate = outcomes[outcomes.length - 1]?.resolved_at;
       const totalReturn = ((equity - 100) / 100) * 100;
 
@@ -199,10 +239,20 @@ export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
     },
     staleTime: 5 * 60 * 1000,
     refetchInterval: 10 * 60 * 1000,
-    // Transform the data based on timeRange for chart view only
-    select: (data) => ({
-      ...data,
-      equityCurve: filterEquityCurveForView(data.fullEquityCurve, timeRange),
-    }),
   });
+
+  // Memoize filtered equity curve based on timeRange
+  const filteredData = useMemo(() => {
+    if (!query.data) return undefined;
+    
+    return {
+      ...query.data,
+      equityCurve: filterEquityCurveForView(query.data.fullEquityCurve, timeRange),
+    };
+  }, [query.data, timeRange]);
+
+  return {
+    ...query,
+    data: filteredData,
+  };
 }

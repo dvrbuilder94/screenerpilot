@@ -134,10 +134,21 @@ export default function Index() {
       tickersToScan.map(async (ticker) => {
         try {
           const assetType = getAssetType(ticker);
-          const macroCandles = await fetchCandles(ticker, macroInterval, 200);
-          const microCandles = await fetchCandles(ticker, microInterval, 200);
+          
+          // Fetch with error handling - skip failed tickers gracefully
+          let macroCandles, microCandles;
+          try {
+            [macroCandles, microCandles] = await Promise.all([
+              fetchCandles(ticker, macroInterval, 200),
+              fetchCandles(ticker, microInterval, 200),
+            ]);
+          } catch (fetchError) {
+            // Skip tickers that fail to fetch (404, timeout, etc.)
+            console.warn(`Skipping ${ticker}: fetch failed`);
+            return null;
+          }
 
-          if (!macroCandles.length || !microCandles.length) {
+          if (!macroCandles?.length || !microCandles?.length) {
             return null;
           }
 

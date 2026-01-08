@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useMemo } from "react";
 
 export interface EquityPoint {
   date: string;
@@ -26,32 +25,12 @@ export interface TradeRecord {
   returnPct: number;
 }
 
-// S&P 500 simulated benchmark (normalized to 100 at start)
-function generateBenchmarkData(startDate: string, days: number): Map<string, number> {
-  const benchmarkMap = new Map<string, number>();
-  const start = new Date(startDate);
-  let benchmarkValue = 100;
-  
-  // S&P 500 average daily return is ~0.04% with some volatility
-  for (let i = 0; i < days; i++) {
-    const date = new Date(start);
-    date.setDate(date.getDate() + i);
-    const dateStr = date.toISOString().split("T")[0];
-    
-    // Simulate S&P 500 daily movement (~10% annual return)
-    const dailyReturn = (Math.random() - 0.47) * 1.5;
-    benchmarkValue = benchmarkValue * (1 + dailyReturn / 100);
-    benchmarkMap.set(dateStr, Math.round(benchmarkValue * 100) / 100);
-  }
-  
-  return benchmarkMap;
-}
-
 // Demo data for when real data is insufficient
-function generateDemoData(): { 
-  fullEquityCurve: EquityPoint[]; 
+function generateDemoData(timeRange: "all" | "6m" | "3m"): { 
+  equityCurve: EquityPoint[]; 
   metrics: PerformanceMetrics; 
-  trades: TradeRecord[] 
+  trades: TradeRecord[];
+  isDemo: boolean;
 } {
   const startDate = new Date("2024-06-01");
   const fullEquityCurve: EquityPoint[] = [];
@@ -90,8 +69,11 @@ function generateDemoData(): {
   const years = 180 / 365.25;
   const cagr = (Math.pow(finalEquity / 100, 1 / years) - 1) * 100;
 
+  // Filter for chart view only
+  const equityCurve = filterEquityCurveForView(fullEquityCurve, timeRange);
+
   return {
-    fullEquityCurve,
+    equityCurve,
     metrics: {
       totalReturn: Math.round(totalReturn * 100) / 100,
       cagr: Math.round(cagr * 100) / 100,
@@ -107,6 +89,7 @@ function generateDemoData(): {
       { id: "4", asset: "SPY", signal: "BUY", entryDate: "2024-11-15", exitDate: "2024-11-22", returnPct: 1.9 },
       { id: "5", asset: "SOLUSDT", signal: "BUY", entryDate: "2024-11-10", exitDate: "2024-11-17", returnPct: 8.3 },
     ],
+    isDemo: true,
   };
 }
 
@@ -131,9 +114,9 @@ function filterEquityCurveForView(
 }
 
 export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
-  const query = useQuery({
-    // Query key does NOT include timeRange since we always fetch all data
-    queryKey: ["performance-data-inception"],
+  return useQuery({
+    // Include timeRange in query key for proper re-filtering
+    queryKey: ["performance-data", timeRange],
     queryFn: async () => {
       // Fetch ALL signal outcomes with their snapshots (inception-based)
       const { data: outcomes, error } = await supabase
@@ -158,8 +141,7 @@ export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
 
       // If insufficient data, return demo data
       if (!outcomes || outcomes.length < 10) {
-        const demo = generateDemoData();
-        return { ...demo, isDemo: true };
+        return generateDemoData(timeRange);
       }
 
       // Build FULL equity curve from inception (single source of truth)
@@ -171,9 +153,6 @@ export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
 
       const fullEquityCurve: EquityPoint[] = [];
       const inceptionDate = outcomes[0]?.signal_snapshots?.created_at?.split("T")[0] || outcomes[0]?.resolved_at.split("T")[0];
-      
-      // Generate benchmark data for the same period
-      const benchmarkMap = generateBenchmarkData(inceptionDate, outcomes.length + 30);
 
       for (const outcome of outcomes) {
         const returnPct = Number(outcome.return_pct);
@@ -223,8 +202,11 @@ export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
         returnPct: Math.round(Number(o.return_pct) * 100) / 100,
       }));
 
+      // Filter equity curve for chart view (metrics stay the same)
+      const equityCurve = filterEquityCurveForView(fullEquityCurve, timeRange);
+
       return {
-        fullEquityCurve,
+        equityCurve,
         metrics: {
           totalReturn: Math.round(totalReturn * 100) / 100,
           cagr: Math.round(cagr * 100) / 100,
@@ -240,19 +222,4 @@ export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
     staleTime: 5 * 60 * 1000,
     refetchInterval: 10 * 60 * 1000,
   });
-
-  // Memoize filtered equity curve based on timeRange
-  const filteredData = useMemo(() => {
-    if (!query.data) return undefined;
-    
-    return {
-      ...query.data,
-      equityCurve: filterEquityCurveForView(query.data.fullEquityCurve, timeRange),
-    };
-  }, [query.data, timeRange]);
-
-  return {
-    ...query,
-    data: filteredData,
-  };
 }

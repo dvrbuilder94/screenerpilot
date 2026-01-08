@@ -25,10 +25,16 @@ export interface TradeRecord {
 }
 
 // Demo data for when real data is insufficient
-function generateDemoData(): { equityCurve: EquityPoint[]; metrics: PerformanceMetrics; trades: TradeRecord[] } {
+function generateDemoData(): { 
+  fullEquityCurve: EquityPoint[]; 
+  metrics: PerformanceMetrics; 
+  trades: TradeRecord[] 
+} {
   const startDate = new Date("2024-06-01");
-  const equityCurve: EquityPoint[] = [];
+  const fullEquityCurve: EquityPoint[] = [];
   let equity = 100;
+  let maxEquity = 100;
+  let maxDrawdown = 0;
 
   // Generate realistic-looking equity curve
   for (let i = 0; i < 180; i++) {
@@ -40,21 +46,27 @@ function generateDemoData(): { equityCurve: EquityPoint[]; metrics: PerformanceM
     equity = equity * (1 + dailyReturn / 100);
     equity = Math.max(equity, 85); // Floor to prevent unrealistic drops
     
-    equityCurve.push({
+    if (equity > maxEquity) maxEquity = equity;
+    const drawdown = ((equity - maxEquity) / maxEquity) * 100;
+    if (drawdown < maxDrawdown) maxDrawdown = drawdown;
+    
+    fullEquityCurve.push({
       date: date.toISOString().split("T")[0],
       equity: Math.round(equity * 100) / 100,
     });
   }
 
-  const finalEquity = equityCurve[equityCurve.length - 1].equity;
+  const finalEquity = fullEquityCurve[fullEquityCurve.length - 1].equity;
   const totalReturn = ((finalEquity - 100) / 100) * 100;
+  const years = 180 / 365.25;
+  const cagr = (Math.pow(finalEquity / 100, 1 / years) - 1) * 100;
 
   return {
-    equityCurve,
+    fullEquityCurve,
     metrics: {
       totalReturn: Math.round(totalReturn * 100) / 100,
-      cagr: Math.round(totalReturn * 2 * 100) / 100, // Annualized approximation
-      maxDrawdown: -8.5,
+      cagr: Math.round(cagr * 100) / 100,
+      maxDrawdown: Math.round(maxDrawdown * 100) / 100,
       winRate: 62.3,
       tradeCount: 47,
       startDate: "2024-06-01",
@@ -69,11 +81,32 @@ function generateDemoData(): { equityCurve: EquityPoint[]; metrics: PerformanceM
   };
 }
 
+/**
+ * Filter equity curve for chart display only.
+ * Metrics are ALWAYS calculated from inception.
+ */
+function filterEquityCurveForView(
+  fullCurve: EquityPoint[],
+  timeRange: "all" | "6m" | "3m"
+): EquityPoint[] {
+  if (timeRange === "all" || fullCurve.length === 0) {
+    return fullCurve;
+  }
+
+  const now = new Date();
+  const months = timeRange === "6m" ? 6 : 3;
+  const cutoff = new Date(now);
+  cutoff.setMonth(cutoff.getMonth() - months);
+
+  return fullCurve.filter((point) => new Date(point.date) >= cutoff);
+}
+
 export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
   return useQuery({
-    queryKey: ["performance-data", timeRange],
+    // Query key does NOT include timeRange since we always fetch all data
+    queryKey: ["performance-data-inception"],
     queryFn: async () => {
-      // Fetch all signal outcomes with their snapshots
+      // Fetch ALL signal outcomes with their snapshots (inception-based)
       const { data: outcomes, error } = await supabase
         .from("signal_outcomes")
         .select(`
@@ -100,26 +133,15 @@ export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
         return { ...demo, isDemo: true };
       }
 
-      // Calculate time range filter
-      let filteredOutcomes = outcomes;
-      if (timeRange !== "all") {
-        const now = new Date();
-        const months = timeRange === "6m" ? 6 : 3;
-        const cutoff = new Date(now.setMonth(now.getMonth() - months));
-        filteredOutcomes = outcomes.filter(
-          (o) => new Date(o.resolved_at) >= cutoff
-        );
-      }
-
-      // Build equity curve
+      // Build FULL equity curve from inception (single source of truth)
       let equity = 100;
       let maxEquity = 100;
       let maxDrawdown = 0;
       let wins = 0;
 
-      const equityCurve: EquityPoint[] = [];
+      const fullEquityCurve: EquityPoint[] = [];
 
-      for (const outcome of filteredOutcomes) {
+      for (const outcome of outcomes) {
         const returnPct = Number(outcome.return_pct);
         equity = equity * (1 + returnPct / 100);
 
@@ -129,29 +151,29 @@ export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
 
         if (returnPct > 0) wins++;
 
-        equityCurve.push({
+        fullEquityCurve.push({
           date: outcome.resolved_at.split("T")[0],
           equity: Math.round(equity * 100) / 100,
         });
       }
 
-      // Calculate metrics
+      // Calculate metrics from INCEPTION (never changes with time range)
+      const inceptionDate = outcomes[0]?.signal_snapshots?.created_at?.split("T")[0] || null;
+      const latestDate = outcomes[outcomes.length - 1]?.resolved_at;
       const totalReturn = ((equity - 100) / 100) * 100;
-      const startDate = outcomes[0]?.signal_snapshots?.created_at?.split("T")[0] || null;
-      const endDate = outcomes[outcomes.length - 1]?.resolved_at;
 
-      // Calculate CAGR
+      // Calculate CAGR from inception
       let cagr = 0;
-      if (startDate && endDate) {
+      if (inceptionDate && latestDate) {
         const years =
-          (new Date(endDate).getTime() - new Date(startDate).getTime()) /
+          (new Date(latestDate).getTime() - new Date(inceptionDate).getTime()) /
           (365.25 * 24 * 60 * 60 * 1000);
         if (years > 0) {
           cagr = (Math.pow(equity / 100, 1 / years) - 1) * 100;
         }
       }
 
-      // Get last 20 trades for history
+      // Get last 20 trades for history (not affected by time range)
       const trades: TradeRecord[] = outcomes.slice(-20).reverse().map((o) => ({
         id: o.id,
         asset: (o.signal_snapshots as any)?.symbol || "Unknown",
@@ -162,14 +184,14 @@ export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
       }));
 
       return {
-        equityCurve,
+        fullEquityCurve,
         metrics: {
           totalReturn: Math.round(totalReturn * 100) / 100,
           cagr: Math.round(cagr * 100) / 100,
           maxDrawdown: Math.round(maxDrawdown * 100) / 100,
-          winRate: Math.round((wins / filteredOutcomes.length) * 10000) / 100,
-          tradeCount: filteredOutcomes.length,
-          startDate,
+          winRate: Math.round((wins / outcomes.length) * 10000) / 100,
+          tradeCount: outcomes.length,
+          startDate: inceptionDate,
         },
         trades,
         isDemo: false,
@@ -177,5 +199,10 @@ export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
     },
     staleTime: 5 * 60 * 1000,
     refetchInterval: 10 * 60 * 1000,
+    // Transform the data based on timeRange for chart view only
+    select: (data) => ({
+      ...data,
+      equityCurve: filterEquityCurveForView(data.fullEquityCurve, timeRange),
+    }),
   });
 }

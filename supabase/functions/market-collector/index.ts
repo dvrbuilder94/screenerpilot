@@ -165,6 +165,36 @@ function generateSignal(
   return { signalType, score, confidence, trend };
 }
 
+// Check if snapshot should be captured (immutable track record)
+async function shouldCaptureSnapshot(
+  supabase: any,
+  symbol: string,
+  timeframe: string,
+  currentSignal: string
+): Promise<boolean> {
+  const { data: lastSnapshot } = await supabase
+    .from('signal_snapshots')
+    .select('signal, created_at')
+    .eq('symbol', symbol)
+    .eq('timeframe', timeframe)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  // Capture if no previous snapshot exists
+  if (!lastSnapshot) return true;
+
+  // Capture if signal changed
+  if (lastSnapshot.signal !== currentSignal) return true;
+
+  // Capture if 24+ hours have passed (daily capture)
+  const lastCreatedAt = new Date(lastSnapshot.created_at).getTime();
+  const hoursSinceLast = (Date.now() - lastCreatedAt) / (1000 * 60 * 60);
+  if (hoursSinceLast >= 24) return true;
+
+  return false;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -181,7 +211,8 @@ serve(async (req) => {
       processed: 0,
       errors: 0,
       candles_saved: 0,
-      snapshots_saved: 0
+      snapshots_saved: 0,
+      track_record_captured: 0
     };
 
     for (const symbol of CRYPTO_UNIVERSE) {
@@ -250,7 +281,7 @@ serve(async (req) => {
             supertrendDir[lastIdx]
           );
 
-          // Save snapshot
+          // Save live snapshot (overwrites - for real-time display)
           await supabase.from('asset_snapshots').upsert({
             symbol,
             asset_type: 'crypto',
@@ -275,8 +306,39 @@ serve(async (req) => {
           }, { onConflict: 'symbol,asset_type,interval' });
 
           results.snapshots_saved++;
-          results.processed++;
 
+          // ========================================
+          // TRACK RECORD: Immutable signal snapshot
+          // ========================================
+          const shouldCapture = await shouldCaptureSnapshot(
+            supabase,
+            symbol,
+            interval,
+            signal.signalType
+          );
+
+          if (shouldCapture) {
+            const { error: snapshotError } = await supabase
+              .from('signal_snapshots')
+              .insert({
+                symbol,
+                asset_type: 'crypto',
+                timeframe: interval,
+                signal: signal.signalType,
+                score: signal.score,
+                confidence: signal.confidence,
+                price_at_signal: currentPrice
+              });
+
+            if (snapshotError) {
+              console.error(`Track record error for ${symbol} ${interval}:`, snapshotError);
+            } else {
+              results.track_record_captured++;
+              console.log(`📸 Track record captured: ${symbol} ${interval} = ${signal.signalType}`);
+            }
+          }
+
+          results.processed++;
           console.log(`✓ Processed ${symbol} ${interval}`);
 
         } catch (error) {

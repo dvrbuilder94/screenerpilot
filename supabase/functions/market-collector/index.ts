@@ -79,11 +79,11 @@ interface Asset {
 
 function buildAssets(): Asset[] {
   return [
-    ...INDICES.map((s) => ({ symbol: s, type: "index", source: "yahoo" })),
-    ...STOCKS.map((s) => ({ symbol: s, type: "stock", source: "yahoo" })),
-    ...ETFS.map((s) => ({ symbol: s, type: "etf", source: "yahoo" })),
-    ...COMMODITIES.map((s) => ({ symbol: s, type: "commodity", source: "yahoo" })),
-    ...CRYPTO.map((s) => ({ symbol: s, type: "crypto", source: "binance" })),
+    ...INDICES.map((s) => ({ symbol: s, type: "index" as const, source: "yahoo" as const })),
+    ...STOCKS.map((s) => ({ symbol: s, type: "stock" as const, source: "yahoo" as const })),
+    ...ETFS.map((s) => ({ symbol: s, type: "etf" as const, source: "yahoo" as const })),
+    ...COMMODITIES.map((s) => ({ symbol: s, type: "commodity" as const, source: "yahoo" as const })),
+    ...CRYPTO.map((s) => ({ symbol: s, type: "crypto" as const, source: "binance" as const })),
   ];
 }
 

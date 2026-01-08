@@ -11,7 +11,7 @@ import Auth from "./pages/Auth";
 import Macro from "./pages/Macro";
 import Commodities from "./pages/Commodities";
 import NotFound from "./pages/NotFound";
-import { PredictionsPage } from "./modules/predictions/PredictionsPage";
+import { TrackRecordPage } from "./modules/track-record";
 
 const queryClient = new QueryClient();
 
@@ -27,9 +27,9 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/track-record" element={<TrackRecordPage />} />
                 <Route path="/macro" element={<Macro />} />
                 <Route path="/commodities" element={<Commodities />} />
-                <Route path="/predictions" element={<PredictionsPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

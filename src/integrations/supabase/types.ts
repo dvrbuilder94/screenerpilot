@@ -270,6 +270,39 @@ export type Database = {
           },
         ]
       }
+      price_expectations: {
+        Row: {
+          created_at: string
+          error_pct: number | null
+          id: string
+          resolved_price: number | null
+          symbol: string
+          target_month: string
+          target_price: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error_pct?: number | null
+          id?: string
+          resolved_price?: number | null
+          symbol: string
+          target_month: string
+          target_price: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error_pct?: number | null
+          id?: string
+          resolved_price?: number | null
+          symbol?: string
+          target_month?: string
+          target_price?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -327,6 +360,33 @@ export type Database = {
           name?: string
           starts_at?: string
           status?: string
+        }
+        Relationships: []
+      }
+      sentiment_votes: {
+        Row: {
+          created_at: string
+          direction: string
+          id: string
+          symbol: string
+          user_id: string
+          vote_date: string
+        }
+        Insert: {
+          created_at?: string
+          direction: string
+          id?: string
+          symbol: string
+          user_id: string
+          vote_date?: string
+        }
+        Update: {
+          created_at?: string
+          direction?: string
+          id?: string
+          symbol?: string
+          user_id?: string
+          vote_date?: string
         }
         Relationships: []
       }

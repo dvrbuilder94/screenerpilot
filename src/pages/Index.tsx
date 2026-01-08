@@ -3,7 +3,6 @@ import { toast } from "sonner";
 import { TradingAIWidget } from "@/components/TradingAIWidget";
 import { DashboardOverview } from "@/components/DashboardOverview";
 import { AssetIntelligencePage } from "@/components/AssetIntelligencePage";
-import { AppHeader } from "@/components/AppHeader";
 import { 
   fetchCandles, 
   Symbol, 
@@ -127,7 +126,8 @@ export default function Index() {
       ...presets.etf_alt,
     ];
 
-    const maxTickers = 100;
+    // Increased max tickers to support larger stock universe
+    const maxTickers = 200;
     const tickersToScan = allTickers.slice(0, maxTickers);
 
     const results = await Promise.allSettled(
@@ -249,6 +249,11 @@ export default function Index() {
     setMicroData(null);
   }, []);
 
+  // Handle manual refresh
+  const handleRefresh = useCallback(() => {
+    scanAllTickers();
+  }, [scanAllTickers]);
+
   // Show asset detail page
   if (selectedSymbol && macroData && microData) {
     return (
@@ -267,12 +272,11 @@ export default function Index() {
     );
   }
 
-  // Show dashboard overview (no asset sidebar)
+  // Show dashboard overview
   return (
     <>
       <TradingAIWidget />
       <div className="flex flex-col min-h-screen w-full bg-background">
-        {/* Main Content - Full width, filters inside DashboardOverview */}
         <main className="flex-1 overflow-auto">
           <div className="p-4 md:p-6 lg:p-8">
             <div className="max-w-[1400px] mx-auto">
@@ -284,6 +288,7 @@ export default function Index() {
                 category={assetCategory}
                 onSearchChange={setSearchQuery}
                 onCategoryChange={setAssetCategory}
+                onRefresh={handleRefresh}
               />
             </div>
           </div>

@@ -7,13 +7,33 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Top crypto tickers for batch collection
+// ============================================
+// ASSET UNIVERSES FOR TRACK RECORD
+// ============================================
+
+// Crypto (Binance API)
 const CRYPTO_UNIVERSE = [
   'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 
   'ADAUSDT', 'DOGEUSDT', 'MATICUSDT', 'DOTUSDT', 'LINKUSDT',
   'AVAXUSDT', 'UNIUSDT', 'ATOMUSDT', 'NEARUSDT', 'APTUSDT',
   'ARBUSDT', 'OPUSDT', 'INJUSDT', 'SUIUSDT', 'TAOUSDT'
 ];
+
+// Stocks (Yahoo Finance) - Top traded for track record
+const STOCK_UNIVERSE = [
+  'AAPL', 'MSFT', 'NVDA', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AVGO', 'BRK-B', 'LLY',
+  'V', 'UNH', 'XOM', 'WMT', 'JNJ', 'ORCL', 'COST', 'MA', 'PG', 'NFLX',
+  'JPM', 'BAC', 'GS', 'AMD', 'INTC', 'QCOM', 'CRM', 'ADBE', 'CSCO', 'PEP'
+];
+
+// ETFs (Yahoo Finance)
+const ETF_UNIVERSE = ['SPY', 'IWM', 'QQQ', 'DIA', 'XLF', 'XLE', 'XLK'];
+
+// Indices (Yahoo Finance)
+const INDEX_UNIVERSE = ['^GSPC', '^NDX', '^RUT', '^DJI'];
+
+// Commodities (Yahoo Finance)
+const COMMODITY_UNIVERSE = ['GC=F', 'SI=F', 'CL=F', 'NG=F', 'PL=F', 'HG=F'];
 
 const INTERVALS = ['5m', '15m', '1h', '4h', '1d'];
 
@@ -24,6 +44,23 @@ interface Candle {
   low: number;
   close: number;
   volume: number;
+}
+
+interface AssetConfig {
+  symbol: string;
+  type: 'crypto' | 'stock' | 'etf' | 'index' | 'commodity';
+  source: 'binance' | 'yahoo';
+}
+
+// Build unified asset list
+function buildAssetList(): AssetConfig[] {
+  return [
+    ...CRYPTO_UNIVERSE.map(s => ({ symbol: s, type: 'crypto' as const, source: 'binance' as const })),
+    ...STOCK_UNIVERSE.map(s => ({ symbol: s, type: 'stock' as const, source: 'yahoo' as const })),
+    ...ETF_UNIVERSE.map(s => ({ symbol: s, type: 'etf' as const, source: 'yahoo' as const })),
+    ...INDEX_UNIVERSE.map(s => ({ symbol: s, type: 'index' as const, source: 'yahoo' as const })),
+    ...COMMODITY_UNIVERSE.map(s => ({ symbol: s, type: 'commodity' as const, source: 'yahoo' as const })),
+  ];
 }
 
 // Calculate EMA
@@ -195,6 +232,83 @@ async function shouldCaptureSnapshot(
   return false;
 }
 
+// Fetch data from Binance (crypto)
+async function fetchBinanceData(symbol: string, interval: string, limit: number): Promise<Candle[] | null> {
+  try {
+    const binanceUrl = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
+    const response = await fetch(binanceUrl);
+    if (!response.ok) return null;
+
+    const rawData = await response.json();
+    return rawData.map((k: any) => ({
+      timestamp: k[0],
+      open: parseFloat(k[1]),
+      high: parseFloat(k[2]),
+      low: parseFloat(k[3]),
+      close: parseFloat(k[4]),
+      volume: parseFloat(k[5])
+    }));
+  } catch {
+    return null;
+  }
+}
+
+// Map interval to Yahoo Finance range/interval
+function getYahooParams(interval: string): { range: string; yahooInterval: string } {
+  switch (interval) {
+    case '5m': return { range: '1d', yahooInterval: '5m' };
+    case '15m': return { range: '5d', yahooInterval: '15m' };
+    case '1h': return { range: '1mo', yahooInterval: '1h' };
+    case '4h': return { range: '3mo', yahooInterval: '1d' }; // Yahoo doesn't support 4h, use 1d as proxy
+    case '1d': return { range: '1y', yahooInterval: '1d' };
+    default: return { range: '1mo', yahooInterval: '1d' };
+  }
+}
+
+// Fetch data from Yahoo Finance (stocks, ETFs, indices, commodities)
+async function fetchYahooData(symbol: string, interval: string): Promise<Candle[] | null> {
+  try {
+    // Only fetch daily data for non-crypto to reduce API calls
+    if (interval !== '1d') return null;
+
+    const { range, yahooInterval } = getYahooParams(interval);
+    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=${range}&interval=${yahooInterval}`;
+    
+    const response = await fetch(yahooUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    });
+    
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    const result = data.chart?.result?.[0];
+    if (!result?.timestamp || !result?.indicators?.quote?.[0]) return null;
+
+    const quotes = result.indicators.quote[0];
+    const timestamps = result.timestamp;
+
+    const candles: Candle[] = [];
+    for (let i = 0; i < timestamps.length; i++) {
+      if (quotes.open[i] != null && quotes.close[i] != null) {
+        candles.push({
+          timestamp: timestamps[i] * 1000,
+          open: quotes.open[i],
+          high: quotes.high[i],
+          low: quotes.low[i],
+          close: quotes.close[i],
+          volume: quotes.volume[i] || 0
+        });
+      }
+    }
+
+    return candles.length > 50 ? candles : null;
+  } catch {
+    return null;
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -212,39 +326,45 @@ serve(async (req) => {
       errors: 0,
       candles_saved: 0,
       snapshots_saved: 0,
-      track_record_captured: 0
+      track_record_captured: 0,
+      by_type: {
+        crypto: 0,
+        stock: 0,
+        etf: 0,
+        index: 0,
+        commodity: 0
+      }
     };
 
-    for (const symbol of CRYPTO_UNIVERSE) {
-      for (const interval of INTERVALS) {
+    const allAssets = buildAssetList();
+
+    for (const asset of allAssets) {
+      // For non-crypto, only process daily (1d) to reduce API calls
+      const intervals = asset.source === 'binance' ? INTERVALS : ['1d'];
+
+      for (const interval of intervals) {
         try {
-          // Fetch from Binance
-          const limit = interval === '1d' ? 200 : interval === '4h' ? 168 : 100;
-          const binanceUrl = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
-          
-          const response = await fetch(binanceUrl);
-          if (!response.ok) {
-            console.error(`Binance error for ${symbol} ${interval}:`, response.status);
-            results.errors++;
-            continue;
+          let candles: Candle[] | null = null;
+
+          // Fetch data from appropriate source
+          if (asset.source === 'binance') {
+            const limit = interval === '1d' ? 200 : interval === '4h' ? 168 : 100;
+            candles = await fetchBinanceData(asset.symbol, interval, limit);
+          } else {
+            candles = await fetchYahooData(asset.symbol, interval);
           }
 
-          const rawData = await response.json();
-          const candles: Candle[] = rawData.map((k: any) => ({
-            timestamp: k[0],
-            open: parseFloat(k[1]),
-            high: parseFloat(k[2]),
-            low: parseFloat(k[3]),
-            close: parseFloat(k[4]),
-            volume: parseFloat(k[5])
-          }));
+          if (!candles || candles.length < 50) {
+            console.log(`Skipping ${asset.symbol} ${interval}: insufficient data`);
+            continue;
+          }
 
           // Save candles to DB (upsert last 50 candles)
           const recentCandles = candles.slice(-50);
           for (const candle of recentCandles) {
             await supabase.from('asset_candles').upsert({
-              symbol,
-              asset_type: 'crypto',
+              symbol: asset.symbol,
+              asset_type: asset.type,
               interval,
               timestamp: candle.timestamp,
               open: candle.open,
@@ -283,8 +403,8 @@ serve(async (req) => {
 
           // Save live snapshot (overwrites - for real-time display)
           await supabase.from('asset_snapshots').upsert({
-            symbol,
-            asset_type: 'crypto',
+            symbol: asset.symbol,
+            asset_type: asset.type,
             interval,
             current_price: currentPrice,
             ema_9: ema9[lastIdx],
@@ -309,12 +429,12 @@ serve(async (req) => {
 
           // ========================================
           // TRACK RECORD: Immutable signal snapshot
-          // DAILY (1d) SIGNALS ONLY - Strategic decision
+          // DAILY (1d) SIGNALS ONLY - All asset types
           // ========================================
           if (interval === '1d') {
             const shouldCapture = await shouldCaptureSnapshot(
               supabase,
-              symbol,
+              asset.symbol,
               interval,
               signal.signalType
             );
@@ -323,8 +443,8 @@ serve(async (req) => {
               const { error: snapshotError } = await supabase
                 .from('signal_snapshots')
                 .insert({
-                  symbol,
-                  asset_type: 'crypto',
+                  symbol: asset.symbol,
+                  asset_type: asset.type,
                   timeframe: interval,
                   signal: signal.signalType,
                   score: signal.score,
@@ -333,19 +453,20 @@ serve(async (req) => {
                 });
 
               if (snapshotError) {
-                console.error(`Track record error for ${symbol} ${interval}:`, snapshotError);
+                console.error(`Track record error for ${asset.symbol} ${interval}:`, snapshotError);
               } else {
                 results.track_record_captured++;
-                console.log(`📸 Track record captured: ${symbol} ${interval} = ${signal.signalType}`);
+                results.by_type[asset.type]++;
+                console.log(`📸 Track record captured: ${asset.symbol} [${asset.type}] ${interval} = ${signal.signalType}`);
               }
             }
           }
 
           results.processed++;
-          console.log(`✓ Processed ${symbol} ${interval}`);
+          console.log(`✓ Processed ${asset.symbol} [${asset.type}] ${interval}`);
 
         } catch (error) {
-          console.error(`Error processing ${symbol} ${interval}:`, error);
+          console.error(`Error processing ${asset.symbol} ${interval}:`, error);
           results.errors++;
         }
       }

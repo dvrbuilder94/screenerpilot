@@ -68,9 +68,9 @@ serve(async (req) => {
     const validationResult = requestSchema.safeParse(body);
     
     if (!validationResult.success) {
+      console.error('Validation failed:', validationResult.error);
       return new Response(JSON.stringify({ 
-        error: 'Invalid input', 
-        details: validationResult.error.issues 
+        error: 'Invalid message format'
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, ArrowRight, BarChart3, Activity, Target, ChevronUp, ChevronDown, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { TrendingUp, TrendingDown, ArrowRight, BarChart3, Activity, Target, ChevronUp, ChevronDown, Search, RefreshCw, Percent } from "lucide-react";
 import { TradingSetup, SignalType } from "@/types/trading";
 import { Sparkline } from "@/components/Sparkline";
 import { getAssetName } from "@/lib/assetNames";
@@ -16,9 +17,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
-type SortField = "symbol" | "price" | "change" | "signal" | "confidence" | "trend";
+type SortField = "symbol" | "category" | "price" | "change" | "signal" | "confidence" | "trend";
 type SortDirection = "asc" | "desc";
+
+const ITEMS_PER_PAGE = 25;
 
 interface DashboardOverviewProps {
   allSignals: TradingSetup[];
@@ -28,6 +39,7 @@ interface DashboardOverviewProps {
   category: string;
   onSearchChange?: (query: string) => void;
   onCategoryChange?: (category: string) => void;
+  onRefresh?: () => void;
 }
 
 const signalOrder: Record<SignalType, number> = {
@@ -46,9 +58,11 @@ export function DashboardOverview({
   category,
   onSearchChange,
   onCategoryChange,
+  onRefresh,
 }: DashboardOverviewProps) {
   const [sortField, setSortField] = useState<SortField>("confidence");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Filter signals by category and search
   const filteredSignals = useMemo(() => {
@@ -70,7 +84,12 @@ export function DashboardOverview({
     return signals;
   }, [allSignals, category, searchQuery]);
 
-  // Market summary stats (daily signals only)
+  // Reset to page 1 when filters change
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [category, searchQuery]);
+
+  // Market summary stats
   const stats = useMemo(() => {
     const total = filteredSignals.length;
     const bullish = filteredSignals.filter((s) =>
@@ -82,12 +101,16 @@ export function DashboardOverview({
     const strongSignals = filteredSignals.filter((s) =>
       ["STRONG_BUY", "STRONG_SELL"].includes(s.macroSignal.signal)
     ).length;
+    const avgConfidence = total > 0 
+      ? Math.round(filteredSignals.reduce((sum, s) => sum + s.macroSignal.confidence, 0) / total)
+      : 0;
 
     return {
       total,
       bullishPct: total > 0 ? Math.round((bullish / total) * 100) : 0,
       bearishPct: total > 0 ? Math.round((bearish / total) * 100) : 0,
       strongSignals,
+      avgConfidence,
     };
   }, [filteredSignals]);
 
@@ -99,6 +122,9 @@ export function DashboardOverview({
       switch (sortField) {
         case "symbol":
           comparison = a.symbol.localeCompare(b.symbol);
+          break;
+        case "category":
+          comparison = a.assetType.localeCompare(b.assetType);
           break;
         case "price":
           comparison = a.currentPrice - b.currentPrice;
@@ -121,6 +147,13 @@ export function DashboardOverview({
     });
   }, [filteredSignals, sortField, sortDirection]);
 
+  // Pagination
+  const totalPages = Math.ceil(sortedSignals.length / ITEMS_PER_PAGE);
+  const paginatedSignals = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return sortedSignals.slice(start, start + ITEMS_PER_PAGE);
+  }, [sortedSignals, currentPage]);
+
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -142,11 +175,25 @@ export function DashboardOverview({
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-semibold text-foreground">Market Overview</h1>
-        <p className="text-muted-foreground mt-1">
-          Daily signals across all tracked assets
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">Market Overview</h1>
+          <p className="text-muted-foreground mt-1">
+            Daily signals across all tracked assets
+          </p>
+        </div>
+        {onRefresh && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRefresh}
+            disabled={isLoading}
+            className="gap-2"
+          >
+            <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} />
+            Refresh
+          </Button>
+        )}
       </div>
 
       {/* Market Summary Cards */}
@@ -179,9 +226,27 @@ export function DashboardOverview({
         />
       </div>
 
-      {/* Filters Row (above table like Coinglass) */}
+      {/* Quick Metrics Row (Coinglass style) */}
+      <div className="flex flex-wrap items-center gap-4 px-4 py-3 bg-muted/30 border border-border/50 rounded-lg text-sm">
+        <div className="flex items-center gap-2">
+          <Activity className="h-4 w-4 text-muted-foreground" />
+          <span><strong>{stats.total}</strong> assets in view</span>
+        </div>
+        <span className="text-border">|</span>
+        <span className="text-bullish"><strong>{stats.bullishPct}%</strong> bullish</span>
+        <span className="text-border">|</span>
+        <span className="text-bearish"><strong>{stats.bearishPct}%</strong> bearish</span>
+        <span className="text-border">|</span>
+        <span><strong>{stats.strongSignals}</strong> strong signals</span>
+        <span className="text-border">|</span>
+        <div className="flex items-center gap-1">
+          <Percent className="h-3 w-3 text-muted-foreground" />
+          <span><strong>{stats.avgConfidence}%</strong> avg confidence</span>
+        </div>
+      </div>
+
+      {/* Filters Row */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        {/* Category Tabs */}
         {onCategoryChange && (
           <CategoryFilterTabs
             category={category}
@@ -189,7 +254,6 @@ export function DashboardOverview({
           />
         )}
 
-        {/* Search */}
         {onSearchChange && (
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -226,16 +290,22 @@ export function DashboardOverview({
             </div>
           ) : (
             <>
-              {/* Desktop Table */}
-              <div className="hidden md:block overflow-x-auto">
+              {/* Desktop Table with sticky header */}
+              <div className="hidden md:block overflow-x-auto max-h-[600px] overflow-y-auto">
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="sticky top-0 bg-card z-10">
                     <TableRow className="hover:bg-transparent border-border/50">
                       <TableHead 
-                        className="w-[200px] cursor-pointer hover:text-foreground"
+                        className="w-[180px] cursor-pointer hover:text-foreground"
                         onClick={() => handleSort("symbol")}
                       >
                         Asset <SortIcon field="symbol" />
+                      </TableHead>
+                      <TableHead 
+                        className="w-[100px] cursor-pointer hover:text-foreground"
+                        onClick={() => handleSort("category")}
+                      >
+                        Category <SortIcon field="category" />
                       </TableHead>
                       <TableHead 
                         className="text-right cursor-pointer hover:text-foreground"
@@ -272,26 +342,24 @@ export function DashboardOverview({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {sortedSignals.map((setup) => (
+                    {paginatedSignals.map((setup) => (
                       <TableRow
                         key={setup.symbol}
                         onClick={() => onSelectSymbol(setup.symbol)}
                         className="cursor-pointer hover:bg-muted/50 transition-colors border-border/30"
                       >
                         <TableCell>
-                          <div className="flex items-center gap-3">
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium">{setup.symbol}</span>
-                                <Badge variant="outline" className="text-xs font-normal">
-                                  {setup.assetType}
-                                </Badge>
-                              </div>
-                              <p className="text-xs text-muted-foreground mt-0.5">
-                                {getAssetName(setup.symbol)}
-                              </p>
-                            </div>
+                          <div>
+                            <span className="font-medium">{setup.symbol}</span>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {getAssetName(setup.symbol)}
+                            </p>
                           </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-xs font-normal capitalize">
+                            {setup.assetType}
+                          </Badge>
                         </TableCell>
                         <TableCell className="text-right font-medium">
                           ${formatPrice(setup.currentPrice)}
@@ -350,7 +418,7 @@ export function DashboardOverview({
 
               {/* Mobile Cards */}
               <div className="md:hidden divide-y divide-border/30">
-                {sortedSignals.map((setup) => (
+                {paginatedSignals.map((setup) => (
                   <button
                     key={setup.symbol}
                     onClick={() => onSelectSymbol(setup.symbol)}
@@ -360,13 +428,15 @@ export function DashboardOverview({
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="font-medium">{setup.symbol}</span>
-                          <Badge variant="outline" className="text-xs font-normal">
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline" className="text-xs font-normal capitalize">
                             {setup.assetType}
                           </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {getAssetName(setup.symbol)}
+                          </span>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {getAssetName(setup.symbol)}
-                        </p>
                       </div>
                     </div>
 
@@ -397,6 +467,53 @@ export function DashboardOverview({
                   </button>
                 ))}
               </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="border-t border-border/30 p-4">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                          className={cn(currentPage === 1 && "pointer-events-none opacity-50")}
+                        />
+                      </PaginationItem>
+                      
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        let pageNum: number;
+                        if (totalPages <= 5) {
+                          pageNum = i + 1;
+                        } else if (currentPage <= 3) {
+                          pageNum = i + 1;
+                        } else if (currentPage >= totalPages - 2) {
+                          pageNum = totalPages - 4 + i;
+                        } else {
+                          pageNum = currentPage - 2 + i;
+                        }
+                        
+                        return (
+                          <PaginationItem key={pageNum}>
+                            <PaginationLink
+                              onClick={() => setCurrentPage(pageNum)}
+                              isActive={currentPage === pageNum}
+                            >
+                              {pageNum}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      })}
+                      
+                      <PaginationItem>
+                        <PaginationNext 
+                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                          className={cn(currentPage === totalPages && "pointer-events-none opacity-50")}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
             </>
           )}
         </CardContent>

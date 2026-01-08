@@ -45,20 +45,13 @@ const ratioDescriptions: Record<string, string> = {
   "Silver/Oil": "Relationship between precious metals and energy",
   "Gold/Oil": "How many barrels of oil one ounce of gold can buy",
   "Platinum/Gold": "Historically platinum > gold. Inversion indicates industrial stress",
-  "Palladium/Gold": "Reflects industrial demand vs safe haven"
+  "Palladium/Gold": "Reflects industrial demand vs safe haven",
 };
-
-const rareEarthsData = [
-  { symbol: "MP", name: "MP Materials", description: "Largest rare earth producer in Western Hemisphere" },
-  { symbol: "LYSCF", name: "Lynas Rare Earths", description: "Australian rare earths mining company" },
-  { symbol: "ILHMF", name: "Iluka Resources", description: "Mineral sands and rare earths producer" },
-  { symbol: "REMX", name: "VanEck Rare Earth ETF", description: "ETF tracking rare earth and strategic metals" },
-];
 
 async function fetchCommodityCandles(yahooSymbol: string, interval: Interval): Promise<Candle[]> {
   try {
-    const { data, error } = await supabase.functions.invoke('fetch-stock-data', {
-      body: { symbol: yahooSymbol, interval }
+    const { data, error } = await supabase.functions.invoke("fetch-stock-data", {
+      body: { symbol: yahooSymbol, interval },
     });
 
     if (error) {
@@ -93,8 +86,8 @@ export default function Commodities() {
           const currentPrice = candles[candles.length - 1]?.close || 0;
           const prevPrice = candles[candles.length - 2]?.close || currentPrice;
           const change = prevPrice > 0 ? ((currentPrice - prevPrice) / prevPrice) * 100 : 0;
-          
-          const closes = candles.map(c => c.close);
+
+          const closes = candles.map((c) => c.close);
           const ema20Values = ema(closes, 20);
           const ema50Values = ema(closes, 50);
 
@@ -104,7 +97,7 @@ export default function Commodities() {
             change,
             candles,
             ema20: ema20Values,
-            ema50: ema50Values
+            ema50: ema50Values,
           };
         }
         return commodity;
@@ -115,7 +108,7 @@ export default function Commodities() {
 
       // Calculate ratios based on fetched prices
       const priceMap: Record<string, number> = {};
-      results.forEach(r => {
+      results.forEach((r) => {
         priceMap[r.name] = r.price;
       });
 
@@ -141,12 +134,12 @@ export default function Commodities() {
       setRatioValues(calculatedRatios);
 
       // Set chart for selected commodity
-      const selected = results.find(r => r.yahooSymbol === selectedCommodity);
+      const selected = results.find((r) => r.yahooSymbol === selectedCommodity);
       if (selected?.candles?.length) {
         setChartData({
           candles: selected.candles,
           ema20: selected.ema20 || [],
-          ema50: selected.ema50 || []
+          ema50: selected.ema50 || [],
         });
       }
 
@@ -160,24 +153,27 @@ export default function Commodities() {
   }, [interval, selectedCommodity]);
 
   // Fetch chart data for selected commodity
-  const fetchChartData = useCallback(async (yahooSymbol: string) => {
-    const commodity = commodityData.find(c => c.yahooSymbol === yahooSymbol);
-    if (commodity?.candles?.length) {
-      setChartData({
-        candles: commodity.candles,
-        ema20: commodity.ema20 || [],
-        ema50: commodity.ema50 || []
-      });
-    } else {
-      const candles = await fetchCommodityCandles(yahooSymbol, interval);
-      if (candles.length > 0) {
-        const closes = candles.map(c => c.close);
-        const ema20Values = ema(closes, 20);
-        const ema50Values = ema(closes, 50);
-        setChartData({ candles, ema20: ema20Values, ema50: ema50Values });
+  const fetchChartData = useCallback(
+    async (yahooSymbol: string) => {
+      const commodity = commodityData.find((c) => c.yahooSymbol === yahooSymbol);
+      if (commodity?.candles?.length) {
+        setChartData({
+          candles: commodity.candles,
+          ema20: commodity.ema20 || [],
+          ema50: commodity.ema50 || [],
+        });
+      } else {
+        const candles = await fetchCommodityCandles(yahooSymbol, interval);
+        if (candles.length > 0) {
+          const closes = candles.map((c) => c.close);
+          const ema20Values = ema(closes, 20);
+          const ema50Values = ema(closes, 50);
+          setChartData({ candles, ema20: ema20Values, ema50: ema50Values });
+        }
       }
-    }
-  }, [commodityData, interval]);
+    },
+    [commodityData, interval],
+  );
 
   useEffect(() => {
     fetchAllPrices();
@@ -193,23 +189,23 @@ export default function Commodities() {
     setSelectedCommodity(yahooSymbol);
   };
 
-  const selectedCommodityInfo = commodityData.find(c => c.yahooSymbol === selectedCommodity);
+  const selectedCommodityInfo = commodityData.find((c) => c.yahooSymbol === selectedCommodity);
 
-  const getRatioStatus = (name: string, currentValue: number): 'neutral' | 'high' | 'low' => {
+  const getRatioStatus = (name: string, currentValue: number): "neutral" | "high" | "low" => {
     const historicalAverages: Record<string, number> = {
       "Copper/Gold": 0.00018,
       "Gold/Silver": 70,
       "Silver/Oil": 0.35,
       "Gold/Oil": 25,
       "Platinum/Gold": 1.2,
-      "Palladium/Gold": 0.8
+      "Palladium/Gold": 0.8,
     };
     const avg = historicalAverages[name];
-    if (!avg || !currentValue) return 'neutral';
+    if (!avg || !currentValue) return "neutral";
     const deviation = (currentValue - avg) / avg;
-    if (deviation > 0.15) return 'high';
-    if (deviation < -0.15) return 'low';
-    return 'neutral';
+    if (deviation > 0.15) return "high";
+    if (deviation < -0.15) return "low";
+    return "neutral";
   };
 
   return (
@@ -221,9 +217,7 @@ export default function Commodities() {
             <Scale className="h-8 w-8 text-primary" />
             <div>
               <h1 className="text-3xl font-bold text-foreground">Commodities</h1>
-              <p className="text-muted-foreground">
-                Precious metals, energy, rare earths and key market ratios
-              </p>
+              <p className="text-muted-foreground">Precious metals, energy, rare earths and key market ratios</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -238,13 +232,8 @@ export default function Commodities() {
                 <SelectItem value="1w">1W</SelectItem>
               </SelectContent>
             </Select>
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={fetchAllPrices}
-              disabled={isLoading}
-            >
-              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <Button variant="outline" size="icon" onClick={fetchAllPrices} disabled={isLoading}>
+              <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
             </Button>
           </div>
         </div>
@@ -257,12 +246,10 @@ export default function Commodities() {
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
             {commodityData.map((commodity) => (
-              <Card 
-                key={commodity.yahooSymbol} 
+              <Card
+                key={commodity.yahooSymbol}
                 className={`cursor-pointer transition-all hover:shadow-md ${
-                  selectedCommodity === commodity.yahooSymbol 
-                    ? 'ring-2 ring-primary border-primary' 
-                    : 'border-border'
+                  selectedCommodity === commodity.yahooSymbol ? "ring-2 ring-primary border-primary" : "border-border"
                 }`}
                 onClick={() => handleCommoditySelect(commodity.yahooSymbol)}
               >
@@ -278,12 +265,18 @@ export default function Commodities() {
                   <p className="font-medium text-foreground text-sm">{commodity.name}</p>
                   <div className="flex items-baseline gap-1 mt-1">
                     <span className="text-lg font-bold text-foreground">
-                      ${commodity.price > 0 ? commodity.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '--'}
+                      $
+                      {commodity.price > 0
+                        ? commodity.price.toLocaleString("en-US", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        : "--"}
                     </span>
                     <span className="text-xs text-muted-foreground">/{commodity.unit}</span>
                   </div>
-                  <span className={`text-sm font-medium ${commodity.change >= 0 ? 'text-bullish' : 'text-bearish'}`}>
-                    {commodity.price > 0 ? `${commodity.change >= 0 ? '+' : ''}${commodity.change.toFixed(2)}%` : '--'}
+                  <span className={`text-sm font-medium ${commodity.change >= 0 ? "text-bullish" : "text-bearish"}`}>
+                    {commodity.price > 0 ? `${commodity.change >= 0 ? "+" : ""}${commodity.change.toFixed(2)}%` : "--"}
                   </span>
                 </CardContent>
               </Card>
@@ -299,11 +292,7 @@ export default function Commodities() {
               {selectedCommodityInfo.name} Chart ({interval.toUpperCase()})
             </h2>
             <Card className="p-4">
-              <MiniChart
-                candles={chartData.candles}
-                ema20={chartData.ema20}
-                ema50={chartData.ema50}
-              />
+              <MiniChart candles={chartData.candles} ema20={chartData.ema20} ema50={chartData.ema50} />
             </Card>
           </section>
         )}
@@ -318,39 +307,31 @@ export default function Commodities() {
             {ratios.map((ratio) => {
               const currentValue = ratioValues[ratio.name] || 0;
               const status = getRatioStatus(ratio.name, currentValue);
-              
+
               return (
                 <Card key={ratio.name} className="border-border hover:shadow-sm transition-all">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center justify-between text-base">
                       <span>{ratio.name}</span>
-                      {status === 'high' && <TrendingUp className="h-4 w-4 text-bullish" />}
-                      {status === 'low' && <TrendingDown className="h-4 w-4 text-bearish" />}
-                      {status === 'neutral' && <Minus className="h-4 w-4 text-muted-foreground" />}
+                      {status === "high" && <TrendingUp className="h-4 w-4 text-bullish" />}
+                      {status === "low" && <TrendingDown className="h-4 w-4 text-bearish" />}
+                      {status === "neutral" && <Minus className="h-4 w-4 text-muted-foreground" />}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <div className="flex items-baseline gap-2">
                       <span className="text-xl font-bold text-foreground">
-                        {currentValue > 0 ? currentValue.toFixed(4) : '--'}
+                        {currentValue > 0 ? currentValue.toFixed(4) : "--"}
                       </span>
-                      <span className="text-sm text-muted-foreground">
-                        (current)
-                      </span>
+                      <span className="text-sm text-muted-foreground">(current)</span>
                     </div>
-                    
-                    <p className="text-sm text-muted-foreground">
-                      {ratioDescriptions[ratio.name]}
-                    </p>
-                    
+
+                    <p className="text-sm text-muted-foreground">{ratioDescriptions[ratio.name]}</p>
+
                     <div className="flex items-center gap-2 text-xs">
-                      <span className="px-2 py-1 rounded bg-secondary text-muted-foreground">
-                        {ratio.numerator}
-                      </span>
+                      <span className="px-2 py-1 rounded bg-secondary text-muted-foreground">{ratio.numerator}</span>
                       <span className="text-muted-foreground">/</span>
-                      <span className="px-2 py-1 rounded bg-secondary text-muted-foreground">
-                        {ratio.denominator}
-                      </span>
+                      <span className="px-2 py-1 rounded bg-secondary text-muted-foreground">{ratio.denominator}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -361,18 +342,14 @@ export default function Commodities() {
 
         {/* Rare Earths Section */}
         <section>
-          <h2 className="text-xl font-semibold mb-4 text-foreground">
-            Rare Earths & Strategic Metals
-          </h2>
+          <h2 className="text-xl font-semibold mb-4 text-foreground">Rare Earths & Strategic Metals</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {rareEarthsData.map((item) => (
               <Card key={item.symbol} className="border-border hover:shadow-sm transition-all">
                 <CardContent className="p-4">
                   <span className="font-mono font-bold text-primary">{item.symbol}</span>
                   <p className="font-medium text-foreground mt-1">{item.name}</p>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {item.description}
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">{item.description}</p>
                 </CardContent>
               </Card>
             ))}

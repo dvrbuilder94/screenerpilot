@@ -49,7 +49,7 @@ export function EquityCurve({ data, timeRange, onTimeRangeChange, isDemo }: Equi
 
   return (
     <Card className="p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
         <div>
           <h2 className="text-lg font-semibold text-foreground">Equity Curve</h2>
           {isDemo && (
@@ -75,6 +75,11 @@ export function EquityCurve({ data, timeRange, onTimeRangeChange, isDemo }: Equi
           ))}
         </div>
       </div>
+      
+      {/* Institutional disclaimer */}
+      <p className="text-xs text-muted-foreground mb-4">
+        Changing the time range adjusts the chart view only. All performance metrics are calculated since inception.
+      </p>
 
       <div className="h-[350px] w-full">
         <ResponsiveContainer width="100%" height="100%">

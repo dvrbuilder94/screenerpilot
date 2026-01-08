@@ -1,8 +1,6 @@
 import { TrendingUp, Menu, Home, Target, BarChart3, Scale } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { AccountDropdown } from "./AccountDropdown";
-import GamificationBadge from "./GamificationBadge";
-import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { useState } from "react";
@@ -16,7 +14,6 @@ const navItems = [
 ];
 
 export const AppHeader = () => {
-  const { user } = useAuth();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -59,9 +56,8 @@ export const AppHeader = () => {
           </nav>
         </div>
 
-        {/* Right section: Gamification + Account + Mobile Menu */}
+        {/* Right section: Account + Mobile Menu */}
         <div className="flex items-center gap-3 flex-shrink-0">
-          {user && <GamificationBadge />}
           <AccountDropdown />
 
           {/* Mobile Menu */}

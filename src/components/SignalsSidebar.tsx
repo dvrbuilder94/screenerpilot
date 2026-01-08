@@ -86,8 +86,8 @@ export function SignalsSidebar({
   return (
     <div className="flex flex-col h-full border-r border-border bg-background">
       {/* Header */}
-      <div className="p-4 border-b border-border">
-        <h2 className="text-lg font-semibold mb-2 text-foreground">All Signals</h2>
+      <div className="p-3 border-b border-border">
+        <h2 className="text-sm font-semibold mb-2 text-foreground">Daily Signals</h2>
         
         {/* Stats */}
         <div className="flex gap-2 mb-3 text-xs">
@@ -103,24 +103,24 @@ export function SignalsSidebar({
         </div>
 
         {/* Search */}
-        <div className="relative mb-3">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+        <div className="relative mb-2">
+          <Search className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search tickers..."
+            placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8"
+            className="pl-8 h-8 text-sm"
           />
         </div>
 
         {/* Filters */}
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           <Select value={filterAsset} onValueChange={(v) => setFilterAsset(v as FilterAssetType)}>
-            <SelectTrigger className="flex-1">
+            <SelectTrigger className="flex-1 h-8 text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">All Assets</SelectItem>
+              <SelectItem value="ALL">All</SelectItem>
               <SelectItem value="crypto">Crypto</SelectItem>
               <SelectItem value="stock">Stocks</SelectItem>
               <SelectItem value="commodity">Commodities</SelectItem>
@@ -130,14 +130,14 @@ export function SignalsSidebar({
           </Select>
 
           <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-            <SelectTrigger className="flex-1">
+            <SelectTrigger className="flex-1 h-8 text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="confidence">By Confidence</SelectItem>
-              <SelectItem value="signal">By Signal</SelectItem>
-              <SelectItem value="alphabetical">Alphabetical</SelectItem>
-              <SelectItem value="price">By Price</SelectItem>
+              <SelectItem value="confidence">Confidence</SelectItem>
+              <SelectItem value="signal">Signal</SelectItem>
+              <SelectItem value="alphabetical">A-Z</SelectItem>
+              <SelectItem value="price">Price</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -164,7 +164,7 @@ export function SignalsSidebar({
                 key={setup.symbol}
                 onClick={() => onSelectSymbol(setup.symbol)}
                 className={cn(
-                  "w-full p-3 mb-2 rounded-lg border border-border",
+                  "w-full p-2 mb-1 rounded-lg border border-border/50",
                   "hover:bg-accent hover:border-primary/50 transition-colors",
                   "text-left",
                   selectedSymbol === setup.symbol && "bg-accent border-primary"

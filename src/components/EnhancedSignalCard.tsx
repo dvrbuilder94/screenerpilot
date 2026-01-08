@@ -10,6 +10,7 @@ interface EnhancedSignalCardProps {
   timeframe: string;
   signal: EnhancedSignal;
   currentPrice: number;
+  isExecutionTiming?: boolean; // For micro signals that are not tracked
 }
 
 export default function EnhancedSignalCard({
@@ -17,6 +18,7 @@ export default function EnhancedSignalCard({
   timeframe,
   signal,
   currentPrice,
+  isExecutionTiming = false,
 }: EnhancedSignalCardProps) {
   const getSignalConfig = () => {
     switch (signal.signal) {
@@ -64,12 +66,17 @@ export default function EnhancedSignalCard({
   const t = translations[language];
 
   return (
-    <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/50">
+    <Card className={`p-6 backdrop-blur-sm border-border/50 ${isExecutionTiming ? 'bg-muted/30' : 'bg-card/50'}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-bold">{title}</h3>
           <p className="text-sm text-muted-foreground">{timeframe}</p>
+          {isExecutionTiming && (
+            <p className="text-xs text-muted-foreground italic mt-1">
+              Execution timing only — not part of system performance tracking
+            </p>
+          )}
         </div>
         <div className={`px-4 py-2 rounded-xl border ${config.bg}`}>
           <div className="flex items-center gap-2">

@@ -118,97 +118,98 @@ export default function Index() {
   const scanAllTickers = useCallback(async () => {
     setIsScanningAll(true);
     
-    const allTickers: Symbol[] = [
-      ...presets.crypto,
-      ...(presets.commodities || []),
-      ...presets.stocks,
-      ...presets.index,
-      ...presets.etf,
-    ];
+    try {
+      const allTickers: Symbol[] = [
+        ...presets.crypto,
+        ...(presets.commodities || []),
+        ...presets.stocks,
+        ...presets.index,
+        ...presets.etf,
+      ];
 
-    // Increased max tickers to support larger stock universe
-    const maxTickers = 200;
-    const tickersToScan = allTickers.slice(0, maxTickers);
+      // Increased max tickers to support larger stock universe
+      const maxTickers = 200;
+      const tickersToScan = allTickers.slice(0, maxTickers);
 
-    const results = await Promise.allSettled(
-      tickersToScan.map(async (ticker) => {
-        try {
-          const assetType = getAssetType(ticker);
-          
-          // Fetch with error handling - skip failed tickers gracefully
-          let macroCandles, microCandles;
+      const results = await Promise.allSettled(
+        tickersToScan.map(async (ticker) => {
           try {
-            [macroCandles, microCandles] = await Promise.all([
-              fetchCandles(ticker, macroInterval, 200),
-              fetchCandles(ticker, microInterval, 200),
-            ]);
-          } catch (fetchError) {
-            // Skip tickers that fail to fetch (404, timeout, etc.)
-            console.warn(`Skipping ${ticker}: fetch failed`);
+            const assetType = getAssetType(ticker);
+            
+            // Fetch with error handling - skip failed tickers gracefully
+            let macroCandles, microCandles;
+            try {
+              [macroCandles, microCandles] = await Promise.all([
+                fetchCandles(ticker, macroInterval, 200),
+                fetchCandles(ticker, microInterval, 200),
+              ]);
+            } catch (fetchError) {
+              // Skip tickers that fail to fetch (404, timeout, etc.)
+              console.warn(`Skipping ${ticker}: fetch failed`);
+              return null;
+            }
+
+            if (!macroCandles?.length || !microCandles?.length) {
+              return null;
+            }
+
+            const macroIndicators = calculateIndicators(macroCandles);
+            const microIndicators = calculateIndicators(microCandles);
+
+            const tradingProfile = TRADING_PROFILES[tradingStyle];
+
+            const macroSignal = calculateEnhancedSignal({
+              indicators: macroIndicators.indicators,
+              currentPrice: macroCandles[macroCandles.length - 1].close,
+              prevPrice: macroCandles[macroCandles.length - 2]?.close || macroCandles[macroCandles.length - 1].close,
+              tradingProfile,
+              sentiment: null,
+            });
+
+            const microSignal = calculateEnhancedSignal({
+              indicators: microIndicators.indicators,
+              currentPrice: microCandles[microCandles.length - 1].close,
+              prevPrice: microCandles[microCandles.length - 2]?.close || microCandles[microCandles.length - 1].close,
+              tradingProfile,
+              sentiment: null,
+            });
+
+            const currentPrice = macroCandles[macroCandles.length - 1].close;
+            const prevPrice = macroCandles[macroCandles.length - 2]?.close || currentPrice;
+            const priceChange = ((currentPrice - prevPrice) / prevPrice) * 100;
+
+            return {
+              symbol: ticker,
+              assetType,
+              currentPrice,
+              priceChange24h: priceChange,
+              macroSignal,
+              microSignal,
+              combinedConfidence: (macroSignal.confidence + microSignal.confidence) / 2,
+              lastUpdate: Date.now(),
+            } as TradingSetup;
+          } catch (error) {
+            console.error(`Error scanning ${ticker}:`, error);
             return null;
           }
+        })
+      );
 
-          if (!macroCandles?.length || !microCandles?.length) {
-            return null;
-          }
-
-          const macroIndicators = calculateIndicators(macroCandles);
-          const microIndicators = calculateIndicators(microCandles);
-
-          const tradingProfile = TRADING_PROFILES[tradingStyle];
-
-          const macroSignal = calculateEnhancedSignal({
-            indicators: macroIndicators.indicators,
-            currentPrice: macroCandles[macroCandles.length - 1].close,
-            prevPrice: macroCandles[macroCandles.length - 2]?.close || macroCandles[macroCandles.length - 1].close,
-            tradingProfile,
-            sentiment: null,
-          });
-
-          const microSignal = calculateEnhancedSignal({
-            indicators: microIndicators.indicators,
-            currentPrice: microCandles[microCandles.length - 1].close,
-            prevPrice: microCandles[microCandles.length - 2]?.close || microCandles[microCandles.length - 1].close,
-            tradingProfile,
-            sentiment: null,
-          });
-
-          const combinedConfidence = Math.round((macroSignal.confidence + microSignal.confidence) / 2);
-          const currentPrice = macroCandles[macroCandles.length - 1].close;
-          
-          const recentCandles = microCandles.slice(-24);
-          const price24hAgo = recentCandles[0]?.close || currentPrice;
-          const priceChange24h = ((currentPrice - price24hAgo) / price24hAgo) * 100;
-          const recentPrices = microCandles.slice(-24).map(c => c.close);
-
-          return {
-            symbol: ticker,
-            assetType,
-            currentPrice,
-            macroSignal,
-            microSignal,
-            combinedConfidence,
-            lastUpdate: Date.now(),
-            priceChange24h,
-            recentPrices,
-          } as TradingSetup;
-        } catch (error) {
-          console.error(`Error scanning ${ticker}:`, error);
-          return null;
+      const validSetups: TradingSetup[] = [];
+      for (const result of results) {
+        if (result.status === "fulfilled" && result.value !== null) {
+          validSetups.push(result.value as TradingSetup);
         }
-      })
-    );
+      }
 
-    const validSetups = results
-      .filter((result): result is PromiseFulfilledResult<TradingSetup | null> => 
-        result.status === "fulfilled" && result.value !== null
-      )
-      .map((result) => result.value as TradingSetup);
-
-    setAllSignals(validSetups);
-    setIsScanningAll(false);
-
-    toast.success(`Scanned ${validSetups.length} assets`);
+      setAllSignals(validSetups);
+      toast.success(`Scanned ${validSetups.length} assets`);
+    } catch (error) {
+      console.error("Error in scanAllTickers:", error);
+      toast.error("Error scanning assets");
+    } finally {
+      setIsScanningAll(false);
+    }
   }, [tradingStyle, calculateIndicators]);
 
   // Fetch data for selected asset
@@ -220,6 +221,12 @@ export default function Index() {
         fetchCandles(symbol, microInterval, 500),
       ]);
 
+      if (!macroCandles?.length || !microCandles?.length) {
+        toast.error("No data available for this asset");
+        setSelectedSymbol(null);
+        return;
+      }
+
       const macroResult = calculateIndicators(macroCandles);
       const microResult = calculateIndicators(microCandles);
 
@@ -227,7 +234,8 @@ export default function Index() {
       setMicroData(microResult);
     } catch (error) {
       console.error("Error fetching asset data:", error);
-      toast.error("Error loading asset data");
+      toast.error("Error loading asset data - asset may be unavailable");
+      setSelectedSymbol(null); // Go back to overview on error
     } finally {
       setIsLoadingAsset(false);
     }

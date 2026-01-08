@@ -26,6 +26,20 @@ export interface TradeRecord {
 }
 
 /**
+ * Deterministic random number generator based on string seed.
+ * Same seed always produces same output.
+ */
+function seededRandom(seed: string): number {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    const char = seed.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs((Math.sin(hash) * 10000) % 1);
+}
+
+/**
  * Fetch real S&P 500 data from Yahoo Finance via edge function
  */
 async function fetchSP500Data(): Promise<Map<string, number>> {
@@ -58,13 +72,13 @@ async function fetchSP500Data(): Promise<Map<string, number>> {
 }
 
 /**
- * Generate demo data up to current date
+ * Generate deterministic demo data.
+ * Same date = same equity value, always.
  */
 function generateDemoData(
-  timeRange: "all" | "6m" | "3m",
   sp500Data: Map<string, number>
 ): { 
-  equityCurve: EquityPoint[]; 
+  fullEquityCurve: EquityPoint[]; 
   metrics: PerformanceMetrics; 
   trades: TradeRecord[];
   isDemo: boolean;
@@ -82,7 +96,6 @@ function generateDemoData(
 
   // Get first S&P value for normalization
   const sp500Entries = Array.from(sp500Data.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-  const firstSP500Value = sp500Entries.length > 0 ? sp500Entries[0][1] : 100;
 
   // Generate daily equity points
   const currentDate = new Date(startDate);
@@ -94,11 +107,13 @@ function generateDemoData(
     // Skip weekends
     const dayOfWeek = currentDate.getDay();
     if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-      // Strategy returns (slight upward bias, ~15% annual)
-      const dailyReturn = (Math.random() - 0.45) * 1.8;
+      // Deterministic daily return based on date
+      const dailyRandom = seededRandom(dateStr + 'equity');
+      const dailyReturn = (dailyRandom - 0.45) * 1.8;
       equity = equity * (1 + dailyReturn / 100);
       
-      if (Math.random() > 0.5) wins++;
+      // Deterministic win/loss
+      if (seededRandom(dateStr + 'win') > 0.5) wins++;
       
       if (equity > maxEquity) maxEquity = equity;
       const drawdown = ((equity - maxEquity) / maxEquity) * 100;
@@ -132,10 +147,7 @@ function generateDemoData(
   const years = fullEquityCurve.length / 252; // ~252 trading days per year
   const cagr = years > 0 ? (Math.pow(finalEquity / 100, 1 / years) - 1) * 100 : 0;
 
-  // Filter for chart view only
-  const equityCurve = filterEquityCurveForView(fullEquityCurve, timeRange);
-
-  // Generate recent demo trades
+  // Generate deterministic demo trades
   const trades: TradeRecord[] = [];
   const symbols = ["BTCUSDT", "ETHUSDT", "AAPL", "SPY", "SOLUSDT", "GOOGL", "MSFT", "NVDA"];
   for (let i = 0; i < 5; i++) {
@@ -144,18 +156,22 @@ function generateDemoData(
     const entryDate = new Date(exitDate);
     entryDate.setDate(entryDate.getDate() - 5);
     
+    // Deterministic return based on trade index
+    const tradeRandom = seededRandom(`trade-${i}`);
+    const tradeReturn = Math.round((tradeRandom * 10 - 2) * 10) / 10;
+    
     trades.push({
       id: String(i + 1),
       asset: symbols[i % symbols.length],
       signal: "BUY",
       entryDate: entryDate.toISOString().split("T")[0],
       exitDate: exitDate.toISOString().split("T")[0],
-      returnPct: Math.round((Math.random() * 10 - 2) * 10) / 10,
+      returnPct: tradeReturn,
     });
   }
 
   return {
-    equityCurve,
+    fullEquityCurve,
     metrics: {
       totalReturn: Math.round(totalReturn * 100) / 100,
       cagr: Math.round(cagr * 100) / 100,
@@ -173,7 +189,7 @@ function generateDemoData(
  * Filter equity curve for chart display only.
  * Metrics are ALWAYS calculated from inception.
  */
-function filterEquityCurveForView(
+export function filterEquityCurveForView(
   fullCurve: EquityPoint[],
   timeRange: "all" | "6m" | "3m"
 ): EquityPoint[] {
@@ -192,9 +208,9 @@ function filterEquityCurveForView(
   return filtered.length > 0 ? filtered : fullCurve.slice(-30);
 }
 
-export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
+export function usePerformanceData() {
   return useQuery({
-    queryKey: ["performance-data", timeRange],
+    queryKey: ["performance-data"],
     queryFn: async () => {
       // Fetch S&P 500 benchmark data first
       const sp500Data = await fetchSP500Data();
@@ -222,7 +238,7 @@ export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
 
       // If insufficient data, return demo data with real S&P 500
       if (!outcomes || outcomes.length < 10) {
-        return generateDemoData(timeRange, sp500Data);
+        return generateDemoData(sp500Data);
       }
 
       // Build FULL equity curve from inception (single source of truth)
@@ -287,11 +303,8 @@ export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
         returnPct: Math.round(Number(o.return_pct) * 100) / 100,
       }));
 
-      // Filter equity curve for chart view (metrics stay the same)
-      const equityCurve = filterEquityCurveForView(fullEquityCurve, timeRange);
-
       return {
-        equityCurve,
+        fullEquityCurve,
         metrics: {
           totalReturn: Math.round(totalReturn * 100) / 100,
           cagr: Math.round(cagr * 100) / 100,

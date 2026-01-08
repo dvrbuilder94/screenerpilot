@@ -330,6 +330,83 @@ export type Database = {
         }
         Relationships: []
       }
+      signal_outcomes: {
+        Row: {
+          end_price: number
+          horizon: string
+          id: string
+          max_drawdown: number
+          resolved_at: string
+          return_pct: number
+          snapshot_id: string
+          start_price: number
+        }
+        Insert: {
+          end_price: number
+          horizon: string
+          id?: string
+          max_drawdown: number
+          resolved_at?: string
+          return_pct: number
+          snapshot_id: string
+          start_price: number
+        }
+        Update: {
+          end_price?: number
+          horizon?: string
+          id?: string
+          max_drawdown?: number
+          resolved_at?: string
+          return_pct?: number
+          snapshot_id?: string
+          start_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signal_outcomes_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "signal_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signal_snapshots: {
+        Row: {
+          asset_type: string
+          confidence: number
+          created_at: string
+          id: string
+          price_at_signal: number
+          score: number
+          signal: string
+          symbol: string
+          timeframe: string
+        }
+        Insert: {
+          asset_type: string
+          confidence: number
+          created_at?: string
+          id?: string
+          price_at_signal: number
+          score: number
+          signal: string
+          symbol: string
+          timeframe: string
+        }
+        Update: {
+          asset_type?: string
+          confidence?: number
+          created_at?: string
+          id?: string
+          price_at_signal?: number
+          score?: number
+          signal?: string
+          symbol?: string
+          timeframe?: string
+        }
+        Relationships: []
+      }
       user_achievements: {
         Row: {
           achievement_id: string

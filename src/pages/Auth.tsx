@@ -48,8 +48,8 @@ const Auth = () => {
       setPendingEmail(email);
       setShowOtpInput(true);
       toast({
-        title: 'Código enviado',
-        description: 'Revisa tu email para el código de verificación.',
+        title: 'Code Sent',
+        description: 'Check your email for the verification code.',
       });
       setIsLoading(false);
     }
@@ -69,8 +69,8 @@ const Auth = () => {
       });
     } else {
       toast({
-        title: '¡Bienvenido!',
-        description: 'Sesión iniciada correctamente.',
+        title: 'Welcome back!',
+        description: 'Successfully signed in.',
       });
       navigate('/');
     }
@@ -82,7 +82,7 @@ const Auth = () => {
     if (otpCode.length !== 6) {
       toast({
         title: 'Error',
-        description: 'Ingresa el código de 6 dígitos.',
+        description: 'Please enter the 6-digit code.',
         variant: 'destructive',
       });
       return;
@@ -100,8 +100,8 @@ const Auth = () => {
       setIsLoading(false);
     } else {
       toast({
-        title: '¡Cuenta verificada!',
-        description: 'Tu cuenta ha sido creada exitosamente.',
+        title: 'Account Verified!',
+        description: 'Your account has been created successfully.',
       });
       navigate('/');
     }
@@ -119,8 +119,8 @@ const Auth = () => {
       });
     } else {
       toast({
-        title: 'Código reenviado',
-        description: 'Revisa tu email para el nuevo código.',
+        title: 'Code Resent',
+        description: 'Check your email for the new code.',
       });
     }
     setIsLoading(false);
@@ -172,9 +172,9 @@ const Auth = () => {
             <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
               <Mail className="h-6 w-6 text-primary" />
             </div>
-            <CardTitle className="text-2xl font-bold">Verifica tu email</CardTitle>
+            <CardTitle className="text-2xl font-bold">Verify Your Email</CardTitle>
             <CardDescription>
-              Enviamos un código de 6 dígitos a<br />
+              We sent a 6-digit code to<br />
               <span className="font-medium text-foreground">{pendingEmail}</span>
             </CardDescription>
           </CardHeader>
@@ -201,12 +201,12 @@ const Auth = () => {
               onClick={handleVerifyOtp}
               disabled={isLoading || otpCode.length !== 6}
             >
-              {isLoading ? 'Verificando...' : 'Verificar código'}
+              {isLoading ? 'Verifying...' : 'Verify Code'}
             </Button>
 
             <div className="text-center space-y-2">
               <p className="text-sm text-muted-foreground">
-                ¿No recibiste el código?
+                Didn't receive the code?
               </p>
               <Button
                 variant="link"
@@ -214,7 +214,7 @@ const Auth = () => {
                 disabled={isLoading}
                 className="text-primary"
               >
-                Reenviar código
+                Resend Code
               </Button>
             </div>
           </CardContent>
@@ -225,7 +225,7 @@ const Auth = () => {
               className="w-full"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Volver al registro
+              Back to Sign Up
             </Button>
           </CardFooter>
         </Card>
@@ -289,8 +289,8 @@ const Auth = () => {
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Iniciar Sesión</TabsTrigger>
-              <TabsTrigger value="signup">Registrarse</TabsTrigger>
+              <TabsTrigger value="signin">Sign In</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin">
@@ -300,14 +300,14 @@ const Auth = () => {
                   <Input
                     id="signin-email"
                     type="email"
-                    placeholder="tu@email.com"
+                    placeholder="your@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">Contraseña</Label>
+                  <Label htmlFor="signin-password">Password</Label>
                   <Input
                     id="signin-password"
                     type="password"
@@ -334,11 +334,11 @@ const Auth = () => {
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-name">Nombre (opcional)</Label>
+                  <Label htmlFor="signup-name">Name (optional)</Label>
                   <Input
                     id="signup-name"
                     type="text"
-                    placeholder="Tu nombre"
+                    placeholder="Your name"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                   />
@@ -348,14 +348,14 @@ const Auth = () => {
                   <Input
                     id="signup-email"
                     type="email"
-                    placeholder="tu@email.com"
+                    placeholder="your@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Contraseña</Label>
+                  <Label htmlFor="signup-password">Password</Label>
                   <Input
                     id="signup-password"
                     type="password"
@@ -367,7 +367,7 @@ const Auth = () => {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
+                  {isLoading ? 'Creating account...' : 'Create Account'}
                 </Button>
               </form>
             </TabsContent>
@@ -375,7 +375,7 @@ const Auth = () => {
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
           <p className="text-xs text-muted-foreground text-center">
-            Free tier: 10 tickers • Pro tier: Acceso ilimitado
+            Free tier: 10 tickers • Pro tier: Unlimited access
           </p>
         </CardFooter>
       </Card>

@@ -309,32 +309,35 @@ serve(async (req) => {
 
           // ========================================
           // TRACK RECORD: Immutable signal snapshot
+          // DAILY (1d) SIGNALS ONLY - Strategic decision
           // ========================================
-          const shouldCapture = await shouldCaptureSnapshot(
-            supabase,
-            symbol,
-            interval,
-            signal.signalType
-          );
+          if (interval === '1d') {
+            const shouldCapture = await shouldCaptureSnapshot(
+              supabase,
+              symbol,
+              interval,
+              signal.signalType
+            );
 
-          if (shouldCapture) {
-            const { error: snapshotError } = await supabase
-              .from('signal_snapshots')
-              .insert({
-                symbol,
-                asset_type: 'crypto',
-                timeframe: interval,
-                signal: signal.signalType,
-                score: signal.score,
-                confidence: signal.confidence,
-                price_at_signal: currentPrice
-              });
+            if (shouldCapture) {
+              const { error: snapshotError } = await supabase
+                .from('signal_snapshots')
+                .insert({
+                  symbol,
+                  asset_type: 'crypto',
+                  timeframe: interval,
+                  signal: signal.signalType,
+                  score: signal.score,
+                  confidence: signal.confidence,
+                  price_at_signal: currentPrice
+                });
 
-            if (snapshotError) {
-              console.error(`Track record error for ${symbol} ${interval}:`, snapshotError);
-            } else {
-              results.track_record_captured++;
-              console.log(`📸 Track record captured: ${symbol} ${interval} = ${signal.signalType}`);
+              if (snapshotError) {
+                console.error(`Track record error for ${symbol} ${interval}:`, snapshotError);
+              } else {
+                results.track_record_captured++;
+                console.log(`📸 Track record captured: ${symbol} ${interval} = ${signal.signalType}`);
+              }
             }
           }
 

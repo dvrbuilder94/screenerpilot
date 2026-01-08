@@ -35,23 +35,22 @@ export interface TrackRecordMetrics {
   total_wins: number;
 }
 
-// Fetch recent signal snapshots
+// Fetch recent signal snapshots (DAILY ONLY for track record)
 export function useSignalSnapshots(
   symbol?: string,
-  timeframe?: string,
   limit = 50
 ) {
   return useQuery({
-    queryKey: ['signal-snapshots', symbol, timeframe, limit],
+    queryKey: ['signal-snapshots', symbol, '1d', limit],
     queryFn: async () => {
       let query = supabase
         .from('signal_snapshots')
         .select('*')
+        .eq('timeframe', '1d') // Daily signals only for track record
         .order('created_at', { ascending: false })
         .limit(limit);
 
       if (symbol) query = query.eq('symbol', symbol);
-      if (timeframe) query = query.eq('timeframe', timeframe);
 
       const { data, error } = await query;
       if (error) throw error;
@@ -184,13 +183,15 @@ export function useTrackRecordMetrics(
   });
 }
 
-// Get total track record stats
+// Get total track record stats (DAILY ONLY)
 export function useTrackRecordStats() {
   return useQuery({
     queryKey: ['track-record-stats'],
     queryFn: async () => {
       const [snapshotsResult, outcomesResult] = await Promise.all([
-        supabase.from('signal_snapshots').select('id', { count: 'exact', head: true }),
+        supabase.from('signal_snapshots')
+          .select('id', { count: 'exact', head: true })
+          .eq('timeframe', '1d'), // Daily signals only for track record
         supabase.from('signal_outcomes').select('id', { count: 'exact', head: true })
       ]);
 

@@ -28,6 +28,11 @@ export function TrackRecordPage() {
           </AlertDescription>
         </Alert>
 
+        {/* Scope Clarification */}
+        <p className="text-xs text-muted-foreground">
+          The System Track Record evaluates daily signals only. Intraday signals are provided for real-time context and execution support.
+        </p>
+
         {/* Global Stats */}
         <TrackRecordStats />
 

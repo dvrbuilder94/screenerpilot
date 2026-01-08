@@ -258,7 +258,7 @@ const [dailyLimit, setDailyLimit] = useState(FREE_DAILY_LIMIT);
                       className={`max-w-[85%] rounded-2xl px-4 py-2 ${
                         msg.role === "user"
                           ? "bg-gradient-to-br from-emerald-500 to-cyan-500 text-white"
-                          : "bg-slate-800/80 text-foreground border border-slate-700/50"
+                          : "bg-slate-700 text-white border border-slate-600"
                       }`}
                     >
                       <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
@@ -287,9 +287,9 @@ const [dailyLimit, setDailyLimit] = useState(FREE_DAILY_LIMIT);
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Pregúntame sobre trading..."
+                  placeholder="Ask me about markets..."
                   disabled={isLoading}
-                  className="bg-slate-800/50 border-slate-700/50 focus-visible:ring-emerald-500/50"
+                  className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-emerald-500/50"
                 />
                 <Button
                   onClick={handleSend}

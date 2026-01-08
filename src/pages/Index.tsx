@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { TradingAIWidget } from "@/components/TradingAIWidget";
 import { DashboardOverview } from "@/components/DashboardOverview";
 import { AssetIntelligencePage } from "@/components/AssetIntelligencePage";
+import { DashboardMacroInsight } from "@/components/DashboardMacroInsight";
 import { 
   fetchCandles, 
   Symbol, 
@@ -305,7 +306,10 @@ export default function Index() {
       <div className="flex flex-col min-h-screen w-full bg-background">
         <main className="flex-1 overflow-auto">
           <div className="p-4 md:p-6 lg:p-8">
-            <div className="max-w-[1400px] mx-auto">
+            <div className="max-w-[1400px] mx-auto space-y-6">
+              {/* Macro Insight */}
+              <DashboardMacroInsight />
+              
               <DashboardOverview
                 allSignals={allSignals}
                 onSelectSymbol={handleSelectSymbol}

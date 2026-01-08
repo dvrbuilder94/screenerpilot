@@ -1,42 +1,95 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+
+/* ======================================================
+   CONFIG
+====================================================== */
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// ============================================
-// ASSET UNIVERSES FOR TRACK RECORD
-// ============================================
+const INTERVAL = "1d";
 
-// Crypto (Binance API) - Solo 4 principales para track record
-const CRYPTO_UNIVERSE = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT'];
+/* ======================================================
+   ASSET UNIVERSES
+====================================================== */
 
-// Stocks (Yahoo Finance) - Top traded + missing tickers restored
-const STOCK_UNIVERSE = [
-  'AAPL', 'MSFT', 'NVDA', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AVGO', 'BRK-B', 'LLY',
-  'V', 'UNH', 'XOM', 'WMT', 'JNJ', 'ORCL', 'COST', 'MA', 'PG', 'NFLX',
-  'JPM', 'BAC', 'GS', 'AMD', 'INTC', 'QCOM', 'CRM', 'ADBE', 'CSCO', 'PEP',
-  'FIGS', 'XPEV', 'RIVN', 'SOFI', 'ENPH', 'SEDG', 'WDC'
+const CRYPTO = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT"];
+
+const STOCKS = [
+  "AAPL",
+  "MSFT",
+  "NVDA",
+  "AMZN",
+  "GOOGL",
+  "META",
+  "TSLA",
+  "AVGO",
+  "BRK-B",
+  "LLY",
+  "V",
+  "UNH",
+  "XOM",
+  "WMT",
+  "JNJ",
+  "ORCL",
+  "COST",
+  "MA",
+  "PG",
+  "NFLX",
+  "JPM",
+  "BAC",
+  "GS",
+  "AMD",
+  "INTC",
+  "QCOM",
+  "CRM",
+  "ADBE",
+  "CSCO",
+  "PEP",
+  "FIGS",
+  "XPEV",
+  "RIVN",
+  "SOFI",
+  "ENPH",
+  "SEDG",
+  "WDC",
 ];
 
-// ETFs (Yahoo Finance) - Including BlackRock iShares
-const ETF_UNIVERSE = [
-  'SPY', 'IWM', 'QQQ', 'DIA', 'XLF', 'XLE', 'XLK',
-  'IVV', 'IEFA', 'AGG', 'IJH', 'IJR', 'EFA', 'EEM',
-  'IWF', 'IWD', 'LQD', 'HYG', 'TIP', 'IWB', 'IWN', 'IWO',
-  'IEMG', 'ITOT', 'IXUS', 'SHY', 'TLT', 'GLD', 'SLV'
-];
+const ETFS = ["SPY", "QQQ", "IWM", "DIA", "XLF", "XLK", "XLE", "GLD", "TLT", "HYG", "LQD"];
 
-// Indices (Yahoo Finance)
-const INDEX_UNIVERSE = ['^GSPC', '^NDX', '^RUT', '^DJI', '^VIX'];
+const INDICES = ["^GSPC", "^NDX", "^DJI", "^RUT", "^VIX"];
+const COMMODITIES = ["GC=F", "SI=F", "CL=F", "NG=F"];
 
-// Commodities (Yahoo Finance)
-const COMMODITY_UNIVERSE = ['GC=F', 'SI=F', 'CL=F', 'NG=F', 'PL=F', 'HG=F', 'PA=F'];
+type AssetType = "crypto" | "stock" | "etf" | "index" | "commodity";
+type Source = "binance" | "yahoo";
 
-const INTERVALS = ['5m', '15m', '1h', '4h', '1d'];
+interface Asset {
+  symbol: string;
+  type: AssetType;
+  source: Source;
+}
+
+/* ======================================================
+   BUILD ASSET LIST
+====================================================== */
+
+function buildAssets(): Asset[] {
+  return [
+    ...INDICES.map((s) => ({ symbol: s, type: "index", source: "yahoo" })),
+    ...STOCKS.map((s) => ({ symbol: s, type: "stock", source: "yahoo" })),
+    ...ETFS.map((s) => ({ symbol: s, type: "etf", source: "yahoo" })),
+    ...COMMODITIES.map((s) => ({ symbol: s, type: "commodity", source: "yahoo" })),
+    ...CRYPTO.map((s) => ({ symbol: s, type: "crypto", source: "binance" })),
+  ];
+}
+
+/* ======================================================
+   TYPES
+====================================================== */
 
 interface Candle {
   timestamp: number;
@@ -47,457 +100,223 @@ interface Candle {
   volume: number;
 }
 
-interface AssetConfig {
-  symbol: string;
-  type: 'crypto' | 'stock' | 'etf' | 'index' | 'commodity';
-  source: 'binance' | 'yahoo';
-}
+/* ======================================================
+   INDICATORS
+====================================================== */
 
-// Build unified asset list - Yahoo Finance primero (evita timeout)
-function buildAssetList(): AssetConfig[] {
-  return [
-    // Yahoo Finance primero (solo daily, más rápido)
-    ...INDEX_UNIVERSE.map(s => ({ symbol: s, type: 'index' as const, source: 'yahoo' as const })),
-    ...STOCK_UNIVERSE.map(s => ({ symbol: s, type: 'stock' as const, source: 'yahoo' as const })),
-    ...ETF_UNIVERSE.map(s => ({ symbol: s, type: 'etf' as const, source: 'yahoo' as const })),
-    ...COMMODITY_UNIVERSE.map(s => ({ symbol: s, type: 'commodity' as const, source: 'yahoo' as const })),
-    // Crypto al final (menos activos ahora)
-    ...CRYPTO_UNIVERSE.map(s => ({ symbol: s, type: 'crypto' as const, source: 'binance' as const })),
-  ];
-}
-
-// Calculate EMA
-function calculateEMA(data: number[], period: number): number[] {
-  const ema: number[] = [];
-  const multiplier = 2 / (period + 1);
-  ema[0] = data[0];
-  
-  for (let i = 1; i < data.length; i++) {
-    ema[i] = (data[i] - ema[i - 1]) * multiplier + ema[i - 1];
+function ema(values: number[], period: number): number[] {
+  const k = 2 / (period + 1);
+  const out: number[] = [values[0]];
+  for (let i = 1; i < values.length; i++) {
+    out[i] = values[i] * k + out[i - 1] * (1 - k);
   }
-  return ema;
+  return out;
 }
 
-// Calculate RSI
-function calculateRSI(closes: number[], period = 14): number[] {
-  const rsi: number[] = [];
-  let gains = 0;
-  let losses = 0;
+function rsi(values: number[], period = 14): number[] {
+  const out: number[] = Array(values.length).fill(null);
+  let gain = 0,
+    loss = 0;
 
   for (let i = 1; i <= period; i++) {
-    const change = closes[i] - closes[i - 1];
-    if (change > 0) gains += change;
-    else losses -= change;
+    const diff = values[i] - values[i - 1];
+    if (diff > 0) gain += diff;
+    else loss -= diff;
   }
 
-  let avgGain = gains / period;
-  let avgLoss = losses / period;
-  rsi[period] = 100 - (100 / (1 + avgGain / avgLoss));
+  let avgGain = gain / period;
+  let avgLoss = loss / period;
+  out[period] = avgLoss === 0 ? 100 : 100 - 100 / (1 + avgGain / avgLoss);
 
-  for (let i = period + 1; i < closes.length; i++) {
-    const change = closes[i] - closes[i - 1];
-    const gain = change > 0 ? change : 0;
-    const loss = change < 0 ? -change : 0;
-
-    avgGain = (avgGain * (period - 1) + gain) / period;
-    avgLoss = (avgLoss * (period - 1) + loss) / period;
-    rsi[i] = 100 - (100 / (1 + avgGain / avgLoss));
+  for (let i = period + 1; i < values.length; i++) {
+    const diff = values[i] - values[i - 1];
+    avgGain = (avgGain * (period - 1) + Math.max(diff, 0)) / period;
+    avgLoss = (avgLoss * (period - 1) + Math.max(-diff, 0)) / period;
+    out[i] = avgLoss === 0 ? 100 : 100 - 100 / (1 + avgGain / avgLoss);
   }
-
-  return rsi;
+  return out;
 }
 
-// Calculate MACD
-function calculateMACD(closes: number[]) {
-  const ema12 = calculateEMA(closes, 12);
-  const ema26 = calculateEMA(closes, 26);
-  const macdLine = ema12.map((val, i) => val - ema26[i]);
-  const signal = calculateEMA(macdLine, 9);
-  const histogram = macdLine.map((val, i) => val - signal[i]);
-  
-  return { macdLine, signal, histogram };
+function macd(values: number[]) {
+  const fast = ema(values, 12);
+  const slow = ema(values, 26);
+  const line = fast.map((v, i) => v - slow[i]);
+  const signal = ema(line, 9);
+  const hist = line.map((v, i) => v - signal[i]);
+  return { line, signal, hist };
 }
 
-// Calculate ATR
-function calculateATR(candles: Candle[], period = 14): number[] {
+function atr(candles: Candle[], period = 14): number[] {
   const tr: number[] = [];
-  
   for (let i = 1; i < candles.length; i++) {
-    const high = candles[i].high;
-    const low = candles[i].low;
-    const prevClose = candles[i - 1].close;
-    
-    tr[i] = Math.max(
-      high - low,
-      Math.abs(high - prevClose),
-      Math.abs(low - prevClose)
+    tr.push(
+      Math.max(
+        candles[i].high - candles[i].low,
+        Math.abs(candles[i].high - candles[i - 1].close),
+        Math.abs(candles[i].low - candles[i - 1].close),
+      ),
     );
   }
-  
-  return calculateEMA(tr.slice(1), period);
+  const atrRaw = ema(tr, period);
+  return Array(period).fill(null).concat(atrRaw);
 }
 
-// Calculate Supertrend
-function calculateSupertrend(candles: Candle[], period = 10, multiplier = 3) {
-  const atr = calculateATR(candles, period);
-  const supertrend: number[] = [];
-  const direction: string[] = [];
-  
+/* REAL Supertrend */
+function supertrend(candles: Candle[], period = 10, multiplier = 3) {
+  const atrVals = atr(candles, period);
+  const trend: ("BULLISH" | "BEARISH")[] = [];
+  let prevTrend: "BULLISH" | "BEARISH" = "BULLISH";
+
   for (let i = period; i < candles.length; i++) {
     const hl2 = (candles[i].high + candles[i].low) / 2;
-    const upperBand = hl2 + multiplier * atr[i - period];
-    const lowerBand = hl2 - multiplier * atr[i - period];
-    
-    if (candles[i].close > upperBand) {
-      supertrend[i] = lowerBand;
-      direction[i] = 'BULLISH';
-    } else {
-      supertrend[i] = upperBand;
-      direction[i] = 'BEARISH';
-    }
+    const upper = hl2 + multiplier * atrVals[i];
+    const lower = hl2 - multiplier * atrVals[i];
+
+    if (candles[i].close > upper) prevTrend = "BULLISH";
+    else if (candles[i].close < lower) prevTrend = "BEARISH";
+
+    trend[i] = prevTrend;
   }
-  
-  return { supertrend, direction };
+  return trend;
 }
 
-// Generate trading signal
-function generateSignal(
-  close: number,
-  ema9: number,
-  ema21: number,
-  ema50: number,
-  rsi: number,
-  macd: number,
-  macdSignal: number,
-  supertrendDir: string
-) {
+/* ======================================================
+   SIGNAL ENGINE
+====================================================== */
+
+function generateSignal(params: {
+  ema9: number;
+  ema21: number;
+  ema50: number;
+  rsi: number;
+  macd: number;
+  macdSignal: number;
+  supertrend: "BULLISH" | "BEARISH";
+  assetType: AssetType;
+}) {
   let score = 0;
-  let confidence = 0;
 
-  // EMA alignment
-  if (ema9 > ema21 && ema21 > ema50) score += 30;
-  else if (ema9 < ema21 && ema21 < ema50) score -= 30;
+  if (params.ema9 > params.ema21 && params.ema21 > params.ema50) score += 30;
+  if (params.ema9 < params.ema21 && params.ema21 < params.ema50) score -= 30;
 
-  // RSI
-  if (rsi > 70) score -= 20;
-  else if (rsi < 30) score += 20;
-  else if (rsi > 50) score += 10;
+  if (params.rsi < 30) score += 20;
+  else if (params.rsi > 70) score -= 20;
+  else if (params.rsi > 50) score += 10;
   else score -= 10;
 
-  // MACD
-  if (macd > macdSignal) score += 20;
-  else score -= 20;
+  score += params.macd > params.macdSignal ? 20 : -20;
+  score += params.supertrend === "BULLISH" ? 20 : -20;
 
-  // Supertrend
-  if (supertrendDir === 'BULLISH') score += 20;
-  else score -= 20;
+  const volatilityAdj = params.assetType === "crypto" ? 0.85 : params.assetType === "index" ? 1.2 : 1;
 
-  confidence = Math.min(Math.abs(score), 100);
+  score *= volatilityAdj;
 
-  let signalType = 'HOLD';
-  if (score > 60) signalType = 'STRONG_BUY';
-  else if (score > 30) signalType = 'BUY';
-  else if (score < -60) signalType = 'STRONG_SELL';
-  else if (score < -30) signalType = 'SELL';
+  let signal = "HOLD";
+  if (score > 60) signal = "STRONG_BUY";
+  else if (score > 30) signal = "BUY";
+  else if (score < -60) signal = "STRONG_SELL";
+  else if (score < -30) signal = "SELL";
 
-  const trend = score > 10 ? 'BULLISH' : score < -10 ? 'BEARISH' : 'NEUTRAL';
-
-  return { signalType, score, confidence, trend };
+  return {
+    signal,
+    score: Math.round(score),
+    confidence: Math.min(Math.abs(score), 100),
+    trend: score > 10 ? "BULLISH" : score < -10 ? "BEARISH" : "NEUTRAL",
+  };
 }
 
-// Check if snapshot should be captured (immutable track record)
-async function shouldCaptureSnapshot(
-  supabase: any,
-  symbol: string,
-  timeframe: string,
-  currentSignal: string
-): Promise<boolean> {
-  const { data: lastSnapshot } = await supabase
-    .from('signal_snapshots')
-    .select('signal, created_at')
-    .eq('symbol', symbol)
-    .eq('timeframe', timeframe)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+/* ======================================================
+   DATA FETCHERS
+====================================================== */
 
-  // Capture if no previous snapshot exists
-  if (!lastSnapshot) return true;
-
-  // Capture if signal changed
-  if (lastSnapshot.signal !== currentSignal) return true;
-
-  // Capture if 24+ hours have passed (daily capture)
-  const lastCreatedAt = new Date(lastSnapshot.created_at).getTime();
-  const hoursSinceLast = (Date.now() - lastCreatedAt) / (1000 * 60 * 60);
-  if (hoursSinceLast >= 24) return true;
-
-  return false;
+async function fetchBinance(symbol: string): Promise<Candle[] | null> {
+  const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=300`);
+  if (!res.ok) return null;
+  const raw = await res.json();
+  return raw.map((k: any) => ({
+    timestamp: k[0],
+    open: +k[1],
+    high: +k[2],
+    low: +k[3],
+    close: +k[4],
+    volume: +k[5],
+  }));
 }
 
-// Fetch data from Binance (crypto)
-async function fetchBinanceData(symbol: string, interval: string, limit: number): Promise<Candle[] | null> {
-  try {
-    const binanceUrl = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
-    const response = await fetch(binanceUrl);
-    if (!response.ok) return null;
+async function fetchYahoo(symbol: string): Promise<Candle[] | null> {
+  const res = await fetch(
+    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=2y&interval=1d`,
+    { headers: { "User-Agent": "Mozilla/5.0" } },
+  );
+  if (!res.ok) return null;
+  const json = await res.json();
+  const r = json.chart?.result?.[0];
+  if (!r) return null;
 
-    const rawData = await response.json();
-    return rawData.map((k: any) => ({
-      timestamp: k[0],
-      open: parseFloat(k[1]),
-      high: parseFloat(k[2]),
-      low: parseFloat(k[3]),
-      close: parseFloat(k[4]),
-      volume: parseFloat(k[5])
-    }));
-  } catch {
-    return null;
-  }
+  return r.timestamp
+    .map((t: number, i: number) => ({
+      timestamp: t * 1000,
+      open: r.indicators.quote[0].open[i],
+      high: r.indicators.quote[0].high[i],
+      low: r.indicators.quote[0].low[i],
+      close: r.indicators.quote[0].close[i],
+      volume: r.indicators.quote[0].volume?.[i] ?? 0,
+    }))
+    .filter((c: Candle) => c.close != null);
 }
 
-// Map interval to Yahoo Finance range/interval
-function getYahooParams(interval: string): { range: string; yahooInterval: string } {
-  switch (interval) {
-    case '5m': return { range: '1d', yahooInterval: '5m' };
-    case '15m': return { range: '5d', yahooInterval: '15m' };
-    case '1h': return { range: '1mo', yahooInterval: '1h' };
-    case '4h': return { range: '3mo', yahooInterval: '1d' }; // Yahoo doesn't support 4h, use 1d as proxy
-    case '1d': return { range: '1y', yahooInterval: '1d' };
-    default: return { range: '1mo', yahooInterval: '1d' };
-  }
-}
+/* ======================================================
+   SERVER
+====================================================== */
 
-// Fetch data from Yahoo Finance (stocks, ETFs, indices, commodities)
-async function fetchYahooData(symbol: string, interval: string): Promise<Candle[] | null> {
-  try {
-    // Only fetch daily data for non-crypto to reduce API calls
-    if (interval !== '1d') return null;
+serve(async () => {
+  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
-    const { range, yahooInterval } = getYahooParams(interval);
-    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=${range}&interval=${yahooInterval}`;
-    
-    const response = await fetch(yahooUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      }
+  const assets = buildAssets();
+
+  for (const asset of assets) {
+    const candles = asset.source === "binance" ? await fetchBinance(asset.symbol) : await fetchYahoo(asset.symbol);
+
+    if (!candles || candles.length < 60) continue;
+
+    const closes = candles.map((c) => c.close);
+    const ema9 = ema(closes, 9);
+    const ema21 = ema(closes, 21);
+    const ema50 = ema(closes, 50);
+    const rsiVals = rsi(closes);
+    const macdVals = macd(closes);
+    const st = supertrend(candles);
+
+    const i = candles.length - 1;
+
+    const signal = generateSignal({
+      ema9: ema9[i],
+      ema21: ema21[i],
+      ema50: ema50[i],
+      rsi: rsiVals[i],
+      macd: macdVals.line[i],
+      macdSignal: macdVals.signal[i],
+      supertrend: st[i],
+      assetType: asset.type,
     });
-    
-    if (!response.ok) return null;
 
-    const data = await response.json();
-    const result = data.chart?.result?.[0];
-    if (!result?.timestamp || !result?.indicators?.quote?.[0]) return null;
-
-    const quotes = result.indicators.quote[0];
-    const timestamps = result.timestamp;
-
-    const candles: Candle[] = [];
-    for (let i = 0; i < timestamps.length; i++) {
-      if (quotes.open[i] != null && quotes.close[i] != null) {
-        candles.push({
-          timestamp: timestamps[i] * 1000,
-          open: quotes.open[i],
-          high: quotes.high[i],
-          low: quotes.low[i],
-          close: quotes.close[i],
-          volume: quotes.volume[i] || 0
-        });
-      }
-    }
-
-    return candles.length > 50 ? candles : null;
-  } catch {
-    return null;
-  }
-}
-
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  try {
-    console.log('Starting market collector batch job...');
-
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    const results = {
-      processed: 0,
-      errors: 0,
-      candles_saved: 0,
-      snapshots_saved: 0,
-      track_record_captured: 0,
-      by_type: {
-        crypto: 0,
-        stock: 0,
-        etf: 0,
-        index: 0,
-        commodity: 0
-      }
-    };
-
-    const allAssets = buildAssetList();
-
-    for (const asset of allAssets) {
-      // Solo daily (1d) para track record - todos los activos
-      const intervals = ['1d'];
-
-      for (const interval of intervals) {
-        try {
-          let candles: Candle[] | null = null;
-
-          // Fetch data from appropriate source
-          if (asset.source === 'binance') {
-            const limit = interval === '1d' ? 200 : interval === '4h' ? 168 : 100;
-            candles = await fetchBinanceData(asset.symbol, interval, limit);
-          } else {
-            candles = await fetchYahooData(asset.symbol, interval);
-          }
-
-          if (!candles || candles.length < 50) {
-            console.log(`Skipping ${asset.symbol} ${interval}: insufficient data`);
-            continue;
-          }
-
-          // Save candles to DB (upsert last 50 candles)
-          const recentCandles = candles.slice(-50);
-          for (const candle of recentCandles) {
-            await supabase.from('asset_candles').upsert({
-              symbol: asset.symbol,
-              asset_type: asset.type,
-              interval,
-              timestamp: candle.timestamp,
-              open: candle.open,
-              high: candle.high,
-              low: candle.low,
-              close: candle.close,
-              volume: candle.volume
-            }, { onConflict: 'symbol,asset_type,interval,timestamp' });
-          }
-          results.candles_saved += recentCandles.length;
-
-          // Calculate indicators
-          const closes = candles.map(c => c.close);
-          const ema9 = calculateEMA(closes, 9);
-          const ema21 = calculateEMA(closes, 21);
-          const ema50 = calculateEMA(closes, 50);
-          const ema200 = calculateEMA(closes, 200);
-          const rsi = calculateRSI(closes, 14);
-          const { macdLine, signal: macdSignal, histogram } = calculateMACD(closes);
-          const atr = calculateATR(candles, 14);
-          const { supertrend, direction: supertrendDir } = calculateSupertrend(candles, 10, 3);
-
-          const lastIdx = candles.length - 1;
-          const currentPrice = candles[lastIdx].close;
-
-          const signal = generateSignal(
-            currentPrice,
-            ema9[lastIdx],
-            ema21[lastIdx],
-            ema50[lastIdx],
-            rsi[lastIdx],
-            macdLine[lastIdx],
-            macdSignal[lastIdx],
-            supertrendDir[lastIdx]
-          );
-
-          // Save live snapshot (overwrites - for real-time display)
-          await supabase.from('asset_snapshots').upsert({
-            symbol: asset.symbol,
-            asset_type: asset.type,
-            interval,
-            current_price: currentPrice,
-            ema_9: ema9[lastIdx],
-            ema_21: ema21[lastIdx],
-            ema_50: ema50[lastIdx],
-            ema_200: ema200[lastIdx],
-            rsi: rsi[lastIdx],
-            macd: macdLine[lastIdx],
-            macd_signal: macdSignal[lastIdx],
-            macd_histogram: histogram[lastIdx],
-            atr: atr[atr.length - 1],
-            supertrend: supertrend[lastIdx],
-            supertrend_direction: supertrendDir[lastIdx],
-            signal_type: signal.signalType,
-            signal_score: signal.score,
-            confidence: signal.confidence,
-            trend: signal.trend,
-            calculated_at: new Date().toISOString()
-          }, { onConflict: 'symbol,asset_type,interval' });
-
-          results.snapshots_saved++;
-
-          // ========================================
-          // TRACK RECORD: Immutable signal snapshot
-          // DAILY (1d) SIGNALS ONLY - All asset types
-          // ========================================
-          if (interval === '1d') {
-            const shouldCapture = await shouldCaptureSnapshot(
-              supabase,
-              asset.symbol,
-              interval,
-              signal.signalType
-            );
-
-            if (shouldCapture) {
-              const { error: snapshotError } = await supabase
-                .from('signal_snapshots')
-                .insert({
-                  symbol: asset.symbol,
-                  asset_type: asset.type,
-                  timeframe: interval,
-                  signal: signal.signalType,
-                  score: signal.score,
-                  confidence: signal.confidence,
-                  price_at_signal: currentPrice
-                });
-
-              if (snapshotError) {
-                console.error(`Track record error for ${asset.symbol} ${interval}:`, snapshotError);
-              } else {
-                results.track_record_captured++;
-                results.by_type[asset.type]++;
-                console.log(`📸 Track record captured: ${asset.symbol} [${asset.type}] ${interval} = ${signal.signalType}`);
-              }
-            }
-          }
-
-          results.processed++;
-          console.log(`✓ Processed ${asset.symbol} [${asset.type}] ${interval}`);
-
-        } catch (error) {
-          console.error(`Error processing ${asset.symbol} ${interval}:`, error);
-          results.errors++;
-        }
-      }
-    }
-
-    console.log('Batch collection complete:', results);
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        results
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
-      }
-    );
-
-  } catch (error) {
-    console.error('Market collector error:', error);
-    return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error'
-      }),
-      { 
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+    await supabase.from("asset_snapshots").upsert(
+      {
+        symbol: asset.symbol,
+        asset_type: asset.type,
+        interval: INTERVAL,
+        current_price: closes[i],
+        signal_type: signal.signal,
+        signal_score: signal.score,
+        confidence: signal.confidence,
+        trend: signal.trend,
+        calculated_at: new Date().toISOString(),
+      },
+      { onConflict: "symbol,asset_type,interval" },
     );
   }
+
+  return new Response(JSON.stringify({ success: true }), {
+    headers: corsHeaders,
+  });
 });

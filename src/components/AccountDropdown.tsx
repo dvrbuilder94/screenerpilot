@@ -103,7 +103,10 @@ export const AccountDropdown = () => {
         
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem className="cursor-pointer hover:bg-secondary/50 transition-smooth">
+        <DropdownMenuItem 
+          onClick={() => navigate('/profile')}
+          className="cursor-pointer hover:bg-secondary/50 transition-smooth"
+        >
           <User className="w-4 h-4 mr-2" />
           Profile
         </DropdownMenuItem>

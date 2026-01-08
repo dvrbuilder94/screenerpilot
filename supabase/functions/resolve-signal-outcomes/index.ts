@@ -96,10 +96,11 @@ serve(async (req) => {
       console.log(`Checking horizon ${horizon.name} (cutoff: ${cutoffTime})`);
 
       // Find snapshots that are old enough but don't have this horizon resolved yet
-      // Use a LEFT JOIN approach: get snapshots, then check if outcome exists
+      // DAILY (1d) SIGNALS ONLY - Strategic decision for track record
       const { data: candidates, error: candidateError } = await supabase
         .from('signal_snapshots')
         .select('*')
+        .eq('timeframe', '1d')
         .lt('created_at', cutoffTime)
         .order('created_at', { ascending: true })
         .limit(100); // Process in batches

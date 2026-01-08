@@ -33,7 +33,7 @@ export function TrackRecordSummary({ horizon }: TrackRecordSummaryProps) {
       <Card className="bg-card border-border">
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-medium text-foreground">
-            Performance by Signal Type
+            Daily Signal Performance
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -47,7 +47,6 @@ export function TrackRecordSummary({ horizon }: TrackRecordSummaryProps) {
                 <thead>
                   <tr className="border-b border-border">
                     <th className="text-left py-2 px-3 text-muted-foreground font-medium">Signal</th>
-                    <th className="text-left py-2 px-3 text-muted-foreground font-medium">Timeframe</th>
                     <th className="text-right py-2 px-3 text-muted-foreground font-medium">Sample</th>
                     <th className="text-right py-2 px-3 text-muted-foreground font-medium">Avg Return</th>
                     <th className="text-right py-2 px-3 text-muted-foreground font-medium">Avg Drawdown</th>
@@ -58,7 +57,6 @@ export function TrackRecordSummary({ horizon }: TrackRecordSummaryProps) {
                   {metrics.map((row, i) => (
                     <tr key={i} className="border-b border-border/50 last:border-0">
                       <td className="py-2 px-3 text-foreground">{row.signal}</td>
-                      <td className="py-2 px-3 text-foreground">{row.timeframe}</td>
                       <td className="py-2 px-3 text-right text-foreground">{row.sample_size}</td>
                       {row.sample_size < 10 ? (
                         <td colSpan={3} className="py-2 px-3 text-center">
@@ -91,7 +89,7 @@ export function TrackRecordSummary({ horizon }: TrackRecordSummaryProps) {
   // Mobile: Stacked cards
   return (
     <div className="space-y-3">
-      <h3 className="text-base font-medium text-foreground">Performance by Signal Type</h3>
+      <h3 className="text-base font-medium text-foreground">Daily Signal Performance</h3>
       {!hasData ? (
         <Card className="bg-card border-border">
           <CardContent className="p-4">
@@ -106,7 +104,6 @@ export function TrackRecordSummary({ horizon }: TrackRecordSummaryProps) {
             <CardContent className="p-4 space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-foreground">{row.signal}</span>
-                <span className="text-xs text-muted-foreground">{row.timeframe}</span>
               </div>
               <div className="text-xs text-muted-foreground">
                 Sample: {row.sample_size}

@@ -13,6 +13,7 @@ import Macro from "./pages/Macro";
 import Commodities from "./pages/Commodities";
 import NotFound from "./pages/NotFound";
 import { TrackRecordPage } from "./modules/track-record";
+import Performance from "./pages/Performance";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/track-record" element={<TrackRecordPage />} />
+                <Route path="/performance" element={<Performance />} />
                 <Route path="/macro" element={<Macro />} />
                 <Route path="/commodities" element={<Commodities />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

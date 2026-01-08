@@ -11,12 +11,16 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { TradeRecord } from "@/hooks/usePerformanceData";
 import { getAssetName } from "@/lib/assetNames";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { t } from "@/lib/translations";
 
 interface TradeHistoryProps {
   trades: TradeRecord[];
 }
 
 export function TradeHistory({ trades }: TradeHistoryProps) {
+  const { language } = useLanguage();
+  
   if (trades.length === 0) {
     return null;
   }
@@ -24,7 +28,7 @@ export function TradeHistory({ trades }: TradeHistoryProps) {
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "—";
     const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', {
       month: "short",
       day: "numeric",
       year: "2-digit",
@@ -39,18 +43,18 @@ export function TradeHistory({ trades }: TradeHistoryProps) {
 
   return (
     <Card className="p-6">
-      <h2 className="text-lg font-semibold text-foreground mb-4">Recent Trades</h2>
+      <h2 className="text-lg font-semibold text-foreground mb-4">{t('performance.recentTrades', language)}</h2>
 
       {/* Desktop Table */}
       <div className="hidden md:block overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-xs uppercase tracking-wide">Asset</TableHead>
-              <TableHead className="text-xs uppercase tracking-wide">Signal</TableHead>
-              <TableHead className="text-xs uppercase tracking-wide">Entry</TableHead>
-              <TableHead className="text-xs uppercase tracking-wide">Exit</TableHead>
-              <TableHead className="text-xs uppercase tracking-wide text-right">Return</TableHead>
+              <TableHead className="text-xs uppercase tracking-wide">{t('performance.asset', language)}</TableHead>
+              <TableHead className="text-xs uppercase tracking-wide">{t('performance.signal', language)}</TableHead>
+              <TableHead className="text-xs uppercase tracking-wide">{t('performance.entry', language)}</TableHead>
+              <TableHead className="text-xs uppercase tracking-wide">{t('performance.exit', language)}</TableHead>
+              <TableHead className="text-xs uppercase tracking-wide text-right">{t('performance.return', language)}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

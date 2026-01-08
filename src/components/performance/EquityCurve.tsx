@@ -1,31 +1,34 @@
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, Line, ComposedChart } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ComposedChart } from "recharts";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { EquityPoint } from "@/hooks/usePerformanceData";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { t } from "@/lib/translations";
 
 interface EquityCurveProps {
   data: EquityPoint[];
   timeRange: "all" | "6m" | "3m";
   onTimeRangeChange: (range: "all" | "6m" | "3m") => void;
-  isDemo?: boolean;
 }
 
-const timeRanges: { label: string; value: "all" | "6m" | "3m" }[] = [
-  { label: "Since Inception", value: "all" },
-  { label: "6M", value: "6m" },
-  { label: "3M", value: "3m" },
-];
+export function EquityCurve({ data, timeRange, onTimeRangeChange }: EquityCurveProps) {
+  const { language } = useLanguage();
+  
+  const timeRanges: { label: string; value: "all" | "6m" | "3m" }[] = [
+    { label: t('performance.sinceInception', language), value: "all" },
+    { label: "6M", value: "6m" },
+    { label: "3M", value: "3m" },
+  ];
 
-export function EquityCurve({ data, timeRange, onTimeRangeChange, isDemo }: EquityCurveProps) {
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return date.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { month: "short", day: "numeric" });
   };
 
   const formatTooltipDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', {
       month: "long",
       day: "numeric",
       year: "numeric",
@@ -57,17 +60,12 @@ export function EquityCurve({ data, timeRange, onTimeRangeChange, isDemo }: Equi
     <Card className="p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Equity Curve</h2>
+          <h2 className="text-lg font-semibold text-foreground">{t('performance.equityCurve', language)}</h2>
           <div className="flex items-center gap-4 mt-1">
-            {isDemo && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground">
-                Demo Data
-              </span>
-            )}
             <div className="flex items-center gap-3 text-xs">
               <span className="flex items-center gap-1">
                 <span className="w-3 h-0.5 bg-bullish rounded"></span>
-                <span className="text-muted-foreground">Strategy</span>
+                <span className="text-muted-foreground">{t('performance.strategy', language)}</span>
               </span>
             </div>
           </div>
@@ -92,7 +90,7 @@ export function EquityCurve({ data, timeRange, onTimeRangeChange, isDemo }: Equi
       
       {/* Institutional disclaimer */}
       <p className="text-xs text-muted-foreground mb-4">
-        Changing the time range adjusts the chart view only. All performance metrics are calculated since inception.
+        {t('performance.chartDisclaimer', language)}
       </p>
 
       <div className="h-[350px] w-full">

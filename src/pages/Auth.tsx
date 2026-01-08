@@ -18,8 +18,10 @@ const Auth = () => {
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [pendingEmail, setPendingEmail] = useState('');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
   
-  const { signUp, signIn, verifyOtp, resendOtp, user } = useAuth();
+  const { signUp, signIn, verifyOtp, resendOtp, resetPassword, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -130,6 +132,37 @@ const Auth = () => {
     setPendingEmail('');
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail) {
+      toast({
+        title: 'Error',
+        description: 'Please enter your email address.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    const { error } = await resetPassword(resetEmail);
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: 'Email Sent',
+        description: 'Check your inbox for password reset instructions.',
+      });
+      setShowForgotPassword(false);
+      setResetEmail('');
+    }
+    setIsLoading(false);
+  };
+
   // OTP Verification Screen
   if (showOtpInput) {
     return (
@@ -200,6 +233,50 @@ const Auth = () => {
     );
   }
 
+  // Forgot Password Screen
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1 text-center">
+            <CardTitle className="text-2xl font-bold">Forgot Password</CardTitle>
+            <CardDescription>
+              Enter your email and we'll send you a reset link.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="reset-email">Email</Label>
+                <Input
+                  id="reset-email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? 'Sending...' : 'Send Reset Link'}
+              </Button>
+            </form>
+          </CardContent>
+          <CardFooter>
+            <Button
+              variant="ghost"
+              onClick={() => setShowForgotPassword(false)}
+              className="w-full"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Sign In
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
       <Card className="w-full max-w-md">
@@ -241,7 +318,15 @@ const Auth = () => {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                  {isLoading ? 'Signing in...' : 'Sign In'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="link"
+                  className="w-full text-sm text-muted-foreground"
+                  onClick={() => setShowForgotPassword(true)}
+                >
+                  Forgot Password?
                 </Button>
               </form>
             </TabsContent>

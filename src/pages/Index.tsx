@@ -1,18 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
 import { TradingAIWidget } from "@/components/TradingAIWidget";
-import { SignalsSidebar } from "@/components/SignalsSidebar";
 import { DashboardOverview } from "@/components/DashboardOverview";
 import { AssetIntelligencePage } from "@/components/AssetIntelligencePage";
+import { AppHeader } from "@/components/AppHeader";
 import { 
   fetchCandles, 
   Symbol, 
   Interval, 
   Candle, 
-  AssetType, 
-  getSymbolsByType,
   getAssetType 
 } from "@/lib/binanceApi";
 import {
@@ -26,7 +22,6 @@ import {
 import { calculateEnhancedSignal } from "@/lib/enhancedSignals";
 import { TradingSetup, EnhancedSignal } from "@/types/trading";
 import { TradingStyle, TRADING_PROFILES } from "@/types/tradingProfile";
-import { useLanguage } from "@/contexts/LanguageContext";
 import presets from "@/config/presets.json";
 
 const STORAGE_KEY = "crypto-dashboard-settings";
@@ -52,21 +47,20 @@ const loadSettings = () => {
 };
 
 export default function Index() {
-  const { language } = useLanguage();
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
-
   // Core state
   const [selectedSymbol, setSelectedSymbol] = useState<Symbol | null>(null);
-  const [tradingStyle, setTradingStyle] = useState<TradingStyle>(() => {
+  const [tradingStyle] = useState<TradingStyle>(() => {
     const saved = loadSettings()?.tradingStyle;
     return saved || 'swing';
   });
 
+  // Dashboard filter state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [assetCategory, setAssetCategory] = useState("ALL");
+
   // All signals state
   const [allSignals, setAllSignals] = useState<TradingSetup[]>([]);
   const [isScanningAll, setIsScanningAll] = useState(false);
-  const [lastScanTime, setLastScanTime] = useState<number>();
 
   // Selected asset data
   const [macroData, setMacroData] = useState<DashboardData | null>(null);
@@ -76,14 +70,6 @@ export default function Index() {
   // Fixed intervals for strategic focus
   const macroInterval: Interval = "1d";
   const microInterval: Interval = "1h";
-
-  // Save trading style to localStorage
-  useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ tradingStyle })
-    );
-  }, [tradingStyle]);
 
   const calculateIndicators = useCallback((candles: Candle[]): DashboardData => {
     const closes = candles.map(c => c.close);
@@ -209,7 +195,6 @@ export default function Index() {
       .map((result) => result.value as TradingSetup);
 
     setAllSignals(validSetups);
-    setLastScanTime(Date.now());
     setIsScanningAll(false);
 
     toast.success(`Scanned ${validSetups.length} assets`);
@@ -264,45 +249,52 @@ export default function Index() {
     setMicroData(null);
   }, []);
 
+  // Show asset detail page
+  if (selectedSymbol && macroData && microData) {
+    return (
+      <>
+        <TradingAIWidget />
+        <AssetIntelligencePage
+          symbol={selectedSymbol}
+          currentPrice={macroData.currentPrice}
+          macroSignal={macroData.enhancedSignal}
+          microSignal={microData.enhancedSignal}
+          candles={macroData.candles}
+          indicators={macroData.indicators}
+          onBack={handleBackToOverview}
+        />
+      </>
+    );
+  }
+
+  // Show dashboard overview (no asset sidebar)
   return (
     <>
       <TradingAIWidget />
-      <div className="flex h-screen w-full bg-background">
-        {/* Signals Sidebar - Slimmer */}
-        <div className="w-72 flex-shrink-0">
-          <SignalsSidebar
-            allSignals={allSignals}
-            selectedSymbol={selectedSymbol || ""}
-            onSelectSymbol={handleSelectSymbol}
-            isLoading={isScanningAll}
-            lastUpdate={lastScanTime}
-          />
-        </div>
+      <div className="flex flex-col min-h-screen w-full bg-background">
+        {/* Header with search and category tabs */}
+        <AppHeader
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          assetCategory={assetCategory}
+          onCategoryChange={setAssetCategory}
+          showAssetFilters={true}
+        />
 
-        {/* Main Content */}
-        <div className="flex-1 overflow-auto">
+        {/* Main Content - Full width, no sidebar */}
+        <main className="flex-1 overflow-auto">
           <div className="p-4 md:p-6 lg:p-8">
             <div className="max-w-[1400px] mx-auto">
-              {selectedSymbol && macroData && microData ? (
-                <AssetIntelligencePage
-                  symbol={selectedSymbol}
-                  currentPrice={macroData.currentPrice}
-                  macroSignal={macroData.enhancedSignal}
-                  microSignal={microData.enhancedSignal}
-                  candles={macroData.candles}
-                  indicators={macroData.indicators}
-                  onBack={handleBackToOverview}
-                />
-              ) : (
-                <DashboardOverview
-                  allSignals={allSignals}
-                  onSelectSymbol={handleSelectSymbol}
-                  isLoading={isScanningAll}
-                />
-              )}
+              <DashboardOverview
+                allSignals={allSignals}
+                onSelectSymbol={handleSelectSymbol}
+                isLoading={isScanningAll}
+                searchQuery={searchQuery}
+                category={assetCategory}
+              />
             </div>
           </div>
-        </div>
+        </main>
       </div>
     </>
   );

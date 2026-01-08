@@ -11,13 +11,8 @@ const corsHeaders = {
 // ASSET UNIVERSES FOR TRACK RECORD
 // ============================================
 
-// Crypto (Binance API)
-const CRYPTO_UNIVERSE = [
-  'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 
-  'ADAUSDT', 'DOGEUSDT', 'MATICUSDT', 'DOTUSDT', 'LINKUSDT',
-  'AVAXUSDT', 'UNIUSDT', 'ATOMUSDT', 'NEARUSDT', 'APTUSDT',
-  'ARBUSDT', 'OPUSDT', 'INJUSDT', 'SUIUSDT', 'TAOUSDT'
-];
+// Crypto (Binance API) - Solo 4 principales para track record
+const CRYPTO_UNIVERSE = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT'];
 
 // Stocks (Yahoo Finance) - Top traded + missing tickers restored
 const STOCK_UNIVERSE = [
@@ -58,14 +53,16 @@ interface AssetConfig {
   source: 'binance' | 'yahoo';
 }
 
-// Build unified asset list
+// Build unified asset list - Yahoo Finance primero (evita timeout)
 function buildAssetList(): AssetConfig[] {
   return [
-    ...CRYPTO_UNIVERSE.map(s => ({ symbol: s, type: 'crypto' as const, source: 'binance' as const })),
+    // Yahoo Finance primero (solo daily, más rápido)
+    ...INDEX_UNIVERSE.map(s => ({ symbol: s, type: 'index' as const, source: 'yahoo' as const })),
     ...STOCK_UNIVERSE.map(s => ({ symbol: s, type: 'stock' as const, source: 'yahoo' as const })),
     ...ETF_UNIVERSE.map(s => ({ symbol: s, type: 'etf' as const, source: 'yahoo' as const })),
-    ...INDEX_UNIVERSE.map(s => ({ symbol: s, type: 'index' as const, source: 'yahoo' as const })),
     ...COMMODITY_UNIVERSE.map(s => ({ symbol: s, type: 'commodity' as const, source: 'yahoo' as const })),
+    // Crypto al final (menos activos ahora)
+    ...CRYPTO_UNIVERSE.map(s => ({ symbol: s, type: 'crypto' as const, source: 'binance' as const })),
   ];
 }
 
@@ -345,8 +342,8 @@ serve(async (req) => {
     const allAssets = buildAssetList();
 
     for (const asset of allAssets) {
-      // For non-crypto, only process daily (1d) to reduce API calls
-      const intervals = asset.source === 'binance' ? INTERVALS : ['1d'];
+      // Solo daily (1d) para track record - todos los activos
+      const intervals = ['1d'];
 
       for (const interval of intervals) {
         try {

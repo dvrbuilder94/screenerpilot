@@ -27,8 +27,6 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
-  connectWallet: () => Promise<{ error: any }>;
-  disconnectWallet: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -134,57 +132,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setSubscription(null);
   };
 
-  const connectWallet = async () => {
-    try {
-      if (!window.ethereum) {
-        return { error: 'MetaMask not installed' };
-      }
-
-      if (!user) {
-        return { error: 'Must be logged in to connect wallet' };
-      }
-
-      const accounts = await window.ethereum.request({
-        method: 'eth_requestAccounts',
-      });
-
-      const walletAddress = accounts[0];
-
-      // Update profile with wallet address
-      // @ts-ignore - Database types not yet regenerated after migration
-      const { error } = await supabase
-        // @ts-ignore
-        .from('profiles')
-        // @ts-ignore
-        .update({ wallet_address: walletAddress })
-        .eq('user_id', user.id);
-
-      if (!error && profile) {
-        setProfile({ ...profile, wallet_address: walletAddress });
-      }
-
-      return { error };
-    } catch (error: any) {
-      return { error: error.message };
-    }
-  };
-
-  const disconnectWallet = async () => {
-    if (!user) return;
-
-    // @ts-ignore - Database types not yet regenerated after migration
-    await supabase
-      // @ts-ignore
-      .from('profiles')
-      // @ts-ignore
-      .update({ wallet_address: null })
-      .eq('user_id', user.id);
-
-    if (profile) {
-      setProfile({ ...profile, wallet_address: null });
-    }
-  };
-
   return (
     <AuthContext.Provider
       value={{
@@ -197,8 +144,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         signIn,
         signInWithGoogle,
         signOut,
-        connectWallet,
-        disconnectWallet,
       }}
     >
       {children}
@@ -213,10 +158,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-// Extend Window interface for ethereum
-declare global {
-  interface Window {
-    ethereum?: any;
-  }
-}

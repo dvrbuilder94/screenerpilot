@@ -19,21 +19,27 @@ const CRYPTO_UNIVERSE = [
   'ARBUSDT', 'OPUSDT', 'INJUSDT', 'SUIUSDT', 'TAOUSDT'
 ];
 
-// Stocks (Yahoo Finance) - Top traded for track record
+// Stocks (Yahoo Finance) - Top traded + missing tickers restored
 const STOCK_UNIVERSE = [
   'AAPL', 'MSFT', 'NVDA', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AVGO', 'BRK-B', 'LLY',
   'V', 'UNH', 'XOM', 'WMT', 'JNJ', 'ORCL', 'COST', 'MA', 'PG', 'NFLX',
-  'JPM', 'BAC', 'GS', 'AMD', 'INTC', 'QCOM', 'CRM', 'ADBE', 'CSCO', 'PEP'
+  'JPM', 'BAC', 'GS', 'AMD', 'INTC', 'QCOM', 'CRM', 'ADBE', 'CSCO', 'PEP',
+  'FIGS', 'XPEV', 'RIVN', 'SOFI', 'ENPH', 'SEDG', 'WDC'
 ];
 
-// ETFs (Yahoo Finance)
-const ETF_UNIVERSE = ['SPY', 'IWM', 'QQQ', 'DIA', 'XLF', 'XLE', 'XLK'];
+// ETFs (Yahoo Finance) - Including BlackRock iShares
+const ETF_UNIVERSE = [
+  'SPY', 'IWM', 'QQQ', 'DIA', 'XLF', 'XLE', 'XLK',
+  'IVV', 'IEFA', 'AGG', 'IJH', 'IJR', 'EFA', 'EEM',
+  'IWF', 'IWD', 'LQD', 'HYG', 'TIP', 'IWB', 'IWN', 'IWO',
+  'IEMG', 'ITOT', 'IXUS', 'SHY', 'TLT', 'GLD', 'SLV'
+];
 
 // Indices (Yahoo Finance)
-const INDEX_UNIVERSE = ['^GSPC', '^NDX', '^RUT', '^DJI'];
+const INDEX_UNIVERSE = ['^GSPC', '^NDX', '^RUT', '^DJI', '^VIX'];
 
 // Commodities (Yahoo Finance)
-const COMMODITY_UNIVERSE = ['GC=F', 'SI=F', 'CL=F', 'NG=F', 'PL=F', 'HG=F'];
+const COMMODITY_UNIVERSE = ['GC=F', 'SI=F', 'CL=F', 'NG=F', 'PL=F', 'HG=F', 'PA=F'];
 
 const INTERVALS = ['5m', '15m', '1h', '4h', '1d'];
 

@@ -14,8 +14,8 @@ export interface Candle {
 // Dynamic types from presets
 export type CryptoSymbol = typeof presets.crypto[number];
 export type StockSymbol = typeof presets.stocks[number];
-export type IndexSymbol = typeof presets.indices[number];
-export type ETFSymbol = typeof presets.etf_alt[number];
+export type IndexSymbol = typeof presets.index[number];
+export type ETFSymbol = typeof presets.etf[number];
 export type CommoditySymbol = 'GC=F' | 'SI=F' | 'PL=F' | 'PA=F' | 'HG=F' | 'CL=F' | 'NG=F';
 export type Symbol = CryptoSymbol | StockSymbol | IndexSymbol | ETFSymbol | CommoditySymbol;
 export type Interval = '1h' | '4h' | '1d' | '1w';
@@ -42,8 +42,8 @@ export function getAssetType(symbol: Symbol): AssetType {
   // Check presets
   if (presets.crypto.includes(symbol as any)) return 'crypto';
   if (presets.stocks.includes(symbol as any)) return 'stock';
-  if (presets.indices.includes(symbol as any)) return 'index';
-  if (presets.etf_alt.includes(symbol as any)) return 'etf';
+  if (presets.index.includes(symbol as any)) return 'index';
+  if (presets.etf.includes(symbol as any)) return 'etf';
   
   return 'stock'; // default
 }
@@ -193,9 +193,9 @@ export function getSymbolsByType(type: AssetType): Symbol[] {
     case 'stock':
       return presets.stocks as Symbol[];
     case 'index':
-      return presets.indices as Symbol[];
+      return presets.index as Symbol[];
     case 'etf':
-      return presets.etf_alt as Symbol[];
+      return presets.etf as Symbol[];
     case 'commodity':
       return COMMODITY_SYMBOLS as Symbol[];
     default:

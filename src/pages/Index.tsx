@@ -122,8 +122,8 @@ export default function Index() {
       ...presets.crypto,
       ...(presets.commodities || []),
       ...presets.stocks,
-      ...presets.indices,
-      ...presets.etf_alt,
+      ...presets.index,
+      ...presets.etf,
     ];
 
     // Increased max tickers to support larger stock universe

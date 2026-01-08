@@ -25,52 +25,134 @@ export interface TradeRecord {
   returnPct: number;
 }
 
-// Demo data for when real data is insufficient
-function generateDemoData(timeRange: "all" | "6m" | "3m"): { 
+/**
+ * Fetch real S&P 500 data from Yahoo Finance via edge function
+ */
+async function fetchSP500Data(): Promise<Map<string, number>> {
+  try {
+    const { data, error } = await supabase.functions.invoke("fetch-stock-data", {
+      body: { symbol: "^GSPC", interval: "1d" },
+    });
+
+    if (error || !data || !Array.isArray(data)) {
+      console.warn("Failed to fetch S&P 500 data, using fallback");
+      return new Map();
+    }
+
+    const priceMap = new Map<string, number>();
+    
+    // Normalize to 100 at first data point
+    const firstClose = data[0]?.close || 1;
+    
+    for (const candle of data) {
+      const date = new Date(candle.openTime).toISOString().split("T")[0];
+      const normalizedPrice = (candle.close / firstClose) * 100;
+      priceMap.set(date, Math.round(normalizedPrice * 100) / 100);
+    }
+
+    return priceMap;
+  } catch (err) {
+    console.warn("Error fetching S&P 500:", err);
+    return new Map();
+  }
+}
+
+/**
+ * Generate demo data up to current date
+ */
+function generateDemoData(
+  timeRange: "all" | "6m" | "3m",
+  sp500Data: Map<string, number>
+): { 
   equityCurve: EquityPoint[]; 
   metrics: PerformanceMetrics; 
   trades: TradeRecord[];
   isDemo: boolean;
 } {
-  const startDate = new Date("2024-06-01");
+  const today = new Date();
+  const startDate = new Date(today);
+  startDate.setMonth(startDate.getMonth() - 8); // 8 months of data
+  
   const fullEquityCurve: EquityPoint[] = [];
   let equity = 100;
-  let benchmark = 100;
   let maxEquity = 100;
   let maxDrawdown = 0;
+  let wins = 0;
+  const totalTrades = 47;
 
-  // Generate realistic-looking equity curve with benchmark
-  for (let i = 0; i < 180; i++) {
-    const date = new Date(startDate);
-    date.setDate(date.getDate() + i);
+  // Get first S&P value for normalization
+  const sp500Entries = Array.from(sp500Data.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  const firstSP500Value = sp500Entries.length > 0 ? sp500Entries[0][1] : 100;
+
+  // Generate daily equity points
+  const currentDate = new Date(startDate);
+  let dayIndex = 0;
+  
+  while (currentDate <= today) {
+    const dateStr = currentDate.toISOString().split("T")[0];
     
-    // Strategy returns (slight upward bias)
-    const dailyReturn = (Math.random() - 0.45) * 2;
-    equity = equity * (1 + dailyReturn / 100);
-    equity = Math.max(equity, 85);
+    // Skip weekends
+    const dayOfWeek = currentDate.getDay();
+    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+      // Strategy returns (slight upward bias, ~15% annual)
+      const dailyReturn = (Math.random() - 0.45) * 1.8;
+      equity = equity * (1 + dailyReturn / 100);
+      
+      if (Math.random() > 0.5) wins++;
+      
+      if (equity > maxEquity) maxEquity = equity;
+      const drawdown = ((equity - maxEquity) / maxEquity) * 100;
+      if (drawdown < maxDrawdown) maxDrawdown = drawdown;
+      
+      // Get real S&P 500 benchmark value or simulate
+      let benchmarkValue = sp500Data.get(dateStr);
+      if (!benchmarkValue && sp500Entries.length > 0) {
+        // Find closest date
+        const closest = sp500Entries.reduce((prev, curr) => {
+          return Math.abs(new Date(curr[0]).getTime() - currentDate.getTime()) < 
+                 Math.abs(new Date(prev[0]).getTime() - currentDate.getTime()) ? curr : prev;
+        });
+        benchmarkValue = closest[1];
+      }
+      
+      fullEquityCurve.push({
+        date: dateStr,
+        equity: Math.round(equity * 100) / 100,
+        benchmark: benchmarkValue || Math.round((100 + dayIndex * 0.05) * 100) / 100,
+      });
+      
+      dayIndex++;
+    }
     
-    // S&P 500 benchmark (lower volatility, ~10% annual)
-    const benchmarkReturn = (Math.random() - 0.47) * 1.2;
-    benchmark = benchmark * (1 + benchmarkReturn / 100);
-    
-    if (equity > maxEquity) maxEquity = equity;
-    const drawdown = ((equity - maxEquity) / maxEquity) * 100;
-    if (drawdown < maxDrawdown) maxDrawdown = drawdown;
-    
-    fullEquityCurve.push({
-      date: date.toISOString().split("T")[0],
-      equity: Math.round(equity * 100) / 100,
-      benchmark: Math.round(benchmark * 100) / 100,
-    });
+    currentDate.setDate(currentDate.getDate() + 1);
   }
 
-  const finalEquity = fullEquityCurve[fullEquityCurve.length - 1].equity;
+  const finalEquity = fullEquityCurve[fullEquityCurve.length - 1]?.equity || 100;
   const totalReturn = ((finalEquity - 100) / 100) * 100;
-  const years = 180 / 365.25;
-  const cagr = (Math.pow(finalEquity / 100, 1 / years) - 1) * 100;
+  const years = fullEquityCurve.length / 252; // ~252 trading days per year
+  const cagr = years > 0 ? (Math.pow(finalEquity / 100, 1 / years) - 1) * 100 : 0;
 
   // Filter for chart view only
   const equityCurve = filterEquityCurveForView(fullEquityCurve, timeRange);
+
+  // Generate recent demo trades
+  const trades: TradeRecord[] = [];
+  const symbols = ["BTCUSDT", "ETHUSDT", "AAPL", "SPY", "SOLUSDT", "GOOGL", "MSFT", "NVDA"];
+  for (let i = 0; i < 5; i++) {
+    const exitDate = new Date(today);
+    exitDate.setDate(exitDate.getDate() - i * 7);
+    const entryDate = new Date(exitDate);
+    entryDate.setDate(entryDate.getDate() - 5);
+    
+    trades.push({
+      id: String(i + 1),
+      asset: symbols[i % symbols.length],
+      signal: "BUY",
+      entryDate: entryDate.toISOString().split("T")[0],
+      exitDate: exitDate.toISOString().split("T")[0],
+      returnPct: Math.round((Math.random() * 10 - 2) * 10) / 10,
+    });
+  }
 
   return {
     equityCurve,
@@ -78,17 +160,11 @@ function generateDemoData(timeRange: "all" | "6m" | "3m"): {
       totalReturn: Math.round(totalReturn * 100) / 100,
       cagr: Math.round(cagr * 100) / 100,
       maxDrawdown: Math.round(maxDrawdown * 100) / 100,
-      winRate: 62.3,
-      tradeCount: 47,
-      startDate: "2024-06-01",
+      winRate: Math.round((wins / totalTrades) * 10000) / 100,
+      tradeCount: totalTrades,
+      startDate: startDate.toISOString().split("T")[0],
     },
-    trades: [
-      { id: "1", asset: "BTCUSDT", signal: "BUY", entryDate: "2024-11-28", exitDate: "2024-12-05", returnPct: 4.2 },
-      { id: "2", asset: "ETHUSDT", signal: "BUY", entryDate: "2024-11-25", exitDate: "2024-12-02", returnPct: 2.8 },
-      { id: "3", asset: "AAPL", signal: "BUY", entryDate: "2024-11-20", exitDate: "2024-11-27", returnPct: -1.5 },
-      { id: "4", asset: "SPY", signal: "BUY", entryDate: "2024-11-15", exitDate: "2024-11-22", returnPct: 1.9 },
-      { id: "5", asset: "SOLUSDT", signal: "BUY", entryDate: "2024-11-10", exitDate: "2024-11-17", returnPct: 8.3 },
-    ],
+    trades,
     isDemo: true,
   };
 }
@@ -110,14 +186,19 @@ function filterEquityCurveForView(
   const cutoff = new Date(now);
   cutoff.setMonth(cutoff.getMonth() - months);
 
-  return fullCurve.filter((point) => new Date(point.date) >= cutoff);
+  const filtered = fullCurve.filter((point) => new Date(point.date) >= cutoff);
+  
+  // Always return at least some data
+  return filtered.length > 0 ? filtered : fullCurve.slice(-30);
 }
 
 export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
   return useQuery({
-    // Include timeRange in query key for proper re-filtering
     queryKey: ["performance-data", timeRange],
     queryFn: async () => {
+      // Fetch S&P 500 benchmark data first
+      const sp500Data = await fetchSP500Data();
+      
       // Fetch ALL signal outcomes with their snapshots (inception-based)
       const { data: outcomes, error } = await supabase
         .from("signal_outcomes")
@@ -139,20 +220,22 @@ export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
 
       if (error) throw error;
 
-      // If insufficient data, return demo data
+      // If insufficient data, return demo data with real S&P 500
       if (!outcomes || outcomes.length < 10) {
-        return generateDemoData(timeRange);
+        return generateDemoData(timeRange, sp500Data);
       }
 
       // Build FULL equity curve from inception (single source of truth)
       let equity = 100;
-      let benchmark = 100;
       let maxEquity = 100;
       let maxDrawdown = 0;
       let wins = 0;
 
       const fullEquityCurve: EquityPoint[] = [];
       const inceptionDate = outcomes[0]?.signal_snapshots?.created_at?.split("T")[0] || outcomes[0]?.resolved_at.split("T")[0];
+
+      // Normalize S&P 500 to 100 at inception
+      const inceptionSP500 = sp500Data.get(inceptionDate) || 100;
 
       for (const outcome of outcomes) {
         const returnPct = Number(outcome.return_pct);
@@ -166,14 +249,16 @@ export function usePerformanceData(timeRange: "all" | "6m" | "3m" = "all") {
 
         const dateStr = outcome.resolved_at.split("T")[0];
         
-        // S&P 500 benchmark simulation
-        const benchmarkReturn = (Math.random() - 0.47) * 1.2;
-        benchmark = benchmark * (1 + benchmarkReturn / 100);
+        // Get real S&P 500 value, normalized to inception
+        let benchmarkValue = sp500Data.get(dateStr);
+        if (benchmarkValue) {
+          benchmarkValue = (benchmarkValue / inceptionSP500) * 100;
+        }
 
         fullEquityCurve.push({
           date: dateStr,
           equity: Math.round(equity * 100) / 100,
-          benchmark: Math.round(benchmark * 100) / 100,
+          benchmark: benchmarkValue ? Math.round(benchmarkValue * 100) / 100 : undefined,
         });
       }
 

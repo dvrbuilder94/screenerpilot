@@ -84,6 +84,12 @@ async function fetchYahooCandles(
     );
     
     if (!response.ok) {
+      // For 500 errors from Yahoo, return empty array instead of throwing
+      // This prevents blank screens when Yahoo Finance has temporary issues
+      if (response.status === 500 || response.status === 404) {
+        console.warn(`Yahoo Finance unavailable for ${symbol}: ${response.status}`);
+        return [];
+      }
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
       throw new Error(errorData.error || `Backend error: ${response.status}`);
     }
@@ -93,8 +99,9 @@ async function fetchYahooCandles(
     // Return the last 'limit' candles
     return candles.slice(-limit);
   } catch (error) {
-    console.error('Error fetching stock data:', error);
-    throw error;
+    // Log but don't crash - return empty array for graceful degradation
+    console.warn(`Failed to fetch ${symbol}:`, error);
+    return [];
   }
 }
 

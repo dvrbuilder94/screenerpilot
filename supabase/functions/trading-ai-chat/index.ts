@@ -1,195 +1,185 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
-import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+
+/* -------------------- CORS -------------------- */
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Input validation schema
+/* -------------------- SCHEMA -------------------- */
+
 const requestSchema = z.object({
-  messages: z.array(z.object({
-    role: z.enum(['user', 'assistant', 'system']),
-    content: z.string().max(2000, 'Message too long')
-  })).min(1).max(20, 'Too many messages')
+  messages: z
+    .array(
+      z.object({
+        role: z.enum(["user", "assistant", "system"]),
+        content: z.string().max(2000),
+      }),
+    )
+    .min(1)
+    .max(20),
 });
 
-// Rate limit per tier
+/* -------------------- LIMITS -------------------- */
+
 const TIER_LIMITS: Record<string, number> = {
   free: 3,
   pro: 50,
-  premium: 999
+  premium: 999,
 };
 
-const SYSTEM_PROMPT = `You are AlexIA, a concise trading assistant.
+/* -------------------- SYSTEM PROMPT -------------------- */
 
-STRICT RULES:
-- Maximum 2 sentences per response. Never exceed this.
-- ONLY answer questions about market data, indicators, and signals.
-- If asked about anything else, say: "I only discuss market data and indicators."
-- Always respond in English only, regardless of user's language.
-- Never give direct buy/sell recommendations.
-- Available metrics: RSI, MACD, EMA, SuperTrend, Fear & Greed, Altseason Index, Dominance.`;
+const SYSTEM_PROMPT = `
+You are AlexIA, a professional multi-asset market copilot.
+
+ROLE:
+- You analyze financial markets across all asset classes:
+  crypto, stocks, ETFs, indices, FX, commodities, and rates.
+- You provide concise, factual market insight.
+
+STYLE RULES:
+- Maximum 2 sentences per response.
+- English only.
+- Clear, neutral, institutional tone.
+
+CONTENT RULES:
+- Discuss trends, momentum, volatility, indicators, correlations, and sentiment.
+- Allowed indicators: RSI, MACD, EMA, SMA, SuperTrend, volatility, dominance, breadth, Fear & Greed.
+- NEVER give direct buy/sell or investment advice.
+- NEVER predict prices with certainty.
+
+INTENT HANDLING:
+- Very short inputs (e.g. "btc", "gold", "sp500") imply:
+  "Provide a brief market overview and current technical context."
+- Follow-up questions should respect previous context automatically.
+
+DOMAIN RESTRICTION:
+- If the user asks about something clearly unrelated to financial markets,
+  reply exactly:
+  "I only discuss financial market data and indicators."
+`;
+
+/* -------------------- HELPERS -------------------- */
+
+function normalizeUserMessages(messages: { role: string; content: string }[]) {
+  return messages.map((msg) => {
+    if (msg.role !== "user") return msg;
+
+    const text = msg.content.trim();
+
+    // Very short / ticker-like input
+    if (text.length <= 8 && /^[a-zA-Z0-9.\- ]+$/.test(text)) {
+      return {
+        ...msg,
+        content: `Give a brief technical and market overview for ${text}, including trend and momentum.`,
+      };
+    }
+
+    return msg;
+  });
+}
+
+/* -------------------- SERVER -------------------- */
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Authenticate user
-    const authHeader = req.headers.get('authorization');
+    /* -------- AUTH -------- */
+
+    const authHeader = req.headers.get("authorization");
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
     }
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const token = authHeader.replace("Bearer ", "");
+    const {
+      data: { user },
+    } = await supabase.auth.getUser(token);
 
-    if (authError || !user) {
-      console.error('Auth error:', authError);
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+    if (!user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
     }
 
-    // Validate input
+    /* -------- BODY -------- */
+
     const body = await req.json();
-    const validationResult = requestSchema.safeParse(body);
-    
-    if (!validationResult.success) {
-      console.error('Validation failed:', validationResult.error);
-      return new Response(JSON.stringify({ 
-        error: 'Invalid message format'
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+    const parsed = requestSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return new Response(JSON.stringify({ error: "Invalid input" }), { status: 400, headers: corsHeaders });
     }
 
-    const { messages } = validationResult.data;
+    let { messages } = parsed.data;
 
-    // Get user subscription tier
-    const { data: subscription } = await supabase
-      .from('user_subscriptions')
-      .select('tier')
-      .eq('user_id', user.id)
+    /* -------- RATE LIMIT -------- */
+
+    const { data: sub } = await supabase.from("user_subscriptions").select("tier").eq("user_id", user.id).single();
+
+    const tier = sub?.tier || "free";
+    const limit = TIER_LIMITS[tier];
+
+    const today = new Date().toISOString().split("T")[0];
+
+    const { data: usage } = await supabase
+      .from("user_ai_usage")
+      .select("message_count")
+      .eq("user_id", user.id)
+      .eq("date", today)
       .single();
 
-    const tier = subscription?.tier || 'free';
-    const dailyLimit = TIER_LIMITS[tier];
+    const count = usage?.message_count || 0;
 
-    // Check and update rate limit
-    const today = new Date().toISOString().split('T')[0];
-    
-    const { data: usage, error: usageError } = await supabase
-      .from('user_ai_usage')
-      .select('message_count')
-      .eq('user_id', user.id)
-      .eq('date', today)
-      .single();
-
-    if (usageError && usageError.code !== 'PGRST116') {
-      console.error('Usage check error:', usageError);
-      return new Response(JSON.stringify({ error: 'Failed to check usage' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+    if (count >= limit) {
+      return new Response(JSON.stringify({ error: "Daily limit reached" }), { status: 429, headers: corsHeaders });
     }
 
-    const currentCount = usage?.message_count || 0;
+    await supabase.from("user_ai_usage").upsert({
+      user_id: user.id,
+      date: today,
+      message_count: count + 1,
+    });
 
-    if (currentCount >= dailyLimit) {
-      return new Response(JSON.stringify({ 
-        error: 'Daily message limit reached',
-        limit: dailyLimit,
-        tier: tier
-      }), {
-        status: 429,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
+    /* -------- NORMALIZE INPUT -------- */
 
-    // Increment usage count
-    if (usage) {
-      await supabase
-        .from('user_ai_usage')
-        .update({ message_count: currentCount + 1 })
-        .eq('user_id', user.id)
-        .eq('date', today);
-    } else {
-      await supabase
-        .from('user_ai_usage')
-        .insert({ user_id: user.id, date: today, message_count: 1 });
-    }
+    messages = normalizeUserMessages(messages);
 
-    // Call AI gateway
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
-    }
+    /* -------- AI CALL -------- */
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          ...messages
-        ],
+        model: "google/gemini-2.5-flash",
         stream: true,
+        messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
       }),
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('AI gateway error:', response.status, errorText);
-      
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: 'AI service rate limit exceeded. Please try again later.' }), {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-      
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: 'AI service credits exhausted. Please contact support.' }), {
-          status: 402,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      return new Response(JSON.stringify({ error: 'AI service error' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+      return new Response(JSON.stringify({ error: "AI service error" }), { status: 500, headers: corsHeaders });
     }
 
     return new Response(response.body, {
-      headers: { ...corsHeaders, 'Content-Type': 'text/event-stream' },
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "text/event-stream",
+      },
     });
-
-  } catch (error) {
-    console.error('Error in trading-ai-chat:', error);
-    return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+  } catch (err) {
+    console.error(err);
+    return new Response(JSON.stringify({ error: "Internal error" }), { status: 500, headers: corsHeaders });
   }
 });

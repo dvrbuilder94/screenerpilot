@@ -2,11 +2,11 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
 import { Sparkles, X, Send, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { getFearGreedIndex, getDominanceData } from "@/lib/cryptoMetrics";
 
 interface Message {
   role: "user" | "assistant";
@@ -19,12 +19,27 @@ const FREE_DAILY_LIMIT = 10;
 const PRO_DAILY_LIMIT = 100;
 const PREMIUM_DAILY_LIMIT = 500;
 
+const QUICK_PROMPTS = [
+  "Why is the market up today?",
+  "Are altcoins outperforming?",
+  "Market sentiment overview",
+  "Assets with strong momentum",
+  "Key macro drivers",
+];
+
+const FOLLOW_UP_PROMPTS = [
+  "What does this mean for altcoins?",
+  "How does macro affect this?",
+  "Risk levels right now?",
+];
+
 export const TradingAIWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [dailyCount, setDailyCount] = useState(0);
+  const [marketContext, setMarketContext] = useState<string>("");
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const { subscription } = useAuth();
@@ -76,6 +91,32 @@ export const TradingAIWidget = () => {
     fetchUsage();
   }, []);
 
+  /* ---------------- MARKET CONTEXT ---------------- */
+
+  useEffect(() => {
+    const fetchMarketContext = async () => {
+      try {
+        const [fearGreed, dominance] = await Promise.all([
+          getFearGreedIndex(),
+          getDominanceData(),
+        ]);
+
+        const context = `
+CURRENT MARKET DATA (use this to inform your responses):
+- Fear & Greed Index: ${fearGreed.value} (${fearGreed.category})
+- BTC Dominance: ${dominance.dominance.toFixed(1)}% (7d change: ${dominance.change7d > 0 ? '+' : ''}${dominance.change7d.toFixed(2)}%)
+`;
+        setMarketContext(context);
+      } catch (err) {
+        console.warn("Failed to fetch market context:", err);
+      }
+    };
+
+    if (isOpen) {
+      fetchMarketContext();
+    }
+  }, [isOpen]);
+
   /* ---------------- STREAM CHAT ---------------- */
 
   const streamChat = async (text: string) => {
@@ -97,13 +138,26 @@ export const TradingAIWidget = () => {
         return;
       }
 
+      // Prepend market context to the first user message
+      const messagesWithContext = [...messages, userMsg].map((m, i) => {
+        if (i === 0 && m.role === "user" && marketContext) {
+          return { ...m, content: `${marketContext}\n\nUser question: ${m.content}` };
+        }
+        return m;
+      });
+
+      // If this is the first message, add context
+      const finalMessages = messages.length === 0 && marketContext
+        ? [{ role: "user" as const, content: `${marketContext}\n\nUser question: ${text}` }]
+        : messagesWithContext;
+
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ messages: [...messages, userMsg] }),
+        body: JSON.stringify({ messages: finalMessages }),
       });
 
       if (!resp.ok) {
@@ -192,7 +246,29 @@ export const TradingAIWidget = () => {
     streamChat(input.trim());
   };
 
+  const handleQuickPrompt = async (prompt: string) => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      toast.error("Please log in to use the AI assistant");
+      return;
+    }
+
+    if (!canSendMessage()) {
+      toast.error("Daily limit reached. Upgrade to continue.");
+      return;
+    }
+
+    streamChat(prompt);
+  };
+
   /* ---------------- UI ---------------- */
+
+  const showFollowUps = messages.length > 0 && 
+    messages[messages.length - 1].role === "assistant" && 
+    !isLoading;
 
   return (
     <>
@@ -226,46 +302,90 @@ export const TradingAIWidget = () => {
               <Sparkles className="h-4 w-4 text-emerald-400" />
               <div>
                 <p className="text-sm font-semibold">AlexIA</p>
-                <p className="text-xs text-slate-400">
-                  {dailyCount}/{getMessageLimit()} today
-                </p>
+                <p className="text-xs text-slate-400">Market Intelligence</p>
               </div>
             </div>
 
-            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="h-8 w-8">
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500">
+                {dailyCount}/{getMessageLimit()}
+              </span>
+              <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="h-8 w-8">
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           {/* Messages */}
           <ScrollArea ref={scrollRef} className="flex-1 px-3 py-4">
+            {/* Quick Prompts - Initial State */}
             {messages.length === 0 && (
-              <div className="text-center text-slate-400 text-sm mt-10">
-                Ask me about BTC, ETH, indicators or markets.
+              <div className="flex flex-col items-center justify-center h-full px-4">
+                <Sparkles className="h-8 w-8 text-emerald-400 mb-3" />
+                <p className="text-sm font-medium text-white mb-1">Market Insights</p>
+                <p className="text-xs text-slate-400 mb-6 text-center">
+                  Quick answers about markets, trends, and indicators
+                </p>
+                
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {QUICK_PROMPTS.map((q) => (
+                    <Button
+                      key={q}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs border-slate-600 hover:bg-slate-800 hover:border-emerald-500 text-slate-300"
+                      onClick={() => handleQuickPrompt(q)}
+                      disabled={isLoading || !canSendMessage()}
+                    >
+                      {q}
+                    </Button>
+                  ))}
+                </div>
               </div>
             )}
 
-            <div className="space-y-3">
-              {messages.map((m, i) => (
-                <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div
-                    className={`max-w-[85%] px-3 py-2 rounded-xl text-sm ${
-                      m.role === "user" ? "bg-emerald-500 text-white" : "bg-slate-800 text-white"
-                    }`}
-                  >
-                    {m.content}
+            {/* Messages List */}
+            {messages.length > 0 && (
+              <div className="space-y-3">
+                {messages.map((m, i) => (
+                  <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                    <div
+                      className={`max-w-[85%] px-3 py-2 rounded-xl text-sm whitespace-pre-wrap ${
+                        m.role === "user" ? "bg-emerald-500 text-white" : "bg-slate-800 text-white"
+                      }`}
+                    >
+                      {m.content}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
 
-              {isLoading && (
-                <div className="flex gap-1">
-                  <div className="h-2 w-2 bg-emerald-400 rounded-full animate-pulse" />
-                  <div className="h-2 w-2 bg-emerald-400 rounded-full animate-pulse delay-75" />
-                  <div className="h-2 w-2 bg-emerald-400 rounded-full animate-pulse delay-150" />
-                </div>
-              )}
-            </div>
+                {/* Follow-up Prompts */}
+                {showFollowUps && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {FOLLOW_UP_PROMPTS.map((q) => (
+                      <Button
+                        key={q}
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs text-slate-400 hover:text-white h-7 px-2"
+                        onClick={() => handleQuickPrompt(q)}
+                        disabled={isLoading || !canSendMessage()}
+                      >
+                        {q}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+
+                {isLoading && (
+                  <div className="flex gap-1">
+                    <div className="h-2 w-2 bg-emerald-400 rounded-full animate-pulse" />
+                    <div className="h-2 w-2 bg-emerald-400 rounded-full animate-pulse delay-75" />
+                    <div className="h-2 w-2 bg-emerald-400 rounded-full animate-pulse delay-150" />
+                  </div>
+                )}
+              </div>
+            )}
           </ScrollArea>
 
           {/* Input */}
@@ -273,8 +393,8 @@ export const TradingAIWidget = () => {
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about markets..."
-              className="bg-slate-800 border-slate-600 text-white"
+              placeholder="Ask a specific market question..."
+              className="bg-slate-800 border-slate-600 text-white text-sm placeholder:text-slate-500"
               disabled={isLoading}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
             />

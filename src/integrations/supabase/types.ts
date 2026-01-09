@@ -194,6 +194,132 @@ export type Database = {
         }
         Relationships: []
       }
+      hidden_gems_metrics: {
+        Row: {
+          atr_percentile: number | null
+          balance_sheet_pctl: number | null
+          calculated_at: string
+          current_ratio: number | null
+          ev_ebitda: number | null
+          fcf_delta_pctl: number | null
+          fcf_delta_qoq: number | null
+          id: string
+          margin_improvement_pctl: number | null
+          margin_improvement_qoq: number | null
+          neglect_pctl: number | null
+          net_debt_ebitda: number | null
+          price_sales: number | null
+          price_structure_pctl: number | null
+          revenue_growth_pctl: number | null
+          revenue_growth_qoq: number | null
+          shares_diluted: boolean | null
+          symbol: string
+          trend_slope: number | null
+          valuation_pctl: number | null
+          volume_rank: number | null
+        }
+        Insert: {
+          atr_percentile?: number | null
+          balance_sheet_pctl?: number | null
+          calculated_at?: string
+          current_ratio?: number | null
+          ev_ebitda?: number | null
+          fcf_delta_pctl?: number | null
+          fcf_delta_qoq?: number | null
+          id?: string
+          margin_improvement_pctl?: number | null
+          margin_improvement_qoq?: number | null
+          neglect_pctl?: number | null
+          net_debt_ebitda?: number | null
+          price_sales?: number | null
+          price_structure_pctl?: number | null
+          revenue_growth_pctl?: number | null
+          revenue_growth_qoq?: number | null
+          shares_diluted?: boolean | null
+          symbol: string
+          trend_slope?: number | null
+          valuation_pctl?: number | null
+          volume_rank?: number | null
+        }
+        Update: {
+          atr_percentile?: number | null
+          balance_sheet_pctl?: number | null
+          calculated_at?: string
+          current_ratio?: number | null
+          ev_ebitda?: number | null
+          fcf_delta_pctl?: number | null
+          fcf_delta_qoq?: number | null
+          id?: string
+          margin_improvement_pctl?: number | null
+          margin_improvement_qoq?: number | null
+          neglect_pctl?: number | null
+          net_debt_ebitda?: number | null
+          price_sales?: number | null
+          price_structure_pctl?: number | null
+          revenue_growth_pctl?: number | null
+          revenue_growth_qoq?: number | null
+          shares_diluted?: boolean | null
+          symbol?: string
+          trend_slope?: number | null
+          valuation_pctl?: number | null
+          volume_rank?: number | null
+        }
+        Relationships: []
+      }
+      hidden_gems_scores: {
+        Row: {
+          balance_sheet_score: number
+          calculated_at: string
+          company_name: string | null
+          explanation: string
+          fundamentals_score: number
+          hidden_gem_score: number
+          id: string
+          market_cap: number | null
+          market_neglect_score: number
+          previous_score: number | null
+          price_structure_score: number
+          rank: number | null
+          sector: string | null
+          symbol: string
+          valuation_score: number
+        }
+        Insert: {
+          balance_sheet_score: number
+          calculated_at?: string
+          company_name?: string | null
+          explanation: string
+          fundamentals_score: number
+          hidden_gem_score: number
+          id?: string
+          market_cap?: number | null
+          market_neglect_score: number
+          previous_score?: number | null
+          price_structure_score: number
+          rank?: number | null
+          sector?: string | null
+          symbol: string
+          valuation_score: number
+        }
+        Update: {
+          balance_sheet_score?: number
+          calculated_at?: string
+          company_name?: string | null
+          explanation?: string
+          fundamentals_score?: number
+          hidden_gem_score?: number
+          id?: string
+          market_cap?: number | null
+          market_neglect_score?: number
+          previous_score?: number | null
+          price_structure_score?: number
+          rank?: number | null
+          sector?: string | null
+          symbol?: string
+          valuation_score?: number
+        }
+        Relationships: []
+      }
       prediction_votes: {
         Row: {
           choice: boolean
@@ -464,6 +590,117 @@ export type Database = {
           signal?: string
           symbol?: string
           timeframe?: string
+        }
+        Relationships: []
+      }
+      stock_fundamentals: {
+        Row: {
+          capital_expenditures: number | null
+          cash_and_equivalents: number | null
+          created_at: string
+          current_assets: number | null
+          current_liabilities: number | null
+          ebitda: number | null
+          enterprise_value: number | null
+          ev_ebitda: number | null
+          fiscal_quarter: string
+          free_cash_flow: number | null
+          id: string
+          net_income: number | null
+          operating_cash_flow: number | null
+          operating_income: number | null
+          price_sales: number | null
+          revenue: number | null
+          shares_outstanding: number | null
+          symbol: string
+          total_debt: number | null
+          total_equity: number | null
+        }
+        Insert: {
+          capital_expenditures?: number | null
+          cash_and_equivalents?: number | null
+          created_at?: string
+          current_assets?: number | null
+          current_liabilities?: number | null
+          ebitda?: number | null
+          enterprise_value?: number | null
+          ev_ebitda?: number | null
+          fiscal_quarter: string
+          free_cash_flow?: number | null
+          id?: string
+          net_income?: number | null
+          operating_cash_flow?: number | null
+          operating_income?: number | null
+          price_sales?: number | null
+          revenue?: number | null
+          shares_outstanding?: number | null
+          symbol: string
+          total_debt?: number | null
+          total_equity?: number | null
+        }
+        Update: {
+          capital_expenditures?: number | null
+          cash_and_equivalents?: number | null
+          created_at?: string
+          current_assets?: number | null
+          current_liabilities?: number | null
+          ebitda?: number | null
+          enterprise_value?: number | null
+          ev_ebitda?: number | null
+          fiscal_quarter?: string
+          free_cash_flow?: number | null
+          id?: string
+          net_income?: number | null
+          operating_cash_flow?: number | null
+          operating_income?: number | null
+          price_sales?: number | null
+          revenue?: number | null
+          shares_outstanding?: number | null
+          symbol?: string
+          total_debt?: number | null
+          total_equity?: number | null
+        }
+        Relationships: []
+      }
+      stock_universe: {
+        Row: {
+          avg_volume_90d: number | null
+          company_name: string | null
+          country: string | null
+          current_price: number | null
+          id: string
+          industry: string | null
+          is_active: boolean | null
+          last_updated: string
+          market_cap: number | null
+          sector: string | null
+          symbol: string
+        }
+        Insert: {
+          avg_volume_90d?: number | null
+          company_name?: string | null
+          country?: string | null
+          current_price?: number | null
+          id?: string
+          industry?: string | null
+          is_active?: boolean | null
+          last_updated?: string
+          market_cap?: number | null
+          sector?: string | null
+          symbol: string
+        }
+        Update: {
+          avg_volume_90d?: number | null
+          company_name?: string | null
+          country?: string | null
+          current_price?: number | null
+          id?: string
+          industry?: string | null
+          is_active?: boolean | null
+          last_updated?: string
+          market_cap?: number | null
+          sector?: string | null
+          symbol?: string
         }
         Relationships: []
       }

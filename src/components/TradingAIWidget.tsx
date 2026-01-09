@@ -25,8 +25,11 @@ export const TradingAIWidget = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [dailyCount, setDailyCount] = useState(0);
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const { subscription } = useAuth();
+
+  /* ---------------- LIMITS ---------------- */
 
   const getMessageLimit = () => {
     switch (subscription?.tier) {
@@ -41,12 +44,16 @@ export const TradingAIWidget = () => {
 
   const canSendMessage = () => dailyCount < getMessageLimit();
 
+  /* ---------------- AUTOSCROLL ---------------- */
+
   useEffect(() => {
     scrollRef.current?.scrollTo({
       top: scrollRef.current.scrollHeight,
       behavior: "smooth",
     });
   }, [messages]);
+
+  /* ---------------- USAGE ---------------- */
 
   useEffect(() => {
     const fetchUsage = async () => {
@@ -69,6 +76,8 @@ export const TradingAIWidget = () => {
     fetchUsage();
   }, []);
 
+  /* ---------------- STREAM CHAT ---------------- */
+
   const streamChat = async (text: string) => {
     const userMsg: Message = { role: "user", content: text };
     setMessages((p) => [...p, userMsg]);
@@ -81,7 +90,12 @@ export const TradingAIWidget = () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      if (!session) throw new Error("Not authenticated");
+
+      if (!session) {
+        toast.error("Please log in to use the AI assistant");
+        setMessages((p) => p.slice(0, -1));
+        return;
+      }
 
       const resp = await fetch(CHAT_URL, {
         method: "POST",
@@ -93,48 +107,92 @@ export const TradingAIWidget = () => {
       });
 
       if (!resp.ok) {
-        if (resp.status === 429) {
+        if (resp.status === 401) {
+          toast.error("Please log in to use the AI assistant");
+        } else if (resp.status === 429) {
           toast.error("Daily limit reached. Upgrade to continue.");
-          setMessages((p) => p.slice(0, -1));
-          return;
+        } else {
+          toast.error("AI service error");
         }
-        throw new Error("AI error");
+
+        setMessages((p) => p.slice(0, -1));
+        return;
       }
 
       setMessages((p) => [...p, { role: "assistant", content: "" }]);
 
       const reader = resp.body!.getReader();
       const decoder = new TextDecoder();
+      let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        assistantText += decoder.decode(value, { stream: true });
+        buffer += decoder.decode(value, { stream: true });
 
-        setMessages((p) => {
-          const copy = [...p];
-          copy[copy.length - 1] = {
-            role: "assistant",
-            content: assistantText,
-          };
-          return copy;
-        });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+
+          const payload = line.replace("data: ", "").trim();
+          if (payload === "[DONE]") break;
+
+          try {
+            const json = JSON.parse(payload);
+            const token = json.choices?.[0]?.delta?.content;
+
+            if (token) {
+              assistantText += token;
+              setMessages((p) => {
+                const copy = [...p];
+                copy[copy.length - 1] = {
+                  role: "assistant",
+                  content: assistantText,
+                };
+                return copy;
+              });
+            }
+          } catch {
+            // ignora basura del stream
+          }
+        }
       }
 
       setDailyCount((p) => p + 1);
     } catch (err) {
-      toast.error("Failed to get response");
+      toast.error("Failed to get AI response");
       setMessages((p) => p.slice(0, -1));
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSend = () => {
+  /* ---------------- SEND ---------------- */
+
+  const handleSend = async () => {
     if (!input.trim() || isLoading) return;
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      toast.error("Please log in to use the AI assistant");
+      return;
+    }
+
+    if (!canSendMessage()) {
+      toast.error("Daily limit reached. Upgrade to continue.");
+      return;
+    }
+
     streamChat(input.trim());
   };
+
+  /* ---------------- UI ---------------- */
 
   return (
     <>
@@ -183,7 +241,7 @@ export const TradingAIWidget = () => {
           <ScrollArea ref={scrollRef} className="flex-1 px-3 py-4">
             {messages.length === 0 && (
               <div className="text-center text-slate-400 text-sm mt-10">
-                Ask me about markets, crypto or indicators.
+                Ask me about BTC, ETH, indicators or markets.
               </div>
             )}
 
@@ -215,7 +273,7 @@ export const TradingAIWidget = () => {
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about BTC, ETH, indicators..."
+              placeholder="Ask about markets..."
               className="bg-slate-800 border-slate-600 text-white"
               disabled={isLoading}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}

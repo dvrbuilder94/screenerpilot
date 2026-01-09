@@ -66,17 +66,21 @@ DOMAIN RESTRICTION:
 
 /* -------------------- HELPERS -------------------- */
 
+function isGreeting(text: string) {
+  return /^(hi|hello|hey|hola|buenas|good morning|good evening)$/i.test(text.trim());
+}
+
 function normalizeUserMessages(messages: { role: string; content: string }[]) {
   return messages.map((msg) => {
     if (msg.role !== "user") return msg;
 
     const text = msg.content.trim();
 
-    // Very short / ticker-like input
+    // Short / ticker-like inputs
     if (text.length <= 8 && /^[a-zA-Z0-9.\- ]+$/.test(text)) {
       return {
         ...msg,
-        content: `Give a brief technical and market overview for ${text}, including trend and momentum.`,
+        content: `Provide a brief technical and market overview for ${text}, including trend and momentum.`,
       };
     }
 
@@ -120,6 +124,28 @@ serve(async (req) => {
     }
 
     let { messages } = parsed.data;
+
+    /* -------- GREETING HANDLING (NO AI CALL) -------- */
+
+    const lastMessage = messages[messages.length - 1];
+
+    if (lastMessage.role === "user" && isGreeting(lastMessage.content)) {
+      const greetingResponse = `Hello, I’m AlexIA — your multi-asset market copilot.
+
+You can ask about BTC, stocks, indices, FX, commodities, or market indicators like RSI, momentum, and volatility.`;
+
+      return new Response(
+        `data: ${JSON.stringify({
+          choices: [{ delta: { content: greetingResponse } }],
+        })}\n\ndata: [DONE]\n`,
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "text/event-stream",
+          },
+        },
+      );
+    }
 
     /* -------- RATE LIMIT -------- */
 

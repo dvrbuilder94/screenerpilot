@@ -79,31 +79,58 @@ async function fetchYahooQuote(symbol: string): Promise<{
   price: number | null;
 }> {
   try {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=3mo`;
+    // Use v7 quote endpoint for market cap data
+    const url = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
     const res = await fetch(url, {
-      headers: { "User-Agent": "Mozilla/5.0" },
+      headers: { 
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept": "application/json"
+      },
     });
     
     if (!res.ok) {
-      console.log(`Yahoo fetch failed for ${symbol}: ${res.status}`);
-      return { marketCap: null, avgVolume: null, price: null };
+      console.log(`Yahoo v7 fetch failed for ${symbol}: ${res.status}`);
+      
+      // Fallback to v8 chart endpoint for price/volume, estimate market cap
+      const chartUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=3mo`;
+      const chartRes = await fetch(chartUrl, {
+        headers: { "User-Agent": "Mozilla/5.0" },
+      });
+      
+      if (!chartRes.ok) {
+        return { marketCap: null, avgVolume: null, price: null };
+      }
+
+      const chartData = await chartRes.json();
+      const meta = chartData.chart?.result?.[0]?.meta;
+      const volumes = chartData.chart?.result?.[0]?.indicators?.quote?.[0]?.volume;
+      
+      const price = meta?.regularMarketPrice ?? null;
+      
+      let avgVolume: number | null = null;
+      if (volumes && volumes.length > 0) {
+        const validVolumes = volumes.filter((v: number | null) => v !== null && v > 0);
+        if (validVolumes.length > 0) {
+          avgVolume = validVolumes.reduce((a: number, b: number) => a + b, 0) / validVolumes.length;
+        }
+      }
+
+      return { marketCap: null, avgVolume, price };
     }
 
     const data = await res.json();
-    const meta = data.chart?.result?.[0]?.meta;
-    const volumes = data.chart?.result?.[0]?.indicators?.quote?.[0]?.volume;
+    const quote = data.quoteResponse?.result?.[0];
     
-    const price = meta?.regularMarketPrice ?? null;
-    const marketCap = meta?.marketCap ?? null;
-    
-    // Calculate 90-day average volume (we have ~60 trading days in 3 months)
-    let avgVolume: number | null = null;
-    if (volumes && volumes.length > 0) {
-      const validVolumes = volumes.filter((v: number | null) => v !== null && v > 0);
-      if (validVolumes.length > 0) {
-        avgVolume = validVolumes.reduce((a: number, b: number) => a + b, 0) / validVolumes.length;
-      }
+    if (!quote) {
+      console.log(`No v7 quote data for ${symbol}`);
+      return { marketCap: null, avgVolume: null, price: null };
     }
+
+    const price = quote.regularMarketPrice ?? null;
+    const marketCap = quote.marketCap ?? null;
+    const avgVolume = quote.averageDailyVolume3Month ?? quote.averageDailyVolume10Day ?? null;
+
+    console.log(`${symbol}: price=${price}, marketCap=${marketCap}, volume=${avgVolume}`);
 
     return { marketCap, avgVolume, price };
   } catch (error) {

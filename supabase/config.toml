@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.universe-collector]
 verify_jwt = false
+
+[functions.fundamentals-collector]
+verify_jwt = false

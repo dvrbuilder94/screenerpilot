@@ -149,21 +149,7 @@ export const TradingAIWidget = () => {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-      const fetchStock = async (symbol: string) => {
-        try {
-          const res = await fetch(`${supabaseUrl}/functions/v1/fetch-stock-data`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'apikey': supabaseKey },
-            body: JSON.stringify({ symbol, interval: '1d' }),
-          });
-          if (!res.ok) return null;
-          const data = await res.json();
-          return data.candles?.[data.candles.length - 1]?.close || data[data.length - 1]?.close;
-        } catch {
-          return null;
-        }
-      };
-
+      // Only use crypto metrics which are reliable - skip Yahoo Finance calls that may 404
       // Crypto
       try {
         const [fearGreed, dominance] = await Promise.all([
@@ -175,49 +161,6 @@ export const TradingAIWidget = () => {
 - BTC Dominance: ${dominance.dominance.toFixed(1)}% (7d: ${dominance.change7d > 0 ? '+' : ''}${dominance.change7d.toFixed(2)}%)`);
       } catch (err) {
         console.warn("Crypto context failed:", err);
-      }
-
-      // Stocks
-      try {
-        const [vix, sp500] = await Promise.all([
-          fetchStock('^VIX'),
-          fetchStock('^GSPC'),
-        ]);
-        if (vix && sp500) {
-          const vixLevel = vix < 15 ? 'Complacency' : vix < 20 ? 'Low' : vix < 25 ? 'Normal' : vix < 30 ? 'Elevated' : 'Extreme';
-          contextParts.push(`EQUITIES:
-- VIX: ${vix.toFixed(1)} (${vixLevel})
-- S&P 500: ${sp500.toLocaleString()}`);
-        }
-      } catch (err) {
-        console.warn("Stocks context failed:", err);
-      }
-
-      // Commodities
-      try {
-        const [gold, oil] = await Promise.all([
-          fetchStock('GC=F'),
-          fetchStock('CL=F'),
-        ]);
-        if (gold && oil) {
-          contextParts.push(`COMMODITIES:
-- Gold: $${gold.toFixed(2)}
-- Oil (WTI): $${oil.toFixed(2)}`);
-        }
-      } catch (err) {
-        console.warn("Commodities context failed:", err);
-      }
-
-      // Macro
-      try {
-        const dxy = await fetchStock('DX-Y.NYB');
-        if (dxy) {
-          const status = dxy > 105 ? 'Strong' : dxy > 100 ? 'Neutral' : 'Weak';
-          contextParts.push(`MACRO:
-- DXY: ${dxy.toFixed(2)} (${status} Dollar)`);
-        }
-      } catch (err) {
-        console.warn("Macro context failed:", err);
       }
 
       const fullContext = contextParts.length > 0

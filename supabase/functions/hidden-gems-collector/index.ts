@@ -26,6 +26,7 @@ interface StockData {
   sharesDiluted: boolean;
   trendSlope: number | null;
   atrPercentile: number | null;
+  ema50vs200: number | null;
 }
 
 interface Percentiles {
@@ -36,6 +37,8 @@ interface Percentiles {
   debtPctl: number;
   capPctl: number;
   volPctl: number;
+  trendPctl: number;
+  atrPctl: number;
 }
 
 // Percentile function (cross-sectional)
@@ -55,6 +58,8 @@ function generateExplanation(pctls: Percentiles): string {
   if (pctls.marginPctl > 70) parts.push("margins expanding");
   if (pctls.fcfPctl > 70) parts.push("cash flow improving");
   if (pctls.valuationPctl > 70) parts.push("valuation compressed vs peers");
+  if (pctls.trendPctl > 70) parts.push("trend improving");
+  if (pctls.atrPctl > 60) parts.push("volatility compressing");
   if (pctls.capPctl > 60) parts.push("under-followed");
 
   if (parts.length === 0) {
@@ -103,7 +108,31 @@ serve(async (req) => {
     console.log(`Universe size: ${universe.length} stocks`);
 
     // ============================================
-    // STEP 2: FETCH FUNDAMENTALS FOR UNIVERSE
+    // STEP 2: FETCH PRICE STRUCTURE DATA FROM ASSET_SNAPSHOTS
+    // ============================================
+    const symbols = universe.map(s => s.symbol);
+    const { data: snapshots } = await supabase
+      .from("asset_snapshots")
+      .select("symbol, ema_50, ema_200, atr, current_price")
+      .in("symbol", symbols)
+      .eq("interval", "1d")
+      .order("calculated_at", { ascending: false });
+
+    // Build a map of latest snapshot per symbol
+    const snapshotMap = new Map<string, { ema50: number | null; ema200: number | null; atr: number | null; price: number | null }>();
+    for (const snap of snapshots || []) {
+      if (!snapshotMap.has(snap.symbol)) {
+        snapshotMap.set(snap.symbol, {
+          ema50: snap.ema_50,
+          ema200: snap.ema_200,
+          atr: snap.atr,
+          price: snap.current_price,
+        });
+      }
+    }
+
+    // ============================================
+    // STEP 3: FETCH FUNDAMENTALS FOR UNIVERSE
     // ============================================
     const stocksWithData: StockData[] = [];
 
@@ -151,6 +180,21 @@ serve(async (req) => {
       const sharesDiluted = previous.shares_outstanding && previous.shares_outstanding > 0 &&
         ((current.shares_outstanding || 0) - previous.shares_outstanding) / previous.shares_outstanding > 0.05;
 
+      // Get price structure data from snapshots
+      const priceData = snapshotMap.get(stock.symbol);
+      
+      // Calculate EMA 50 vs 200 slope (positive = improving trend)
+      let ema50vs200: number | null = null;
+      if (priceData?.ema50 && priceData?.ema200 && priceData.ema200 > 0) {
+        ema50vs200 = (priceData.ema50 - priceData.ema200) / priceData.ema200;
+      }
+
+      // Calculate ATR as % of price (lower = less volatile)
+      let atrPercentile: number | null = null;
+      if (priceData?.atr && priceData?.price && priceData.price > 0) {
+        atrPercentile = (priceData.atr / priceData.price) * 100;
+      }
+
       stocksWithData.push({
         symbol: stock.symbol,
         companyName: stock.company_name,
@@ -165,8 +209,9 @@ serve(async (req) => {
         netDebtEbitda,
         currentRatio,
         sharesDiluted: sharesDiluted || false,
-        trendSlope: null, // TODO: Integrate from asset_snapshots
-        atrPercentile: null,
+        trendSlope: ema50vs200,
+        atrPercentile,
+        ema50vs200,
       });
     }
 
@@ -180,7 +225,7 @@ serve(async (req) => {
     }
 
     // ============================================
-    // STEP 3: BUILD CROSS-SECTIONAL DISTRIBUTIONS
+    // STEP 4: BUILD CROSS-SECTIONAL DISTRIBUTIONS
     // ============================================
     const distributions = {
       revenueGrowth: stocksWithData.map(s => s.revenueGrowthQoQ).filter((v): v is number => v !== null),
@@ -190,10 +235,12 @@ serve(async (req) => {
       netDebtEbitda: stocksWithData.map(s => s.netDebtEbitda).filter((v): v is number => v !== null),
       marketCap: stocksWithData.map(s => s.marketCap).filter((v): v is number => v !== null),
       volume: stocksWithData.map(s => s.avgVolume90d).filter((v): v is number => v !== null),
+      trendSlope: stocksWithData.map(s => s.trendSlope).filter((v): v is number => v !== null),
+      atrPct: stocksWithData.map(s => s.atrPercentile).filter((v): v is number => v !== null),
     };
 
     // ============================================
-    // STEP 4: GET PREVIOUS SCORES FOR TEMPORAL STABILITY
+    // STEP 5: GET PREVIOUS SCORES FOR TEMPORAL STABILITY
     // ============================================
     const { data: prevScores } = await supabase
       .from("hidden_gems_scores")
@@ -204,7 +251,7 @@ serve(async (req) => {
     );
 
     // ============================================
-    // STEP 5: CALCULATE COMPONENT SCORES
+    // STEP 6: CALCULATE COMPONENT SCORES
     // ============================================
     const scoredStocks = stocksWithData.map(stock => {
       // FUNDAMENTALS (30%) - Higher is better
@@ -227,9 +274,10 @@ serve(async (req) => {
       const dilutionPenalty = stock.sharesDiluted ? -20 : 0;
       const balanceSheetScore = Math.max(0, Math.min(100, debtPctl + dilutionPenalty));
 
-      // PRICE STRUCTURE (15%) - Placeholder using volume as proxy
-      // TODO: Add trend slope calculation from asset_snapshots
-      const priceStructureScore = 50;
+      // PRICE STRUCTURE (15%) - EMA trend + ATR compression
+      const trendPctl = percentileRank(stock.trendSlope, distributions.trendSlope) ?? 50;
+      const atrPctl = percentileRank(stock.atrPercentile, distributions.atrPct, true) ?? 50; // Lower ATR% = better
+      const priceStructureScore = trendPctl * 0.6 + atrPctl * 0.4;
 
       // MARKET NEGLECT (10%) - Smaller cap, lower volume = more neglected
       const capPctl = percentileRank(stock.marketCap, distributions.marketCap, true) ?? 50;
@@ -251,7 +299,7 @@ serve(async (req) => {
         : rawScore;
 
       // EXPLANATION
-      const pctls: Percentiles = { revPctl, marginPctl, fcfPctl, valuationPctl, debtPctl, capPctl, volPctl };
+      const pctls: Percentiles = { revPctl, marginPctl, fcfPctl, valuationPctl, debtPctl, capPctl, volPctl, trendPctl, atrPctl };
       const explanation = generateExplanation(pctls);
 
       return {
@@ -290,7 +338,7 @@ serve(async (req) => {
     scoredStocks.forEach((s, i) => { s.rank = i + 1; });
 
     // ============================================
-    // STEP 6: UPSERT TO SPLIT TABLES
+    // STEP 7: UPSERT TO SPLIT TABLES
     // ============================================
     const now = new Date().toISOString();
     

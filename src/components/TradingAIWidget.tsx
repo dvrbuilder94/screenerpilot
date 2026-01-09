@@ -10,7 +10,7 @@ import { getFearGreedIndex, getDominanceData } from "@/lib/cryptoMetrics";
 import { cn } from "@/lib/utils";
 
 interface Message {
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system";
   content: string;
 }
 
@@ -19,8 +19,10 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trading-ai-c
 const FREE_DAILY_LIMIT = 10;
 const PRO_DAILY_LIMIT = 100;
 const PREMIUM_DAILY_LIMIT = 500;
+const CONTEXT_CACHE_TTL = 3 * 60 * 1000; // 3 minutes
 
 type PromptCategory = 'overview' | 'crypto' | 'stocks' | 'commodities' | 'fed';
+type MarketScope = 'crypto' | 'equities' | 'commodities' | 'macro' | 'global';
 
 const CATEGORIZED_PROMPTS: Record<PromptCategory, { icon: LucideIcon; label: string; prompts: string[] }> = {
   overview: {
@@ -82,6 +84,38 @@ const FOLLOW_UP_PROMPTS = [
   "Key events this week?",
 ];
 
+const SCOPE_LABELS: Record<MarketScope, string> = {
+  crypto: "Crypto",
+  equities: "Equities",
+  commodities: "Commodities",
+  macro: "Macro",
+  global: "Global",
+};
+
+// Infer market scope from user input
+const inferScope = (text: string): MarketScope => {
+  const t = text.toLowerCase();
+  
+  if (t.includes('btc') || t.includes('bitcoin') || t.includes('crypto') || 
+      t.includes('eth') || t.includes('altcoin') || t.includes('dominance') || 
+      t.includes('fear') || t.includes('greed'))
+    return 'crypto';
+  
+  if (t.includes('s&p') || t.includes('sp500') || t.includes('equities') || 
+      t.includes('stocks') || t.includes('vix') || t.includes('nasdaq'))
+    return 'equities';
+  
+  if (t.includes('gold') || t.includes('oil') || t.includes('commodities') || 
+      t.includes('copper') || t.includes('silver'))
+    return 'commodities';
+  
+  if (t.includes('fed') || t.includes('rates') || t.includes('dollar') || 
+      t.includes('dxy') || t.includes('treasury') || t.includes('yield'))
+    return 'macro';
+  
+  return 'global';
+};
+
 export const TradingAIWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -90,9 +124,15 @@ export const TradingAIWidget = () => {
   const [dailyCount, setDailyCount] = useState(0);
   const [marketContext, setMarketContext] = useState<string>("");
   const [promptCategory, setPromptCategory] = useState<PromptCategory>('overview');
+  const [activeScope, setActiveScope] = useState<MarketScope>('global');
+  const [isLoadingContext, setIsLoadingContext] = useState(false);
+  const [lastContextFetch, setLastContextFetch] = useState<number>(0);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const { subscription } = useAuth();
+
+  const isContextReady = marketContext.length > 0;
 
   /* ---------------- LIMITS ---------------- */
 
@@ -141,16 +181,13 @@ export const TradingAIWidget = () => {
     fetchUsage();
   }, []);
 
-  /* ---------------- MARKET CONTEXT ---------------- */
+  /* ---------------- MARKET CONTEXT (with 3-min cache) ---------------- */
 
   useEffect(() => {
     const fetchFullMarketContext = async () => {
+      setIsLoadingContext(true);
       const contextParts: string[] = [];
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-      // Only use crypto metrics which are reliable - skip Yahoo Finance calls that may 404
-      // Crypto
       try {
         const [fearGreed, dominance] = await Promise.all([
           getFearGreedIndex(),
@@ -168,17 +205,45 @@ export const TradingAIWidget = () => {
         : '';
 
       setMarketContext(fullContext);
+      setLastContextFetch(Date.now());
+      setIsLoadingContext(false);
     };
 
-    if (isOpen) {
+    const shouldRefetch = 
+      !marketContext || 
+      Date.now() - lastContextFetch > CONTEXT_CACHE_TTL;
+
+    if (isOpen && shouldRefetch) {
       fetchFullMarketContext();
     }
-  }, [isOpen]);
+  }, [isOpen, marketContext, lastContextFetch]);
+
+  /* ---------------- CLOSE HANDLER ---------------- */
+
+  const handleClose = () => {
+    abortControllerRef.current?.abort();
+    setIsOpen(false);
+  };
 
   /* ---------------- STREAM CHAT ---------------- */
 
-  const streamChat = async (text: string) => {
-    const userMsg: Message = { role: "user", content: text };
+  const streamChat = async (text: string, isFollowUp = false) => {
+    // Abort any existing stream
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = new AbortController();
+
+    // Infer scope from initial message only
+    if (!isFollowUp && messages.length === 0) {
+      const scope = inferScope(text);
+      setActiveScope(scope);
+    }
+
+    // For follow-ups, prepend scope context
+    const scopedText = isFollowUp && activeScope !== 'global'
+      ? `In the context of ${activeScope} markets: ${text}`
+      : text;
+
+    const userMsg: Message = { role: "user", content: scopedText };
     setMessages((p) => [...p, userMsg]);
     setInput("");
     setIsLoading(true);
@@ -196,18 +261,14 @@ export const TradingAIWidget = () => {
         return;
       }
 
-      // Prepend market context to the first user message
-      const messagesWithContext = [...messages, userMsg].map((m, i) => {
-        if (i === 0 && m.role === "user" && marketContext) {
-          return { ...m, content: `${marketContext}\n\nUser question: ${m.content}` };
-        }
-        return m;
-      });
-
-      // If this is the first message, add context
-      const finalMessages = messages.length === 0 && marketContext
-        ? [{ role: "user" as const, content: `${marketContext}\n\nUser question: ${text}` }]
-        : messagesWithContext;
+      // Clean message building: system context + conversation history
+      const finalMessages: Message[] = marketContext
+        ? [
+            { role: "system", content: marketContext },
+            ...messages,
+            userMsg,
+          ]
+        : [...messages, userMsg];
 
       const resp = await fetch(CHAT_URL, {
         method: "POST",
@@ -216,6 +277,7 @@ export const TradingAIWidget = () => {
           Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ messages: finalMessages }),
+        signal: abortControllerRef.current.signal,
       });
 
       if (!resp.ok) {
@@ -223,6 +285,8 @@ export const TradingAIWidget = () => {
           toast.error("Please log in to use the AI assistant");
         } else if (resp.status === 429) {
           toast.error("Daily limit reached. Upgrade to continue.");
+        } else if (resp.status === 402) {
+          toast.error("Payment required. Please add funds.");
         } else {
           toast.error("AI service error");
         }
@@ -268,13 +332,17 @@ export const TradingAIWidget = () => {
               });
             }
           } catch {
-            // ignora basura del stream
+            // ignore malformed stream data
           }
         }
       }
 
       setDailyCount((p) => p + 1);
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        // Stream was intentionally aborted
+        return;
+      }
       toast.error("Failed to get AI response");
       setMessages((p) => p.slice(0, -1));
     } finally {
@@ -320,6 +388,28 @@ export const TradingAIWidget = () => {
     }
 
     streamChat(prompt);
+  };
+
+  const handleFollowUp = async (prompt: string) => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      toast.error("Please log in to use the AI assistant");
+      return;
+    }
+
+    if (!canSendMessage()) {
+      toast.error("Daily limit reached. Upgrade to continue.");
+      return;
+    }
+
+    streamChat(prompt, true); // Pass isFollowUp = true
+  };
+
+  const clearScope = () => {
+    setActiveScope('global');
   };
 
   /* ---------------- UI ---------------- */
@@ -368,11 +458,26 @@ export const TradingAIWidget = () => {
               <span className="text-xs text-slate-500">
                 {dailyCount}/{getMessageLimit()}
               </span>
-              <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="h-8 w-8">
+              <Button variant="ghost" size="icon" onClick={handleClose} className="h-8 w-8">
                 <X className="h-4 w-4" />
               </Button>
             </div>
           </div>
+
+          {/* Active Scope Indicator */}
+          {messages.length > 0 && activeScope !== 'global' && (
+            <div className="flex items-center gap-2 px-4 py-1.5 border-b border-slate-800">
+              <span className="text-xs bg-emerald-600/20 text-emerald-400 px-2 py-0.5 rounded-full">
+                Focus: {SCOPE_LABELS[activeScope]}
+              </span>
+              <button
+                onClick={clearScope}
+                className="text-xs text-slate-500 hover:text-white transition-colors"
+              >
+                Clear
+              </button>
+            </div>
+          )}
 
           {/* Messages */}
           <ScrollArea ref={scrollRef} className="flex-1 px-3 py-4">
@@ -407,16 +512,39 @@ export const TradingAIWidget = () => {
 
                 {/* Prompts for selected category */}
                 <div className="flex-1 space-y-2">
-                  {CATEGORIZED_PROMPTS[promptCategory].prompts.map((q) => (
-                    <button
-                      key={q}
-                      onClick={() => handleQuickPrompt(q)}
-                      disabled={isLoading || !canSendMessage()}
-                      className="w-full text-left px-3 py-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-sm text-white border border-slate-700 hover:border-emerald-500/50 transition-all disabled:opacity-50"
-                    >
-                      {q}
-                    </button>
-                  ))}
+                  {isLoadingContext ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="h-5 w-5 animate-spin text-emerald-400" />
+                      <span className="ml-2 text-sm text-slate-400">Loading market data...</span>
+                    </div>
+                  ) : !isContextReady ? (
+                    <>
+                      <p className="text-center text-xs text-slate-500 py-2">
+                        Market data unavailable. You can still ask questions.
+                      </p>
+                      {CATEGORIZED_PROMPTS[promptCategory].prompts.map((q) => (
+                        <button
+                          key={q}
+                          onClick={() => handleQuickPrompt(q)}
+                          disabled={isLoading || !canSendMessage()}
+                          className="w-full text-left px-3 py-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-sm text-white border border-slate-700 hover:border-emerald-500/50 transition-all disabled:opacity-50"
+                        >
+                          {q}
+                        </button>
+                      ))}
+                    </>
+                  ) : (
+                    CATEGORIZED_PROMPTS[promptCategory].prompts.map((q) => (
+                      <button
+                        key={q}
+                        onClick={() => handleQuickPrompt(q)}
+                        disabled={isLoading || !canSendMessage()}
+                        className="w-full text-left px-3 py-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-sm text-white border border-slate-700 hover:border-emerald-500/50 transition-all disabled:opacity-50"
+                      >
+                        {q}
+                      </button>
+                    ))
+                  )}
                 </div>
               </div>
             )}
@@ -424,7 +552,7 @@ export const TradingAIWidget = () => {
             {/* Messages List */}
             {messages.length > 0 && (
               <div className="space-y-3">
-                {messages.map((m, i) => (
+                {messages.filter(m => m.role !== 'system').map((m, i) => (
                   <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                     <div
                       className={`max-w-[85%] px-3 py-2 rounded-xl text-sm whitespace-pre-wrap ${
@@ -442,7 +570,7 @@ export const TradingAIWidget = () => {
                     {FOLLOW_UP_PROMPTS.map((q) => (
                       <button
                         key={q}
-                        onClick={() => handleQuickPrompt(q)}
+                        onClick={() => handleFollowUp(q)}
                         disabled={isLoading || !canSendMessage()}
                         className="px-2.5 py-1 rounded-md text-xs bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors disabled:opacity-50"
                       >

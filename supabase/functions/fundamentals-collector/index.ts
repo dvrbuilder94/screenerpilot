@@ -1,202 +1,178 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
+/* =========================
+   CORS
+========================= */
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface YahooFinancials {
+/* =========================
+   Types
+========================= */
+interface FundamentalQuarter {
+  symbol: string;
+  fiscal_quarter: string;
+
   revenue: number | null;
   ebitda: number | null;
-  operatingIncome: number | null;
-  netIncome: number | null;
-  totalDebt: number | null;
-  cash: number | null;
-  totalEquity: number | null;
-  sharesOutstanding: number | null;
-  currentAssets: number | null;
-  currentLiabilities: number | null;
-  operatingCashFlow: number | null;
-  capex: number | null;
-  freeCashFlow: number | null;
-  enterpriseValue: number | null;
-  evEbitda: number | null;
-  priceSales: number | null;
-  fiscalQuarter: string;
+  operating_income: number | null;
+  net_income: number | null;
+
+  total_debt: number | null;
+  cash_and_equivalents: number | null;
+  total_equity: number | null;
+
+  current_assets: number | null;
+  current_liabilities: number | null;
+
+  operating_cash_flow: number | null;
+  capital_expenditures: number | null;
+  free_cash_flow: number | null;
+
+  enterprise_value: number | null;
+  ev_ebitda: number | null;
+  price_sales: number | null;
+
+  last_updated: string;
 }
 
-async function fetchYahooFinancials(symbol: string): Promise<YahooFinancials[]> {
+/* =========================
+   Yahoo Fetch
+========================= */
+async function fetchYahooFundamentals(symbol: string): Promise<FundamentalQuarter[]> {
   try {
-    // Fetch from Yahoo Finance quoteSummary endpoint
-    const url = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${symbol}?modules=incomeStatementHistoryQuarterly,balanceSheetHistoryQuarterly,cashflowStatementHistoryQuarterly,defaultKeyStatistics,financialData`;
-    
+    const url =
+      `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${symbol}` +
+      `?modules=incomeStatementHistoryQuarterly,balanceSheetHistoryQuarterly,cashflowStatementHistoryQuarterly,defaultKeyStatistics`;
+
     const res = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0" },
     });
 
-    if (!res.ok) {
-      console.log(`Yahoo fetch failed for ${symbol}: ${res.status}`);
-      return [];
-    }
+    if (!res.ok) throw new Error(`Yahoo failed ${res.status}`);
 
-    const data = await res.json();
-    const result = data.quoteSummary?.result?.[0];
-    
-    if (!result) {
-      console.log(`No data for ${symbol}`);
-      return [];
-    }
+    const json = await res.json();
+    const r = json?.quoteSummary?.result?.[0];
+    if (!r) return [];
 
-    const incomeStatements = result.incomeStatementHistoryQuarterly?.incomeStatementHistory || [];
-    const balanceSheets = result.balanceSheetHistoryQuarterly?.balanceSheetStatements || [];
-    const cashFlows = result.cashflowStatementHistoryQuarterly?.cashflowStatements || [];
-    const keyStats = result.defaultKeyStatistics || {};
-    const financialData = result.financialData || {};
+    const income = r.incomeStatementHistoryQuarterly?.incomeStatementHistory ?? [];
+    const balance = r.balanceSheetHistoryQuarterly?.balanceSheetStatements ?? [];
+    const cashflow = r.cashflowStatementHistoryQuarterly?.cashflowStatements ?? [];
+    const stats = r.defaultKeyStatistics ?? {};
 
-    // Get last 2 quarters
-    const quarters: YahooFinancials[] = [];
-    
-    for (let i = 0; i < Math.min(2, incomeStatements.length); i++) {
-      const income = incomeStatements[i] || {};
-      const balance = balanceSheets[i] || {};
-      const cashflow = cashFlows[i] || {};
-      
-      // Parse fiscal quarter from endDate
-      const endDate = income.endDate?.fmt || "";
-      const date = new Date(endDate);
-      const year = date.getFullYear();
-      const quarter = Math.ceil((date.getMonth() + 1) / 3);
-      const fiscalQuarter = `${year}Q${quarter}`;
+    const quarters: FundamentalQuarter[] = [];
+
+    for (let i = 0; i < Math.min(2, income.length); i++) {
+      const inc = income[i] ?? {};
+      const bal = balance[i] ?? {};
+      const cf = cashflow[i] ?? {};
+
+      const endDate = inc.endDate?.fmt;
+      if (!endDate) continue;
+
+      const d = new Date(endDate);
+      const q = Math.ceil((d.getMonth() + 1) / 3);
+      const fiscal = `${d.getFullYear()}Q${q}`;
 
       quarters.push({
-        revenue: income.totalRevenue?.raw ?? null,
-        ebitda: income.ebitda?.raw ?? null,
-        operatingIncome: income.operatingIncome?.raw ?? null,
-        netIncome: income.netIncome?.raw ?? null,
-        totalDebt: balance.longTermDebt?.raw ?? null,
-        cash: balance.cash?.raw ?? null,
-        totalEquity: balance.totalStockholderEquity?.raw ?? null,
-        sharesOutstanding: keyStats.sharesOutstanding?.raw ?? null,
-        currentAssets: balance.totalCurrentAssets?.raw ?? null,
-        currentLiabilities: balance.totalCurrentLiabilities?.raw ?? null,
-        operatingCashFlow: cashflow.totalCashFromOperatingActivities?.raw ?? null,
-        capex: cashflow.capitalExpenditures?.raw ?? null,
-        freeCashFlow: cashflow.freeCashFlow?.raw ?? null,
-        enterpriseValue: keyStats.enterpriseValue?.raw ?? null,
-        evEbitda: keyStats.enterpriseToEbitda?.raw ?? null,
-        priceSales: keyStats.priceToSalesTrailing12Months?.raw ?? null,
-        fiscalQuarter,
+        symbol,
+        fiscal_quarter: fiscal,
+
+        revenue: inc.totalRevenue?.raw ?? null,
+        ebitda: inc.ebitda?.raw ?? null,
+        operating_income: inc.operatingIncome?.raw ?? null,
+        net_income: inc.netIncome?.raw ?? null,
+
+        total_debt: bal.longTermDebt?.raw ?? null,
+        cash_and_equivalents: bal.cash?.raw ?? null,
+        total_equity: bal.totalStockholderEquity?.raw ?? null,
+
+        current_assets: bal.totalCurrentAssets?.raw ?? null,
+        current_liabilities: bal.totalCurrentLiabilities?.raw ?? null,
+
+        operating_cash_flow: cf.totalCashFromOperatingActivities?.raw ?? null,
+        capital_expenditures: cf.capitalExpenditures?.raw ?? null,
+        free_cash_flow: cf.freeCashFlow?.raw ?? null,
+
+        enterprise_value: stats.enterpriseValue?.raw ?? null,
+        ev_ebitda: stats.enterpriseToEbitda?.raw ?? null,
+        price_sales: stats.priceToSalesTrailing12Months?.raw ?? null,
+
+        last_updated: new Date().toISOString(),
       });
     }
 
     return quarters;
-  } catch (error) {
-    console.error(`Error fetching financials for ${symbol}:`, error);
+  } catch (err) {
+    console.error(`Yahoo fundamentals failed for ${symbol}`, err);
     return [];
   }
 }
 
+/* =========================
+   Server
+========================= */
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-  );
+  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
   try {
-    // Get active stocks from universe
-    const { data: universe, error: universeError } = await supabase
-      .from("stock_universe")
-      .select("symbol")
-      .eq("is_active", true);
+    const { data: universe, error } = await supabase.from("stock_universe").select("symbol").eq("is_active", true);
 
-    if (universeError) {
-      throw universeError;
-    }
-
+    if (error) throw error;
     if (!universe || universe.length === 0) {
-      return new Response(
-        JSON.stringify({ success: true, processed: 0, message: "No active stocks in universe" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ success: true, processed: 0 }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    console.log(`Processing fundamentals for ${universe.length} stocks...`);
+    let processed = 0;
+    let skipped = 0;
 
-    let processedCount = 0;
-    let errorCount = 0;
+    for (const row of universe) {
+      const quarters = await fetchYahooFundamentals(row.symbol);
 
-    for (const stock of universe) {
-      try {
-        const financials = await fetchYahooFinancials(stock.symbol);
-        
-        if (financials.length === 0) {
-          console.log(`No financials for ${stock.symbol}`);
-          continue;
-        }
-
-        // Upsert each quarter
-        for (const quarter of financials) {
-          const { error: upsertError } = await supabase
-            .from("stock_fundamentals")
-            .upsert({
-              symbol: stock.symbol,
-              fiscal_quarter: quarter.fiscalQuarter,
-              revenue: quarter.revenue,
-              ebitda: quarter.ebitda,
-              operating_income: quarter.operatingIncome,
-              net_income: quarter.netIncome,
-              total_debt: quarter.totalDebt,
-              cash_and_equivalents: quarter.cash,
-              total_equity: quarter.totalEquity,
-              shares_outstanding: quarter.sharesOutstanding,
-              current_assets: quarter.currentAssets,
-              current_liabilities: quarter.currentLiabilities,
-              operating_cash_flow: quarter.operatingCashFlow,
-              capital_expenditures: quarter.capex,
-              free_cash_flow: quarter.freeCashFlow,
-              enterprise_value: quarter.enterpriseValue,
-              ev_ebitda: quarter.evEbitda,
-              price_sales: quarter.priceSales,
-            }, { onConflict: "symbol,fiscal_quarter" });
-
-          if (upsertError) {
-            console.error(`Error upserting ${stock.symbol} ${quarter.fiscalQuarter}:`, upsertError);
-          }
-        }
-
-        processedCount++;
-        console.log(`Processed ${stock.symbol}: ${financials.length} quarters`);
-
-        // Rate limiting: 300ms between requests
-        await new Promise(resolve => setTimeout(resolve, 300));
-      } catch (err) {
-        console.error(`Error processing ${stock.symbol}:`, err);
-        errorCount++;
+      if (quarters.length === 0) {
+        skipped++;
+        continue;
       }
+
+      const { error: upsertError } = await supabase.from("stock_fundamentals").upsert(quarters, {
+        onConflict: "symbol,fiscal_quarter",
+      });
+
+      if (upsertError) {
+        console.error(`Upsert failed for ${row.symbol}`, upsertError);
+        skipped++;
+      } else {
+        processed++;
+      }
+
+      // Soft rate limit
+      await new Promise((r) => setTimeout(r, 350));
     }
 
-    console.log(`Completed: ${processedCount} processed, ${errorCount} errors`);
-
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        processed: processedCount,
-        errors: errorCount,
-        total: universe.length
+      JSON.stringify({
+        success: true,
+        processed,
+        skipped,
+        total: universe.length,
       }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
-
-  } catch (error) {
-    console.error("Fundamentals Collector Error:", error);
+  } catch (err) {
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({
+        error: err instanceof Error ? err.message : "Unknown error",
+      }),
+      { status: 500, headers: corsHeaders },
     );
   }
 });

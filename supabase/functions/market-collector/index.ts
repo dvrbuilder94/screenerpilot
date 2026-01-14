@@ -12,6 +12,8 @@ const corsHeaders = {
 };
 
 const INTERVAL = "1d";
+const BATCH_SIZE = 15;
+const DELAY_BETWEEN_BATCHES = 800;
 
 /* ======================================================
    ASSET UNIVERSES
@@ -20,43 +22,94 @@ const INTERVAL = "1d";
 const CRYPTO = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT"];
 
 const STOCKS = [
-  "AAPL",
-  "MSFT",
-  "NVDA",
-  "AMZN",
-  "GOOGL",
-  "META",
-  "TSLA",
-  "AVGO",
-  "BRK-B",
-  "LLY",
-  "V",
-  "UNH",
-  "XOM",
-  "WMT",
-  "JNJ",
-  "ORCL",
-  "COST",
-  "MA",
-  "PG",
-  "NFLX",
-  "JPM",
-  "BAC",
-  "GS",
-  "AMD",
-  "INTC",
-  "QCOM",
-  "CRM",
-  "ADBE",
-  "CSCO",
-  "PEP",
-  "FIGS",
-  "XPEV",
-  "RIVN",
-  "SOFI",
-  "ENPH",
-  "SEDG",
-  "WDC",
+  // Mega Caps
+  "AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "TSLA",
+  "AVGO", "ADBE", "BRK-B", "LLY", "V", "UNH", "XOM", "WMT",
+  "JNJ", "ORCL", "COST", "MA", "PG", "NFLX", "PEP", "CSCO",
+  "AMD", "INTC", "QCOM", "TXN", "AMAT", "INTU", "ISRG", "BKNG",
+  "MU", "LRCX", "KLAC", "ASML", "MRVL", "SNPS", "CDNS", "ORLY",
+  "REGN", "VRTX", "MDLZ", "SBUX", "GILD", "ADI", "PANW", "CRWD",
+  "FTNT", "ADP", "PYPL", "ABNB", "MAR", "CTAS", "NXPI", "ROP",
+  "AEP", "EXC", "PAYX", "ODFL", "FAST", "IDXX", "BIIB", "EA",
+  "TTWO", "MNST", "DLTR", "ROST", "KDP", "PCAR", "XEL", "WDAY",
+  "ZS", "DDOG", "MDB", "TEAM", "SHOP", "UBER", "LYFT",
+  
+  // Financials
+  "JPM", "BAC", "WFC", "GS", "MS", "C", "AXP", "BLK", "SCHW",
+  "PNC", "USB", "TFC", "COF", "BK", "STT", "AMP", "NTRS", "CFG",
+  "KEY", "FITB", "RF", "HBAN", "CMA", "ZION", "MTB",
+  
+  // Communications
+  "T", "VZ", "CMCSA", "DIS", "CRM", "NOW", "IBM", "ACN", "SPGI",
+  
+  // Insurance
+  "MMC", "CB", "AIG", "TRV", "AFL", "PRU", "MET", "ALL",
+  
+  // Healthcare
+  "DHR", "ABT", "TMO", "SYK", "MDT", "BMY", "PFE", "MRK", "ABBV",
+  "AMGN", "CVS", "CI", "HUM", "UHS", "HCA", "ELV", "CNC", "DVA",
+  "ZBH", "BDX", "BAX", "BSX", "EW", "HOLX", "DXCM", "ALGN",
+  "A", "IQV", "MTD", "WAT", "TER", "KEYS", "MCHP", "ON", "SWKS", "MPWR",
+  
+  // Consumer
+  "KO", "MCD", "NKE", "TGT", "HD", "LOW", "TJX", "CMG", "YUM",
+  "DPZ", "DRI", "F", "GM", "HON", "GE", "CAT", "DE", "RTX",
+  "LMT", "NOC", "BA", "UPS", "FDX",
+  
+  // Utilities
+  "NEE", "DUK", "SO", "D", "SRE", "PEG", "ED", "WEC", "ES", "AWK", "ATO",
+  
+  // Growth Stocks
+  "FIGS", "XPEV", "RIVN", "SOFI", "ENPH", "SEDG", "WDC",
+  
+  // Technology Growth
+  "PLTR", "SNOW", "NET", "OKTA", "GTLB", "PATH", "DOCN", "CFLT", "ESTC",
+  "BILL", "HUBS", "TWLO", "DOCU", "ZEN", "SMAR", "MNDY", "PCTY", "PAYC",
+  "FIVN", "NICE", "COUP", "DT", "FRSH", "SUMO", "TENB", "VRNS", "QLYS",
+  "RPD", "NCNO", "DBX", "LSPD", "WEAV", "BRZE", "AMPL", "AI", "BBAI",
+  "IONQ", "RGTI", "QUBT", "TOST", "FOUR", "FLYW", "PSFE", "OLO", "TASK",
+  "COUR", "UDMY", "DUOL", "CHGG", "U", "RBLX", "ZI", "S", "FSLY",
+  "APPF", "PD", "APP",
+  
+  // Healthcare/Biotech
+  "VEEV", "HIMS", "DOCS", "RXRX", "TDOC", "NBIX", "AXSM", "MRNA", "BNTX",
+  "NVAX", "BEAM", "EDIT", "NTLA", "CRSP", "EXAS", "ILMN", "NTRA", "TXG",
+  "SDGR", "LEGN", "ALNY", "IONS", "SRPT", "BMRN", "GH", "TWST", "VCYT",
+  "MYGN", "RGEN", "MEDP", "DNLI", "ARVN", "RCKT", "RARE", "KURA", "APLS",
+  "ARWR", "PCVX", "IOVA", "BLUE", "FATE", "SRRK", "KRYS", "PTCT", "VKTX",
+  "VRNA", "BHVN", "CERT", "GTHX", "BBIO",
+  
+  // Consumer Discretionary
+  "CROX", "SHAK", "BROS", "BIRD", "RVLV", "LULU", "DECK", "ONON", "GOOS",
+  "WRBY", "PLBY", "PRKS", "ASO", "DKS", "HIBB", "COLM", "PVH", "RL",
+  "TPR", "CPRI", "VFC", "HBI", "UAA", "SKX", "NIO", "LI", "LCID",
+  "FSR", "NKLA", "WKHS", "GOEV", "NRDY", "SFIX", "RENT", "CHWY", "W",
+  "ETSY", "CVNA", "WISH",
+  
+  // Fintech
+  "HOOD", "UPST", "AFRM", "LC", "LMND", "ROOT", "MQ", "PAYO", "DLO",
+  "RELY", "NU", "COIN", "MARA", "RIOT", "CLSK", "HUT", "BTBT", "CIFR",
+  "HIVE", "BITF", "CORZ", "WULF", "SQ", "OPEN", "RDFN", "RKT", "UWMC",
+  "TREE", "LDI", "GHLD", "CLOV", "OSCR", "ACHR",
+  
+  // Industrials/Aerospace
+  "RKLB", "JOBY", "LILM", "SPCE", "ASTS", "LUNR", "ASTR", "RDW", "PLUG",
+  "FCEL", "BLDP", "BE", "BLBD", "LEV", "VLTA", "HYLN", "XL", "PTRA",
+  "ARVL", "REE", "EVTV", "HYZN", "LDOS", "KTOS", "RCAT", "UAVS", "EH", "BWXT",
+  
+  // Clean Energy
+  "RUN", "NOVA", "FSLR", "ARRY", "STEM", "CHPT", "EVGO", "BLNK", "DCFC",
+  "QS", "GEVO", "AMTX", "CLNE", "LICY", "FREYR", "MAXN", "CSIQ", "JKS",
+  "DQ", "SPWR", "EOSE", "FLNC", "BEEM",
+  
+  // Communications/Media
+  "ROKU", "TTD", "MGNI", "PUBM", "IAS", "DV", "APPS", "GENI", "SKLZ",
+  "DKNG", "PENN", "RSI", "FUBO", "PARA", "WBD", "LYV", "SPOT", "SIRI",
+  "IHRT", "ATUS",
+  
+  // Real Estate
+  "ZG", "EXPI", "COMP", "OPAD", "DOOR", "HOUS", "OPRT", "REAX", "RMAX",
+  "REAL", "FYBR"
 ];
 
 const ETFS = ["SPY", "QQQ", "IWM", "DIA", "XLF", "XLK", "XLE", "GLD", "TLT", "HYG", "LQD"];
@@ -230,54 +283,61 @@ function generateSignal(params: {
 ====================================================== */
 
 async function fetchBinance(symbol: string): Promise<Candle[] | null> {
-  const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=300`);
-  if (!res.ok) return null;
-  const raw = await res.json();
-  return raw.map((k: any) => ({
-    timestamp: k[0],
-    open: +k[1],
-    high: +k[2],
-    low: +k[3],
-    close: +k[4],
-    volume: +k[5],
-  }));
+  try {
+    const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=300`);
+    if (!res.ok) return null;
+    const raw = await res.json();
+    return raw.map((k: any) => ({
+      timestamp: k[0],
+      open: +k[1],
+      high: +k[2],
+      low: +k[3],
+      close: +k[4],
+      volume: +k[5],
+    }));
+  } catch {
+    return null;
+  }
 }
 
 async function fetchYahoo(symbol: string): Promise<Candle[] | null> {
-  const res = await fetch(
-    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=2y&interval=1d`,
-    { headers: { "User-Agent": "Mozilla/5.0" } },
-  );
-  if (!res.ok) return null;
-  const json = await res.json();
-  const r = json.chart?.result?.[0];
-  if (!r) return null;
+  try {
+    const res = await fetch(
+      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=2y&interval=1d`,
+      { headers: { "User-Agent": "Mozilla/5.0" } },
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    const r = json.chart?.result?.[0];
+    if (!r) return null;
 
-  return r.timestamp
-    .map((t: number, i: number) => ({
-      timestamp: t * 1000,
-      open: r.indicators.quote[0].open[i],
-      high: r.indicators.quote[0].high[i],
-      low: r.indicators.quote[0].low[i],
-      close: r.indicators.quote[0].close[i],
-      volume: r.indicators.quote[0].volume?.[i] ?? 0,
-    }))
-    .filter((c: Candle) => c.close != null);
+    return r.timestamp
+      .map((t: number, i: number) => ({
+        timestamp: t * 1000,
+        open: r.indicators.quote[0].open[i],
+        high: r.indicators.quote[0].high[i],
+        low: r.indicators.quote[0].low[i],
+        close: r.indicators.quote[0].close[i],
+        volume: r.indicators.quote[0].volume?.[i] ?? 0,
+      }))
+      .filter((c: Candle) => c.close != null);
+  } catch {
+    return null;
+  }
 }
 
 /* ======================================================
-   SERVER
+   PROCESS SINGLE ASSET
 ====================================================== */
 
-serve(async () => {
-  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-
-  const assets = buildAssets();
-
-  for (const asset of assets) {
+async function processAsset(asset: Asset, supabase: any): Promise<boolean> {
+  try {
     const candles = asset.source === "binance" ? await fetchBinance(asset.symbol) : await fetchYahoo(asset.symbol);
 
-    if (!candles || candles.length < 60) continue;
+    if (!candles || candles.length < 60) {
+      console.log(`Skipping ${asset.symbol}: insufficient data`);
+      return false;
+    }
 
     const closes = candles.map((c) => c.close);
     const ema9 = ema(closes, 9);
@@ -314,9 +374,54 @@ serve(async () => {
       },
       { onConflict: "symbol,asset_type,interval" },
     );
+
+    return true;
+  } catch (err) {
+    console.log(`Error processing ${asset.symbol}:`, err);
+    return false;
+  }
+}
+
+/* ======================================================
+   SERVER
+====================================================== */
+
+serve(async () => {
+  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+
+  const assets = buildAssets();
+  console.log(`Processing ${assets.length} assets in batches of ${BATCH_SIZE}`);
+
+  let processed = 0;
+  let failed = 0;
+
+  // Process in batches with parallel requests per batch
+  for (let i = 0; i < assets.length; i += BATCH_SIZE) {
+    const batch = assets.slice(i, i + BATCH_SIZE);
+    
+    const results = await Promise.all(
+      batch.map(asset => processAsset(asset, supabase))
+    );
+    
+    results.forEach(success => {
+      if (success) processed++;
+      else failed++;
+    });
+
+    // Delay between batches to avoid rate limiting
+    if (i + BATCH_SIZE < assets.length) {
+      await new Promise(r => setTimeout(r, DELAY_BETWEEN_BATCHES));
+    }
   }
 
-  return new Response(JSON.stringify({ success: true }), {
+  console.log(`Completed: ${processed} processed, ${failed} failed`);
+
+  return new Response(JSON.stringify({ 
+    success: true, 
+    processed, 
+    failed,
+    total: assets.length 
+  }), {
     headers: corsHeaders,
   });
 });

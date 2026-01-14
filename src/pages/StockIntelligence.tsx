@@ -1,6 +1,16 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, TrendingUp, TrendingDown, AlertCircle, Loader2, Zap, ShieldCheck, ShieldAlert, Info } from "lucide-react";
+import {
+  Search,
+  TrendingUp,
+  TrendingDown,
+  AlertCircle,
+  Loader2,
+  Zap,
+  ShieldCheck,
+  ShieldAlert,
+  Info,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,10 +58,7 @@ function ConfidenceBar({ value }: { value: number }) {
         <span className="font-medium">{value}%</span>
       </div>
       <div className="h-2 bg-muted rounded-full overflow-hidden">
-        <div 
-          className={`h-full ${getColor()} transition-all duration-500`} 
-          style={{ width: `${value}%` }} 
-        />
+        <div className={`h-full ${getColor()} transition-all duration-500`} style={{ width: `${value}%` }} />
       </div>
     </div>
   );
@@ -59,25 +66,25 @@ function ConfidenceBar({ value }: { value: number }) {
 
 function VerdictBadge({ verdict }: { verdict: string }) {
   const config: Record<string, { icon: typeof TrendingUp; color: string; bg: string }> = {
-    "Bullish inflection": { 
-      icon: TrendingUp, 
-      color: "text-emerald-400", 
-      bg: "bg-emerald-500/20 border-emerald-500/30" 
+    "Bullish inflection": {
+      icon: TrendingUp,
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/20 border-emerald-500/30",
     },
-    "Fundamentals improving, price lagging": { 
-      icon: TrendingUp, 
-      color: "text-blue-400", 
-      bg: "bg-blue-500/20 border-blue-500/30" 
+    "Fundamentals improving, price lagging": {
+      icon: TrendingUp,
+      color: "text-blue-400",
+      bg: "bg-blue-500/20 border-blue-500/30",
     },
-    "Neutral / mixed signals": { 
-      icon: AlertCircle, 
-      color: "text-amber-400", 
-      bg: "bg-amber-500/20 border-amber-500/30" 
+    "Neutral / mixed signals": {
+      icon: AlertCircle,
+      color: "text-amber-400",
+      bg: "bg-amber-500/20 border-amber-500/30",
     },
-    "Deteriorating fundamentals": { 
-      icon: TrendingDown, 
-      color: "text-red-400", 
-      bg: "bg-red-500/20 border-red-500/30" 
+    "Deteriorating fundamentals": {
+      icon: TrendingDown,
+      color: "text-red-400",
+      bg: "bg-red-500/20 border-red-500/30",
     },
   };
 
@@ -91,12 +98,17 @@ function VerdictBadge({ verdict }: { verdict: string }) {
   );
 }
 
-function SignalItem({ label, value, type = "neutral" }: { label: string; value: string; type?: "positive" | "negative" | "neutral" }) {
-  const colorClass = type === "positive" 
-    ? "text-emerald-400" 
-    : type === "negative" 
-    ? "text-red-400" 
-    : "text-foreground";
+function SignalItem({
+  label,
+  value,
+  type = "neutral",
+}: {
+  label: string;
+  value: string;
+  type?: "positive" | "negative" | "neutral";
+}) {
+  const colorClass =
+    type === "positive" ? "text-emerald-400" : type === "negative" ? "text-red-400" : "text-foreground";
 
   return (
     <div className="flex justify-between items-center py-2 border-b border-border/50 last:border-0">
@@ -108,8 +120,8 @@ function SignalItem({ label, value, type = "neutral" }: { label: string; value: 
 
 function getSignalType(value: string, positive: string[], negative: string[]): "positive" | "negative" | "neutral" {
   const lower = value.toLowerCase();
-  if (positive.some(p => lower.includes(p))) return "positive";
-  if (negative.some(n => lower.includes(n))) return "negative";
+  if (positive.some((p) => lower.includes(p))) return "positive";
+  if (negative.some((n) => lower.includes(n))) return "negative";
   return "neutral";
 }
 
@@ -162,7 +174,7 @@ export default function StockIntelligence() {
           <h1 className="text-2xl font-semibold text-foreground">Stock Intelligence</h1>
         </div>
         <p className="text-muted-foreground mt-2 text-sm max-w-xl">
-          On-demand fundamental analysis. Enter any US stock ticker to get an instant diagnostic of its current state.
+          On-demand technical analysis. Enter any US stock ticker to get an instant diagnostic of its current state.
         </p>
       </div>
 
@@ -181,11 +193,7 @@ export default function StockIntelligence() {
                 maxLength={10}
               />
             </div>
-            <Button 
-              onClick={analyzeStock} 
-              disabled={loading || !symbol.trim()}
-              className="px-6"
-            >
+            <Button onClick={analyzeStock} disabled={loading || !symbol.trim()} className="px-6">
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -254,24 +262,20 @@ export default function StockIntelligence() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
-                <SignalItem 
-                  label="Trend" 
-                  value={result.priceAction?.trend || "N/A"} 
+                <SignalItem
+                  label="Trend"
+                  value={result.priceAction?.trend || "N/A"}
                   type={getSignalType(result.priceAction?.trend || "", ["uptrend", "strong"], ["downtrend"])}
                 />
-                <SignalItem 
-                  label="Momentum" 
-                  value={result.priceAction?.momentum || "N/A"} 
+                <SignalItem
+                  label="Momentum"
+                  value={result.priceAction?.momentum || "N/A"}
                   type={getSignalType(result.priceAction?.momentum || "", ["strong", "highs"], ["weak", "lows"])}
                 />
-                <SignalItem 
-                  label="Volume" 
-                  value={result.priceAction?.volatility || "N/A"} 
-                  type="neutral"
-                />
-                <SignalItem 
-                  label="Support" 
-                  value={result.priceAction?.support || "N/A"} 
+                <SignalItem label="Volume" value={result.priceAction?.volatility || "N/A"} type="neutral" />
+                <SignalItem
+                  label="Support"
+                  value={result.priceAction?.support || "N/A"}
                   type={getSignalType(result.priceAction?.support || "", ["at 50", "above"], ["below", "extended"])}
                 />
               </CardContent>
@@ -281,22 +285,23 @@ export default function StockIntelligence() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  {result.signals.risk.dilution === "low" && result.signals.risk.debt === "manageable" 
-                    ? <ShieldCheck className="h-4 w-4 text-emerald-400" />
-                    : <ShieldAlert className="h-4 w-4 text-amber-400" />
-                  }
+                  {result.signals.risk.dilution === "low" && result.signals.risk.debt === "manageable" ? (
+                    <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                  ) : (
+                    <ShieldAlert className="h-4 w-4 text-amber-400" />
+                  )}
                   Risk Factors
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
-                <SignalItem 
-                  label="Dilution" 
-                  value={result.signals.risk.dilution} 
+                <SignalItem
+                  label="Dilution"
+                  value={result.signals.risk.dilution}
                   type={getSignalType(result.signals.risk.dilution, ["low"], ["high"])}
                 />
-                <SignalItem 
-                  label="Debt Level" 
-                  value={result.signals.risk.debt} 
+                <SignalItem
+                  label="Debt Level"
+                  value={result.signals.risk.debt}
                   type={getSignalType(result.signals.risk.debt, ["manageable"], ["high", "elevated"])}
                 />
               </CardContent>
@@ -317,9 +322,7 @@ export default function StockIntelligence() {
             <div className="text-center">
               <Zap className="h-12 w-12 mx-auto mb-4 text-muted-foreground/30" />
               <p className="text-lg font-medium text-muted-foreground">Enter a ticker to analyze</p>
-              <p className="text-sm text-muted-foreground/70 mt-1">
-                Get instant fundamental insights for any US stock
-              </p>
+              <p className="text-sm text-muted-foreground/70 mt-1">Get instant fundamental insights for any US stock</p>
             </div>
           </CardContent>
         </Card>

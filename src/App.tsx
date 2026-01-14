@@ -14,7 +14,7 @@ import Commodities from "./pages/Commodities";
 import NotFound from "./pages/NotFound";
 import { TrackRecordPage } from "./modules/track-record";
 import Performance from "./pages/Performance";
-import HiddenGems from "./pages/HiddenGems";
+import StockIntelligence from "./pages/StockIntelligence";
 
 const queryClient = new QueryClient();
 
@@ -35,7 +35,7 @@ const App = () => (
                 <Route path="/performance" element={<Performance />} />
                 <Route path="/macro" element={<Macro />} />
                 <Route path="/commodities" element={<Commodities />} />
-                <Route path="/hidden-gems" element={<HiddenGems />} />
+                <Route path="/stock-intelligence" element={<StockIntelligence />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

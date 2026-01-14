@@ -24,11 +24,5 @@ verify_jwt = false
 [functions.dashboard-insight]
 verify_jwt = false
 
-[functions.hidden-gems-collector]
-verify_jwt = false
-
-[functions.universe-collector]
-verify_jwt = false
-
-[functions.fundamentals-collector]
+[functions.analyze-stock]
 verify_jwt = false

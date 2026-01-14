@@ -64,9 +64,9 @@ const STOCKS = [
   
   // Technology Growth
   "PLTR", "SNOW", "NET", "OKTA", "GTLB", "PATH", "DOCN", "CFLT", "ESTC",
-  "BILL", "HUBS", "TWLO", "DOCU", "ZEN", "SMAR", "MNDY", "PCTY", "PAYC",
-  "FIVN", "NICE", "COUP", "DT", "FRSH", "SUMO", "TENB", "VRNS", "QLYS",
-  "RPD", "NCNO", "DBX", "LSPD", "WEAV", "BRZE", "AMPL", "AI", "BBAI",
+  "BILL", "HUBS", "TWLO", "DOCU", "SMAR", "MNDY", "PCTY", "PAYC",
+  "FIVN", "NICE", "DT", "FRSH", "TENB", "VRNS", "QLYS",
+  "RPD", "NCNO", "DBX", "WEAV", "BRZE", "AMPL", "AI", "BBAI",
   "IONQ", "RGTI", "QUBT", "TOST", "FOUR", "FLYW", "PSFE", "OLO", "TASK",
   "COUR", "UDMY", "DUOL", "CHGG", "U", "RBLX", "ZI", "S", "FSLY",
   "APPF", "PD", "APP",
@@ -80,36 +80,35 @@ const STOCKS = [
   "VRNA", "BHVN", "CERT", "GTHX", "BBIO",
   
   // Consumer Discretionary
-  "CROX", "SHAK", "BROS", "BIRD", "RVLV", "LULU", "DECK", "ONON", "GOOS",
-  "WRBY", "PLBY", "PRKS", "ASO", "DKS", "HIBB", "COLM", "PVH", "RL",
+  "CROX", "SHAK", "BROS", "RVLV", "LULU", "DECK", "ONON", "GOOS",
+  "WRBY", "ASO", "DKS", "HIBB", "COLM", "PVH", "RL",
   "TPR", "CPRI", "VFC", "HBI", "UAA", "SKX", "NIO", "LI", "LCID",
-  "FSR", "NKLA", "WKHS", "GOEV", "NRDY", "SFIX", "RENT", "CHWY", "W",
-  "ETSY", "CVNA", "WISH",
+  "NKLA", "WKHS", "GOEV", "SFIX", "CHWY", "W",
+  "ETSY", "CVNA",
   
   // Fintech
   "HOOD", "UPST", "AFRM", "LC", "LMND", "ROOT", "MQ", "PAYO", "DLO",
   "RELY", "NU", "COIN", "MARA", "RIOT", "CLSK", "HUT", "BTBT", "CIFR",
   "HIVE", "BITF", "CORZ", "WULF", "SQ", "OPEN", "RDFN", "RKT", "UWMC",
-  "TREE", "LDI", "GHLD", "CLOV", "OSCR", "ACHR",
+  "TREE", "GHLD", "CLOV", "OSCR", "ACHR",
   
   // Industrials/Aerospace
-  "RKLB", "JOBY", "LILM", "SPCE", "ASTS", "LUNR", "ASTR", "RDW", "PLUG",
-  "FCEL", "BLDP", "BE", "BLBD", "LEV", "VLTA", "HYLN", "XL", "PTRA",
-  "ARVL", "REE", "EVTV", "HYZN", "LDOS", "KTOS", "RCAT", "UAVS", "EH", "BWXT",
+  "RKLB", "JOBY", "LILM", "SPCE", "ASTS", "LUNR", "RDW", "PLUG",
+  "FCEL", "BLDP", "BE", "BLBD", "LEV", "HYLN",
+  "LDOS", "KTOS", "RCAT", "EH", "BWXT",
   
   // Clean Energy
-  "RUN", "NOVA", "FSLR", "ARRY", "STEM", "CHPT", "EVGO", "BLNK", "DCFC",
-  "QS", "GEVO", "AMTX", "CLNE", "LICY", "FREYR", "MAXN", "CSIQ", "JKS",
-  "DQ", "SPWR", "EOSE", "FLNC", "BEEM",
+  "RUN", "NOVA", "FSLR", "ARRY", "STEM", "CHPT", "EVGO", "BLNK",
+  "QS", "GEVO", "CLNE", "MAXN", "CSIQ", "JKS",
+  "DQ", "EOSE", "FLNC",
   
   // Communications/Media
   "ROKU", "TTD", "MGNI", "PUBM", "IAS", "DV", "APPS", "GENI", "SKLZ",
   "DKNG", "PENN", "RSI", "FUBO", "PARA", "WBD", "LYV", "SPOT", "SIRI",
-  "IHRT", "ATUS",
+  "IHRT",
   
   // Real Estate
-  "ZG", "EXPI", "COMP", "OPAD", "DOOR", "HOUS", "OPRT", "REAX", "RMAX",
-  "REAL", "FYBR"
+  "ZG", "EXPI", "COMP", "RMAX", "FYBR"
 ];
 
 const ETFS = ["SPY", "QQQ", "IWM", "DIA", "XLF", "XLK", "XLE", "GLD", "TLT", "HYG", "LQD"];

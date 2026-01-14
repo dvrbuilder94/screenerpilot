@@ -94,10 +94,11 @@ async function fetchYahooCandles(
       throw new Error(errorData.error || `Backend error: ${response.status}`);
     }
     
-    const candles = await response.json();
+    const data = await response.json();
+    const candles = data.candles || data || [];
     
     // Return the last 'limit' candles
-    return candles.slice(-limit);
+    return Array.isArray(candles) ? candles.slice(-limit) : [];
   } catch (error) {
     // Log but don't crash - return empty array for graceful degradation
     console.warn(`Failed to fetch ${symbol}:`, error);

@@ -25,6 +25,12 @@ interface AnalysisResult {
       debt: string;
     };
   };
+  priceAction?: {
+    trend: string;
+    momentum: string;
+    volatility: string;
+    support: string;
+  };
   summary: string;
 }
 
@@ -239,29 +245,34 @@ export default function StockIntelligence() {
 
           {/* Signals Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Fundamentals */}
+            {/* Price Action */}
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-primary" />
-                  Fundamentals
+                  Price Action
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
                 <SignalItem 
-                  label="Revenue QoQ" 
-                  value={result.signals.fundamentals.revenueQoQ} 
-                  type={getSignalType(result.signals.fundamentals.revenueQoQ, ["+"], ["-"])}
+                  label="Trend" 
+                  value={result.priceAction?.trend || "N/A"} 
+                  type={getSignalType(result.priceAction?.trend || "", ["uptrend", "strong"], ["downtrend"])}
                 />
                 <SignalItem 
-                  label="Margin Trend" 
-                  value={result.signals.fundamentals.marginTrend} 
-                  type={getSignalType(result.signals.fundamentals.marginTrend, ["improving"], ["deteriorating"])}
+                  label="Momentum" 
+                  value={result.priceAction?.momentum || "N/A"} 
+                  type={getSignalType(result.priceAction?.momentum || "", ["strong", "highs"], ["weak", "lows"])}
                 />
                 <SignalItem 
-                  label="Free Cash Flow" 
-                  value={result.signals.fundamentals.fcf} 
-                  type={getSignalType(result.signals.fundamentals.fcf, ["positive", "turned"], ["negative", "deteriorating"])}
+                  label="Volume" 
+                  value={result.priceAction?.volatility || "N/A"} 
+                  type="neutral"
+                />
+                <SignalItem 
+                  label="Support" 
+                  value={result.priceAction?.support || "N/A"} 
+                  type={getSignalType(result.priceAction?.support || "", ["at 50", "above"], ["below", "extended"])}
                 />
               </CardContent>
             </Card>

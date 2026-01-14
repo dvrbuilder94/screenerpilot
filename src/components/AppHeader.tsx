@@ -1,4 +1,4 @@
-import { TrendingUp, Menu, Home, Target, BarChart3, Scale, LineChart, Gem } from "lucide-react";
+import { TrendingUp, Menu, Home, Target, BarChart3, Scale, LineChart, Zap } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { AccountDropdown } from "./AccountDropdown";
 import { Button } from "./ui/button";
@@ -10,7 +10,7 @@ const navItems = [
   { title: "Dashboard", url: "/", icon: Home },
   { title: "Performance", url: "/performance", icon: LineChart },
   { title: "Track Record", url: "/track-record", icon: Target },
-  { title: "Hidden Gems", url: "/hidden-gems", icon: Gem, beta: true },
+  { title: "Stock Intel", url: "/stock-intelligence", icon: Zap },
   { title: "Macro Analysis", url: "/macro", icon: BarChart3 },
   { title: "Commodities", url: "/commodities", icon: Scale },
 ];
@@ -37,7 +37,6 @@ export const AppHeader = () => {
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item) => {
               const isActive = location.pathname === item.url;
-              const isBeta = "beta" in item && item.beta;
               return (
                 <Button
                   key={item.url}
@@ -52,11 +51,6 @@ export const AppHeader = () => {
                   <Link to={item.url}>
                     <item.icon className="w-4 h-4 mr-2" />
                     {item.title}
-                    {isBeta && (
-                      <span className="ml-1 px-1.5 py-0.5 text-[10px] font-medium bg-amber-500/20 text-amber-400 rounded-full">
-                        BETA
-                      </span>
-                    )}
                   </Link>
                 </Button>
               );
@@ -80,7 +74,6 @@ export const AppHeader = () => {
               <nav className="flex flex-col gap-2 mt-8">
                 {navItems.map((item) => {
                   const isActive = location.pathname === item.url;
-                  const isBeta = "beta" in item && item.beta;
                   return (
                     <Button
                       key={item.url}
@@ -92,11 +85,6 @@ export const AppHeader = () => {
                       <Link to={item.url}>
                         <item.icon className="w-4 h-4 mr-3" />
                         {item.title}
-                        {isBeta && (
-                          <span className="ml-2 px-1.5 py-0.5 text-[10px] font-medium bg-amber-500/20 text-amber-400 rounded-full">
-                            BETA
-                          </span>
-                        )}
                       </Link>
                     </Button>
                   );

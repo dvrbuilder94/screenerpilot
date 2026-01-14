@@ -5,28 +5,21 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const YAHOO_HEADERS = {
-  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-  "Accept": "application/json",
-  "Referer": "https://finance.yahoo.com/",
-};
-
 // -------------------- TYPES --------------------
 
-interface QuoteData {
+interface StockData {
   symbol: string;
+  companyName: string;
   price: number;
   marketCap: number;
-  companyName: string;
-}
-
-interface FundamentalsData {
-  revenueQoQ: number | null;
-  marginTrend: "improving" | "deteriorating" | "stable" | null;
-  fcfStatus: "positive" | "turned_positive" | "negative" | "deteriorating" | null;
-  dilution: "low" | "moderate" | "high" | null;
-  netDebtEbitda: number | null;
-  debtStatus: "manageable" | "elevated" | "high" | null;
+  dayChange: number;
+  dayChangePercent: number;
+  fiftyDayAverage: number;
+  twoHundredDayAverage: number;
+  fiftyTwoWeekHigh: number;
+  fiftyTwoWeekLow: number;
+  volume: number;
+  avgVolume: number;
 }
 
 interface AnalysisResult {
@@ -47,182 +40,151 @@ interface AnalysisResult {
       debt: string;
     };
   };
+  priceAction: {
+    trend: string;
+    momentum: string;
+    volatility: string;
+    support: string;
+  };
   summary: string;
 }
 
 // -------------------- FETCH HELPERS --------------------
 
-async function fetchQuote(symbol: string): Promise<QuoteData | null> {
+async function fetchStockData(symbol: string): Promise<StockData | null> {
   try {
-    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
-    const res = await fetch(url, { headers: YAHOO_HEADERS });
+    // Use chart endpoint which is more permissive
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=6mo&interval=1d&includePrePost=false`;
+    console.log(`Fetching data for ${symbol}`);
+    
+    const res = await fetch(url, { 
+      headers: { "User-Agent": "Mozilla/5.0" },
+    });
     
     if (!res.ok) {
-      console.error(`Quote fetch failed: ${res.status}`);
+      console.error(`Fetch failed: ${res.status}`);
       return null;
     }
     
     const json = await res.json();
-    const quote = json?.quoteResponse?.result?.[0];
+    const result = json?.chart?.result?.[0];
+    const meta = result?.meta;
+    const quote = result?.indicators?.quote?.[0];
     
-    if (!quote) return null;
-    
-    return {
-      symbol: quote.symbol,
-      price: quote.regularMarketPrice ?? 0,
-      marketCap: quote.marketCap ?? 0,
-      companyName: quote.shortName || quote.longName || symbol,
-    };
-  } catch (err) {
-    console.error("Quote fetch error:", err);
-    return null;
-  }
-}
-
-async function fetchFundamentals(symbol: string): Promise<FundamentalsData | null> {
-  try {
-    const url = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${symbol}?modules=incomeStatementHistoryQuarterly,cashflowStatementHistoryQuarterly,balanceSheetHistoryQuarterly`;
-    const res = await fetch(url, { headers: YAHOO_HEADERS });
-    
-    if (!res.ok) {
-      console.error(`Fundamentals fetch failed: ${res.status}`);
+    if (!meta || !quote) {
+      console.error("Invalid response structure");
       return null;
     }
     
-    const json = await res.json();
-    const data = json?.quoteSummary?.result?.[0];
-    
-    if (!data) return null;
-    
-    const income = data.incomeStatementHistoryQuarterly?.incomeStatementHistory || [];
-    const cashflow = data.cashflowStatementHistoryQuarterly?.cashflowStatements || [];
-    const balance = data.balanceSheetHistoryQuarterly?.balanceSheetStatements || [];
-    
-    if (income.length < 2) return null;
-    
-    const cur = income[0];
-    const prev = income[1];
-    
-    // Revenue QoQ
-    const curRevenue = cur.totalRevenue?.raw || 0;
-    const prevRevenue = prev.totalRevenue?.raw || 0;
-    const revenueQoQ = prevRevenue > 0 ? ((curRevenue - prevRevenue) / prevRevenue) * 100 : null;
-    
-    // Margin trend (EBITDA margin)
-    const curEbitda = cur.ebitda?.raw || 0;
-    const prevEbitda = prev.ebitda?.raw || 0;
-    const curMargin = curRevenue > 0 ? curEbitda / curRevenue : 0;
-    const prevMargin = prevRevenue > 0 ? prevEbitda / prevRevenue : 0;
-    const marginDelta = curMargin - prevMargin;
-    
-    let marginTrend: "improving" | "deteriorating" | "stable" | null = null;
-    if (marginDelta > 0.02) marginTrend = "improving";
-    else if (marginDelta < -0.02) marginTrend = "deteriorating";
-    else marginTrend = "stable";
-    
-    // FCF status
-    const curFcf = cashflow[0]?.freeCashFlow?.raw || 0;
-    const prevFcf = cashflow[1]?.freeCashFlow?.raw || 0;
-    
-    let fcfStatus: "positive" | "turned_positive" | "negative" | "deteriorating" | null = null;
-    if (curFcf > 0 && prevFcf <= 0) fcfStatus = "turned_positive";
-    else if (curFcf > 0) fcfStatus = "positive";
-    else if (curFcf < prevFcf) fcfStatus = "deteriorating";
-    else fcfStatus = "negative";
-    
-    // Dilution
-    const curShares = balance[0]?.commonStock?.raw || cur.dilutedAverageShares?.raw || 0;
-    const prevShares = balance[1]?.commonStock?.raw || prev.dilutedAverageShares?.raw || 0;
-    const shareChange = prevShares > 0 ? ((curShares - prevShares) / prevShares) * 100 : 0;
-    
-    let dilution: "low" | "moderate" | "high" | null = null;
-    if (shareChange < 1) dilution = "low";
-    else if (shareChange < 5) dilution = "moderate";
-    else dilution = "high";
-    
-    // Net Debt / EBITDA
-    const totalDebt = balance[0]?.totalDebt?.raw || balance[0]?.longTermDebt?.raw || 0;
-    const cash = balance[0]?.cashAndCashEquivalents?.raw || balance[0]?.cash?.raw || 0;
-    const netDebt = totalDebt - cash;
-    const netDebtEbitda = curEbitda > 0 ? netDebt / curEbitda : null;
-    
-    let debtStatus: "manageable" | "elevated" | "high" | null = null;
-    if (netDebtEbitda === null) debtStatus = null;
-    else if (netDebtEbitda < 2) debtStatus = "manageable";
-    else if (netDebtEbitda < 4) debtStatus = "elevated";
-    else debtStatus = "high";
+    console.log(`Data fetched: ${meta.symbol} @ ${meta.regularMarketPrice}`);
     
     return {
-      revenueQoQ,
-      marginTrend,
-      fcfStatus,
-      dilution,
-      netDebtEbitda,
-      debtStatus,
+      symbol: meta.symbol,
+      companyName: meta.shortName || meta.longName || symbol,
+      price: meta.regularMarketPrice ?? 0,
+      marketCap: meta.marketCap ?? 0,
+      dayChange: meta.regularMarketPrice - meta.previousClose,
+      dayChangePercent: ((meta.regularMarketPrice - meta.previousClose) / meta.previousClose) * 100,
+      fiftyDayAverage: meta.fiftyDayAverage ?? 0,
+      twoHundredDayAverage: meta.twoHundredDayAverage ?? 0,
+      fiftyTwoWeekHigh: meta.fiftyTwoWeekHigh ?? 0,
+      fiftyTwoWeekLow: meta.fiftyTwoWeekLow ?? 0,
+      volume: meta.regularMarketVolume ?? 0,
+      avgVolume: meta.averageDailyVolume10Day ?? meta.averageDailyVolume3Month ?? 0,
     };
   } catch (err) {
-    console.error("Fundamentals fetch error:", err);
+    console.error("Fetch error:", err);
     return null;
   }
 }
 
 // -------------------- ANALYSIS LOGIC --------------------
 
-function calculateVerdict(fundamentals: FundamentalsData): { verdict: string; confidence: number; summary: string } {
-  let score = 50; // Base score
+function analyzeStock(data: StockData): { verdict: string; confidence: number; summary: string; priceAction: AnalysisResult["priceAction"] } {
+  let score = 50;
   const reasons: string[] = [];
   
-  // Revenue growth scoring
-  if (fundamentals.revenueQoQ !== null) {
-    if (fundamentals.revenueQoQ > 20) {
-      score += 15;
-      reasons.push("strong revenue growth");
-    } else if (fundamentals.revenueQoQ > 10) {
-      score += 10;
-      reasons.push("solid revenue growth");
-    } else if (fundamentals.revenueQoQ > 0) {
-      score += 5;
-      reasons.push("positive revenue trend");
-    } else if (fundamentals.revenueQoQ < -10) {
-      score -= 15;
-      reasons.push("revenue declining");
-    }
-  }
+  // Price vs Moving Averages
+  const aboveFiftyDay = data.price > data.fiftyDayAverage;
+  const aboveTwoHundredDay = data.price > data.twoHundredDayAverage;
+  const fiftyAboveTwoHundred = data.fiftyDayAverage > data.twoHundredDayAverage;
   
-  // Margin trend scoring
-  if (fundamentals.marginTrend === "improving") {
-    score += 15;
-    reasons.push("margins expanding");
-  } else if (fundamentals.marginTrend === "deteriorating") {
-    score -= 10;
-    reasons.push("margin compression");
-  }
-  
-  // FCF scoring
-  if (fundamentals.fcfStatus === "turned_positive") {
+  // Trend analysis
+  let trend = "Neutral";
+  if (aboveFiftyDay && aboveTwoHundredDay && fiftyAboveTwoHundred) {
     score += 20;
-    reasons.push("FCF inflection");
-  } else if (fundamentals.fcfStatus === "positive") {
-    score += 10;
-  } else if (fundamentals.fcfStatus === "deteriorating") {
-    score -= 10;
-    reasons.push("cash burn increasing");
+    trend = "Strong uptrend";
+    reasons.push("strong uptrend");
+  } else if (aboveFiftyDay && aboveTwoHundredDay) {
+    score += 15;
+    trend = "Uptrend";
+    reasons.push("above key averages");
+  } else if (!aboveFiftyDay && !aboveTwoHundredDay) {
+    score -= 15;
+    trend = "Downtrend";
+    reasons.push("below key averages");
+  } else if (aboveTwoHundredDay && !aboveFiftyDay) {
+    trend = "Pullback in uptrend";
+    score += 5;
+    reasons.push("pulling back to support");
+  } else {
+    trend = "Mixed";
   }
   
-  // Dilution penalty
-  if (fundamentals.dilution === "high") {
-    score -= 15;
-    reasons.push("significant dilution");
-  } else if (fundamentals.dilution === "moderate") {
+  // 52-week range position
+  const rangePosition = (data.price - data.fiftyTwoWeekLow) / (data.fiftyTwoWeekHigh - data.fiftyTwoWeekLow);
+  
+  let momentum = "Neutral";
+  if (rangePosition > 0.8) {
+    momentum = "Near highs";
+    score += 10;
+    reasons.push("near 52-week highs");
+  } else if (rangePosition < 0.2) {
+    momentum = "Near lows";
+    score -= 10;
+    reasons.push("near 52-week lows");
+  } else if (rangePosition > 0.6) {
+    momentum = "Strong";
+    score += 5;
+  } else if (rangePosition < 0.4) {
+    momentum = "Weak";
     score -= 5;
   }
   
-  // Debt scoring
-  if (fundamentals.debtStatus === "high") {
-    score -= 10;
-    reasons.push("high leverage");
-  } else if (fundamentals.debtStatus === "manageable") {
+  // Volume analysis
+  const volumeRatio = data.volume / data.avgVolume;
+  let volatility = "Normal";
+  if (volumeRatio > 2) {
+    volatility = "High volume";
+    reasons.push("unusual volume");
+  } else if (volumeRatio > 1.5) {
+    volatility = "Above average";
+  } else if (volumeRatio < 0.5) {
+    volatility = "Low volume";
+  }
+  
+  // Support level
+  const distanceFromFifty = ((data.price - data.fiftyDayAverage) / data.fiftyDayAverage) * 100;
+  let support = "N/A";
+  if (distanceFromFifty > 10) {
+    support = "Extended";
+  } else if (distanceFromFifty > 0 && distanceFromFifty <= 5) {
+    support = "At 50-day MA";
     score += 5;
+  } else if (distanceFromFifty < 0 && distanceFromFifty >= -5) {
+    support = "Testing 50-day";
+  } else if (distanceFromFifty < -10) {
+    support = "Below support";
+    score -= 5;
+  }
+  
+  // Day change sentiment
+  if (data.dayChangePercent > 3) {
+    score += 5;
+    reasons.push("strong daily move");
+  } else if (data.dayChangePercent < -3) {
+    score -= 5;
+    reasons.push("weak daily action");
   }
   
   // Clamp score
@@ -233,33 +195,36 @@ function calculateVerdict(fundamentals: FundamentalsData): { verdict: string; co
   let summary: string;
   
   if (score >= 75) {
-    verdict = "Bullish inflection";
-    summary = `Strong fundamental improvement with ${reasons.slice(0, 2).join(" and ")}`;
+    verdict = "Bullish momentum";
+    summary = `Strong technical setup with ${reasons.slice(0, 2).join(" and ") || "bullish indicators"}`;
   } else if (score >= 60) {
-    verdict = "Fundamentals improving, price lagging";
-    summary = `Business showing positive trends: ${reasons.slice(0, 2).join(", ")}`;
+    verdict = "Constructive";
+    summary = `Positive price structure: ${reasons.slice(0, 2).join(", ") || "above key levels"}`;
   } else if (score >= 45) {
-    verdict = "Neutral / mixed signals";
-    summary = "Mixed fundamental picture with both positives and concerns";
+    verdict = "Neutral / Wait";
+    summary = "Mixed signals - wait for clearer direction";
   } else {
-    verdict = "Deteriorating fundamentals";
-    summary = `Caution warranted: ${reasons.filter(r => r.includes("declin") || r.includes("compres") || r.includes("dilut") || r.includes("burn")).slice(0, 2).join(", ") || "fundamentals weakening"}`;
+    verdict = "Caution";
+    const negativeReasons = reasons.filter(r => 
+      r.includes("below") || r.includes("low") || r.includes("weak")
+    );
+    summary = `Weak technicals: ${negativeReasons.slice(0, 2).join(", ") || "price under pressure"}`;
   }
   
-  return { verdict, confidence: score, summary };
+  return { 
+    verdict, 
+    confidence: score, 
+    summary,
+    priceAction: { trend, momentum, volatility, support }
+  };
 }
 
 function formatMarketCap(cap: number): string {
   if (cap >= 1e12) return `$${(cap / 1e12).toFixed(1)}T`;
   if (cap >= 1e9) return `$${(cap / 1e9).toFixed(1)}B`;
   if (cap >= 1e6) return `$${(cap / 1e6).toFixed(0)}M`;
+  if (cap === 0) return "N/A";
   return `$${cap.toLocaleString()}`;
-}
-
-function formatRevenueQoQ(val: number | null): string {
-  if (val === null) return "N/A";
-  const sign = val >= 0 ? "+" : "";
-  return `${sign}${val.toFixed(1)}%`;
 }
 
 // -------------------- MAIN HANDLER --------------------
@@ -280,53 +245,43 @@ serve(async (req) => {
     }
     
     const cleanSymbol = symbol.toUpperCase().trim();
-    console.log(`Analyzing stock: ${cleanSymbol}`);
+    console.log(`\n========== Analyzing: ${cleanSymbol} ==========`);
     
-    // Fetch quote and fundamentals in parallel
-    const [quote, fundamentals] = await Promise.all([
-      fetchQuote(cleanSymbol),
-      fetchFundamentals(cleanSymbol),
-    ]);
+    const data = await fetchStockData(cleanSymbol);
     
-    if (!quote) {
+    if (!data) {
       return new Response(
         JSON.stringify({ error: `Unable to fetch data for ${cleanSymbol}. Please verify the ticker symbol.` }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
     
-    if (!fundamentals) {
-      return new Response(
-        JSON.stringify({ error: `No fundamental data available for ${cleanSymbol}. This may be an ETF, index, or newly listed stock.` }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-    
-    // Calculate verdict
-    const { verdict, confidence, summary } = calculateVerdict(fundamentals);
+    // Analyze the stock
+    const { verdict, confidence, summary, priceAction } = analyzeStock(data);
     
     const result: AnalysisResult = {
       symbol: cleanSymbol,
-      companyName: quote.companyName,
-      price: quote.price,
-      marketCap: formatMarketCap(quote.marketCap),
+      companyName: data.companyName,
+      price: data.price,
+      marketCap: formatMarketCap(data.marketCap),
       verdict,
       confidence,
       signals: {
         fundamentals: {
-          revenueQoQ: formatRevenueQoQ(fundamentals.revenueQoQ),
-          marginTrend: fundamentals.marginTrend || "N/A",
-          fcf: fundamentals.fcfStatus?.replace("_", " ") || "N/A",
+          revenueQoQ: "N/A",
+          marginTrend: "N/A",
+          fcf: "N/A",
         },
         risk: {
-          dilution: fundamentals.dilution || "N/A",
-          debt: fundamentals.debtStatus || "N/A",
+          dilution: "N/A",
+          debt: "N/A",
         },
       },
+      priceAction,
       summary,
     };
     
-    console.log(`Analysis complete for ${cleanSymbol}: ${verdict} (${confidence}%)`);
+    console.log(`✅ Analysis complete: ${verdict} (${confidence}%)`);
     
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

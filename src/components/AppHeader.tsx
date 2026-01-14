@@ -1,4 +1,4 @@
-import { TrendingUp, Menu, Home, Target, BarChart3, Scale, LineChart, Zap } from "lucide-react";
+import { TrendingUp, Menu, Home, BarChart3, Scale, Zap } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { AccountDropdown } from "./AccountDropdown";
 import { Button } from "./ui/button";
@@ -8,8 +8,6 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { title: "Dashboard", url: "/", icon: Home },
-  { title: "Performance", url: "/performance", icon: LineChart },
-  { title: "Track Record", url: "/track-record", icon: Target },
   { title: "Stock Intel", url: "/stock-intelligence", icon: Zap },
   { title: "Macro Analysis", url: "/macro", icon: BarChart3 },
   { title: "Commodities", url: "/commodities", icon: Scale },

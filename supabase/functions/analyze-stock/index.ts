@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -22,6 +24,11 @@ interface StockData {
   avgVolume: number;
 }
 
+interface InsightBullet {
+  category: string;
+  text: string;
+}
+
 interface AnalysisResult {
   symbol: string;
   companyName: string;
@@ -29,17 +36,6 @@ interface AnalysisResult {
   marketCap: string;
   verdict: string;
   confidence: number;
-  signals: {
-    fundamentals: {
-      revenueQoQ: string;
-      marginTrend: string;
-      fcf: string;
-    };
-    risk: {
-      dilution: string;
-      debt: string;
-    };
-  };
   priceAction: {
     trend: string;
     momentum: string;
@@ -47,6 +43,7 @@ interface AnalysisResult {
     support: string;
   };
   summary: string;
+  intelligenceInsight?: InsightBullet[];
 }
 
 // -------------------- FETCH HELPERS --------------------
@@ -259,6 +256,74 @@ serve(async (req) => {
     // Analyze the stock
     const { verdict, confidence, summary, priceAction } = analyzeStock(data);
     
+    // Calculate range position for context
+    const rangePosition = Math.round(((data.price - data.fiftyTwoWeekLow) / (data.fiftyTwoWeekHigh - data.fiftyTwoWeekLow)) * 100);
+    
+    // Generate AI insight
+    let intelligenceInsight: InsightBullet[] | undefined;
+    
+    if (LOVABLE_API_KEY) {
+      try {
+        console.log("Generating AI insight...");
+        const insightPrompt = `You are a senior equity strategist. Generate a ticker-specific "Intelligence Insight" for ${cleanSymbol} (${data.companyName}).
+
+Context provided:
+- Technical verdict: ${verdict} (${confidence}%)
+- Price trend: ${priceAction.trend}, Momentum: ${priceAction.momentum}
+- 52-week position: ${rangePosition}%
+- Current price: $${data.price.toFixed(2)}
+- Market cap: ${formatMarketCap(data.marketCap)}
+
+Generate exactly 4 bullet points in this JSON format:
+[
+  {"category": "Macro Context", "text": "One relevant macro factor that directly impacts this company's business"},
+  {"category": "Stock Signals", "text": "Key technical or flow observation"},
+  {"category": "Risks", "text": "One specific risk factor for this ticker"},
+  {"category": "Tactical Takeaway", "text": "One actionable implication"}
+]
+
+Rules:
+- Tie macro signals directly to the stock's business model
+- Include relevant commodity, currency, or macro drivers when applicable
+- Professional tone, no hype, no investment advice
+- Maximum 35 words per bullet point
+- Return ONLY valid JSON array, no other text`;
+
+        const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages: [
+              { role: "user", content: insightPrompt }
+            ],
+            max_tokens: 400,
+          }),
+        });
+
+        if (aiResponse.ok) {
+          const aiData = await aiResponse.json();
+          const content = aiData.choices?.[0]?.message?.content;
+          if (content) {
+            // Extract JSON from response (handle markdown code blocks)
+            let jsonStr = content.trim();
+            if (jsonStr.startsWith("```")) {
+              jsonStr = jsonStr.replace(/```json?\n?/g, "").replace(/```/g, "").trim();
+            }
+            intelligenceInsight = JSON.parse(jsonStr);
+            console.log("AI insight generated successfully");
+          }
+        } else {
+          console.error("AI insight generation failed:", aiResponse.status);
+        }
+      } catch (aiErr) {
+        console.error("AI insight error:", aiErr);
+      }
+    }
+    
     const result: AnalysisResult = {
       symbol: cleanSymbol,
       companyName: data.companyName,
@@ -266,19 +331,9 @@ serve(async (req) => {
       marketCap: formatMarketCap(data.marketCap),
       verdict,
       confidence,
-      signals: {
-        fundamentals: {
-          revenueQoQ: "N/A",
-          marginTrend: "N/A",
-          fcf: "N/A",
-        },
-        risk: {
-          dilution: "N/A",
-          debt: "N/A",
-        },
-      },
       priceAction,
       summary,
+      intelligenceInsight,
     };
     
     console.log(`✅ Analysis complete: ${verdict} (${confidence}%)`);

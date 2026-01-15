@@ -7,15 +7,18 @@ import {
   AlertCircle,
   Loader2,
   Zap,
-  ShieldCheck,
-  ShieldAlert,
   Info,
+  Lightbulb,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+
+interface InsightBullet {
+  category: string;
+  text: string;
+}
 
 interface AnalysisResult {
   symbol: string;
@@ -24,17 +27,6 @@ interface AnalysisResult {
   marketCap: string;
   verdict: string;
   confidence: number;
-  signals: {
-    fundamentals: {
-      revenueQoQ: string;
-      marginTrend: string;
-      fcf: string;
-    };
-    risk: {
-      dilution: string;
-      debt: string;
-    };
-  };
   priceAction?: {
     trend: string;
     momentum: string;
@@ -42,6 +34,7 @@ interface AnalysisResult {
     support: string;
   };
   summary: string;
+  intelligenceInsight?: InsightBullet[];
 }
 
 function ConfidenceBar({ value }: { value: number }) {
@@ -281,29 +274,27 @@ export default function StockIntelligence() {
               </CardContent>
             </Card>
 
-            {/* Risk */}
-            <Card>
+            {/* Intelligence Insight */}
+            <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  {result.signals.risk.dilution === "low" && result.signals.risk.debt === "manageable" ? (
-                    <ShieldCheck className="h-4 w-4 text-emerald-400" />
-                  ) : (
-                    <ShieldAlert className="h-4 w-4 text-amber-400" />
-                  )}
-                  Risk Factors
+                  <Lightbulb className="h-4 w-4 text-primary" />
+                  Intelligence Insight
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0">
-                <SignalItem
-                  label="Dilution"
-                  value={result.signals.risk.dilution}
-                  type={getSignalType(result.signals.risk.dilution, ["low"], ["high"])}
-                />
-                <SignalItem
-                  label="Debt Level"
-                  value={result.signals.risk.debt}
-                  type={getSignalType(result.signals.risk.debt, ["manageable"], ["high", "elevated"])}
-                />
+              <CardContent className="pt-0 space-y-3">
+                {result.intelligenceInsight ? (
+                  result.intelligenceInsight.map((bullet, idx) => (
+                    <div key={idx} className="text-sm">
+                      <span className="font-semibold text-foreground">{bullet.category}:</span>{" "}
+                      <span className="text-muted-foreground">{bullet.text}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">
+                    Insight generation unavailable
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>

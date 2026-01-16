@@ -38,21 +38,25 @@ const BINANCE_API_BASE = 'https://api.binance.com/api/v3';
 const COMMODITY_SYMBOLS = ['GC=F', 'SI=F', 'PL=F', 'PA=F', 'HG=F', 'CL=F', 'NG=F'];
 
 export function getAssetType(symbol: Symbol): AssetType {
-  // Check if it's a crypto pair (ends with USDT, BUSD, etc.)
+  // Crypto: check suffix first (most reliable)
   if (symbol.endsWith('USDT') || symbol.endsWith('BUSD') || symbol.endsWith('BTC') || symbol.endsWith('ETH')) {
     return 'crypto';
   }
   
-  // Check if it's a commodity (futures symbol)
-  if (COMMODITY_SYMBOLS.includes(symbol)) return 'commodity';
+  // Index: check carat prefix (most reliable for indices like ^GSPC, ^NDX)
+  if (symbol.startsWith('^')) return 'index';
   
-  // Check presets
-  if (presets.crypto.includes(symbol as any)) return 'crypto';
-  if (ALL_STOCKS.includes(symbol as any)) return 'stock';
-  if (presets.index.includes(symbol as any)) return 'index';
-  if (presets.etf.includes(symbol as any)) return 'etf';
+  // Commodity: futures symbols with =F suffix (GC=F, SI=F, CL=F, etc.)
+  if (symbol.includes('=F') || COMMODITY_SYMBOLS.includes(symbol)) return 'commodity';
   
-  return 'stock'; // default
+  // ETF: check BEFORE stocks (order matters!)
+  if ((presets.etf as readonly string[]).includes(symbol)) return 'etf';
+  
+  // Crypto from presets
+  if ((presets.crypto as readonly string[]).includes(symbol)) return 'crypto';
+  
+  // Default to stock for everything else
+  return 'stock';
 }
 
 /**

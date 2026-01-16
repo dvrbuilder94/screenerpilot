@@ -29,7 +29,6 @@ const intervalConfig: Record<string, { range: string; yahooInterval: string; ms:
   "15m": { range: "5d", yahooInterval: "15m", ms: 15 * 60_000 },
   "30m": { range: "1mo", yahooInterval: "30m", ms: 30 * 60_000 },
   "1h": { range: "1mo", yahooInterval: "1h", ms: 60 * 60_000 },
-  // 4h REAL: agregado desde 1h
   "4h": { range: "3mo", yahooInterval: "1h", ms: 4 * 60 * 60_000, aggregate: 4 },
   "1d": { range: "2y", yahooInterval: "1d", ms: 24 * 60 * 60_000 },
   "1w": { range: "5y", yahooInterval: "1wk", ms: 7 * 24 * 60 * 60_000 },
@@ -92,26 +91,58 @@ serve(async (req) => {
     const timeoutId = setTimeout(() => controller.abort(), 25_000);
 
     const response = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0",
-      },
+      headers: { "User-Agent": "Mozilla/5.0" },
       signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
 
+    /* =========================
+       Yahoo error → graceful skip
+    ========================= */
+
     if (!response.ok) {
-      return new Response(JSON.stringify({ error: "Yahoo Finance error" }), {
-        status: response.status,
-        headers: corsHeaders,
-      });
+      return new Response(
+        JSON.stringify({
+          symbol,
+          interval,
+          source: "yahoo",
+          candles: [],
+          skipped: true,
+          reason: "symbol_not_supported",
+        }),
+        {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+            "Cache-Control": "public, max-age=60",
+          },
+        },
+      );
     }
 
     const json = await response.json();
     const result = json?.chart?.result?.[0];
 
     if (!result?.timestamp || !result?.indicators?.quote?.[0]) {
-      return new Response(JSON.stringify({ error: "Invalid Yahoo response" }), { status: 500, headers: corsHeaders });
+      return new Response(
+        JSON.stringify({
+          symbol,
+          interval,
+          source: "yahoo",
+          candles: [],
+          skipped: true,
+          reason: "no_price_data",
+        }),
+        {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        },
+      );
     }
 
     const { timestamp } = result;
@@ -139,7 +170,6 @@ serve(async (req) => {
       })
       .filter(Boolean);
 
-    // Aggregate if needed (4h)
     if (config.aggregate) {
       candles = aggregateCandles(candles, config.aggregate, config.ms);
     }
@@ -152,6 +182,7 @@ serve(async (req) => {
         candles,
       }),
       {
+        status: 200,
         headers: {
           ...corsHeaders,
           "Content-Type": "application/json",
@@ -161,6 +192,12 @@ serve(async (req) => {
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
-    return new Response(JSON.stringify({ error: message }), { status: 500, headers: corsHeaders });
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json",
+      },
+    });
   }
 });

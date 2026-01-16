@@ -180,6 +180,10 @@ export default function Index() {
             const currentPrice = macroCandles[macroCandles.length - 1].close;
             const prevPrice = macroCandles[macroCandles.length - 2]?.close || currentPrice;
             const priceChange = ((currentPrice - prevPrice) / prevPrice) * 100;
+            
+            // Calculate average volume (last 20 candles) for sorting
+            const recentCandles = macroCandles.slice(-20);
+            const avgVolume = recentCandles.reduce((sum, c) => sum + (c.volume || 0), 0) / recentCandles.length;
 
             return {
               symbol: ticker,
@@ -190,6 +194,7 @@ export default function Index() {
               microSignal,
               combinedConfidence: (macroSignal.confidence + microSignal.confidence) / 2,
               lastUpdate: Date.now(),
+              volume24h: avgVolume * currentPrice, // Volume in dollar terms
             } as TradingSetup;
           } catch (error) {
             console.error(`Error scanning ${ticker}:`, error);

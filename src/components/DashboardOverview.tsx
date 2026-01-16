@@ -26,7 +26,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-type SortField = "symbol" | "category" | "price" | "change" | "signal" | "confidence" | "trend";
+type SortField = "symbol" | "category" | "price" | "change" | "signal" | "confidence" | "trend" | "volume";
 type SortDirection = "asc" | "desc";
 
 const ITEMS_PER_PAGE = 25;
@@ -60,7 +60,7 @@ export function DashboardOverview({
   onCategoryChange,
   onRefresh,
 }: DashboardOverviewProps) {
-  const [sortField, setSortField] = useState<SortField>("confidence");
+  const [sortField, setSortField] = useState<SortField>("volume");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -140,6 +140,9 @@ export function DashboardOverview({
           break;
         case "trend":
           comparison = a.macroSignal.trend.localeCompare(b.macroSignal.trend);
+          break;
+        case "volume":
+          comparison = (a.volume24h || 0) - (b.volume24h || 0);
           break;
       }
       

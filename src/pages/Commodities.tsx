@@ -48,13 +48,6 @@ const ratioDescriptions: Record<string, string> = {
   "Palladium/Gold": "Reflects industrial demand vs safe haven",
 };
 
-const rareEarthsData = [
-  { symbol: "MP", name: "MP Materials", description: "Largest rare earth producer in the Western Hemisphere" },
-  { symbol: "LYSCF", name: "Lynas Rare Earths", description: "Major rare earth miner and processor in Australia" },
-  { symbol: "ILHMF", name: "Iluka Resources", description: "Mineral sands and rare earth producer" },
-  { symbol: "REMX", name: "VanEck Rare Earth ETF", description: "ETF tracking rare earth and strategic metals companies" },
-];
-
 async function fetchCommodityCandles(yahooSymbol: string, interval: Interval): Promise<Candle[]> {
   try {
     const { data, error } = await supabase.functions.invoke("fetch-stock-data", {
@@ -66,7 +59,9 @@ async function fetchCommodityCandles(yahooSymbol: string, interval: Interval): P
       return [];
     }
 
-    return data || [];
+    // Handle response - candles are in data.candles
+    const candles = data?.candles || data || [];
+    return Array.isArray(candles) ? candles : [];
   } catch (err) {
     console.error(`Failed to fetch ${yahooSymbol}:`, err);
     return [];
@@ -224,7 +219,7 @@ export default function Commodities() {
             <Scale className="h-8 w-8 text-primary" />
             <div>
               <h1 className="text-3xl font-bold text-foreground">Commodities</h1>
-              <p className="text-muted-foreground">Precious metals, energy, rare earths and key market ratios</p>
+              <p className="text-muted-foreground">Precious metals, energy and key market ratios</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -344,22 +339,6 @@ export default function Commodities() {
                 </Card>
               );
             })}
-          </div>
-        </section>
-
-        {/* Rare Earths Section */}
-        <section>
-          <h2 className="text-xl font-semibold mb-4 text-foreground">Rare Earths & Strategic Metals</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-            {rareEarthsData.map((item) => (
-              <Card key={item.symbol} className="border-border hover:shadow-sm transition-all">
-                <CardContent className="p-4">
-                  <span className="font-mono font-bold text-primary">{item.symbol}</span>
-                  <p className="font-medium text-foreground mt-1">{item.name}</p>
-                  <p className="text-xs text-muted-foreground mt-2">{item.description}</p>
-                </CardContent>
-              </Card>
-            ))}
           </div>
         </section>
 

@@ -1,5 +1,6 @@
 // Multi-source API client for fetching candlestick data (Binance + Yahoo Finance)
 import presets from '@/config/presets.json';
+import type { Region } from '@/types/trading';
 
 export interface Candle {
   openTime: number;
@@ -23,7 +24,6 @@ export type AssetType = 'crypto' | 'stock' | 'index' | 'etf' | 'commodity';
 export type GroupKey = keyof typeof presets.groups;
 
 const BINANCE_API_BASE = 'https://api.binance.com/api/v3';
-const YAHOO_FINANCE_API = 'https://query1.finance.yahoo.com/v8/finance/chart';
 
 /**
  * Detect asset type from symbol
@@ -46,6 +46,91 @@ export function getAssetType(symbol: Symbol): AssetType {
   if (presets.etf.includes(symbol as any)) return 'etf';
   
   return 'stock'; // default
+}
+
+// Build region map from presets
+const LATAM_TICKERS = new Set<string>([
+  ...presets.stocks_latam.argentina,
+  ...presets.stocks_latam.brazil,
+  ...presets.stocks_latam.chile,
+]);
+
+const ASIA_TICKERS = new Set<string>(presets.stocks_asia);
+
+/**
+ * Get region for a symbol
+ */
+export function getAssetRegion(symbol: string): Region {
+  if (LATAM_TICKERS.has(symbol)) return 'latam';
+  if (ASIA_TICKERS.has(symbol)) return 'asia';
+  if (symbol.endsWith('USDT') || symbol.endsWith('BUSD')) return 'global';
+  return 'usa';
+}
+
+/**
+ * Get all unique tickers with their regions (deduplicates)
+ */
+export function getAllTickersWithRegion(): { symbol: string; region: Region }[] {
+  const seen = new Set<string>();
+  const result: { symbol: string; region: Region }[] = [];
+  
+  // Add crypto (global)
+  for (const symbol of presets.crypto) {
+    if (!seen.has(symbol)) {
+      seen.add(symbol);
+      result.push({ symbol, region: 'global' });
+    }
+  }
+  
+  // Add USA stocks
+  for (const symbol of presets.stocks_usa) {
+    if (!seen.has(symbol)) {
+      seen.add(symbol);
+      result.push({ symbol, region: 'usa' });
+    }
+  }
+  
+  // Add LATAM stocks
+  for (const symbol of [...presets.stocks_latam.argentina, ...presets.stocks_latam.brazil, ...presets.stocks_latam.chile]) {
+    if (!seen.has(symbol)) {
+      seen.add(symbol);
+      result.push({ symbol, region: 'latam' });
+    }
+  }
+  
+  // Add Asia stocks
+  for (const symbol of presets.stocks_asia) {
+    if (!seen.has(symbol)) {
+      seen.add(symbol);
+      result.push({ symbol, region: 'asia' });
+    }
+  }
+  
+  // Add ETFs (usa)
+  for (const symbol of presets.etf) {
+    if (!seen.has(symbol)) {
+      seen.add(symbol);
+      result.push({ symbol, region: 'usa' });
+    }
+  }
+  
+  // Add Index (global)
+  for (const symbol of presets.index) {
+    if (!seen.has(symbol)) {
+      seen.add(symbol);
+      result.push({ symbol, region: 'global' });
+    }
+  }
+  
+  // Add Commodities (global)
+  for (const symbol of presets.commodities) {
+    if (!seen.has(symbol)) {
+      seen.add(symbol);
+      result.push({ symbol, region: 'global' });
+    }
+  }
+  
+  return result;
 }
 
 /**

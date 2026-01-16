@@ -37,8 +37,10 @@ interface DashboardOverviewProps {
   isLoading: boolean;
   searchQuery: string;
   category: string;
+  region?: string;
   onSearchChange?: (query: string) => void;
   onCategoryChange?: (category: string) => void;
+  onRegionChange?: (region: string) => void;
   onRefresh?: () => void;
 }
 
@@ -56,22 +58,31 @@ export function DashboardOverview({
   isLoading,
   searchQuery,
   category,
+  region = "ALL",
   onSearchChange,
   onCategoryChange,
+  onRegionChange,
   onRefresh,
 }: DashboardOverviewProps) {
   const [sortField, setSortField] = useState<SortField>("volume");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Filter signals by category and search
+  // Filter signals by category, region, and search
   const filteredSignals = useMemo(() => {
     let signals = allSignals;
     
+    // Filter by category
     if (category !== "ALL") {
       signals = signals.filter((s) => s.assetType === category);
     }
     
+    // Filter by region (only apply when viewing stocks or all)
+    if (region !== "ALL" && (category === "stock" || category === "ALL")) {
+      signals = signals.filter((s) => s.region === region);
+    }
+    
+    // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       signals = signals.filter(
@@ -82,7 +93,7 @@ export function DashboardOverview({
     }
     
     return signals;
-  }, [allSignals, category, searchQuery]);
+  }, [allSignals, category, region, searchQuery]);
 
   // Reset to page 1 when filters change
   useMemo(() => {
@@ -254,6 +265,8 @@ export function DashboardOverview({
           <CategoryFilterTabs
             category={category}
             onCategoryChange={onCategoryChange}
+            region={region}
+            onRegionChange={onRegionChange}
           />
         )}
 

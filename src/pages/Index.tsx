@@ -9,7 +9,9 @@ import {
   Symbol, 
   Interval, 
   Candle, 
-  getAssetType 
+  getAssetType,
+  getAllTickersWithRegion,
+  getAssetRegion,
 } from "@/lib/binanceApi";
 import {
   ema,
@@ -22,7 +24,6 @@ import {
 import { calculateEnhancedSignal } from "@/lib/enhancedSignals";
 import { TradingSetup, EnhancedSignal } from "@/types/trading";
 import { TradingStyle, TRADING_PROFILES } from "@/types/tradingProfile";
-import presets from "@/config/presets.json";
 
 const STORAGE_KEY = "crypto-dashboard-settings";
 
@@ -54,9 +55,10 @@ export default function Index() {
     return saved || 'swing';
   });
 
-  // Dashboard filter state
+  // Dashboard filter state - default to "stock"
   const [searchQuery, setSearchQuery] = useState("");
-  const [assetCategory, setAssetCategory] = useState("ALL");
+  const [assetCategory, setAssetCategory] = useState("stock");
+  const [regionFilter, setRegionFilter] = useState("ALL");
 
   // All signals state
   const [allSignals, setAllSignals] = useState<TradingSetup[]>([]);
@@ -120,30 +122,25 @@ export default function Index() {
     setIsScanningAll(true);
     
     try {
-      const allTickers: Symbol[] = [
-        ...presets.crypto,
-        ...presets.etf,
-        ...presets.index,
-        ...(presets.commodities || []),
-        ...presets.stocks,
-      ];
+      // Get deduplicated tickers with regions
+      const tickersWithRegion = getAllTickersWithRegion();
 
       // Increased max tickers to support larger asset universe
-      const maxTickers = 300;
+      const maxTickers = 350;
       const failedTickers: string[] = [];
-      const tickersToScan = allTickers.slice(0, maxTickers);
+      const tickersToScan = tickersWithRegion.slice(0, maxTickers);
 
       const results = await Promise.allSettled(
-        tickersToScan.map(async (ticker) => {
+        tickersToScan.map(async ({ symbol: ticker, region }) => {
           try {
-            const assetType = getAssetType(ticker);
+            const assetType = getAssetType(ticker as Symbol);
             
             // Fetch with error handling - skip failed tickers gracefully
             let macroCandles, microCandles;
             try {
               [macroCandles, microCandles] = await Promise.all([
-                fetchCandles(ticker, macroInterval, 200),
-                fetchCandles(ticker, microInterval, 200),
+                fetchCandles(ticker as Symbol, macroInterval, 200),
+                fetchCandles(ticker as Symbol, microInterval, 200),
               ]);
             } catch (fetchError) {
               // Skip tickers that fail to fetch (404, timeout, etc.)
@@ -195,6 +192,7 @@ export default function Index() {
               combinedConfidence: (macroSignal.confidence + microSignal.confidence) / 2,
               lastUpdate: Date.now(),
               volume24h: avgVolume * currentPrice, // Volume in dollar terms
+              region, // Assign region from presets
             } as TradingSetup;
           } catch (error) {
             console.error(`Error scanning ${ticker}:`, error);
@@ -321,8 +319,10 @@ export default function Index() {
                 isLoading={isScanningAll}
                 searchQuery={searchQuery}
                 category={assetCategory}
+                region={regionFilter}
                 onSearchChange={setSearchQuery}
                 onCategoryChange={setAssetCategory}
+                onRegionChange={setRegionFilter}
                 onRefresh={handleRefresh}
               />
             </div>

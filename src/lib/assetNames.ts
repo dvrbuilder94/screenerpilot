@@ -590,6 +590,54 @@ export const ASSET_NAMES: Record<string, string> = {
   LYSCF: "Lynas Rare Earths",
   ILHMF: "Iluka Resources",
   REMX: "Rare Earth ETF",
+
+  // LATAM ADRs - Argentina
+  YPF: "YPF Energía",
+  GGAL: "Grupo Galicia",
+  BMA: "Banco Macro",
+  PAM: "Pampa Energía",
+  TEO: "Telecom Argentina",
+  TGS: "Transportadora de Gas",
+  BBAR: "BBVA Argentina",
+  CEPU: "Central Puerto",
+  EDN: "Edenor",
+  SUPV: "Grupo Supervielle",
+  LOMA: "Loma Negra",
+  CRESY: "Cresud",
+
+  // LATAM ADRs - Brazil
+  PBR: "Petrobras",
+  VALE: "Vale",
+  ITUB: "Itaú Unibanco",
+  BBD: "Bradesco",
+  ABEV: "Ambev",
+  ERJ: "Embraer",
+  GGB: "Gerdau",
+  SUZ: "Suzano",
+  AZUL: "Azul Airlines",
+  CIG: "Cemig",
+  SBS: "Sabesp",
+  VIV: "Telefônica Brasil",
+  UGP: "Ultrapar",
+  SID: "CSN",
+  BRFS: "BRF",
+
+  // LATAM ADRs - Chile
+  SQM: "SQM Lithium",
+  BCH: "Banco de Chile",
+  BSAC: "Santander Chile",
+  CCU: "CCU",
+  LTM: "LATAM Airlines",
+
+  // Asia ADRs
+  BABA: "Alibaba",
+  JD: "JD.com",
+  PDD: "PDD Holdings",
+  BIDU: "Baidu",
+  TME: "Tencent Music",
+  BILI: "Bilibili",
+  FUTU: "Futu Holdings",
+  TIGR: "UP Fintech",
 };
 
 export function getAssetName(symbol: string): string {

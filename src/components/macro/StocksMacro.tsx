@@ -54,8 +54,9 @@ export function StocksMacro() {
             );
             
             if (response.ok) {
-              const candles = await response.json();
-              if (candles.length > 0) {
+              const data = await response.json();
+              const candles = data.candles || data;
+              if (Array.isArray(candles) && candles.length > 0) {
                 priceMap[symbol] = candles[candles.length - 1].close;
               }
             }
@@ -78,8 +79,9 @@ export function StocksMacro() {
             );
             
             if (response.ok) {
-              const candles = await response.json();
-              if (candles.length > 1) {
+              const data = await response.json();
+              const candles = data.candles || data;
+              if (Array.isArray(candles) && candles.length > 1) {
                 const latest = candles[candles.length - 1].close;
                 const previous = candles[candles.length - 2].close;
                 const changePercent = ((latest - previous) / previous) * 100;

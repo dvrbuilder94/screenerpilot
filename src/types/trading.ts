@@ -24,6 +24,7 @@ export interface TradingSetup {
   lastUpdate: number;
   priceChange24h?: number;
   recentPrices?: number[];
+  volume24h?: number; // Average daily volume for sorting
 }
 
 export interface FilterOptions {

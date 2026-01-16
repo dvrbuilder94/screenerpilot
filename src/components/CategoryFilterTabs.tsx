@@ -6,7 +6,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Globe } from "lucide-react";
 
 export const assetCategories = [
   { value: "stock", label: "Stocks" },
@@ -17,25 +16,14 @@ export const assetCategories = [
   { value: "ALL", label: "All" },
 ];
 
-export const regionFilters = [
-  { value: "ALL", label: "All Regions" },
-  { value: "usa", label: "USA" },
-  { value: "latam", label: "LATAM" },
-  { value: "asia", label: "Asia" },
-];
-
 interface CategoryFilterTabsProps {
   category: string;
   onCategoryChange: (category: string) => void;
-  region?: string;
-  onRegionChange?: (region: string) => void;
 }
 
 export function CategoryFilterTabs({
   category,
   onCategoryChange,
-  region = "ALL",
-  onRegionChange,
 }: CategoryFilterTabsProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -72,25 +60,6 @@ export function CategoryFilterTabs({
           </SelectContent>
         </Select>
       </div>
-
-      {/* Region Filter - only show when stocks are selected */}
-      {onRegionChange && (category === "stock" || category === "ALL") && (
-        <div className="flex items-center gap-2">
-          <Globe className="h-4 w-4 text-muted-foreground hidden sm:block" />
-          <Select value={region} onValueChange={onRegionChange}>
-            <SelectTrigger className="w-36 h-9 text-sm">
-              <SelectValue placeholder="Region" />
-            </SelectTrigger>
-            <SelectContent>
-              {regionFilters.map((r) => (
-                <SelectItem key={r.value} value={r.value}>
-                  {r.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
     </div>
   );
 }

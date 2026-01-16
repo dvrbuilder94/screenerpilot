@@ -10,8 +10,7 @@ import {
   Interval, 
   Candle, 
   getAssetType,
-  getAllTickersWithRegion,
-  getAssetRegion,
+  getAllTickers,
 } from "@/lib/binanceApi";
 import {
   ema,
@@ -58,7 +57,6 @@ export default function Index() {
   // Dashboard filter state - default to "stock"
   const [searchQuery, setSearchQuery] = useState("");
   const [assetCategory, setAssetCategory] = useState("stock");
-  const [regionFilter, setRegionFilter] = useState("ALL");
 
   // All signals state
   const [allSignals, setAllSignals] = useState<TradingSetup[]>([]);
@@ -122,16 +120,16 @@ export default function Index() {
     setIsScanningAll(true);
     
     try {
-      // Get deduplicated tickers with regions
-      const tickersWithRegion = getAllTickersWithRegion();
+      // Get deduplicated tickers (no regions - simplified)
+      const allTickersList = getAllTickers();
 
-      // Increased max tickers to support larger asset universe
-      const maxTickers = 350;
+      // Max tickers to scan
+      const maxTickers = 300;
       const failedTickers: string[] = [];
-      const tickersToScan = tickersWithRegion.slice(0, maxTickers);
+      const tickersToScan = allTickersList.slice(0, maxTickers);
 
       const results = await Promise.allSettled(
-        tickersToScan.map(async ({ symbol: ticker, region }) => {
+        tickersToScan.map(async (ticker) => {
           try {
             const assetType = getAssetType(ticker as Symbol);
             
@@ -191,8 +189,7 @@ export default function Index() {
               microSignal,
               combinedConfidence: (macroSignal.confidence + microSignal.confidence) / 2,
               lastUpdate: Date.now(),
-              volume24h: avgVolume * currentPrice, // Volume in dollar terms
-              region, // Assign region from presets
+              volume24h: avgVolume * currentPrice,
             } as TradingSetup;
           } catch (error) {
             console.error(`Error scanning ${ticker}:`, error);
@@ -319,10 +316,8 @@ export default function Index() {
                 isLoading={isScanningAll}
                 searchQuery={searchQuery}
                 category={assetCategory}
-                region={regionFilter}
                 onSearchChange={setSearchQuery}
                 onCategoryChange={setAssetCategory}
-                onRegionChange={setRegionFilter}
                 onRefresh={handleRefresh}
               />
             </div>

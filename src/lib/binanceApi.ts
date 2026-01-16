@@ -1,6 +1,5 @@
 // Multi-source API client for fetching candlestick data (Binance + Yahoo Finance)
 import presets from '@/config/presets.json';
-import type { Region } from '@/types/trading';
 
 export interface Candle {
   openTime: number;
@@ -56,89 +55,38 @@ export function getAssetType(symbol: Symbol): AssetType {
   return 'stock'; // default
 }
 
-// Build region map from presets
-const LATAM_TICKERS = new Set<string>([
-  ...presets.stocks_latam.argentina,
-  ...presets.stocks_latam.brazil,
-  ...presets.stocks_latam.chile,
-]);
-
-const ASIA_TICKERS = new Set<string>(presets.stocks_asia);
-
 /**
- * Get region for a symbol
+ * Get all unique tickers for scanning (simplified - no regions)
  */
-export function getAssetRegion(symbol: string): Region {
-  if (LATAM_TICKERS.has(symbol)) return 'latam';
-  if (ASIA_TICKERS.has(symbol)) return 'asia';
-  if (symbol.endsWith('USDT') || symbol.endsWith('BUSD')) return 'global';
-  return 'usa';
-}
-
-/**
- * Get all unique tickers with their regions (deduplicates)
- */
-export function getAllTickersWithRegion(): { symbol: string; region: Region }[] {
+export function getAllTickers(): string[] {
   const seen = new Set<string>();
-  const result: { symbol: string; region: Region }[] = [];
   
-  // Add crypto (global)
+  // Add crypto
   for (const symbol of presets.crypto) {
-    if (!seen.has(symbol)) {
-      seen.add(symbol);
-      result.push({ symbol, region: 'global' });
-    }
+    seen.add(symbol);
   }
   
-  // Add USA stocks
+  // Add USA stocks only (most reliable with Yahoo Finance)
   for (const symbol of presets.stocks_usa) {
-    if (!seen.has(symbol)) {
-      seen.add(symbol);
-      result.push({ symbol, region: 'usa' });
-    }
+    seen.add(symbol);
   }
   
-  // Add LATAM stocks
-  for (const symbol of [...presets.stocks_latam.argentina, ...presets.stocks_latam.brazil, ...presets.stocks_latam.chile]) {
-    if (!seen.has(symbol)) {
-      seen.add(symbol);
-      result.push({ symbol, region: 'latam' });
-    }
-  }
-  
-  // Add Asia stocks
-  for (const symbol of presets.stocks_asia) {
-    if (!seen.has(symbol)) {
-      seen.add(symbol);
-      result.push({ symbol, region: 'asia' });
-    }
-  }
-  
-  // Add ETFs (usa)
+  // Add ETFs
   for (const symbol of presets.etf) {
-    if (!seen.has(symbol)) {
-      seen.add(symbol);
-      result.push({ symbol, region: 'usa' });
-    }
+    seen.add(symbol);
   }
   
-  // Add Index (global)
+  // Add Index
   for (const symbol of presets.index) {
-    if (!seen.has(symbol)) {
-      seen.add(symbol);
-      result.push({ symbol, region: 'global' });
-    }
+    seen.add(symbol);
   }
   
-  // Add Commodities (global)
+  // Add Commodities
   for (const symbol of presets.commodities) {
-    if (!seen.has(symbol)) {
-      seen.add(symbol);
-      result.push({ symbol, region: 'global' });
-    }
+    seen.add(symbol);
   }
   
-  return result;
+  return Array.from(seen);
 }
 
 /**

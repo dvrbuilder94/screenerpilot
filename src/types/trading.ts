@@ -2,8 +2,6 @@
 
 export type SignalType = 'STRONG_BUY' | 'BUY' | 'HOLD' | 'SELL' | 'STRONG_SELL';
 
-export type Region = 'usa' | 'latam' | 'asia' | 'global';
-
 export interface EnhancedSignal {
   signal: SignalType;
   score: number;
@@ -26,8 +24,7 @@ export interface TradingSetup {
   lastUpdate: number;
   priceChange24h?: number;
   recentPrices?: number[];
-  volume24h?: number; // Average daily volume for sorting
-  region?: Region;
+  volume24h?: number;
 }
 
 export interface FilterOptions {

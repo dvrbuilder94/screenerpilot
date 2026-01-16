@@ -12,9 +12,17 @@ export interface Candle {
   closeTime: number;
 }
 
-// Dynamic types from presets
+// Dynamic types from presets - combine all stock sources
+const ALL_STOCKS = [
+  ...presets.stocks_usa,
+  ...presets.stocks_latam.argentina,
+  ...presets.stocks_latam.brazil,
+  ...presets.stocks_latam.chile,
+  ...presets.stocks_asia,
+] as const;
+
 export type CryptoSymbol = typeof presets.crypto[number];
-export type StockSymbol = typeof presets.stocks[number];
+export type StockSymbol = typeof ALL_STOCKS[number];
 export type IndexSymbol = typeof presets.index[number];
 export type ETFSymbol = typeof presets.etf[number];
 export type CommoditySymbol = 'GC=F' | 'SI=F' | 'PL=F' | 'PA=F' | 'HG=F' | 'CL=F' | 'NG=F';
@@ -41,7 +49,7 @@ export function getAssetType(symbol: Symbol): AssetType {
   
   // Check presets
   if (presets.crypto.includes(symbol as any)) return 'crypto';
-  if (presets.stocks.includes(symbol as any)) return 'stock';
+  if (ALL_STOCKS.includes(symbol as any)) return 'stock';
   if (presets.index.includes(symbol as any)) return 'index';
   if (presets.etf.includes(symbol as any)) return 'etf';
   
@@ -284,7 +292,7 @@ export function getSymbolsByType(type: AssetType): Symbol[] {
     case 'crypto':
       return presets.crypto as Symbol[];
     case 'stock':
-      return presets.stocks as Symbol[];
+      return ALL_STOCKS as unknown as Symbol[];
     case 'index':
       return presets.index as Symbol[];
     case 'etf':

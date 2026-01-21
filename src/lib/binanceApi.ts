@@ -94,6 +94,26 @@ export function getAllTickers(): string[] {
 }
 
 /**
+ * Get tickers by specific category for selective scanning
+ */
+export function getTickersByCategory(category: string): string[] {
+  switch (category) {
+    case 'stock':
+      return [...presets.stocks_usa];
+    case 'crypto':
+      return [...presets.crypto];
+    case 'etf':
+      return [...presets.etf];
+    case 'index':
+      return [...presets.index];
+    case 'commodity':
+      return [...presets.commodities];
+    default:
+      return getAllTickers();
+  }
+}
+
+/**
  * Convert interval to Yahoo Finance format
  */
 function intervalToYahoo(interval: Interval): { range: string; granularity: string } {

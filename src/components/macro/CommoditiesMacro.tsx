@@ -13,11 +13,28 @@ interface RatioData {
 }
 
 const COMMODITY_MAP: Record<string, string> = {
+  // Precious Metals
   'GC=F': 'Gold',
   'SI=F': 'Silver',
-  'HG=F': 'Copper',
-  'CL=F': 'Oil',
   'PL=F': 'Platinum',
+  'PA=F': 'Palladium',
+  // Industrial
+  'HG=F': 'Copper',
+  // Energy
+  'CL=F': 'Crude Oil',
+  'NG=F': 'Natural Gas',
+  // Agriculture
+  'ZW=F': 'Wheat',
+  'ZC=F': 'Corn',
+  'ZS=F': 'Soybeans',
+  'KC=F': 'Coffee',
+};
+
+// ETFs for commodities without liquid futures on Yahoo
+const COMMODITY_ETF_MAP: Record<string, string> = {
+  'URA': 'Uranium (ETF)',
+  'PALL': 'Palladium (ETF)',
+  'WEAT': 'Wheat (ETF)',
 };
 
 export function CommoditiesMacro() {
@@ -29,11 +46,13 @@ export function CommoditiesMacro() {
       setIsLoading(true);
       
       try {
-        const symbols = Object.keys(COMMODITY_MAP);
+        const futuresSymbols = Object.keys(COMMODITY_MAP);
+        const etfSymbols = Object.keys(COMMODITY_ETF_MAP);
+        const allSymbols = [...futuresSymbols, ...etfSymbols];
         const priceMap: Record<string, number> = {};
         
         await Promise.all(
-          symbols.map(async (symbol) => {
+          allSymbols.map(async (symbol) => {
             try {
               const response = await fetch(
                 `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-stock-data`,
@@ -145,29 +164,53 @@ export function CommoditiesMacro() {
     );
   }
 
+  // Group commodities by category
+  const categories = {
+    'Precious Metals': ['GC=F', 'SI=F', 'PL=F', 'PA=F'],
+    'Energy': ['CL=F', 'NG=F'],
+    'Industrial': ['HG=F'],
+    'Agriculture': ['ZW=F', 'ZC=F', 'ZS=F', 'KC=F'],
+    'ETFs': Object.keys(COMMODITY_ETF_MAP),
+  };
+
+  const allCommodities = { ...COMMODITY_MAP, ...COMMODITY_ETF_MAP };
+
   return (
     <div className="space-y-8">
-      {/* Spot Prices - Hero Row */}
-      <Card className="border-2 border-border bg-gradient-to-br from-card to-muted/30">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Scale className="h-5 w-5 text-primary" />
-            Spot Prices
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {Object.entries(COMMODITY_MAP).map(([symbol, name]) => (
-              <div key={symbol} className="text-center p-4 bg-muted/30 rounded-lg border border-border/50">
-                <p className="text-sm text-muted-foreground font-medium">{name}</p>
-                <p className="text-2xl font-bold mt-1">
-                  ${prices[symbol]?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '—'}
-                </p>
+      {/* Spot Prices by Category */}
+      {Object.entries(categories).map(([category, symbols]) => {
+        const hasData = symbols.some(s => prices[s]);
+        if (!hasData) return null;
+        
+        return (
+          <Card key={category} className="border-2 border-border bg-gradient-to-br from-card to-muted/30">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Scale className="h-5 w-5 text-primary" />
+                {category}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {symbols.map((symbol) => {
+                  const price = prices[symbol];
+                  const name = allCommodities[symbol];
+                  if (!price) return null;
+                  
+                  return (
+                    <div key={symbol} className="text-center p-4 bg-muted/30 rounded-lg border border-border/50">
+                      <p className="text-sm text-muted-foreground font-medium">{name}</p>
+                      <p className="text-xl font-bold mt-1">
+                        ${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        );
+      })}
 
       {/* Key Ratios */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

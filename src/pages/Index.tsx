@@ -115,6 +115,23 @@ export default function Index() {
     };
   }, [tradingStyle]);
 
+  // Batch utility to limit concurrent requests
+  const batchProcess = useCallback(async <T, R>(
+    items: T[],
+    processor: (item: T) => Promise<R>,
+    batchSize: number = 10
+  ): Promise<PromiseSettledResult<R>[]> => {
+    const results: PromiseSettledResult<R>[] = [];
+    
+    for (let i = 0; i < items.length; i += batchSize) {
+      const batch = items.slice(i, i + batchSize);
+      const batchResults = await Promise.allSettled(batch.map(processor));
+      results.push(...batchResults);
+    }
+    
+    return results;
+  }, []);
+
   // Scan all tickers for overview
   const scanAllTickers = useCallback(async () => {
     setIsScanningAll(true);
@@ -124,79 +141,78 @@ export default function Index() {
       const allTickersList = getAllTickers();
 
       // Max tickers to scan
-      const maxTickers = 300;
+      const maxTickers = 100; // Reduced to prevent overwhelming
       const failedTickers: string[] = [];
       const tickersToScan = allTickersList.slice(0, maxTickers);
 
-      const results = await Promise.allSettled(
-        tickersToScan.map(async (ticker) => {
+      // Process in batches of 10 concurrent requests to avoid rate limiting
+      const results = await batchProcess(tickersToScan, async (ticker) => {
+        try {
+          const assetType = getAssetType(ticker as Symbol);
+          
+          // Fetch with error handling - skip failed tickers gracefully
+          let macroCandles, microCandles;
           try {
-            const assetType = getAssetType(ticker as Symbol);
-            
-            // Fetch with error handling - skip failed tickers gracefully
-            let macroCandles, microCandles;
-            try {
-              [macroCandles, microCandles] = await Promise.all([
-                fetchCandles(ticker as Symbol, macroInterval, 200),
-                fetchCandles(ticker as Symbol, microInterval, 200),
-              ]);
-            } catch (fetchError) {
-              // Skip tickers that fail to fetch (404, timeout, etc.)
-              console.warn(`Skipping ${ticker}: fetch failed`, fetchError);
-              failedTickers.push(ticker);
-              return null;
-            }
-
-            if (!macroCandles?.length || !microCandles?.length) {
-              return null;
-            }
-
-            const macroIndicators = calculateIndicators(macroCandles);
-            const microIndicators = calculateIndicators(microCandles);
-
-            const tradingProfile = TRADING_PROFILES[tradingStyle];
-
-            const macroSignal = calculateEnhancedSignal({
-              indicators: macroIndicators.indicators,
-              currentPrice: macroCandles[macroCandles.length - 1].close,
-              prevPrice: macroCandles[macroCandles.length - 2]?.close || macroCandles[macroCandles.length - 1].close,
-              tradingProfile,
-              sentiment: null,
-            });
-
-            const microSignal = calculateEnhancedSignal({
-              indicators: microIndicators.indicators,
-              currentPrice: microCandles[microCandles.length - 1].close,
-              prevPrice: microCandles[microCandles.length - 2]?.close || microCandles[microCandles.length - 1].close,
-              tradingProfile,
-              sentiment: null,
-            });
-
-            const currentPrice = macroCandles[macroCandles.length - 1].close;
-            const prevPrice = macroCandles[macroCandles.length - 2]?.close || currentPrice;
-            const priceChange = ((currentPrice - prevPrice) / prevPrice) * 100;
-            
-            // Calculate average volume (last 20 candles) for sorting
-            const recentCandles = macroCandles.slice(-20);
-            const avgVolume = recentCandles.reduce((sum, c) => sum + (c.volume || 0), 0) / recentCandles.length;
-
-            return {
-              symbol: ticker,
-              assetType,
-              currentPrice,
-              priceChange24h: priceChange,
-              macroSignal,
-              microSignal,
-              combinedConfidence: (macroSignal.confidence + microSignal.confidence) / 2,
-              lastUpdate: Date.now(),
-              volume24h: avgVolume * currentPrice,
-            } as TradingSetup;
-          } catch (error) {
-            console.error(`Error scanning ${ticker}:`, error);
+            [macroCandles, microCandles] = await Promise.all([
+              fetchCandles(ticker as Symbol, macroInterval, 200),
+              fetchCandles(ticker as Symbol, microInterval, 200),
+            ]);
+          } catch (fetchError) {
+            // Skip tickers that fail to fetch (404, timeout, etc.)
+            console.warn(`Skipping ${ticker}: fetch failed`, fetchError);
+            failedTickers.push(ticker);
             return null;
           }
-        })
-      );
+
+          if (!macroCandles?.length || !microCandles?.length) {
+            return null;
+          }
+
+          const macroIndicators = calculateIndicators(macroCandles);
+          const microIndicators = calculateIndicators(microCandles);
+
+          const tradingProfile = TRADING_PROFILES[tradingStyle];
+
+          const macroSignal = calculateEnhancedSignal({
+            indicators: macroIndicators.indicators,
+            currentPrice: macroCandles[macroCandles.length - 1].close,
+            prevPrice: macroCandles[macroCandles.length - 2]?.close || macroCandles[macroCandles.length - 1].close,
+            tradingProfile,
+            sentiment: null,
+          });
+
+          const microSignal = calculateEnhancedSignal({
+            indicators: microIndicators.indicators,
+            currentPrice: microCandles[microCandles.length - 1].close,
+            prevPrice: microCandles[microCandles.length - 2]?.close || microCandles[microCandles.length - 1].close,
+            tradingProfile,
+            sentiment: null,
+          });
+
+          const currentPrice = macroCandles[macroCandles.length - 1].close;
+          const prevPrice = macroCandles[macroCandles.length - 2]?.close || currentPrice;
+          const priceChange = ((currentPrice - prevPrice) / prevPrice) * 100;
+          
+          // Calculate average volume (last 20 candles) for sorting
+          const recentCandles = macroCandles.slice(-20);
+          const avgVolume = recentCandles.reduce((sum, c) => sum + (c.volume || 0), 0) / recentCandles.length;
+
+          return {
+            symbol: ticker,
+            assetType,
+            currentPrice,
+            priceChange24h: priceChange,
+            macroSignal,
+            microSignal,
+            combinedConfidence: (macroSignal.confidence + microSignal.confidence) / 2,
+            lastUpdate: Date.now(),
+            volume24h: avgVolume * currentPrice,
+          } as TradingSetup;
+        } catch (error) {
+          console.error(`Error scanning ${ticker}:`, error);
+          return null;
+        }
+      }, 10);
 
       const validSetups: TradingSetup[] = [];
       for (const result of results) {

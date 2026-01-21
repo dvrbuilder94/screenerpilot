@@ -34,6 +34,21 @@ export const ASSET_NAMES: Record<string, string> = {
   "HG=F": "Copper",
   "CL=F": "Crude Oil",
   "NG=F": "Natural Gas",
+  // Agriculture Futures
+  "ZW=F": "Wheat",
+  "ZC=F": "Corn",
+  "ZS=F": "Soybeans",
+  "KC=F": "Coffee",
+  "CT=F": "Cotton",
+  "LBS=F": "Lumber",
+  // Commodity ETFs
+  URA: "Uranium",
+  PALL: "Palladium ETF",
+  WEAT: "Wheat ETF",
+  CORN: "Corn ETF",
+  SOYB: "Soybeans ETF",
+  JO: "Coffee ETF",
+  BAL: "Cotton ETF",
 
   // Magnificent Seven
   AAPL: "Apple",

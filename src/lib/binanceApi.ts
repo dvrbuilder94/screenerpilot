@@ -65,28 +65,28 @@ export function getAssetType(symbol: Symbol): AssetType {
 export function getAllTickers(): string[] {
   const seen = new Set<string>();
   
-  // Add crypto
-  for (const symbol of presets.crypto) {
-    seen.add(symbol);
-  }
-  
-  // Add USA stocks only (most reliable with Yahoo Finance)
-  for (const symbol of presets.stocks_usa) {
-    seen.add(symbol);
-  }
-  
-  // Add ETFs
-  for (const symbol of presets.etf) {
-    seen.add(symbol);
-  }
-  
-  // Add Index
+  // PRIORITY 1: Add all Index first (5 tickers - critical for category visibility)
   for (const symbol of presets.index) {
     seen.add(symbol);
   }
   
-  // Add Commodities
+  // PRIORITY 2: Add all Commodities (7 tickers)
   for (const symbol of presets.commodities) {
+    seen.add(symbol);
+  }
+  
+  // PRIORITY 3: Add all ETFs (31 tickers)
+  for (const symbol of presets.etf) {
+    seen.add(symbol);
+  }
+  
+  // PRIORITY 4: Add crypto (24 tickers)
+  for (const symbol of presets.crypto) {
+    seen.add(symbol);
+  }
+  
+  // PRIORITY 5: Add USA stocks last (largest group)
+  for (const symbol of presets.stocks_usa) {
     seen.add(symbol);
   }
   

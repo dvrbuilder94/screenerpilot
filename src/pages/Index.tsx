@@ -140,8 +140,8 @@ export default function Index() {
       // Get deduplicated tickers (no regions - simplified)
       const allTickersList = getAllTickers();
 
-      // Max tickers to scan
-      const maxTickers = 100; // Reduced to prevent overwhelming
+      // Max tickers to scan - increased for better category coverage
+      const maxTickers = 200;
       const failedTickers: string[] = [];
       const tickersToScan = allTickersList.slice(0, maxTickers);
 

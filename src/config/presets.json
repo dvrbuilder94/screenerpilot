@@ -59,7 +59,7 @@
     "BILL", "HUBS", "TWLO", "DOCU", "MNDY", "PCTY", "PAYC",
     "FIVN", "NICE", "DT", "FRSH", "TENB", "VRNS", "QLYS",
     "RPD", "NCNO", "DBX", "WEAV", "BRZE", "AMPL", "AI", "BBAI",
-    "IONQ", "RGTI", "QUBT", "TOST", "FOUR", "FLYW", "PSFE", "OLO", "TASK",
+    "IONQ", "RGTI", "QUBT", "TOST", "FOUR", "FLYW", "PSFE", "TASK",
     "COUR", "UDMY", "DUOL", "CHGG", "U", "RBLX", "ZI", "S", "FSLY",
     "APPF", "PD", "APP",
     
@@ -116,10 +116,10 @@
     "CASY", "INGR", "LW", "POST", "USFD", "PFGC", "CHEF", "CORE", "BJ",
     
     "GOOGL", "AMZN", "META", "SNAP", "PINS", "ZM", "MTCH", "BMBL", "YELP",
-    "GRPN", "TRIP", "EXPE", "BKNG", "TRVG", "SABR", "PYCR", "SMAR", "FROG",
+    "GRPN", "TRIP", "EXPE", "BKNG", "TRVG", "SABR", "PYCR", "FROG",
     
     "RCL", "CCL", "NCLH", "H", "HLT", "CHH", "WH", "IHG", "MGM", "LVS",
-    "WYNN", "CZR", "DKNG", "BYD", "MCRI", "PK", "DIN", "EAT", "CAKE", "TXRH",
+    "WYNN", "CZR", "BYD", "MCRI", "PK", "DIN", "EAT", "CAKE", "TXRH",
     
     "GPC", "AAP", "AZO", "BBY", "FIVE", "ULTA", "WSM", "RH", "BBWI", "BOOT",
     "VSCO", "ANF", "URBN", "AEO", "EXPR", "JWN", "M", "KSS", "DDS", "GPS",
@@ -127,10 +127,94 @@
     "WAB", "EMR", "ROK", "AME", "ITW", "PNR", "XYL", "IEX", "GNRC", "SWK",
     "SNA", "WSO", "AOS", "FBIN", "MAS", "VMC", "MLM", "EXP", "BLDR", "TREX",
     
-    "MOH", "OSCR", "PGNY", "ACCD", "GDRX", "SDGR", "OSH", "AMWL", "TALK",
+    "MOH", "PGNY", "ACCD", "GDRX", "AMWL", "TALK",
     "PHM", "LEN", "DHI", "TOL", "NVR", "MTH", "KBH", "TMHC", "CCS", "MHO",
     
-    "CARR", "OTIS", "TT", "LII", "JCI", "TRU", "AZTA", "WST", "TFX", "STE"
+    "CARR", "OTIS", "TT", "LII", "JCI", "TRU", "AZTA", "WST", "TFX", "STE",
+    
+    "FIS", "FISV", "GPN", "FLT", "WEX", "JKHY", "GDYN", "EVTC", "QTWO", "PRFT",
+    "SSNC", "BR", "WK", "ENV", "CSGP", "CDW", "EPAM", "GLOB", "EXLS", "WNS",
+    "CTSH", "INFY", "WIT", "LDOS", "CACI", "SAIC", "BAH", "GDIT", "KTOS", "MRCY",
+    
+    "ZBRA", "TRMB", "GRMN", "LOGI", "CGNX", "FLIR", "MKSI", "NOVT", "ITRI", "VIAV",
+    "COHR", "II-VI", "LITE", "IIVI", "AAOI", "FNSR", "CIEN", "INFN", "CALX", "LUMEN",
+    "COMM", "SATS", "IRDM", "GSAT", "OSAT", "GILT", "SANM", "FLEX", "JBL", "CLS",
+    
+    "BIO", "TECH", "PKI", "BRKR", "GNSS", "LMAT", "XRAY", "NUVA", "MMSI", "PRGO",
+    "VTRS", "ELAN", "CTLT", "CRL", "PPD", "MLAB", "NEOG", "CHE", "LHCG", "AMED",
+    "ACHC", "ADUS", "SGRY", "SEM", "PNTG", "EHC", "ENSG", "NHC", "BKD", "CCRN",
+    
+    "WCN", "WM", "RSG", "CWST", "GFL", "CLH", "SRCL", "ECOL", "US", "ADSW",
+    "LKQ", "CPRT", "KAR", "IAA", "RBA", "ABM", "CTAS", "ARMK", "GDI", "MSGS",
+    "CHDN", "GDEN", "PLYA", "TNL", "VAC", "MTN", "SKI", "BWA", "ALV", "APTV",
+    
+    "LEA", "MGA", "VC", "DAN", "MOD", "SHYF", "WBC", "LCII", "THRM", "PII",
+    "HOG", "THO", "WGO", "CWH", "MBUU", "MCFT", "PATK", "FOXF", "TORC", "HYZN",
+    "FSR", "REE", "PTRA", "XL", "ARVL", "RIDE", "SOLO", "AYRO", "FUV", "CENN",
+    
+    "CVS", "WBA", "RAD", "HZNP", "JAZZ", "UTHR", "INCY", "EXEL", "SGEN", "IMGN",
+    "FOLD", "TGTX", "XNCR", "IMVT", "SLGN", "CYTK", "ROIV", "GLPG", "MRUS", "RVMD",
+    "SWTX", "RXDX", "JANX", "ERAS", "IMCR", "IMTX", "ABCL", "ANAB", "ATRA", "ATRC",
+    
+    "LUNG", "IRTC", "OMCL", "PHR", "ONEM", "AMEH", "CANO", "CLVR", "BODY", "HCAT",
+    "VERV", "BLI", "NVRO", "NPCE", "NUVB", "SKIN", "SILK", "ANGO", "CNMD", "ITGR",
+    "LIVN", "GMED", "ATEC", "AXGN", "KIDS", "AORT", "STAA", "OM", "EYES", "OFIX",
+    
+    "NSIT", "SCSC", "PLUS", "LSCC", "AMBA", "AMKR", "CEVA", "NXPI", "SYNA", "SYMS",
+    "STX", "NTAP", "PSTG", "NEWR", "SPT", "GWRE", "BSY", "CWAN", "BOX", "APPN",
+    "CLVT", "SPSC", "MANH", "EVBG", "OTEX", "EGHT", "PRGS", "BAND", "RIOT", "BIGC",
+    
+    "BTRS", "DCT", "SUMO", "ASAN", "SQSP", "FROG", "RPM", "ROL", "WST", "MASI",
+    "PODD", "TNDM", "SWAV", "SHOO", "WWW", "GIII", "SCVL", "BGFV", "HIBB", "PLCE",
+    "BURL", "OLLI", "CATO", "PRTS", "RCII", "RENT", "BARK", "WOOF", "FRPT", "PETQ",
+    
+    "SEAS", "SIX", "FUN", "PRKS", "EPR", "RRR", "BOYD", "GLPI", "VICI", "RYN",
+    "WY", "PCH", "PPC", "CALM", "SAFM", "JBSS", "LANC", "TR", "SENEA", "FRPH",
+    "MGPI", "COKE", "FIZZ", "CELH", "ZVIA", "OTLY", "BFB", "STZ", "DEO", "TAP",
+    
+    "SAM", "BREW", "WEST", "WDFC", "CLX", "CHD", "CL", "NWL", "SPB", "ELF",
+    "REVG", "REVL", "EL", "COTY", "IPAR", "HAIN", "STKL", "USNA", "BRBR", "APRN",
+    "BYND", "TTCF", "SMPL", "VITL", "DOCN", "DNUT", "CAKE", "JACK", "WING", "LOCO",
+    
+    "PLAY", "DAVE", "EAT", "CHUY", "TACO", "PZZA", "ARCO", "FAT", "BH", "QSR",
+    "DENN", "BJRI", "RRGB", "BLMN", "RUTH", "STKS", "ARKR", "CBRL", "FWRG", "NATH",
+    "DNUT", "BROS", "SBUX", "DNKN", "SHAK", "CMG", "CAVA", "PTLO", "NDLS", "LOCO",
+    
+    "PPC", "TSN", "HRL", "INGR", "BRFS", "ACI", "GO", "SFM", "UNFI", "SPTN",
+    "VLGEA", "WMK", "NGVC", "IMKTA", "KR", "ACI", "SFM", "PFGC", "USFD", "SYY",
+    "CHEF", "CORE", "HFFG", "JJSF", "BRID", "SNAX", "FREE", "SNAK", "NOMD", "APPH",
+    
+    "AGFY", "VFF", "CRON", "TLRY", "CGC", "SNDL", "ACB", "HEXO", "OGI", "GRWG",
+    "SMG", "LAWN", "AGCO", "TITN", "TSCO", "FARM", "FPI", "LAND", "RETO", "INBX",
+    "VCNX", "PHUN", "ZIVO", "AGRX", "APPH", "CROP", "ROOT", "LMND", "ACHR", "JOBY",
+    
+    "ENVX", "DCFC", "DRIV", "SOLO", "GOEV", "FFIE", "PSNY", "MULN", "WKHS", "NKLA",
+    "RIVN", "LCID", "PTRA", "ARVL", "RIDE", "FSR", "REE", "XL", "AYRO", "FUV",
+    "MVST", "QS", "BLNK", "CHPT", "EVGO", "VLTA", "NRGV", "AMPX", "DCFC", "AMPL",
+    
+    "BEEM", "RKLB", "ASTR", "SPCE", "ASTS", "LUNR", "MNTS", "BKSY", "PL", "VORB",
+    "LLAP", "SLDP", "KCAC", "SNSE", "MKFG", "XPOF", "ARKO", "CSWI", "ESAB", "GTLS",
+    "GTES", "HAYW", "HNI", "IBEX", "JBLU", "JETS", "LUV", "ALK", "SAVE", "HA",
+    
+    "MESA", "SKYW", "ALGT", "SNCY", "UAL", "AAL", "DAL", "JBLU", "RYAAY", "VLRS",
+    "CPA", "CEA", "ZNH", "AC", "AZUL", "GOL", "SMFG", "MFG", "MUFG", "MTU",
+    "KB", "SHG", "WF", "NMR", "RY", "TD", "BNS", "BMO", "CM", "HSBC",
+    
+    "UBS", "CS", "DB", "BNPQY", "SAN", "BBVA", "ING", "ABN", "SMFG", "MUFG",
+    "NMR", "MFG", "KB", "SHG", "WF", "HDB", "IBN", "ITUB", "BBD", "NU",
+    "SAN", "BSBR", "XP", "STNE", "PAGS", "MELI", "DESP", "GLBE", "GLOB", "CAAP",
+    
+    "CX", "CEMEX", "SUM", "EXP", "USLM", "GHC", "WLY", "SCHL", "LRN", "ATGE",
+    "CHGG", "LOPE", "PRDO", "STRA", "LAUR", "APEI", "LINC", "UTI", "TWOU", "VTRU",
+    "NRDY", "NAOV", "BFAM", "KLC", "AFYA", "ARCE", "SLVM", "POWL", "GVA", "ERII",
+    
+    "AMRC", "HUBB", "GNRC", "POWL", "ATKR", "NVT", "ENS", "EBS", "AZEK", "CNM",
+    "GMS", "SUM", "OC", "JELD", "AWI", "FBM", "APOG", "SSD", "GFF", "DOOR",
+    "MHK", "FND", "LL", "TILE", "ROCK", "STLD", "NUE", "CLF", "X", "CMC",
+    
+    "RS", "ATI", "CRS", "KALU", "ZEUS", "HAYN", "CENX", "AA", "ARNC", "HWM",
+    "POWW", "RGR", "SWBI", "VSTO", "AXON", "DGII", "OSIS", "JNPR", "CSCO", "ANET",
+    "EXTR", "CIEN", "ADTN", "VG", "AKAM", "FSLY", "NET", "LLNW", "EGIO", "CDN"
   ],
   "stocks_latam": {
     "argentina": [

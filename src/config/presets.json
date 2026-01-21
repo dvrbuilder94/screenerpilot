@@ -7,8 +7,10 @@
     "CRVUSDT", "AAVEUSDT", "EIGENUSDT", "RNDRUSDT"
   ],
   "commodities": [
-    "GC=F", "SI=F", "PL=F", "PA=F", "HG=F", "CL=F", "NG=F"
+    "GC=F", "SI=F", "PL=F", "PA=F", "HG=F", "CL=F", "NG=F",
+    "ZW=F", "ZC=F", "ZS=F", "KC=F", "CT=F", "LBS=F"
   ],
+  "commodity_etfs": ["URA", "PALL", "WEAT", "CORN", "SOYB", "JO", "BAL"],
   "metals": [
     "XAUUSD", "XAGUSD", "XPTUSD", "XPDUSD", "XCUUSD"
   ],

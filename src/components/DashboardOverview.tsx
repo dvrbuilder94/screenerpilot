@@ -9,6 +9,7 @@ import { getAssetName } from "@/lib/assetNames";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { CategoryFilterTabs } from "@/components/CategoryFilterTabs";
+import { MarketRegimeBadges } from "@/components/MarketRegimeBadges";
 import {
   Table,
   TableBody,
@@ -200,6 +201,9 @@ export function DashboardOverview({
           </Button>
         )}
       </div>
+
+      {/* Market Regime Badges - Always visible, independent of tab */}
+      <MarketRegimeBadges />
 
       {/* Market Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

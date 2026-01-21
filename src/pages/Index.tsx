@@ -137,11 +137,11 @@ export default function Index() {
     setIsScanningAll(true);
     
     try {
-      // Get deduplicated tickers (no regions - simplified)
+      // Get deduplicated tickers - priority ordered for broad coverage
       const allTickersList = getAllTickers();
 
-      // Max tickers to scan - increased for better category coverage
-      const maxTickers = 200;
+      // Increased max for better category coverage (balanced across all asset types)
+      const maxTickers = 300;
       const failedTickers: string[] = [];
       const tickersToScan = allTickersList.slice(0, maxTickers);
 

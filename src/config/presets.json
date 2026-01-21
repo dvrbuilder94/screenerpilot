@@ -95,7 +95,42 @@
     
     "ZG", "EXPI", "COMP", "RMAX", "FYBR",
     
-    "MELI", "NU"
+    "MELI", "NU",
+    
+    "CVX", "COP", "EOG", "SLB", "PSX", "MPC", "VLO", "OXY", "PXD", "DVN",
+    "HAL", "BKR", "FANG", "HES", "MRO", "APA", "CTRA", "OVV", "CLR", "EQT",
+    
+    "LIN", "APD", "SHW", "ECL", "DD", "PPG", "NEM", "FCX", "CTVA", "DOW",
+    "LYB", "ALB", "IFF", "FMC", "CE", "EMN", "WLK", "SEE", "BALL", "PKG",
+    
+    "AMT", "PLD", "CCI", "EQIX", "PSA", "SPG", "O", "DLR", "WELL", "AVB",
+    "EQR", "VTR", "ARE", "MAA", "UDR", "ESS", "CPT", "PEAK", "KIM", "REG",
+    
+    "ANET", "FICO", "CPRT", "ANSS", "MPWR", "SMCI", "SWKS", "QRVO", "WOLF",
+    "ONTO", "RMBS", "CRUS", "SLAB", "DIOD", "POWI", "SITM", "ACLS", "FORM",
+    
+    "GD", "HII", "TXT", "CW", "AXON", "TRMB", "TDG", "HEI", "ARES", "APO",
+    "KKR", "OWL", "HLNE", "FDS", "MSCI", "ICE", "CME", "NDAQ", "MKTX",
+    
+    "SYY", "HSY", "GIS", "K", "CPB", "SJM", "CAG", "MKC", "HRL", "TSN",
+    "CASY", "INGR", "LW", "POST", "USFD", "PFGC", "CHEF", "CORE", "BJ",
+    
+    "GOOGL", "AMZN", "META", "SNAP", "PINS", "ZM", "MTCH", "BMBL", "YELP",
+    "GRPN", "TRIP", "EXPE", "BKNG", "TRVG", "SABR", "PYCR", "SMAR", "FROG",
+    
+    "RCL", "CCL", "NCLH", "H", "HLT", "CHH", "WH", "IHG", "MGM", "LVS",
+    "WYNN", "CZR", "DKNG", "BYD", "MCRI", "PK", "DIN", "EAT", "CAKE", "TXRH",
+    
+    "GPC", "AAP", "AZO", "BBY", "FIVE", "ULTA", "WSM", "RH", "BBWI", "BOOT",
+    "VSCO", "ANF", "URBN", "AEO", "EXPR", "JWN", "M", "KSS", "DDS", "GPS",
+    
+    "WAB", "EMR", "ROK", "AME", "ITW", "PNR", "XYL", "IEX", "GNRC", "SWK",
+    "SNA", "WSO", "AOS", "FBIN", "MAS", "VMC", "MLM", "EXP", "BLDR", "TREX",
+    
+    "MOH", "OSCR", "PGNY", "ACCD", "GDRX", "SDGR", "OSH", "AMWL", "TALK",
+    "PHM", "LEN", "DHI", "TOL", "NVR", "MTH", "KBH", "TMHC", "CCS", "MHO",
+    
+    "CARR", "OTIS", "TT", "LII", "JCI", "TRU", "AZTA", "WST", "TFX", "STE"
   ],
   "stocks_latam": {
     "argentina": [

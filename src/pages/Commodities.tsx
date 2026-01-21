@@ -4,6 +4,7 @@ import { TrendingUp, TrendingDown, Minus, Scale, DollarSign, BarChart3, RefreshC
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import MiniChart from "@/components/MiniChart";
+import RatioChart from "@/components/RatioChart";
 import { Candle, Interval } from "@/lib/binanceApi";
 import { ema } from "@/lib/indicators";
 import { toast } from "sonner";
@@ -299,11 +300,16 @@ export default function Commodities() {
           </section>
         )}
 
+        {/* Ratio Charts - Multi-Year Historical */}
+        <section>
+          <RatioChart />
+        </section>
+
         {/* Ratios Section */}
         <section>
           <h2 className="text-xl font-semibold mb-4 text-foreground flex items-center gap-2">
             <Scale className="h-5 w-5" />
-            Key Ratios
+            Key Ratios (Current)
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {ratios.map((ratio) => {

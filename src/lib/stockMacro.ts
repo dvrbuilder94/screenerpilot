@@ -31,6 +31,13 @@ async function fetchLatestPrice(symbol: string): Promise<number | null> {
     if (!response.ok) return null;
 
     const data = await response.json();
+    
+    // Handle graceful degradation (skipped symbols)
+    if (data.skipped) {
+      console.warn(`Symbol ${symbol} skipped: ${data.reason}`);
+      return null;
+    }
+    
     const candles = data.candles || data;
     
     if (Array.isArray(candles) && candles.length > 0) {
@@ -64,6 +71,13 @@ async function fetchSectorReturns(symbols: string[]): Promise<number> {
         if (!response.ok) return;
 
         const data = await response.json();
+        
+        // Handle graceful degradation (skipped symbols)
+        if (data.skipped) {
+          console.warn(`Symbol ${symbol} skipped: ${data.reason}`);
+          return;
+        }
+        
         const candles = data.candles || data;
         
         if (Array.isArray(candles) && candles.length >= 5) {

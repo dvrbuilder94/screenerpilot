@@ -35,6 +35,13 @@ async function fetchPriceWithHistory(symbol: string): Promise<PriceData | null> 
     if (!response.ok) return null;
 
     const data = await response.json();
+    
+    // Handle graceful degradation (skipped symbols)
+    if (data.skipped) {
+      console.warn(`Symbol ${symbol} skipped: ${data.reason}`);
+      return null;
+    }
+    
     const candles = data.candles || data;
     
     if (Array.isArray(candles) && candles.length >= 7) {
@@ -59,8 +66,9 @@ export async function calculateCommodityRegime(): Promise<CommodityMarketRegime>
   const drivers: string[] = [];
   
   // Fetch all required data in parallel
+  // Note: DX=F is Dollar Index Futures (DXY alternative on Yahoo)
   const [dxyData, oilData, goldData, copperData] = await Promise.all([
-    fetchPriceWithHistory('DX-Y.NYB'), // DXY
+    fetchPriceWithHistory('DX=F'),      // DXY (Dollar Index Futures)
     fetchPriceWithHistory('CL=F'),      // Oil
     fetchPriceWithHistory('GC=F'),      // Gold
     fetchPriceWithHistory('HG=F'),      // Copper

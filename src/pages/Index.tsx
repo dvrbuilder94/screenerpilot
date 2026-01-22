@@ -1,16 +1,17 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { TradingAIWidget } from "@/components/TradingAIWidget";
 import { DashboardOverview } from "@/components/DashboardOverview";
 import { AssetIntelligencePage } from "@/components/AssetIntelligencePage";
 import { DashboardMacroInsight } from "@/components/DashboardMacroInsight";
+import { useSignalCache } from "@/hooks/useSignalCache";
 import { 
   fetchCandles, 
   Symbol, 
   Interval, 
   Candle, 
   getAssetType,
-  getAllTickers,
+  getTickersByCategory,
 } from "@/lib/binanceApi";
 import {
   ema,
@@ -61,6 +62,12 @@ export default function Index() {
   // All signals state
   const [allSignals, setAllSignals] = useState<TradingSetup[]>([]);
   const [isScanningAll, setIsScanningAll] = useState(false);
+  
+  // Track last scanned category to avoid duplicate scans
+  const lastScannedCategory = useRef<string | null>(null);
+
+  // Cache hook for instant loading
+  const { getCachedSignals, setCachedSignals, isCacheFresh } = useSignalCache();
 
   // Selected asset data
   const [macroData, setMacroData] = useState<DashboardData | null>(null);
@@ -115,11 +122,11 @@ export default function Index() {
     };
   }, [tradingStyle]);
 
-  // Batch utility to limit concurrent requests
+  // Batch utility to limit concurrent requests - increased to 25 for speed
   const batchProcess = useCallback(async <T, R>(
     items: T[],
     processor: (item: T) => Promise<R>,
-    batchSize: number = 10
+    batchSize: number = 25
   ): Promise<PromiseSettledResult<R>[]> => {
     const results: PromiseSettledResult<R>[] = [];
     
@@ -132,21 +139,30 @@ export default function Index() {
     return results;
   }, []);
 
-  // Scan all tickers for overview
-  const scanAllTickers = useCallback(async () => {
+  // Scan tickers for a specific category (lazy loading)
+  const scanCategory = useCallback(async (category: string, forceRefresh = false) => {
+    // Skip if already scanning same category and cache is fresh
+    if (!forceRefresh && lastScannedCategory.current === category && isCacheFresh(category)) {
+      return;
+    }
+
+    // Load from cache immediately for instant UI
+    const cached = getCachedSignals(category);
+    if (cached && cached.length > 0 && !forceRefresh) {
+      setAllSignals(cached);
+      // Still refresh in background
+    }
+
     setIsScanningAll(true);
+    lastScannedCategory.current = category;
     
     try {
-      // Get deduplicated tickers - priority ordered for broad coverage
-      const allTickersList = getAllTickers();
-
-      // Increased max for better category coverage (balanced across all asset types)
-      const maxTickers = 300;
+      // Get tickers for this category only
+      const tickersToScan = getTickersByCategory(category);
       const failedTickers: string[] = [];
-      const tickersToScan = allTickersList.slice(0, maxTickers);
 
-      // Process in batches of 10 concurrent requests to avoid rate limiting
-      const results = await batchProcess(tickersToScan, async (ticker) => {
+      // Process in batches of 25 concurrent requests
+      const results = await batchProcess(tickersToScan, async (ticker: string) => {
         try {
           const assetType = getAssetType(ticker as Symbol);
           
@@ -212,7 +228,7 @@ export default function Index() {
           console.error(`Error scanning ${ticker}:`, error);
           return null;
         }
-      }, 10);
+      }, 25);
 
       const validSetups: TradingSetup[] = [];
       for (const result of results) {
@@ -222,19 +238,20 @@ export default function Index() {
       }
 
       setAllSignals(validSetups);
+      setCachedSignals(category, validSetups);
       
       if (failedTickers.length > 0) {
         console.warn(`Failed tickers (${failedTickers.length}):`, failedTickers.join(', '));
       }
       
-      toast.success(`Scanned ${validSetups.length} assets${failedTickers.length > 0 ? ` (${failedTickers.length} failed)` : ''}`);
+      toast.success(`Scanned ${validSetups.length} ${category} assets`);
     } catch (error) {
-      console.error("Error in scanAllTickers:", error);
+      console.error("Error in scanCategory:", error);
       toast.error("Error scanning assets");
     } finally {
       setIsScanningAll(false);
     }
-  }, [tradingStyle, calculateIndicators]);
+  }, [tradingStyle, calculateIndicators, getCachedSignals, setCachedSignals, isCacheFresh, batchProcess]);
 
   // Fetch data for selected asset
   const fetchAssetData = useCallback(async (symbol: Symbol) => {
@@ -265,19 +282,24 @@ export default function Index() {
     }
   }, [calculateIndicators]);
 
-  // Initial scan
+  // Initial scan for default category
   useEffect(() => {
-    scanAllTickers();
-  }, [scanAllTickers]);
+    scanCategory(assetCategory);
+  }, []);
 
-  // Auto-refresh all signals every 10 minutes
+  // Rescan when category changes
+  useEffect(() => {
+    scanCategory(assetCategory);
+  }, [assetCategory, scanCategory]);
+
+  // Auto-refresh current category every 10 minutes
   useEffect(() => {
     const interval = setInterval(() => {
-      scanAllTickers();
+      scanCategory(assetCategory, true);
     }, 10 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [scanAllTickers]);
+  }, [assetCategory, scanCategory]);
 
   // Handle symbol selection
   const handleSelectSymbol = useCallback((symbol: string) => {
@@ -294,8 +316,8 @@ export default function Index() {
 
   // Handle manual refresh
   const handleRefresh = useCallback(() => {
-    scanAllTickers();
-  }, [scanAllTickers]);
+    scanCategory(assetCategory, true);
+  }, [assetCategory, scanCategory]);
 
   // Show asset detail page
   if (selectedSymbol && macroData && microData) {

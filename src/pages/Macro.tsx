@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { EthVsBtcPanel } from '@/components/EthVsBtcPanel';
+import { BmnrVsEthPanel } from '@/components/BmnrVsEthPanel';
 import { CryptoRiskMeter } from '@/components/CryptoRiskMeter';
 import { EthUpsidePanel } from '@/components/EthUpsidePanel';
 import { AltseasonIndexPanel } from '@/components/AltseasonIndexPanel';

@@ -26,6 +26,9 @@ export const ASSET_NAMES: Record<string, string> = {
   EIGENUSDT: "EigenLayer",
   RNDRUSDT: "Render",
 
+  // Mining Stocks
+  BMNR: "BitMine",
+
   // Commodities (Yahoo Finance symbols)
   "GC=F": "Gold",
   "SI=F": "Silver",

@@ -1,14 +1,13 @@
 import { IndicatorData } from "./indicators";
 import { EnhancedSignal, SignalType } from "@/types/trading";
 import { TradingProfile } from "@/types/tradingProfile";
-import { SentimentData, getSentimentImpact } from "@/types/sentiment";
 
 interface SignalCalculationParams {
   indicators: IndicatorData;
   currentPrice: number;
   prevPrice?: number;
   tradingProfile?: TradingProfile;
-  sentiment?: SentimentData | null;
+  sentiment?: null;
 }
 
 /**
@@ -168,18 +167,7 @@ export function calculateEnhancedSignal({
   const stopLoss = calculateStopLoss(currentPrice, lastAtr, supertrendValue, trend);
   const targets = calculateTargets(currentPrice, lastAtr, trend);
 
-  // ============= APPLY SENTIMENT IMPACT =============
-  if (sentiment) {
-    const signalType = trend === 'BULLISH' ? 'bullish' : trend === 'BEARISH' ? 'bearish' : 'bullish';
-    const sentimentImpact = getSentimentImpact(sentiment, signalType);
-    
-    score += sentimentImpact.scoreModifier;
-    confidence += sentimentImpact.confidenceModifier;
-    
-    if (sentimentImpact.warning) {
-      warnings.push(sentimentImpact.warning);
-    }
-  }
+  // Sentiment impact removed in Phase 1 cleanup
 
   // ============= DETERMINE FINAL SIGNAL =============
   const signal = getSignalFromScore(score);

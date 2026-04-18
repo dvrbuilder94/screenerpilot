@@ -287,6 +287,72 @@ export type Database = {
         }
         Relationships: []
       }
+      market_snapshots: {
+        Row: {
+          category: string
+          change_1d: number | null
+          change_pct_1d: number | null
+          change_pct_1m: number | null
+          change_pct_1w: number | null
+          change_pct_1y: number | null
+          change_pct_ytd: number | null
+          created_at: string
+          current_price: number | null
+          display_name: string
+          fetched_at: string
+          id: string
+          market_cap: number | null
+          previous_close: number | null
+          raw_data: Json | null
+          region: string | null
+          symbol: string
+          updated_at: string
+          volume: number | null
+        }
+        Insert: {
+          category: string
+          change_1d?: number | null
+          change_pct_1d?: number | null
+          change_pct_1m?: number | null
+          change_pct_1w?: number | null
+          change_pct_1y?: number | null
+          change_pct_ytd?: number | null
+          created_at?: string
+          current_price?: number | null
+          display_name: string
+          fetched_at?: string
+          id?: string
+          market_cap?: number | null
+          previous_close?: number | null
+          raw_data?: Json | null
+          region?: string | null
+          symbol: string
+          updated_at?: string
+          volume?: number | null
+        }
+        Update: {
+          category?: string
+          change_1d?: number | null
+          change_pct_1d?: number | null
+          change_pct_1m?: number | null
+          change_pct_1w?: number | null
+          change_pct_1y?: number | null
+          change_pct_ytd?: number | null
+          created_at?: string
+          current_price?: number | null
+          display_name?: string
+          fetched_at?: string
+          id?: string
+          market_cap?: number | null
+          previous_close?: number | null
+          raw_data?: Json | null
+          region?: string | null
+          symbol?: string
+          updated_at?: string
+          volume?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

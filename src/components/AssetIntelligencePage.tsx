@@ -103,8 +103,7 @@ export function AssetIntelligencePage({
         </CardContent>
       </Card>
 
-      {/* System Credibility */}
-      <TrackRecordContext signalType={macroSignal.signal} />
+
 
       {/* Visual Context - Daily Chart */}
       <Card className="bg-card/50 border-border/50">

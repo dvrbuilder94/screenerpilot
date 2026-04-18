@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.market-snapshots-collector]
 verify_jwt = false
+
+[functions.fred-collector]
+verify_jwt = false

@@ -1,42 +1,70 @@
-import { GitCompareArrows, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Coins, BarChart3, Bitcoin, Globe2 } from "lucide-react";
+import { RatioCategoryTable } from "@/components/ratios/RatioCategoryTable";
+
+type RatioTab = "commodity" | "equity" | "crypto" | "latam_fx";
 
 export default function Ratios() {
+  const [tab, setTab] = useState<RatioTab>("commodity");
+
   return (
     <div className="min-h-screen bg-background">
-      <main className="container mx-auto px-5 py-10 max-w-6xl">
-        <header className="mb-10">
-          <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground mb-3">
-            Phase 4 · Coming soon
-          </div>
-          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
-            Cross-Asset Ratio Monitor
-          </h1>
-          <p className="text-[15px] text-muted-foreground mt-2 max-w-2xl">
-            Historical ratios with rolling Z-scores to identify market extremes and
-            capital rotation between asset classes.
+      <main className="container mx-auto px-4 py-6 max-w-7xl">
+        <div className="mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Cross-Asset Ratios</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Z-Score 5Y rolling · Identifies extremes (|z| ≥ 2σ) and risk regime shifts (|z| ≥ 1σ)
           </p>
-        </header>
+        </div>
 
-        <div className="fin-card p-8 flex flex-col items-start gap-4">
-          <div className="flex items-center justify-center w-11 h-11 rounded-lg bg-primary/15 border border-primary/30">
-            <GitCompareArrows className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-foreground mb-2">
-              Commodity, equity, crypto and LATAM FX ratios
-            </h2>
-            <p className="text-sm text-muted-foreground max-w-xl leading-relaxed">
-              Examples in development:{" "}
-              <span className="text-foreground">Gold/Silver, Copper/Gold, SPY/GLD,
-              IWM/SPY, HYG/LQD, ETH/BTC, MSTR/BTC, CLP/Copper, BRL/Oil</span> — each with
-              5Y average, current Z-score and a clear RISK-ON / RISK-OFF / EXTREME signal.
-            </p>
-          </div>
+        <div className="mb-6 flex flex-wrap items-center gap-2 text-[10px]">
+          <span className="text-muted-foreground uppercase tracking-wider mr-1">Legend:</span>
+          <span className="inline-flex items-center px-2 py-0.5 rounded bg-emerald-500/25 text-emerald-300 ring-1 ring-emerald-500/40 font-bold uppercase">EXTREME HIGH</span>
+          <span className="inline-flex items-center px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-bold uppercase">RISK-ON</span>
+          <span className="inline-flex items-center px-2 py-0.5 rounded bg-muted/40 text-muted-foreground font-bold uppercase">NEUTRAL</span>
+          <span className="inline-flex items-center px-2 py-0.5 rounded bg-rose-500/15 text-rose-400 font-bold uppercase">RISK-OFF</span>
+          <span className="inline-flex items-center px-2 py-0.5 rounded bg-rose-500/25 text-rose-300 ring-1 ring-rose-500/40 font-bold uppercase">EXTREME LOW</span>
+        </div>
 
-          <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-            <Sparkles className="w-3.5 h-3.5 text-primary" />
-            <span>Phase 4 of the Macro Intelligence Terminal rollout</span>
-          </div>
+        <Tabs value={tab} onValueChange={(v) => setTab(v as RatioTab)} className="space-y-6">
+          <TabsList className="w-full h-12 bg-muted/40 p-1 grid grid-cols-4 gap-1">
+            <TabsTrigger value="commodity" className="flex items-center justify-center gap-2 h-full text-sm font-medium">
+              <Coins className="h-4 w-4" />
+              <span className="hidden sm:inline">Commodities</span>
+            </TabsTrigger>
+            <TabsTrigger value="equity" className="flex items-center justify-center gap-2 h-full text-sm font-medium">
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Equities</span>
+            </TabsTrigger>
+            <TabsTrigger value="crypto" className="flex items-center justify-center gap-2 h-full text-sm font-medium">
+              <Bitcoin className="h-4 w-4" />
+              <span className="hidden sm:inline">Crypto</span>
+            </TabsTrigger>
+            <TabsTrigger value="latam_fx" className="flex items-center justify-center gap-2 h-full text-sm font-medium">
+              <Globe2 className="h-4 w-4" />
+              <span className="hidden sm:inline">LATAM FX</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="commodity" className="mt-0">
+            <RatioCategoryTable category="commodity" description="Metal, energy & monetary stress ratios. Ranked by absolute Z-Score (extremes first)." />
+          </TabsContent>
+          <TabsContent value="equity" className="mt-0">
+            <RatioCategoryTable category="equity" description="Risk-on / risk-off equity rotations: small caps, tech leadership, credit spreads, defensives." />
+          </TabsContent>
+          <TabsContent value="crypto" className="mt-0">
+            <RatioCategoryTable category="crypto" description="BTC vs traditional store of value, alt season indicator, and crypto vs equity beta." />
+          </TabsContent>
+          <TabsContent value="latam_fx" className="mt-0">
+            <RatioCategoryTable category="latam_fx" description="LATAM FX vs DXY and commodity correlations (CLP↔Copper, BRL/MXN↔Oil)." />
+          </TabsContent>
+        </Tabs>
+
+        <div className="mt-10 py-4 border-t border-border/40">
+          <p className="text-[11px] text-muted-foreground text-center">
+            Source: Yahoo Finance · 5Y daily closes · Z-Score = (current − μ₅ᵧ) / σ₅ᵧ · Updated every 6h
+          </p>
         </div>
       </main>
     </div>

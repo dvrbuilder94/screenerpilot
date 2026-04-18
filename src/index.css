@@ -139,7 +139,7 @@
     @apply bg-border rounded-full;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-border-strong;
+    background-color: hsl(var(--border-strong));
   }
 }
 

@@ -6,7 +6,6 @@ import { EnhancedSignal } from "@/types/trading";
 import { IndicatorData } from "@/lib/indicators";
 import { Candle } from "@/lib/binanceApi";
 import { TrackRecordContext } from "@/components/TrackRecordContext";
-import { AssetSentiment } from "@/components/AssetSentiment";
 import MiniChart from "@/components/MiniChart";
 import { getAssetName } from "@/lib/assetNames";
 
@@ -105,24 +104,8 @@ export function AssetIntelligencePage({
         </CardContent>
       </Card>
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* System Credibility Block */}
-        <TrackRecordContext signalType={macroSignal.signal} />
-
-        {/* Community Sentiment */}
-        <Card className="bg-card/50 border-border/50">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-medium">Community Sentiment</CardTitle>
-            <p className="text-xs text-muted-foreground">
-              Community sentiment reflects user opinions, not system signals.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <AssetSentiment symbol={symbol} />
-          </CardContent>
-        </Card>
-      </div>
+      {/* System Credibility */}
+      <TrackRecordContext signalType={macroSignal.signal} />
 
       {/* Visual Context - Daily Chart */}
       <Card className="bg-card/50 border-border/50">

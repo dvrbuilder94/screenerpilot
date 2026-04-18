@@ -145,8 +145,10 @@ async function fetchYahoo(symbol: string): Promise<YahooQuote | null> {
     const timestamps: number[] = result.timestamp ?? [];
     const current =
       meta.regularMarketPrice ?? closes[closes.length - 1] ?? null;
+    // IMPORTANT: with range=1y, meta.chartPreviousClose is the close ~1Y ago, NOT yesterday.
+    // Use penultimate daily close as the actual previous-day close.
     const previousClose =
-      meta.chartPreviousClose ?? closes[closes.length - 2] ?? null;
+      closes.length >= 2 ? closes[closes.length - 2] : (meta.chartPreviousClose ?? current);
     if (current == null) return null;
 
     return {

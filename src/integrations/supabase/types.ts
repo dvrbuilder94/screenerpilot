@@ -287,6 +287,66 @@ export type Database = {
         }
         Relationships: []
       }
+      macro_indicators: {
+        Row: {
+          category: string
+          change_pct: number | null
+          change_value: number | null
+          country: string | null
+          created_at: string
+          current_value: number | null
+          display_name: string
+          fetched_at: string
+          frequency: string | null
+          history: Json | null
+          id: string
+          notes: string | null
+          observation_date: string | null
+          previous_value: number | null
+          series_id: string
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          change_pct?: number | null
+          change_value?: number | null
+          country?: string | null
+          created_at?: string
+          current_value?: number | null
+          display_name: string
+          fetched_at?: string
+          frequency?: string | null
+          history?: Json | null
+          id?: string
+          notes?: string | null
+          observation_date?: string | null
+          previous_value?: number | null
+          series_id: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          change_pct?: number | null
+          change_value?: number | null
+          country?: string | null
+          created_at?: string
+          current_value?: number | null
+          display_name?: string
+          fetched_at?: string
+          frequency?: string | null
+          history?: Json | null
+          id?: string
+          notes?: string | null
+          observation_date?: string | null
+          previous_value?: number | null
+          series_id?: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       market_snapshots: {
         Row: {
           category: string

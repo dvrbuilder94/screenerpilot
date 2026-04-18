@@ -14,39 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      achievements: {
-        Row: {
-          created_at: string
-          description: string
-          icon: string
-          id: string
-          name: string
-          points_reward: number
-          requirement_type: string
-          requirement_value: number
-        }
-        Insert: {
-          created_at?: string
-          description: string
-          icon: string
-          id?: string
-          name: string
-          points_reward?: number
-          requirement_type: string
-          requirement_value: number
-        }
-        Update: {
-          created_at?: string
-          description?: string
-          icon?: string
-          id?: string
-          name?: string
-          points_reward?: number
-          requirement_type?: string
-          requirement_value?: number
-        }
-        Relationships: []
-      }
       api_usage: {
         Row: {
           created_at: string
@@ -320,115 +287,6 @@ export type Database = {
         }
         Relationships: []
       }
-      prediction_votes: {
-        Row: {
-          choice: boolean
-          created_at: string
-          id: string
-          prediction_id: string
-          user_id: string
-        }
-        Insert: {
-          choice: boolean
-          created_at?: string
-          id?: string
-          prediction_id: string
-          user_id: string
-        }
-        Update: {
-          choice?: boolean
-          created_at?: string
-          id?: string
-          prediction_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "prediction_votes_prediction_id_fkey"
-            columns: ["prediction_id"]
-            isOneToOne: false
-            referencedRelation: "predictions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      predictions: {
-        Row: {
-          condition: Json
-          created_at: string
-          id: string
-          resolve_at: string
-          result: boolean | null
-          season_id: string
-          status: string
-          symbol: string
-          title: string
-        }
-        Insert: {
-          condition: Json
-          created_at?: string
-          id?: string
-          resolve_at: string
-          result?: boolean | null
-          season_id: string
-          status?: string
-          symbol: string
-          title: string
-        }
-        Update: {
-          condition?: Json
-          created_at?: string
-          id?: string
-          resolve_at?: string
-          result?: boolean | null
-          season_id?: string
-          status?: string
-          symbol?: string
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "predictions_season_id_fkey"
-            columns: ["season_id"]
-            isOneToOne: false
-            referencedRelation: "seasons"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      price_expectations: {
-        Row: {
-          created_at: string
-          error_pct: number | null
-          id: string
-          resolved_price: number | null
-          symbol: string
-          target_month: string
-          target_price: number
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          error_pct?: number | null
-          id?: string
-          resolved_price?: number | null
-          symbol: string
-          target_month: string
-          target_price: number
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          error_pct?: number | null
-          id?: string
-          resolved_price?: number | null
-          symbol?: string
-          target_month?: string
-          target_price?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           created_at: string
@@ -456,63 +314,6 @@ export type Database = {
           updated_at?: string
           user_id?: string
           wallet_address?: string | null
-        }
-        Relationships: []
-      }
-      seasons: {
-        Row: {
-          created_at: string
-          description: string | null
-          ends_at: string
-          id: string
-          name: string
-          starts_at: string
-          status: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          ends_at: string
-          id?: string
-          name: string
-          starts_at: string
-          status?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          ends_at?: string
-          id?: string
-          name?: string
-          starts_at?: string
-          status?: string
-        }
-        Relationships: []
-      }
-      sentiment_votes: {
-        Row: {
-          created_at: string
-          direction: string
-          id: string
-          symbol: string
-          user_id: string
-          vote_date: string
-        }
-        Insert: {
-          created_at?: string
-          direction: string
-          id?: string
-          symbol: string
-          user_id: string
-          vote_date?: string
-        }
-        Update: {
-          created_at?: string
-          direction?: string
-          id?: string
-          symbol?: string
-          user_id?: string
-          vote_date?: string
         }
         Relationships: []
       }
@@ -704,35 +505,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_achievements: {
-        Row: {
-          achievement_id: string
-          id: string
-          unlocked_at: string
-          user_id: string
-        }
-        Insert: {
-          achievement_id: string
-          id?: string
-          unlocked_at?: string
-          user_id: string
-        }
-        Update: {
-          achievement_id?: string
-          id?: string
-          unlocked_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_achievements_achievement_id_fkey"
-            columns: ["achievement_id"]
-            isOneToOne: false
-            referencedRelation: "achievements"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_ai_usage: {
         Row: {
           created_at: string | null
@@ -760,42 +532,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_gamification: {
-        Row: {
-          created_at: string
-          current_level: number
-          current_streak: number
-          id: string
-          last_login_date: string | null
-          longest_streak: number
-          total_points: number
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          current_level?: number
-          current_streak?: number
-          id?: string
-          last_login_date?: string | null
-          longest_streak?: number
-          total_points?: number
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          current_level?: number
-          current_streak?: number
-          id?: string
-          last_login_date?: string | null
-          longest_streak?: number
-          total_points?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       user_roles: {
         Row: {
           id: string
@@ -813,41 +549,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
-      }
-      user_season_stats: {
-        Row: {
-          correct: number
-          season_id: string
-          total: number
-          updated_at: string
-          user_id: string
-          xp: number
-        }
-        Insert: {
-          correct?: number
-          season_id: string
-          total?: number
-          updated_at?: string
-          user_id: string
-          xp?: number
-        }
-        Update: {
-          correct?: number
-          season_id?: string
-          total?: number
-          updated_at?: string
-          user_id?: string
-          xp?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_season_stats_season_id_fkey"
-            columns: ["season_id"]
-            isOneToOne: false
-            referencedRelation: "seasons"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       user_subscriptions: {
         Row: {
@@ -905,7 +606,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      calculate_level: { Args: { points: number }; Returns: number }
       get_user_tier: { Args: { p_user_id: string }; Returns: string }
       has_role: {
         Args: {
@@ -913,14 +613,6 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
-      }
-      record_prediction_vote: {
-        Args: { p_choice: boolean; p_prediction_id: string }
-        Returns: undefined
-      }
-      resolve_prediction: {
-        Args: { p_prediction_id: string; p_result: boolean }
-        Returns: undefined
       }
     }
     Enums: {

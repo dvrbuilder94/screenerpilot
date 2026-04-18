@@ -53,7 +53,7 @@ export function IndicatorRow({ indicator }: IndicatorRowProps) {
       </td>
       <td className="py-3 px-3 w-24">
         {history.length > 1 ? (
-          <Sparkline data={history} width={80} height={24} color={isPositive ? "#10b981" : isNegative ? "#f43f5e" : "#94a3b8"} />
+          <Sparkline data={history} width={80} height={24} />
         ) : (
           <span className="text-xs text-muted-foreground">—</span>
         )}

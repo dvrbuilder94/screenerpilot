@@ -443,6 +443,81 @@ export type Database = {
         }
         Relationships: []
       }
+      ratio_snapshots: {
+        Row: {
+          category: string
+          change_pct_1d: number | null
+          change_pct_1m: number | null
+          change_pct_1w: number | null
+          change_pct_3m: number | null
+          created_at: string
+          current_value: number | null
+          denominator_symbol: string
+          display_name: string
+          fetched_at: string
+          history_90d: Json | null
+          id: string
+          max_5y: number | null
+          mean_5y: number | null
+          min_5y: number | null
+          notes: string | null
+          numerator_symbol: string
+          percentile_5y: number | null
+          ratio_id: string
+          std_5y: number | null
+          updated_at: string
+          z_score: number | null
+        }
+        Insert: {
+          category: string
+          change_pct_1d?: number | null
+          change_pct_1m?: number | null
+          change_pct_1w?: number | null
+          change_pct_3m?: number | null
+          created_at?: string
+          current_value?: number | null
+          denominator_symbol: string
+          display_name: string
+          fetched_at?: string
+          history_90d?: Json | null
+          id?: string
+          max_5y?: number | null
+          mean_5y?: number | null
+          min_5y?: number | null
+          notes?: string | null
+          numerator_symbol: string
+          percentile_5y?: number | null
+          ratio_id: string
+          std_5y?: number | null
+          updated_at?: string
+          z_score?: number | null
+        }
+        Update: {
+          category?: string
+          change_pct_1d?: number | null
+          change_pct_1m?: number | null
+          change_pct_1w?: number | null
+          change_pct_3m?: number | null
+          created_at?: string
+          current_value?: number | null
+          denominator_symbol?: string
+          display_name?: string
+          fetched_at?: string
+          history_90d?: Json | null
+          id?: string
+          max_5y?: number | null
+          mean_5y?: number | null
+          min_5y?: number | null
+          notes?: string | null
+          numerator_symbol?: string
+          percentile_5y?: number | null
+          ratio_id?: string
+          std_5y?: number | null
+          updated_at?: string
+          z_score?: number | null
+        }
+        Relationships: []
+      }
       signal_outcomes: {
         Row: {
           end_price: number

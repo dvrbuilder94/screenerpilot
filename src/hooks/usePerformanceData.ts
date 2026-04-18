@@ -111,7 +111,7 @@ function generateDemoData(sp500Data: Map<string, number>): {
     current.setDate(current.getDate() + 1);
   }
 
-  const finalEquity = fullEquityCurve.at(-1)?.equity ?? 100;
+  const finalEquity = fullEquityCurve[fullEquityCurve.length - 1]?.equity ?? 100;
   const totalReturn = ((finalEquity - 100) / 100) * 100;
   const years = fullEquityCurve.length / 252;
   const cagr = years > 0 ? (Math.pow(finalEquity / 100, 1 / years) - 1) * 100 : 0;

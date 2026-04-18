@@ -100,11 +100,12 @@ async function processRatio(cfg: RatioConfig) {
     fetchCloses(cfg.denominator),
   ]);
 
-  // Align by timestamp (use intersection)
-  const denMap = new Map(denCloses.map((p) => [p.ts, p.close]));
+  // Align by DATE string (YYYY-MM-DD) — different markets have different session timestamps
+  const toDate = (ts: number) => new Date(ts * 1000).toISOString().slice(0, 10);
+  const denMap = new Map(denCloses.map((p) => [toDate(p.ts), p.close]));
   const aligned: { ts: number; ratio: number }[] = [];
   for (const p of numCloses) {
-    const d = denMap.get(p.ts);
+    const d = denMap.get(toDate(p.ts));
     if (d && d !== 0) aligned.push({ ts: p.ts, ratio: p.close / d });
   }
   if (aligned.length < 30) throw new Error(`${cfg.ratio_id}: only ${aligned.length} aligned points`);

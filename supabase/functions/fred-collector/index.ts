@@ -43,8 +43,8 @@ const FRED_SERIES: SeriesConfig[] = [
   { series_id: "IRSTCI01CLM156N", display_name: "BCCh Policy Rate", category: "latam", country: "CL", unit: "%", notes: "Chile central bank rate" },
   { series_id: "CHLCPIALLMINMEI", display_name: "Chile CPI YoY", category: "latam", country: "CL", unit: "%", transform: "yoy_pct" },
   // LATAM - Colombia
-  { series_id: "IRSTCI01COM156N", display_name: "BanRep Policy Rate", category: "latam", country: "CO", unit: "%", notes: "Colombia central bank rate" },
-  { series_id: "COLCPIALLMINMEI", display_name: "Colombia CPI YoY", category: "latam", country: "CO", unit: "%", transform: "yoy_pct" },
+  { series_id: "IR3TIB01COM156N", display_name: "BanRep Policy Rate (proxy)", category: "latam", country: "CO", unit: "%", notes: "Colombia 3M interbank rate (BanRep proxy)" },
+  { series_id: "CPALTT01COM659N", display_name: "Colombia CPI YoY", category: "latam", country: "CO", unit: "%", notes: "Colombia CPI YoY (FRED OECD series)" },
 ];
 
 async function fetchFredSeries(series_id: string) {

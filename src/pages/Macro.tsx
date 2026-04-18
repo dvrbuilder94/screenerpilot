@@ -1,84 +1,58 @@
-import { useState } from 'react';
-import { EthVsBtcPanel } from '@/components/EthVsBtcPanel';
-import { BmnrVsEthPanel } from '@/components/BmnrVsEthPanel';
-import { CryptoRiskMeter } from '@/components/CryptoRiskMeter';
-import { EthUpsidePanel } from '@/components/EthUpsidePanel';
-import { AltseasonIndexPanel } from '@/components/AltseasonIndexPanel';
-import { DominancePanel } from '@/components/DominancePanel';
-import { FearGreedPanel } from '@/components/FearGreedPanel';
-import { CryptoMacroInsight } from '@/components/CryptoMacroInsight';
-import { MacroCategoryTabs, MacroCategory } from '@/components/macro/MacroCategoryTabs';
-import { CommoditiesMacro } from '@/components/macro/CommoditiesMacro';
-import { StocksMacro } from '@/components/macro/StocksMacro';
-import { FedMacro } from '@/components/macro/FedMacro';
+import { useState } from "react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Landmark, Globe2, Bitcoin } from "lucide-react";
+import { FedMacroPanel } from "@/components/macro/FedMacroPanel";
+import { LatamMacroPanel } from "@/components/macro/LatamMacroPanel";
+import { CryptoMacroPanel } from "@/components/macro/CryptoMacroPanel";
+
+type MacroTab = "fed" | "latam" | "crypto";
 
 export default function Macro() {
-  const [activeCategory, setActiveCategory] = useState<MacroCategory>('crypto');
+  const [tab, setTab] = useState<MacroTab>("fed");
 
   return (
     <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 py-6 max-w-7xl">
-        {/* Hero Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight">
-            Macro Analysis
-          </h1>
-          <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
-            Real-time macro indicators across Crypto, Stocks, Commodities, and Federal Reserve data
+        <div className="mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Macro Intelligence</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Real-time macroeconomic indicators across the Fed, LATAM economies, and crypto markets
           </p>
         </div>
 
-        {/* Category Tabs - Prominent */}
-        <div className="mb-8">
-          <MacroCategoryTabs 
-            activeCategory={activeCategory} 
-            onCategoryChange={setActiveCategory} 
-          />
-        </div>
+        <Tabs value={tab} onValueChange={(v) => setTab(v as MacroTab)} className="space-y-6">
+          <TabsList className="w-full h-12 bg-muted/40 p-1 grid grid-cols-3 gap-1">
+            <TabsTrigger value="fed" className="flex items-center justify-center gap-2 h-full text-sm font-medium">
+              <Landmark className="h-4 w-4" />
+              <span className="hidden sm:inline">FED & US Macro</span>
+              <span className="sm:hidden">FED</span>
+            </TabsTrigger>
+            <TabsTrigger value="latam" className="flex items-center justify-center gap-2 h-full text-sm font-medium">
+              <Globe2 className="h-4 w-4" />
+              <span className="hidden sm:inline">LATAM Macro</span>
+              <span className="sm:hidden">LATAM</span>
+            </TabsTrigger>
+            <TabsTrigger value="crypto" className="flex items-center justify-center gap-2 h-full text-sm font-medium">
+              <Bitcoin className="h-4 w-4" />
+              <span className="hidden sm:inline">Crypto Macro</span>
+              <span className="sm:hidden">Crypto</span>
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Category Content */}
-        <div className="min-h-[60vh]">
-          {activeCategory === 'crypto' && (
-            <div className="space-y-6">
-              {/* AI Insight - Full width hero */}
-              <CryptoMacroInsight />
+          <TabsContent value="fed" className="mt-0">
+            <FedMacroPanel />
+          </TabsContent>
+          <TabsContent value="latam" className="mt-0">
+            <LatamMacroPanel />
+          </TabsContent>
+          <TabsContent value="crypto" className="mt-0">
+            <CryptoMacroPanel />
+          </TabsContent>
+        </Tabs>
 
-              {/* Primary Metrics - 2 column hero */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <FearGreedPanel />
-                <AltseasonIndexPanel />
-              </div>
-
-              {/* Secondary Metrics */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <EthVsBtcPanel />
-                <BmnrVsEthPanel />
-                <EthUpsidePanel />
-                <DominancePanel />
-              </div>
-
-              {/* Risk Meter - Full width */}
-              <CryptoRiskMeter />
-            </div>
-          )}
-
-          {activeCategory === 'commodities' && (
-            <CommoditiesMacro />
-          )}
-
-          {activeCategory === 'stocks' && (
-            <StocksMacro />
-          )}
-
-          {activeCategory === 'fed' && (
-            <FedMacro />
-          )}
-        </div>
-
-        {/* Footer note */}
-        <div className="mt-10 py-4 border-t border-border/50">
-          <p className="text-xs text-muted-foreground text-center">
-            Data updates in real-time. Crypto via Binance. Stocks, commodities, and Fed indicators via Yahoo Finance.
+        <div className="mt-10 py-4 border-t border-border/40">
+          <p className="text-[11px] text-muted-foreground text-center">
+            Sources: FRED (St. Louis Fed) · Yahoo Finance · CoinGecko · Binance · Alternative.me Fear & Greed Index
           </p>
         </div>
       </main>

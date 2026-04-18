@@ -1,4 +1,4 @@
-import { TrendingUp, Menu, Home, BarChart3, Scale, Zap } from "lucide-react";
+import { LineChart, Layers, GitCompareArrows, Star, Menu, TrendingUp } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { AccountDropdown } from "./AccountDropdown";
 import { Button } from "./ui/button";
@@ -7,10 +7,10 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { title: "Dashboard", url: "/", icon: Home },
-  { title: "Stock Intel", url: "/stock-intelligence", icon: Zap },
-  { title: "Macro Analysis", url: "/macro", icon: BarChart3 },
-  { title: "Commodities", url: "/commodities", icon: Scale },
+  { title: "Markets", url: "/markets", icon: LineChart },
+  { title: "Macro", url: "/macro", icon: Layers },
+  { title: "Ratios", url: "/ratios", icon: GitCompareArrows },
+  { title: "Watchlist", url: "/profile", icon: Star },
 ];
 
 export const AppHeader = () => {
@@ -18,49 +18,54 @@ export const AppHeader = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/50 bg-card/95 backdrop-blur-md">
-      <div className="flex h-14 items-center justify-between px-4 gap-4">
-        {/* Left section: Logo + Desktop Nav */}
-        <div className="flex items-center gap-6 flex-shrink-0">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary shadow-sm">
-              <TrendingUp className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <h1 className="hidden sm:block text-lg font-semibold text-foreground">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
+      <div className="flex h-16 items-center justify-between px-5 gap-4">
+        {/* Logo + tagline */}
+        <Link to="/" className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/15 border border-primary/30">
+            <TrendingUp className="w-4 h-4 text-primary" />
+          </div>
+          <div className="hidden sm:flex flex-col leading-none">
+            <span className="text-[15px] font-semibold tracking-tight text-foreground">
               ScreenerPilot
-            </h1>
-          </Link>
+            </span>
+            <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground mt-0.5">
+              Macro Intelligence Terminal
+            </span>
+          </div>
+        </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.url;
-              return (
-                <Button
-                  key={item.url}
-                  variant="ghost"
-                  size="sm"
-                  asChild
-                  className={cn(
-                    "text-muted-foreground hover:text-foreground",
-                    isActive && "bg-muted text-foreground font-medium"
-                  )}
-                >
-                  <Link to={item.url}>
-                    <item.icon className="w-4 h-4 mr-2" />
-                    {item.title}
-                  </Link>
-                </Button>
-              );
-            })}
-          </nav>
-        </div>
+        {/* Desktop nav */}
+        <nav className="hidden md:flex items-center gap-1 ml-4">
+          {navItems.map((item) => {
+            const isActive =
+              item.url === "/"
+                ? location.pathname === "/"
+                : location.pathname.startsWith(item.url);
+            return (
+              <Button
+                key={item.url}
+                variant="ghost"
+                size="sm"
+                asChild
+                className={cn(
+                  "h-9 px-3 text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 rounded-md",
+                  isActive && "bg-secondary text-foreground"
+                )}
+              >
+                <Link to={item.url}>
+                  <item.icon className="w-3.5 h-3.5 mr-2" />
+                  {item.title}
+                </Link>
+              </Button>
+            );
+          })}
+        </nav>
 
-        {/* Right section: Account + Mobile Menu */}
-        <div className="flex items-center gap-3 flex-shrink-0">
+        {/* Right: Account + mobile trigger */}
+        <div className="flex items-center gap-2 ml-auto flex-shrink-0">
           <AccountDropdown />
 
-          {/* Mobile Menu */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
@@ -68,15 +73,21 @@ export const AppHeader = () => {
                 <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px]">
-              <nav className="flex flex-col gap-2 mt-8">
+            <SheetContent side="right" className="w-[280px] bg-background border-border">
+              <div className="mt-2 mb-6">
+                <div className="text-[15px] font-semibold text-foreground">ScreenerPilot</div>
+                <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground mt-1">
+                  Macro Intelligence Terminal
+                </div>
+              </div>
+              <nav className="flex flex-col gap-1">
                 {navItems.map((item) => {
-                  const isActive = location.pathname === item.url;
+                  const isActive = location.pathname.startsWith(item.url);
                   return (
                     <Button
                       key={item.url}
                       variant={isActive ? "secondary" : "ghost"}
-                      className="justify-start"
+                      className="justify-start h-10"
                       asChild
                       onClick={() => setMobileMenuOpen(false)}
                     >

@@ -5,7 +5,6 @@ import { TrendingUp, TrendingDown, Minus, ArrowLeft, Clock } from "lucide-react"
 import { EnhancedSignal } from "@/types/trading";
 import { IndicatorData } from "@/lib/indicators";
 import { Candle } from "@/lib/binanceApi";
-import { TrackRecordContext } from "@/components/TrackRecordContext";
 import MiniChart from "@/components/MiniChart";
 import { getAssetName } from "@/lib/assetNames";
 

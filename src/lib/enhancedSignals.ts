@@ -1,14 +1,13 @@
 import { IndicatorData } from "./indicators";
 import { EnhancedSignal, SignalType } from "@/types/trading";
 import { TradingProfile } from "@/types/tradingProfile";
-import { SentimentData, getSentimentImpact } from "@/types/sentiment";
 
 interface SignalCalculationParams {
   indicators: IndicatorData;
   currentPrice: number;
   prevPrice?: number;
   tradingProfile?: TradingProfile;
-  sentiment?: SentimentData | null;
+  sentiment?: null;
 }
 
 /**

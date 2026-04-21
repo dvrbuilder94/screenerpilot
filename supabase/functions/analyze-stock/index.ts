@@ -362,6 +362,7 @@ Rules: ≤35 words per bullet, professional, no advice, no markdown.`;
 
     const result = {
       symbol: cleanSymbol,
+      timeframe: tf,
       companyName: data.companyName,
       price,
       marketCap: formatMarketCap(data.marketCap),

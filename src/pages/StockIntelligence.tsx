@@ -16,9 +16,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import StockChart from "@/components/stock/StockChart";
 import IndicatorPanels from "@/components/stock/IndicatorPanels";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
 type Timeframe = "daily" | "weekly" | "monthly";
+
+const TIMEFRAMES: { value: Timeframe; label: string; sub: string }[] = [
+  { value: "daily", label: "Daily", sub: "1Y" },
+  { value: "weekly", label: "Weekly", sub: "5Y" },
+  { value: "monthly", label: "Monthly", sub: "10Y" },
+];
 
 interface InsightBullet {
   category: string;

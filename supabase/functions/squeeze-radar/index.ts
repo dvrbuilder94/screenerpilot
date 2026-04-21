@@ -120,7 +120,7 @@ function score(bars: YahooBar[], meta: any): Candidate | null {
   const winHigh = Math.max(...highs.slice(-126));
   const winLow = Math.min(...lows.slice(-126));
   const drawdown = ((price - winHigh) / winHigh) * 100; // negative
-  const positionInRange = ((price - winLow) / (winHigh - winLow)) * 100;
+  void winLow;
 
   // 5-day momentum
   const ref5 = bars[bars.length - 6]?.c ?? bars[0].c;

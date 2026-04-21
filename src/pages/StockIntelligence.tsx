@@ -462,6 +462,8 @@ export default function StockIntelligence() {
           </CardContent>
         </Card>
       )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

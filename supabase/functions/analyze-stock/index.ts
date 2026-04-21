@@ -210,21 +210,23 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { symbol } = await req.json();
+    const { symbol, timeframe } = await req.json();
     if (!symbol || typeof symbol !== "string") {
       return new Response(JSON.stringify({ error: "Missing 'symbol'" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const tf: Timeframe = timeframe === "weekly" || timeframe === "monthly" ? timeframe : "daily";
 
     const cleanSymbol = symbol.toUpperCase().trim();
-    console.log(`\n========== Analyzing: ${cleanSymbol} ==========`);
+    console.log(`\n========== Analyzing: ${cleanSymbol} (${tf}) ==========`);
 
-    const data = await fetchStockData(cleanSymbol);
-    if (!data || data.candles.length < 50) {
+    const data = await fetchStockData(cleanSymbol, tf);
+    const minBars = tf === "monthly" ? 24 : tf === "weekly" ? 30 : 50;
+    if (!data || data.candles.length < minBars) {
       return new Response(
-        JSON.stringify({ error: `Unable to fetch sufficient data for ${cleanSymbol}.` }),
+        JSON.stringify({ error: `Unable to fetch sufficient ${tf} data for ${cleanSymbol}.` }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

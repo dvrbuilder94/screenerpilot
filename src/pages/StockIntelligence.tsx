@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import StockChart from "@/components/stock/StockChart";
 import IndicatorPanels from "@/components/stock/IndicatorPanels";
+import ShortSqueezeRadar from "@/components/stock/ShortSqueezeRadar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 type Timeframe = "daily" | "weekly" | "monthly";
 
 const TIMEFRAMES: { value: Timeframe; label: string; sub: string }[] = [
@@ -157,6 +159,7 @@ export default function StockIntelligence() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"analyze" | "squeeze">("analyze");
   const cacheRef = useRef<Map<string, AnalysisResult>>(new Map());
   const requestIdRef = useRef(0);
 
@@ -230,20 +233,39 @@ export default function StockIntelligence() {
     }
   };
 
+  const handleAnalyzeFromRadar = (sym: string) => {
+    setActiveTab("analyze");
+    setSymbol(sym);
+    analyzeStock(undefined, sym);
+  };
+
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6">
         <div className="flex items-center gap-3">
           <Zap className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-semibold text-foreground">Stock Intelligence</h1>
         </div>
         <p className="text-muted-foreground mt-2 text-sm max-w-xl">
-          On-demand technical analysis. Enter any US stock ticker to get an instant diagnostic of its current state.
+          On-demand technical analysis and short squeeze radar for US equities.
         </p>
       </div>
 
-      {/* Search Input */}
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "analyze" | "squeeze")} className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="analyze">Analyze Stock</TabsTrigger>
+          <TabsTrigger value="squeeze">
+            <Zap className="h-3.5 w-3.5 mr-1.5" />
+            Short Squeeze Radar
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="squeeze" className="mt-0">
+          <ShortSqueezeRadar onAnalyze={handleAnalyzeFromRadar} />
+        </TabsContent>
+
+        <TabsContent value="analyze" className="mt-0 space-y-6">
       <Card className="mb-6">
         <CardContent className="pt-6 space-y-4">
           <div className="flex gap-3">
@@ -440,6 +462,8 @@ export default function StockIntelligence() {
           </CardContent>
         </Card>
       )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

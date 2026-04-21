@@ -184,7 +184,7 @@ export default function StockIntelligence() {
   };
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-3xl mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3">
@@ -268,6 +268,23 @@ export default function StockIntelligence() {
               </p>
             </CardContent>
           </Card>
+
+          {/* Chart 1Y */}
+          {result.chart && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">1-Year Price · EMAs · Bollinger Bands</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <StockChart data={result.chart} height={340} />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Technical Indicators */}
+          {result.indicators && (
+            <IndicatorPanels indicators={result.indicators} price={result.price} />
+          )}
 
           {/* Signals Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

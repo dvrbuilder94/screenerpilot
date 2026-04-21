@@ -252,7 +252,7 @@ export default function StockIntelligence() {
               <Input
                 placeholder="Enter ticker symbol (e.g., SOFI, PLTR, COIN)"
                 value={symbol}
-                onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+                onChange={(e) => handleSymbolChange(e.target.value)}
                 onKeyDown={handleKeyDown}
                 className="pl-10 text-lg font-medium"
                 maxLength={10}

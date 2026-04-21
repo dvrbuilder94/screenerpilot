@@ -163,11 +163,10 @@ export default function StockIntelligence() {
 
     setLoading(true);
     setError(null);
-    setResult(null);
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke("analyze-stock", {
-        body: { symbol: symbol.trim().toUpperCase() },
+        body: { symbol: symbol.trim().toUpperCase(), timeframe: tf },
       });
 
       if (fnError) {
@@ -176,6 +175,7 @@ export default function StockIntelligence() {
 
       if (data.error) {
         setError(data.error);
+        setResult(null);
       } else {
         setResult(data);
       }
@@ -184,6 +184,11 @@ export default function StockIntelligence() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleTimeframeChange = (tf: Timeframe) => {
+    setTimeframe(tf);
+    if (symbol.trim()) analyzeStock(tf);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -207,7 +212,7 @@ export default function StockIntelligence() {
 
       {/* Search Input */}
       <Card className="mb-6">
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 space-y-4">
           <div className="flex gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -220,7 +225,7 @@ export default function StockIntelligence() {
                 maxLength={10}
               />
             </div>
-            <Button onClick={analyzeStock} disabled={loading || !symbol.trim()} className="px-6">
+            <Button onClick={() => analyzeStock()} disabled={loading || !symbol.trim()} className="px-6">
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -230,6 +235,37 @@ export default function StockIntelligence() {
                 "Analyze"
               )}
             </Button>
+          </div>
+
+          {/* Timeframe selector */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs text-muted-foreground mr-1">Timeframe:</span>
+            <div className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5">
+              {TIMEFRAMES.map((tf) => {
+                const active = timeframe === tf.value;
+                return (
+                  <button
+                    key={tf.value}
+                    type="button"
+                    disabled={loading}
+                    onClick={() => handleTimeframeChange(tf.value)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                      active
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    {tf.label}
+                    <span className="ml-1 text-[10px] opacity-60">{tf.sub}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {result?.timeframe && (
+              <Badge variant="outline" className="ml-auto text-[10px] uppercase">
+                Showing: {result.timeframe}
+              </Badge>
+            )}
           </div>
         </CardContent>
       </Card>

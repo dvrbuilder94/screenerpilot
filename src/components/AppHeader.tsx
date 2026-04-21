@@ -1,4 +1,4 @@
-import { LineChart, Layers, GitCompareArrows, Star, Menu, TrendingUp } from "lucide-react";
+import { LineChart, Layers, GitCompareArrows, Star, Menu, TrendingUp, Search } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { AccountDropdown } from "./AccountDropdown";
 import { Button } from "./ui/button";
@@ -7,6 +7,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
+  { title: "Stock Intelligence", url: "/", icon: Search },
   { title: "Markets", url: "/markets", icon: LineChart },
   { title: "Macro", url: "/macro", icon: Layers },
   { title: "Ratios", url: "/ratios", icon: GitCompareArrows },
@@ -82,7 +83,7 @@ export const AppHeader = () => {
               </div>
               <nav className="flex flex-col gap-1">
                 {navItems.map((item) => {
-                  const isActive = location.pathname.startsWith(item.url);
+                  const isActive = item.url === "/" ? location.pathname === "/" : location.pathname.startsWith(item.url);
                   return (
                     <Button
                       key={item.url}

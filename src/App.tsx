@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
-import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import Macro from "./pages/Macro";
@@ -28,7 +27,7 @@ const App = () => (
           <BrowserRouter>
             <AppLayout>
               <Routes>
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<StockIntelligence />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/markets" element={<Markets />} />

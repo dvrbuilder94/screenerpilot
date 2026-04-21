@@ -148,12 +148,14 @@ function getSignalType(value: string, positive: string[], negative: string[]): "
 
 export default function StockIntelligence() {
   const [symbol, setSymbol] = useState("");
+  const [timeframe, setTimeframe] = useState<Timeframe>("daily");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const analyzeStock = async () => {
+  const analyzeStock = async (tfOverride?: Timeframe) => {
     if (!symbol.trim()) return;
+    const tf = tfOverride ?? timeframe;
 
     setLoading(true);
     setError(null);

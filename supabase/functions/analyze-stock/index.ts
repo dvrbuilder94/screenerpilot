@@ -315,7 +315,8 @@ serve(async (req) => {
     let intelligenceInsight: InsightBullet[] | undefined;
     if (LOVABLE_API_KEY) {
       try {
-        const prompt = `You are a senior equity strategist. Generate a ticker-specific "Intelligence Insight" for ${cleanSymbol} (${data.companyName}).
+        const tfLabel = tf === "daily" ? "Daily (1Y)" : tf === "weekly" ? "Weekly (5Y)" : "Monthly (10Y)";
+        const prompt = `You are a senior equity strategist. Generate a ticker-specific "Intelligence Insight" for ${cleanSymbol} (${data.companyName}) on the ${tfLabel} timeframe.
 
 Technicals:
 - Verdict: ${verdict} (${score}%)

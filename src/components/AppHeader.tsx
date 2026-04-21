@@ -83,7 +83,7 @@ export const AppHeader = () => {
               </div>
               <nav className="flex flex-col gap-1">
                 {navItems.map((item) => {
-                  const isActive = location.pathname.startsWith(item.url);
+                  const isActive = item.url === "/" ? location.pathname === "/" : location.pathname.startsWith(item.url);
                   return (
                     <Button
                       key={item.url}

@@ -114,9 +114,18 @@ function bollinger(values: number[], period = 20, mult = 2) {
 
 // -------------------- FETCH --------------------
 
-async function fetchStockData(symbol: string): Promise<StockData | null> {
+type Timeframe = "daily" | "weekly" | "monthly";
+
+const TF_CONFIG: Record<Timeframe, { range: string; interval: string }> = {
+  daily: { range: "1y", interval: "1d" },
+  weekly: { range: "5y", interval: "1wk" },
+  monthly: { range: "10y", interval: "1mo" },
+};
+
+async function fetchStockData(symbol: string, timeframe: Timeframe = "daily"): Promise<StockData | null> {
   try {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=1y&interval=1d&includePrePost=false`;
+    const { range, interval } = TF_CONFIG[timeframe];
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=${range}&interval=${interval}&includePrePost=false`;
     const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
     if (!res.ok) {
       console.error(`Fetch failed: ${res.status}`);

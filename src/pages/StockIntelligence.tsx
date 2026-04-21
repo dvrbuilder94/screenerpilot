@@ -14,17 +14,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import StockChart from "@/components/stock/StockChart";
+import IndicatorPanels from "@/components/stock/IndicatorPanels";
 
 interface InsightBullet {
   category: string;
   text: string;
 }
 
+type Tone = "positive" | "negative" | "neutral";
+
 interface AnalysisResult {
   symbol: string;
   companyName: string;
   price: number;
   marketCap: string;
+  dayChangePercent?: number;
   verdict: string;
   confidence: number;
   priceAction?: {
@@ -35,6 +40,26 @@ interface AnalysisResult {
   };
   summary: string;
   intelligenceInsight?: InsightBullet[];
+  indicators?: {
+    rsi: { value: number; label: string; tone: Tone };
+    macd: { macd: number; signal: number; hist: number; label: string; tone: Tone };
+    bollinger: { upper: number; mid: number; lower: number; width: number; label: string; tone: Tone };
+    emas: { ema20: number | null; ema50: number | null; ema200: number | null };
+    range52w: { high: number; low: number; position: number };
+  };
+  chart?: {
+    timestamps: number[];
+    close: number[];
+    ema20: (number | null)[];
+    ema50: (number | null)[];
+    ema200: (number | null)[];
+    bbUpper: (number | null)[];
+    bbLower: (number | null)[];
+    rsi: (number | null)[];
+    macd: (number | null)[];
+    macdSignal: (number | null)[];
+    macdHist: (number | null)[];
+  };
 }
 
 function ConfidenceBar({ value }: { value: number }) {
@@ -159,7 +184,7 @@ export default function StockIntelligence() {
   };
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-3xl mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3">
@@ -243,6 +268,23 @@ export default function StockIntelligence() {
               </p>
             </CardContent>
           </Card>
+
+          {/* Chart 1Y */}
+          {result.chart && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">1-Year Price · EMAs · Bollinger Bands</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <StockChart data={result.chart} height={340} />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Technical Indicators */}
+          {result.indicators && (
+            <IndicatorPanels indicators={result.indicators} price={result.price} />
+          )}
 
           {/* Signals Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

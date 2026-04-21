@@ -319,7 +319,9 @@ export default function StockIntelligence() {
           {result.chart && (
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm">1-Year Price · EMAs · Bollinger Bands</CardTitle>
+                <CardTitle className="text-sm">
+                  {result.timeframe === "weekly" ? "5-Year Weekly" : result.timeframe === "monthly" ? "10-Year Monthly" : "1-Year Daily"} Price · EMAs · Bollinger Bands
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <StockChart data={result.chart} height={340} />

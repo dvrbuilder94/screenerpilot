@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Search,
@@ -157,33 +157,65 @@ export default function StockIntelligence() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const cacheRef = useRef<Map<string, AnalysisResult>>(new Map());
+  const requestIdRef = useRef(0);
 
-  const analyzeStock = async (tfOverride?: Timeframe) => {
-    if (!symbol.trim()) return;
-    const tf = tfOverride ?? timeframe;
+  const analyzeStock = useCallback(
+    async (tfOverride?: Timeframe, symbolOverride?: string) => {
+      const sym = (symbolOverride ?? symbol).trim().toUpperCase();
+      if (!sym) return;
+      const tf = tfOverride ?? timeframe;
+      const cacheKey = `${sym}:${tf}`;
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { data, error: fnError } = await supabase.functions.invoke("analyze-stock", {
-        body: { symbol: symbol.trim().toUpperCase(), timeframe: tf },
-      });
-
-      if (fnError) {
-        throw new Error(fnError.message || "Analysis failed");
+      // Serve from cache instantly if available
+      const cached = cacheRef.current.get(cacheKey);
+      if (cached) {
+        setResult(cached);
+        setError(null);
+        setLoading(false);
+        return;
       }
 
-      if (data.error) {
-        setError(data.error);
-        setResult(null);
-      } else {
-        setResult(data);
+      const reqId = ++requestIdRef.current;
+      setLoading(true);
+      setError(null);
+
+      try {
+        const { data, error: fnError } = await supabase.functions.invoke("analyze-stock", {
+          body: { symbol: sym, timeframe: tf },
+        });
+
+        // Ignore stale responses (user changed symbol/tf mid-flight)
+        if (reqId !== requestIdRef.current) return;
+
+        if (fnError) {
+          throw new Error(fnError.message || "Analysis failed");
+        }
+
+        if (data.error) {
+          setError(data.error);
+          setResult(null);
+        } else {
+          cacheRef.current.set(cacheKey, data);
+          setResult(data);
+        }
+      } catch (err) {
+        if (reqId !== requestIdRef.current) return;
+        setError(err instanceof Error ? err.message : "Failed to analyze stock");
+      } finally {
+        if (reqId === requestIdRef.current) setLoading(false);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to analyze stock");
-    } finally {
-      setLoading(false);
+    },
+    [symbol, timeframe]
+  );
+
+  const handleSymbolChange = (value: string) => {
+    const next = value.toUpperCase();
+    setSymbol(next);
+    // Invalidate previous result when the symbol actually changes
+    if (result && next !== result.symbol) {
+      setResult(null);
+      setError(null);
     }
   };
 
@@ -220,7 +252,7 @@ export default function StockIntelligence() {
               <Input
                 placeholder="Enter ticker symbol (e.g., SOFI, PLTR, COIN)"
                 value={symbol}
-                onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+                onChange={(e) => handleSymbolChange(e.target.value)}
                 onKeyDown={handleKeyDown}
                 className="pl-10 text-lg font-medium"
                 maxLength={10}

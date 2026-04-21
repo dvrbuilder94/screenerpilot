@@ -27,7 +27,7 @@ const App = () => (
           <BrowserRouter>
             <AppLayout>
               <Routes>
-                <Route path="/" element={<StockIntelligence />} />
+                <Route path="/" element={<Markets />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/markets" element={<Markets />} />

@@ -16,6 +16,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import StockChart from "@/components/stock/StockChart";
 import IndicatorPanels from "@/components/stock/IndicatorPanels";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+type Timeframe = "daily" | "weekly" | "monthly";
 
 interface InsightBullet {
   category: string;

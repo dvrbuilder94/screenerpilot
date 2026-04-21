@@ -114,9 +114,18 @@ function bollinger(values: number[], period = 20, mult = 2) {
 
 // -------------------- FETCH --------------------
 
-async function fetchStockData(symbol: string): Promise<StockData | null> {
+type Timeframe = "daily" | "weekly" | "monthly";
+
+const TF_CONFIG: Record<Timeframe, { range: string; interval: string }> = {
+  daily: { range: "1y", interval: "1d" },
+  weekly: { range: "5y", interval: "1wk" },
+  monthly: { range: "10y", interval: "1mo" },
+};
+
+async function fetchStockData(symbol: string, timeframe: Timeframe = "daily"): Promise<StockData | null> {
   try {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=1y&interval=1d&includePrePost=false`;
+    const { range, interval } = TF_CONFIG[timeframe];
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=${range}&interval=${interval}&includePrePost=false`;
     const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
     if (!res.ok) {
       console.error(`Fetch failed: ${res.status}`);
@@ -201,21 +210,23 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { symbol } = await req.json();
+    const { symbol, timeframe } = await req.json();
     if (!symbol || typeof symbol !== "string") {
       return new Response(JSON.stringify({ error: "Missing 'symbol'" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const tf: Timeframe = timeframe === "weekly" || timeframe === "monthly" ? timeframe : "daily";
 
     const cleanSymbol = symbol.toUpperCase().trim();
-    console.log(`\n========== Analyzing: ${cleanSymbol} ==========`);
+    console.log(`\n========== Analyzing: ${cleanSymbol} (${tf}) ==========`);
 
-    const data = await fetchStockData(cleanSymbol);
-    if (!data || data.candles.length < 50) {
+    const data = await fetchStockData(cleanSymbol, tf);
+    const minBars = tf === "monthly" ? 24 : tf === "weekly" ? 30 : 50;
+    if (!data || data.candles.length < minBars) {
       return new Response(
-        JSON.stringify({ error: `Unable to fetch sufficient data for ${cleanSymbol}.` }),
+        JSON.stringify({ error: `Unable to fetch sufficient ${tf} data for ${cleanSymbol}.` }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -304,7 +315,8 @@ serve(async (req) => {
     let intelligenceInsight: InsightBullet[] | undefined;
     if (LOVABLE_API_KEY) {
       try {
-        const prompt = `You are a senior equity strategist. Generate a ticker-specific "Intelligence Insight" for ${cleanSymbol} (${data.companyName}).
+        const tfLabel = tf === "daily" ? "Daily (1Y)" : tf === "weekly" ? "Weekly (5Y)" : "Monthly (10Y)";
+        const prompt = `You are a senior equity strategist. Generate a ticker-specific "Intelligence Insight" for ${cleanSymbol} (${data.companyName}) on the ${tfLabel} timeframe.
 
 Technicals:
 - Verdict: ${verdict} (${score}%)
@@ -350,6 +362,7 @@ Rules: ≤35 words per bullet, professional, no advice, no markdown.`;
 
     const result = {
       symbol: cleanSymbol,
+      timeframe: tf,
       companyName: data.companyName,
       price,
       marketCap: formatMarketCap(data.marketCap),

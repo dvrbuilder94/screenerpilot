@@ -33,6 +33,7 @@ type Tone = "positive" | "negative" | "neutral";
 
 interface AnalysisResult {
   symbol: string;
+  timeframe?: Timeframe;
   companyName: string;
   price: number;
   marketCap: string;

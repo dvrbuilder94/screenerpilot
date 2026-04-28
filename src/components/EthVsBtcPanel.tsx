@@ -44,7 +44,7 @@ export const EthVsBtcPanel = () => {
 
         {data && (
           <div className="space-y-6">
-            <BloombergInsight insight={ethVsBtcInsight(data)} />
+            <BloombergInsight insight={ethVsBtcInsight(data)} panel="ETH vs BTC (90d Risk/Reward)" data={data} />
             {/* Side-by-side comparison */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* BTC */}

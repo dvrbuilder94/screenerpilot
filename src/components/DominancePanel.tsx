@@ -49,7 +49,7 @@ export const DominancePanel = () => {
 
         {data && (
           <div className="space-y-6">
-            <BloombergInsight insight={dominanceInsight(data)} />
+            <BloombergInsight insight={dominanceInsight(data)} panel="BTC Dominance" data={data} />
             {/* Main Dominance Value */}
             <div className="text-center">
               <div className="text-6xl font-bold text-primary">

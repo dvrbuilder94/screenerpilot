@@ -151,7 +151,7 @@ export const BmnrVsEthPanel = () => {
         )}
         {data && (
           <div className="space-y-6">
-            <BloombergInsight insight={bmnrVsEthInsight(data)} />
+            <BloombergInsight insight={bmnrVsEthInsight(data)} panel="BMNR vs ETH (90d)" data={data} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {renderSide('BMNR', data.bmnr, data.winner === 'BMNR')}
               {renderSide('ETH', data.eth, data.winner === 'ETH')}

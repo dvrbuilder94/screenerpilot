@@ -66,7 +66,7 @@ export const FearGreedPanel = () => {
 
         {data && (
           <div className="space-y-6">
-            <BloombergInsight insight={fearGreedInsight(data)} />
+            <BloombergInsight insight={fearGreedInsight(data)} panel="Crypto Fear & Greed Index" data={data} />
             {/* Main Value */}
             <div className="text-center">
               <div className={`text-6xl font-bold ${getValueColor(data.value)}`}>

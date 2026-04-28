@@ -2,6 +2,8 @@ import { useMacroIndicators } from "@/hooks/useMacroIndicators";
 import { IndicatorRow } from "./IndicatorRow";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Landmark } from "lucide-react";
+import { BloombergInsight } from "@/components/BloombergInsight";
+import type { BloombergInsightData } from "@/components/BloombergInsight";
 
 const FED_ORDER = [
   "DFF", "WALCL", "RRPONTSYD", "M2SL",
@@ -34,8 +36,19 @@ export function FedMacroPanel() {
     );
   }
 
+  const dff = sorted.find(i => i.series_id === "DFF");
+  const cpi = sorted.find(i => i.series_id === "CPIAUCSL");
+  const unr = sorted.find(i => i.series_id === "UNRATE");
+  const insight: BloombergInsightData | null = dff || cpi || unr ? {
+    signal: `${dff ? `FFR ${dff.current_value?.toFixed(2)}%` : ''}${cpi ? ` · CPI ${cpi.change_pct?.toFixed(2) ?? cpi.current_value}` : ''}${unr ? ` · U-rate ${unr.current_value?.toFixed(1)}%` : ''}`.trim(),
+    implication: 'Fed policy stance shapes risk appetite across all asset classes',
+    action: 'Watch incoming prints vs consensus for regime shifts',
+    tone: (cpi?.change_pct ?? 0) > 3 ? 'caution' : (unr?.change_pct ?? 0) > 0 ? 'bearish' : 'neutral',
+  } : null;
+
   return (
     <div className="space-y-4">
+      <BloombergInsight insight={insight} panel="FRED · US Macro Indicators" data={sorted.slice(0, 8)} />
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Landmark className="h-4 w-4" />
         <span>Federal Reserve & US Macroeconomic Indicators</span>

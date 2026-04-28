@@ -18,6 +18,8 @@ import StockChart from "@/components/stock/StockChart";
 import IndicatorPanels from "@/components/stock/IndicatorPanels";
 import ShortSqueezeRadar from "@/components/stock/ShortSqueezeRadar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BloombergInsight } from "@/components/BloombergInsight";
+import { stockAnalysisInsight } from "@/lib/bloombergInsights";
 type Timeframe = "daily" | "weekly" | "monthly";
 
 const TIMEFRAMES: { value: Timeframe; label: string; sub: string }[] = [
@@ -361,6 +363,29 @@ export default function StockIntelligence() {
               </div>
 
               <ConfidenceBar value={result.confidence} />
+
+              <div className="mt-4">
+                <BloombergInsight
+                  insight={stockAnalysisInsight({
+                    symbol: result.symbol,
+                    verdict: result.verdict,
+                    confidence: result.confidence,
+                    rsi: result.indicators?.rsi.value,
+                    pos52w: result.indicators?.range52w.position,
+                    trend: result.priceAction?.trend,
+                  })}
+                  panel={`Stock Intelligence · ${result.symbol} (${result.timeframe ?? 'daily'})`}
+                  data={{
+                    symbol: result.symbol,
+                    company: result.companyName,
+                    price: result.price,
+                    verdict: result.verdict,
+                    confidence: result.confidence,
+                    priceAction: result.priceAction,
+                    indicators: result.indicators,
+                  }}
+                />
+              </div>
 
               <p className="text-muted-foreground mt-4 text-sm bg-muted/30 p-3 rounded-lg">
                 <Info className="inline h-4 w-4 mr-1.5 opacity-70" />

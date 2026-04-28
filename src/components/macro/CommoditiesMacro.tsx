@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowUpIcon, ArrowDownIcon, Scale } from 'lucide-react';
 import presets from '@/config/presets.json';
+import { BloombergInsight } from '@/components/BloombergInsight';
+import { commoditiesMacroInsight } from '@/lib/bloombergInsights';
 
 interface RatioData {
   name: string;
@@ -177,6 +179,11 @@ export function CommoditiesMacro() {
 
   return (
     <div className="space-y-8">
+      <BloombergInsight
+        insight={commoditiesMacroInsight(ratios)}
+        panel="Commodities Macro (Ratios)"
+        data={{ ratios, prices }}
+      />
       {/* Spot Prices by Category */}
       {Object.entries(categories).map(([category, symbols]) => {
         const hasData = symbols.some(s => prices[s]);

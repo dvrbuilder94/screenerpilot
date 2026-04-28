@@ -3,6 +3,8 @@ import { useMarketSnapshotsBySymbols } from "@/hooks/useMarketSnapshots";
 import { IndicatorRow } from "./IndicatorRow";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Globe2, TrendingUp, TrendingDown } from "lucide-react";
+import { BloombergInsight } from "@/components/BloombergInsight";
+import { latamFxInsight } from "@/lib/bloombergInsights";
 
 const COUNTRIES = [
   { code: "MX", flag: "🇲🇽", name: "Mexico", fx: "MXN=X" },
@@ -63,12 +65,19 @@ export function LatamMacroPanel() {
       {COUNTRIES.map((c) => {
         const countryInds = (indicators ?? []).filter((i) => i.country === c.code);
         if (countryInds.length === 0) return null;
+        const fx = fxSnapshots?.find((s) => s.symbol === c.fx);
+        const pair = `USD/${c.code === "BR" ? "BRL" : c.code === "MX" ? "MXN" : c.code === "CL" ? "CLP" : "COP"}`;
         return (
           <div key={c.code} className="space-y-2">
             <h3 className="text-sm font-semibold flex items-center gap-2">
               <span className="text-lg">{c.flag}</span>
               {c.name}
             </h3>
+            <BloombergInsight
+              insight={latamFxInsight({ country: c.name, pair, price: fx?.current_price ?? undefined, change1d: fx?.change_pct_1d ?? undefined })}
+              panel={`LATAM Macro · ${c.name}`}
+              data={{ fx, indicators: countryInds }}
+            />
             <div className="rounded-lg border border-border/40 bg-card/30 overflow-hidden">
               <table className="w-full text-sm">
                 <thead className="bg-muted/40 border-b border-border/40">

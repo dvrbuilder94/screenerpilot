@@ -79,7 +79,7 @@ export const CryptoRiskMeter = () => {
 
         {data && (
           <>
-            <BloombergInsight insight={riskRegimeInsight(data)} />
+            <BloombergInsight insight={riskRegimeInsight(data)} panel="Crypto Risk Regime" data={data} />
             <div className={`p-6 rounded-xl border ${config.borderColor} ${config.bgColor}`}>
               <div className="flex items-center justify-center gap-3 mb-2">
                 <Icon className={`w-8 h-8 ${config.color}`} />

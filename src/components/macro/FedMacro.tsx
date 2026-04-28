@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Landmark, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
 import { EconomicCalendar } from './EconomicCalendar';
+import { BloombergInsight } from '@/components/BloombergInsight';
+import { fedMacroInsight } from '@/lib/bloombergInsights';
 
 export function FedMacro() {
   const [marketData, setMarketData] = useState<Record<string, number>>({});
@@ -92,6 +94,11 @@ export function FedMacro() {
 
   return (
     <div className="space-y-8">
+      <BloombergInsight
+        insight={fedMacroInsight({ dxy, yield10y, yield5y, yield30y })}
+        panel="FED & US Macro (DXY, Yield Curve)"
+        data={{ dxy, yield10y, yield5y, yield30y, yieldCurve }}
+      />
       {/* Hero Row - DXY and Yield Curve */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* DXY Panel */}

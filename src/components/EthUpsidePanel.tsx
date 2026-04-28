@@ -56,7 +56,7 @@ export const EthUpsidePanel = () => {
 
         {data && (
           <div className="space-y-6">
-            <BloombergInsight insight={ethUpsideInsight(data)} />
+            <BloombergInsight insight={ethUpsideInsight(data)} panel="ETH Upside Probability" data={data} />
             {/* Main Score */}
             <div className="text-center">
               <div className={`text-6xl font-bold ${getScoreColor(data.score)}`}>

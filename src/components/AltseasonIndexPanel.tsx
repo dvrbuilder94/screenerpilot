@@ -81,7 +81,7 @@ export const AltseasonIndexPanel = () => {
 
         {data && (
           <>
-            <BloombergInsight insight={altseasonInsight(data)} />
+            <BloombergInsight insight={altseasonInsight(data)} panel={`Altseason Index (${lookbackDays}d)`} data={data} />
             {/* Main Index Value */}
             <div className="text-center">
               <div className={`text-6xl font-bold ${getIndexColor(data.index)}`}>

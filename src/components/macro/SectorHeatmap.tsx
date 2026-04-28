@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LayoutGrid, TrendingUp, TrendingDown } from 'lucide-react';
+import { BloombergInsight } from '@/components/BloombergInsight';
+import { sectorHeatmapInsight } from '@/lib/bloombergInsights';
 
 interface SectorPerformance {
   symbol: string;
@@ -116,7 +118,12 @@ export function SectorHeatmap() {
         </CardTitle>
         <p className="text-sm text-muted-foreground">S&P 500 sectors by market cap weight</p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-3">
+        <BloombergInsight
+          insight={sectorHeatmapInsight(sectorData)}
+          panel="S&P 500 Sector Heatmap"
+          data={sectorData}
+        />
         {/* Treemap-style grid */}
         <div className="grid grid-cols-4 gap-1.5 auto-rows-fr" style={{ gridAutoRows: '80px' }}>
           {sectorData.map((sector, idx) => {

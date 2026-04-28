@@ -1,6 +1,8 @@
 import { useRatioSnapshots, RatioSnapshot } from "@/hooks/useRatioSnapshots";
 import { RatioRow } from "./RatioRow";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BloombergInsight } from "@/components/BloombergInsight";
+import { ratiosCategoryInsight } from "@/lib/bloombergInsights";
 
 interface Props {
   category: string;
@@ -30,6 +32,11 @@ export function RatioCategoryTable({ category, description }: Props) {
 
   return (
     <div className="space-y-3">
+      <BloombergInsight
+        insight={ratiosCategoryInsight(rows, category)}
+        panel={`Ratios · ${category}`}
+        data={rows.slice(0, 8)}
+      />
       <p className="text-sm text-muted-foreground">{description}</p>
       <div className="rounded-lg border border-border/40 bg-card/30 overflow-x-auto">
         <table className="w-full text-sm min-w-[840px]">

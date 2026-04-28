@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Activity, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react';
 import { SectorHeatmap } from './SectorHeatmap';
+import { BloombergInsight } from '@/components/BloombergInsight';
+import { stocksMacroInsight } from '@/lib/bloombergInsights';
 
 interface SectorData {
   symbol: string;
@@ -138,6 +140,17 @@ export function StocksMacro() {
 
   return (
     <div className="space-y-8">
+      <BloombergInsight
+        insight={stocksMacroInsight({
+          vix,
+          sp500,
+          rotationDiff:
+            (['XLK','XLF','XLE'].reduce((s, k) => s + (sectorData[k] || 0), 0) / 3) -
+            (['XLV','XLP','XLU'].reduce((s, k) => s + (sectorData[k] || 0), 0) / 3),
+        })}
+        panel="US Stocks Macro (VIX & Sector Rotation)"
+        data={{ vix, sp500, sectorData, rotationSignal }}
+      />
       {/* Hero Row - VIX and S&P */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* VIX Panel */}

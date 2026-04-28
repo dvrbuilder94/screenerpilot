@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Bitcoin, TrendingUp, TrendingDown, Activity } from "lucide-react";
+import { BloombergInsight } from "@/components/BloombergInsight";
+import { cryptoMacroInsight } from "@/lib/bloombergInsights";
 
 interface CryptoMetric {
   label: string;
@@ -153,8 +155,24 @@ export function CryptoMacroPanel() {
     );
   }
 
+  const findVal = (label: string) => metrics.find(m => m.label === label);
+  const totalMcap = findVal("Total Market Cap");
+  const btcDomMet = findVal("BTC Dominance");
+  const fg = findVal("Fear & Greed Index");
+  const funding = findVal("BTC Funding Rate");
+
   return (
     <div className="space-y-4">
+      <BloombergInsight
+        insight={cryptoMacroInsight({
+          totalMcapChange: totalMcap?.change,
+          btcDom: btcDomMet ? parseFloat(btcDomMet.value) : undefined,
+          fearGreed: fg ? parseInt(fg.value) : undefined,
+          fundingRate: funding ? parseFloat(funding.value.replace('%','').replace('+','')) : undefined,
+        })}
+        panel="Crypto Microstructure & Sentiment"
+        data={metrics}
+      />
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Bitcoin className="h-4 w-4" />
         <span>Crypto Market Microstructure & Sentiment</span>

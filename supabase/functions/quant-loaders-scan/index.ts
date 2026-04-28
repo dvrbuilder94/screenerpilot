@@ -155,23 +155,16 @@ function parseInstitutionalOwnership(md: string): {
 }
 
 function parseShortInterest(md: string): { shortFloatPct: number | null; earningsInDays: number | null } {
-  // MarketBeat short page: "Short Interest40,500,000 shares"  "% of Float7.30%"
+  // MarketBeat short page formats values without space, e.g. "Short Percent of Float12.74%"
+  // or in narrative: "representing 12.74% of the public float"
   const shortFloatPct =
-    matchPct(md, /%\s*of\s*Float\s*([\d.]+)\s*%/i) ??
-    matchPct(md, /Short\s*%\s*of\s*Float[\s\S]{0,40}?([\d.]+)\s*%/i) ??
-    matchPct(md, /Float\s*Short[\s\S]{0,40}?([\d.]+)\s*%/i);
+    matchPct(md, /Short\s*Percent\s*of\s*Float[^\d-]*([\d.]+)\s*%/i) ??
+    matchPct(md, /([\d.]+)\s*%\s*of\s*the\s*public\s*float/i) ??
+    matchPct(md, /Percentage\s*of\s*Float\s*Shorted[^\d-]*([\d.]+)\s*%/i) ??
+    matchPct(md, /%\s*of\s*Float[^\d-]*([\d.]+)\s*%/i);
 
-  // Earnings date — look for "Next Earnings Date"
-  let earningsInDays: number | null = null;
-  const em = md.match(/Next\s*Earnings\s*(?:Date)?[\s\S]{0,40}?([A-Z][a-z]+\s+\d{1,2},?\s*\d{4})/i);
-  if (em) {
-    const t = Date.parse(em[1]);
-    if (Number.isFinite(t)) {
-      const days = Math.round((t - Date.now()) / 86400000);
-      if (days >= -2 && days <= 90) earningsInDays = days;
-    }
-  }
-  return { shortFloatPct, earningsInDays };
+  // Earnings date is rarely on this page; leave null and let caller skip.
+  return { shortFloatPct, earningsInDays: null };
 }
 
 function matchPct(text: string, re: RegExp): number | null {

@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.ratios-collector]
 verify_jwt = false
+
+[functions.quant-loaders-scan]
+verify_jwt = false

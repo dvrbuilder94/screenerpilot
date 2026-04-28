@@ -17,6 +17,8 @@ import { Badge } from "@/components/ui/badge";
 import StockChart from "@/components/stock/StockChart";
 import IndicatorPanels from "@/components/stock/IndicatorPanels";
 import ShortSqueezeRadar from "@/components/stock/ShortSqueezeRadar";
+import QuantLoadersRadar from "@/components/stock/QuantLoadersRadar";
+import { Radar } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BloombergInsight } from "@/components/BloombergInsight";
 import { stockAnalysisInsight } from "@/lib/bloombergInsights";
@@ -161,7 +163,7 @@ export default function StockIntelligence() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"analyze" | "squeeze">("analyze");
+  const [activeTab, setActiveTab] = useState<"analyze" | "squeeze" | "quant">("analyze");
   const cacheRef = useRef<Map<string, AnalysisResult>>(new Map());
   const requestIdRef = useRef(0);
 
@@ -254,17 +256,25 @@ export default function StockIntelligence() {
         </p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "analyze" | "squeeze")} className="w-full">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "analyze" | "squeeze" | "quant")} className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="analyze">Analyze Stock</TabsTrigger>
           <TabsTrigger value="squeeze">
             <Zap className="h-3.5 w-3.5 mr-1.5" />
             Short Squeeze Radar
           </TabsTrigger>
+          <TabsTrigger value="quant">
+            <Radar className="h-3.5 w-3.5 mr-1.5" />
+            Quant Loaders
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="squeeze" className="mt-0">
           <ShortSqueezeRadar onAnalyze={handleAnalyzeFromRadar} />
+        </TabsContent>
+
+        <TabsContent value="quant" className="mt-0">
+          <QuantLoadersRadar onAnalyze={handleAnalyzeFromRadar} />
         </TabsContent>
 
         <TabsContent value="analyze" className="mt-0 space-y-6">

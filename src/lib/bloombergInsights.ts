@@ -1,4 +1,4 @@
-import type { BloombergInsightData } from '@/components/BloombergInsight';
+import type { BloombergInsightData, InsightTone } from '@/components/BloombergInsight';
 
 const fmtPct = (n: number, d = 1) => `${n >= 0 ? '+' : ''}${n.toFixed(d)}%`;
 

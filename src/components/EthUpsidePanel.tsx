@@ -3,6 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getEthUpsideScore } from '@/lib/cryptoMetrics';
+import { BloombergInsight } from '@/components/BloombergInsight';
+import { ethUpsideInsight } from '@/lib/bloombergInsights';
 
 export const EthUpsidePanel = () => {
   const { data, isLoading, error } = useQuery({
@@ -54,6 +56,7 @@ export const EthUpsidePanel = () => {
 
         {data && (
           <div className="space-y-6">
+            <BloombergInsight insight={ethUpsideInsight(data)} />
             {/* Main Score */}
             <div className="text-center">
               <div className={`text-6xl font-bold ${getScoreColor(data.score)}`}>

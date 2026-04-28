@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Sparkles } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getAltseasonIndex } from '@/lib/cryptoMetrics';
+import { BloombergInsight } from '@/components/BloombergInsight';
+import { altseasonInsight } from '@/lib/bloombergInsights';
 
 export const AltseasonIndexPanel = () => {
   const [lookbackDays, setLookbackDays] = useState(30);
@@ -79,6 +81,7 @@ export const AltseasonIndexPanel = () => {
 
         {data && (
           <>
+            <BloombergInsight insight={altseasonInsight(data)} />
             {/* Main Index Value */}
             <div className="text-center">
               <div className={`text-6xl font-bold ${getIndexColor(data.index)}`}>

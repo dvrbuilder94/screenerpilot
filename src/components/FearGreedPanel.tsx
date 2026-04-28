@@ -3,6 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Brain } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getFearGreedIndex } from '@/lib/cryptoMetrics';
+import { BloombergInsight } from '@/components/BloombergInsight';
+import { fearGreedInsight } from '@/lib/bloombergInsights';
 
 export const FearGreedPanel = () => {
   const { data, isLoading, error } = useQuery({
@@ -64,6 +66,7 @@ export const FearGreedPanel = () => {
 
         {data && (
           <div className="space-y-6">
+            <BloombergInsight insight={fearGreedInsight(data)} />
             {/* Main Value */}
             <div className="text-center">
               <div className={`text-6xl font-bold ${getValueColor(data.value)}`}>

@@ -3,6 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCandles, Candle } from '@/lib/binanceApi';
+import { BloombergInsight } from '@/components/BloombergInsight';
+import { bmnrVsEthInsight } from '@/lib/bloombergInsights';
 
 interface AssetMetrics {
   returns: number;
@@ -149,6 +151,7 @@ export const BmnrVsEthPanel = () => {
         )}
         {data && (
           <div className="space-y-6">
+            <BloombergInsight insight={bmnrVsEthInsight(data)} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {renderSide('BMNR', data.bmnr, data.winner === 'BMNR')}
               {renderSide('ETH', data.eth, data.winner === 'ETH')}

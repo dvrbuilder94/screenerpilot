@@ -2,6 +2,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Loader2, Shield } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getDominanceData } from '@/lib/cryptoMetrics';
+import { BloombergInsight } from '@/components/BloombergInsight';
+import { dominanceInsight } from '@/lib/bloombergInsights';
 
 export const DominancePanel = () => {
   const { data, isLoading, error } = useQuery({
@@ -47,6 +49,7 @@ export const DominancePanel = () => {
 
         {data && (
           <div className="space-y-6">
+            <BloombergInsight insight={dominanceInsight(data)} />
             {/* Main Dominance Value */}
             <div className="text-center">
               <div className="text-6xl font-bold text-primary">

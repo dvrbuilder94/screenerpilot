@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Loader2, TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { calculateAltseasonIndex, AltseasonData } from '@/lib/cryptoMacro';
+import { BloombergInsight } from '@/components/BloombergInsight';
+import { altseasonInsight } from '@/lib/bloombergInsights';
 
 export const AltseasonPanel = () => {
   const [lookbackDays, setLookbackDays] = useState(90);
@@ -71,6 +73,7 @@ export const AltseasonPanel = () => {
 
         {data && (
           <>
+            <BloombergInsight insight={altseasonInsight(data)} />
             <div className="text-center">
               <div className={`text-6xl font-bold ${getTextColor(data.value)}`}>
                 {data.value}

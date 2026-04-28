@@ -3,6 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Coins } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { calculateEthVsBtc } from '@/lib/cryptoMacro';
+import { BloombergInsight } from '@/components/BloombergInsight';
+import { ethVsBtcInsight } from '@/lib/bloombergInsights';
 
 export const EthVsBtcPanel = () => {
   const { data, isLoading, error } = useQuery({
@@ -42,6 +44,7 @@ export const EthVsBtcPanel = () => {
 
         {data && (
           <div className="space-y-6">
+            <BloombergInsight insight={ethVsBtcInsight(data)} />
             {/* Side-by-side comparison */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* BTC */}

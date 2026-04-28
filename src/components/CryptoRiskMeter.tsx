@@ -3,6 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Activity, TrendingUp, Minus, TrendingDown } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { calculateCryptoRisk, RiskState } from '@/lib/cryptoMacro';
+import { BloombergInsight } from '@/components/BloombergInsight';
+import { riskRegimeInsight } from '@/lib/bloombergInsights';
 
 export const CryptoRiskMeter = () => {
   const { data, isLoading, error } = useQuery({
@@ -77,6 +79,7 @@ export const CryptoRiskMeter = () => {
 
         {data && (
           <>
+            <BloombergInsight insight={riskRegimeInsight(data)} />
             <div className={`p-6 rounded-xl border ${config.borderColor} ${config.bgColor}`}>
               <div className="flex items-center justify-center gap-3 mb-2">
                 <Icon className={`w-8 h-8 ${config.color}`} />

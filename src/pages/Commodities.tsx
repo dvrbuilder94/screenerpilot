@@ -265,50 +265,59 @@ export default function Commodities() {
           </div>
         </div>
 
-        {/* Commodity Prices Grid */}
-        <section>
-          <h2 className="text-xl font-semibold mb-4 text-foreground flex items-center gap-2">
+        {/* Commodity Prices Grid - Grouped by category */}
+        <section className="space-y-6">
+          <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
             <DollarSign className="h-5 w-5" />
             Spot Prices
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-            {commodityData.map((commodity) => (
-              <Card
-                key={commodity.yahooSymbol}
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  selectedCommodity === commodity.yahooSymbol ? "ring-2 ring-primary border-primary" : "border-border"
-                }`}
-                onClick={() => handleCommoditySelect(commodity.yahooSymbol)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="font-mono text-xs text-muted-foreground">{commodity.yahooSymbol}</span>
-                    {commodity.change >= 0 ? (
-                      <TrendingUp className="h-4 w-4 text-bullish" />
-                    ) : (
-                      <TrendingDown className="h-4 w-4 text-bearish" />
-                    )}
-                  </div>
-                  <p className="font-medium text-foreground text-sm">{commodity.name}</p>
-                  <div className="flex items-baseline gap-1 mt-1">
-                    <span className="text-lg font-bold text-foreground">
-                      $
-                      {commodity.price > 0
-                        ? commodity.price.toLocaleString("en-US", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })
-                        : "--"}
-                    </span>
-                    <span className="text-xs text-muted-foreground">/{commodity.unit}</span>
-                  </div>
-                  <span className={`text-sm font-medium ${commodity.change >= 0 ? "text-bullish" : "text-bearish"}`}>
-                    {commodity.price > 0 ? `${commodity.change >= 0 ? "+" : ""}${commodity.change.toFixed(2)}%` : "--"}
-                  </span>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {(["Precious", "Energy", "Industrial", "Battery / Critical", "Agriculture"] as const).map((cat) => {
+            const items = commodityData.filter((c) => c.category === cat);
+            if (items.length === 0) return null;
+            return (
+              <div key={cat}>
+                <h3 className="text-sm font-medium text-muted-foreground mb-2 uppercase tracking-wide">{cat}</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                  {items.map((commodity) => (
+                    <Card
+                      key={commodity.yahooSymbol}
+                      className={`cursor-pointer transition-all hover:shadow-md ${
+                        selectedCommodity === commodity.yahooSymbol ? "ring-2 ring-primary border-primary" : "border-border"
+                      }`}
+                      onClick={() => handleCommoditySelect(commodity.yahooSymbol)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="font-mono text-xs text-muted-foreground">{commodity.yahooSymbol}</span>
+                          {commodity.change >= 0 ? (
+                            <TrendingUp className="h-4 w-4 text-bullish" />
+                          ) : (
+                            <TrendingDown className="h-4 w-4 text-bearish" />
+                          )}
+                        </div>
+                        <p className="font-medium text-foreground text-sm">{commodity.name}</p>
+                        <div className="flex items-baseline gap-1 mt-1">
+                          <span className="text-lg font-bold text-foreground">
+                            $
+                            {commodity.price > 0
+                              ? commodity.price.toLocaleString("en-US", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })
+                              : "--"}
+                          </span>
+                          <span className="text-xs text-muted-foreground">/{commodity.unit}</span>
+                        </div>
+                        <span className={`text-sm font-medium ${commodity.change >= 0 ? "text-bullish" : "text-bearish"}`}>
+                          {commodity.price > 0 ? `${commodity.change >= 0 ? "+" : ""}${commodity.change.toFixed(2)}%` : "--"}
+                        </span>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </section>
 
         {/* Chart Section */}

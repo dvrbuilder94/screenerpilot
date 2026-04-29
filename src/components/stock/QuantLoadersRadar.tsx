@@ -26,6 +26,8 @@ interface Holding {
   pctOfPortfolio: number | null;
   valueUsd: number | null;
   shares: number | null;
+  deltaPct: number | null;
+  asOf: string | null;
 }
 
 interface ScanResponse {

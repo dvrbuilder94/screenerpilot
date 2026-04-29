@@ -21,6 +21,7 @@ interface CommodityData {
   symbol: string;
   yahooSymbol: string;
   name: string;
+  category: "Precious" | "Energy" | "Industrial" | "Battery / Critical" | "Agriculture";
   price: number;
   change: number;
   unit: string;
@@ -29,15 +30,38 @@ interface CommodityData {
   ema50?: number[];
 }
 
-// Yahoo Finance commodity futures symbols
+// Yahoo Finance commodity futures + ETF proxies for metals without liquid futures
 const commoditySymbols: CommodityData[] = [
-  { symbol: "Gold", yahooSymbol: "GC=F", name: "Gold", price: 0, change: 0, unit: "oz" },
-  { symbol: "Silver", yahooSymbol: "SI=F", name: "Silver", price: 0, change: 0, unit: "oz" },
-  { symbol: "Platinum", yahooSymbol: "PL=F", name: "Platinum", price: 0, change: 0, unit: "oz" },
-  { symbol: "Palladium", yahooSymbol: "PA=F", name: "Palladium", price: 0, change: 0, unit: "oz" },
-  { symbol: "Copper", yahooSymbol: "HG=F", name: "Copper", price: 0, change: 0, unit: "lb" },
-  { symbol: "Crude Oil", yahooSymbol: "CL=F", name: "Crude Oil", price: 0, change: 0, unit: "bbl" },
-  { symbol: "Natural Gas", yahooSymbol: "NG=F", name: "Natural Gas", price: 0, change: 0, unit: "MMBtu" },
+  // Precious metals
+  { symbol: "Gold", yahooSymbol: "GC=F", name: "Gold", category: "Precious", price: 0, change: 0, unit: "oz" },
+  { symbol: "Silver", yahooSymbol: "SI=F", name: "Silver", category: "Precious", price: 0, change: 0, unit: "oz" },
+  { symbol: "Platinum", yahooSymbol: "PL=F", name: "Platinum", category: "Precious", price: 0, change: 0, unit: "oz" },
+  { symbol: "Palladium", yahooSymbol: "PA=F", name: "Palladium", category: "Precious", price: 0, change: 0, unit: "oz" },
+  { symbol: "Palladium ETF", yahooSymbol: "PALL", name: "Palladium ETF", category: "Precious", price: 0, change: 0, unit: "share" },
+
+  // Energy
+  { symbol: "Crude Oil", yahooSymbol: "CL=F", name: "Crude Oil", category: "Energy", price: 0, change: 0, unit: "bbl" },
+  { symbol: "Brent", yahooSymbol: "BZ=F", name: "Brent Crude", category: "Energy", price: 0, change: 0, unit: "bbl" },
+  { symbol: "Natural Gas", yahooSymbol: "NG=F", name: "Natural Gas", category: "Energy", price: 0, change: 0, unit: "MMBtu" },
+  { symbol: "Uranium ETF", yahooSymbol: "URA", name: "Uranium ETF", category: "Energy", price: 0, change: 0, unit: "share" },
+  { symbol: "Cameco", yahooSymbol: "CCJ", name: "Cameco (Uranium)", category: "Energy", price: 0, change: 0, unit: "share" },
+
+  // Industrial metals
+  { symbol: "Copper", yahooSymbol: "HG=F", name: "Copper", category: "Industrial", price: 0, change: 0, unit: "lb" },
+  { symbol: "Aluminum ETF", yahooSymbol: "JJU", name: "Aluminum ETN", category: "Industrial", price: 0, change: 0, unit: "share" },
+
+  // Battery / Critical metals
+  { symbol: "Lithium ETF", yahooSymbol: "LIT", name: "Lithium ETF", category: "Battery / Critical", price: 0, change: 0, unit: "share" },
+  { symbol: "Albemarle", yahooSymbol: "ALB", name: "Albemarle (Lithium)", category: "Battery / Critical", price: 0, change: 0, unit: "share" },
+  { symbol: "Rare Earths ETF", yahooSymbol: "REMX", name: "Rare Earths ETF", category: "Battery / Critical", price: 0, change: 0, unit: "share" },
+  { symbol: "MP Materials", yahooSymbol: "MP", name: "MP Materials (Rare Earth)", category: "Battery / Critical", price: 0, change: 0, unit: "share" },
+  { symbol: "Nickel/Battery ETF", yahooSymbol: "BATT", name: "Battery Tech ETF", category: "Battery / Critical", price: 0, change: 0, unit: "share" },
+
+  // Agriculture
+  { symbol: "Wheat", yahooSymbol: "ZW=F", name: "Wheat", category: "Agriculture", price: 0, change: 0, unit: "bu" },
+  { symbol: "Corn", yahooSymbol: "ZC=F", name: "Corn", category: "Agriculture", price: 0, change: 0, unit: "bu" },
+  { symbol: "Soybeans", yahooSymbol: "ZS=F", name: "Soybeans", category: "Agriculture", price: 0, change: 0, unit: "bu" },
+  { symbol: "Coffee", yahooSymbol: "KC=F", name: "Coffee", category: "Agriculture", price: 0, change: 0, unit: "lb" },
 ];
 
 const ratioDescriptions: Record<string, string> = {
@@ -241,50 +265,59 @@ export default function Commodities() {
           </div>
         </div>
 
-        {/* Commodity Prices Grid */}
-        <section>
-          <h2 className="text-xl font-semibold mb-4 text-foreground flex items-center gap-2">
+        {/* Commodity Prices Grid - Grouped by category */}
+        <section className="space-y-6">
+          <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
             <DollarSign className="h-5 w-5" />
             Spot Prices
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-            {commodityData.map((commodity) => (
-              <Card
-                key={commodity.yahooSymbol}
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  selectedCommodity === commodity.yahooSymbol ? "ring-2 ring-primary border-primary" : "border-border"
-                }`}
-                onClick={() => handleCommoditySelect(commodity.yahooSymbol)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="font-mono text-xs text-muted-foreground">{commodity.yahooSymbol}</span>
-                    {commodity.change >= 0 ? (
-                      <TrendingUp className="h-4 w-4 text-bullish" />
-                    ) : (
-                      <TrendingDown className="h-4 w-4 text-bearish" />
-                    )}
-                  </div>
-                  <p className="font-medium text-foreground text-sm">{commodity.name}</p>
-                  <div className="flex items-baseline gap-1 mt-1">
-                    <span className="text-lg font-bold text-foreground">
-                      $
-                      {commodity.price > 0
-                        ? commodity.price.toLocaleString("en-US", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })
-                        : "--"}
-                    </span>
-                    <span className="text-xs text-muted-foreground">/{commodity.unit}</span>
-                  </div>
-                  <span className={`text-sm font-medium ${commodity.change >= 0 ? "text-bullish" : "text-bearish"}`}>
-                    {commodity.price > 0 ? `${commodity.change >= 0 ? "+" : ""}${commodity.change.toFixed(2)}%` : "--"}
-                  </span>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {(["Precious", "Energy", "Industrial", "Battery / Critical", "Agriculture"] as const).map((cat) => {
+            const items = commodityData.filter((c) => c.category === cat);
+            if (items.length === 0) return null;
+            return (
+              <div key={cat}>
+                <h3 className="text-sm font-medium text-muted-foreground mb-2 uppercase tracking-wide">{cat}</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                  {items.map((commodity) => (
+                    <Card
+                      key={commodity.yahooSymbol}
+                      className={`cursor-pointer transition-all hover:shadow-md ${
+                        selectedCommodity === commodity.yahooSymbol ? "ring-2 ring-primary border-primary" : "border-border"
+                      }`}
+                      onClick={() => handleCommoditySelect(commodity.yahooSymbol)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="font-mono text-xs text-muted-foreground">{commodity.yahooSymbol}</span>
+                          {commodity.change >= 0 ? (
+                            <TrendingUp className="h-4 w-4 text-bullish" />
+                          ) : (
+                            <TrendingDown className="h-4 w-4 text-bearish" />
+                          )}
+                        </div>
+                        <p className="font-medium text-foreground text-sm">{commodity.name}</p>
+                        <div className="flex items-baseline gap-1 mt-1">
+                          <span className="text-lg font-bold text-foreground">
+                            $
+                            {commodity.price > 0
+                              ? commodity.price.toLocaleString("en-US", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })
+                              : "--"}
+                          </span>
+                          <span className="text-xs text-muted-foreground">/{commodity.unit}</span>
+                        </div>
+                        <span className={`text-sm font-medium ${commodity.change >= 0 ? "text-bullish" : "text-bearish"}`}>
+                          {commodity.price > 0 ? `${commodity.change >= 0 ? "+" : ""}${commodity.change.toFixed(2)}%` : "--"}
+                        </span>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </section>
 
         {/* Chart Section */}

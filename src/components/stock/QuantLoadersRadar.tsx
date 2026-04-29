@@ -174,10 +174,11 @@ export default function QuantLoadersRadar({ onAnalyze }: Props) {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[60px]">#</TableHead>
+                    <TableHead className="w-[50px]">#</TableHead>
                     <TableHead>Ticker</TableHead>
                     <TableHead>Compañía</TableHead>
                     <TableHead className="text-right">% Cartera</TableHead>
+                    <TableHead className="text-right">Δ QoQ</TableHead>
                     <TableHead className="text-right">Valor</TableHead>
                     <TableHead className="text-right">Acciones</TableHead>
                     <TableHead></TableHead>

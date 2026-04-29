@@ -21,6 +21,7 @@ interface CommodityData {
   symbol: string;
   yahooSymbol: string;
   name: string;
+  category: "Precious" | "Energy" | "Industrial" | "Battery / Critical" | "Agriculture";
   price: number;
   change: number;
   unit: string;
@@ -29,15 +30,38 @@ interface CommodityData {
   ema50?: number[];
 }
 
-// Yahoo Finance commodity futures symbols
+// Yahoo Finance commodity futures + ETF proxies for metals without liquid futures
 const commoditySymbols: CommodityData[] = [
-  { symbol: "Gold", yahooSymbol: "GC=F", name: "Gold", price: 0, change: 0, unit: "oz" },
-  { symbol: "Silver", yahooSymbol: "SI=F", name: "Silver", price: 0, change: 0, unit: "oz" },
-  { symbol: "Platinum", yahooSymbol: "PL=F", name: "Platinum", price: 0, change: 0, unit: "oz" },
-  { symbol: "Palladium", yahooSymbol: "PA=F", name: "Palladium", price: 0, change: 0, unit: "oz" },
-  { symbol: "Copper", yahooSymbol: "HG=F", name: "Copper", price: 0, change: 0, unit: "lb" },
-  { symbol: "Crude Oil", yahooSymbol: "CL=F", name: "Crude Oil", price: 0, change: 0, unit: "bbl" },
-  { symbol: "Natural Gas", yahooSymbol: "NG=F", name: "Natural Gas", price: 0, change: 0, unit: "MMBtu" },
+  // Precious metals
+  { symbol: "Gold", yahooSymbol: "GC=F", name: "Gold", category: "Precious", price: 0, change: 0, unit: "oz" },
+  { symbol: "Silver", yahooSymbol: "SI=F", name: "Silver", category: "Precious", price: 0, change: 0, unit: "oz" },
+  { symbol: "Platinum", yahooSymbol: "PL=F", name: "Platinum", category: "Precious", price: 0, change: 0, unit: "oz" },
+  { symbol: "Palladium", yahooSymbol: "PA=F", name: "Palladium", category: "Precious", price: 0, change: 0, unit: "oz" },
+  { symbol: "Palladium ETF", yahooSymbol: "PALL", name: "Palladium ETF", category: "Precious", price: 0, change: 0, unit: "share" },
+
+  // Energy
+  { symbol: "Crude Oil", yahooSymbol: "CL=F", name: "Crude Oil", category: "Energy", price: 0, change: 0, unit: "bbl" },
+  { symbol: "Brent", yahooSymbol: "BZ=F", name: "Brent Crude", category: "Energy", price: 0, change: 0, unit: "bbl" },
+  { symbol: "Natural Gas", yahooSymbol: "NG=F", name: "Natural Gas", category: "Energy", price: 0, change: 0, unit: "MMBtu" },
+  { symbol: "Uranium ETF", yahooSymbol: "URA", name: "Uranium ETF", category: "Energy", price: 0, change: 0, unit: "share" },
+  { symbol: "Cameco", yahooSymbol: "CCJ", name: "Cameco (Uranium)", category: "Energy", price: 0, change: 0, unit: "share" },
+
+  // Industrial metals
+  { symbol: "Copper", yahooSymbol: "HG=F", name: "Copper", category: "Industrial", price: 0, change: 0, unit: "lb" },
+  { symbol: "Aluminum ETF", yahooSymbol: "JJU", name: "Aluminum ETN", category: "Industrial", price: 0, change: 0, unit: "share" },
+
+  // Battery / Critical metals
+  { symbol: "Lithium ETF", yahooSymbol: "LIT", name: "Lithium ETF", category: "Battery / Critical", price: 0, change: 0, unit: "share" },
+  { symbol: "Albemarle", yahooSymbol: "ALB", name: "Albemarle (Lithium)", category: "Battery / Critical", price: 0, change: 0, unit: "share" },
+  { symbol: "Rare Earths ETF", yahooSymbol: "REMX", name: "Rare Earths ETF", category: "Battery / Critical", price: 0, change: 0, unit: "share" },
+  { symbol: "MP Materials", yahooSymbol: "MP", name: "MP Materials (Rare Earth)", category: "Battery / Critical", price: 0, change: 0, unit: "share" },
+  { symbol: "Nickel/Battery ETF", yahooSymbol: "BATT", name: "Battery Tech ETF", category: "Battery / Critical", price: 0, change: 0, unit: "share" },
+
+  // Agriculture
+  { symbol: "Wheat", yahooSymbol: "ZW=F", name: "Wheat", category: "Agriculture", price: 0, change: 0, unit: "bu" },
+  { symbol: "Corn", yahooSymbol: "ZC=F", name: "Corn", category: "Agriculture", price: 0, change: 0, unit: "bu" },
+  { symbol: "Soybeans", yahooSymbol: "ZS=F", name: "Soybeans", category: "Agriculture", price: 0, change: 0, unit: "bu" },
+  { symbol: "Coffee", yahooSymbol: "KC=F", name: "Coffee", category: "Agriculture", price: 0, change: 0, unit: "lb" },
 ];
 
 const ratioDescriptions: Record<string, string> = {

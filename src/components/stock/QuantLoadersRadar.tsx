@@ -204,6 +204,24 @@ export default function QuantLoadersRadar({ onAnalyze }: Props) {
                         )}
                       </TableCell>
                       <TableCell className="text-right text-sm">
+                        {h.deltaPct !== null ? (
+                          <span
+                            className={
+                              h.deltaPct >= 30
+                                ? "text-emerald-500 font-medium"
+                                : h.deltaPct < 0
+                                  ? "text-red-500"
+                                  : "text-muted-foreground"
+                            }
+                          >
+                            {h.deltaPct > 0 ? "+" : ""}
+                            {h.deltaPct.toFixed(1)}%
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right text-sm">
                         {fmtMoney(h.valueUsd)}
                       </TableCell>
                       <TableCell className="text-right text-xs text-muted-foreground">

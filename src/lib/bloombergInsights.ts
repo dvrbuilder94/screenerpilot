@@ -7,13 +7,13 @@ export function dominanceInsight(d: { dominance: number; change7d: number }): Bl
   const ch = d.change7d;
   if (ch > 1.5) return {
     signal: `BTC.D ${fmtPct(ch)} (7d) → ${d.dominance.toFixed(1)}%`,
-    implication: 'Capital rotating into BTC, alts under pressure',
+    implication: 'BTC absorbing flows · alt beta compressing (RISK-OFF tilt)',
     action: 'Trim alt exposure, hold majors',
     tone: 'caution',
   };
   if (ch < -1.5) return {
     signal: `BTC.D ${fmtPct(ch)} (7d) → ${d.dominance.toFixed(1)}%`,
-    implication: 'Liquidity flowing into alts, risk-on rotation',
+    implication: 'Liquidity rotating down the curve into alts (RISK-ON)',
     action: 'Selectively add high-quality alts',
     tone: 'bullish',
   };
@@ -31,13 +31,13 @@ export function altseasonInsight(d: { value?: number; index?: number; altsOutper
   if (v >= 70) return {
     signal: `Altseason ON (${v}/100)`,
     implication: `${d.altsOutperforming}/${d.totalAlts} alts beating BTC`,
-    action: 'Prime window for selective alt longs',
+    action: 'Constructive window for selective alt exposure',
     tone: 'bullish',
   };
   if (v < 30) return {
     signal: `Bitcoin Season (${v}/100)`,
     implication: 'Alts broadly underperforming BTC',
-    action: 'Defensive: stick to BTC/ETH',
+    action: 'Defensive bias: anchor in BTC/ETH',
     tone: 'bearish',
   };
   return {
@@ -100,20 +100,20 @@ export function ethUpsideInsight(d: { score: number; emaTrend: string; volatilit
 export function fearGreedInsight(d: { value: number; category: string }): BloombergInsightData {
   if (d.value <= 25) return {
     signal: `${d.category} (${d.value}/100)`,
-    implication: 'Capitulation zone, contrarian setup forming',
+    implication: 'Capitulation zone · contrarian long setup forming',
     action: 'Scale into majors gradually',
     tone: 'bullish',
   };
   if (d.value >= 75) return {
     signal: `${d.category} (${d.value}/100)`,
-    implication: 'Euphoria zone, late-cycle risk',
+    implication: 'Euphoria · late-cycle distribution risk',
     action: 'Tighten stops, take partial profits',
     tone: 'caution',
   };
   return {
     signal: `${d.category} (${d.value}/100)`,
     implication: 'Sentiment balanced, no extreme positioning',
-    action: 'Trade the technicals, not the mood',
+    action: 'Trade structure, not sentiment',
     tone: 'neutral',
   };
 }
@@ -122,19 +122,19 @@ export function fearGreedInsight(d: { value: number; category: string }): Bloomb
 export function riskRegimeInsight(d: { state: 'risk_on' | 'risk_off' | 'neutral'; altsAvgReturn7d: number }): BloombergInsightData {
   if (d.state === 'risk_on') return {
     signal: `RISK-ON · alts ${fmtPct(d.altsAvgReturn7d)} (7d)`,
-    implication: 'Aggressive bid across higher-beta assets',
+    implication: 'Broad bid across higher-beta names · beta expanding',
     action: 'Increase exposure to high-beta names',
     tone: 'bullish',
   };
   if (d.state === 'risk_off') return {
     signal: `RISK-OFF · alts ${fmtPct(d.altsAvgReturn7d)} (7d)`,
-    implication: 'Defensive flows, beta compressing',
+    implication: 'Risk reduction across the curve · beta compressing',
     action: 'Reduce leverage, raise cash',
     tone: 'bearish',
   };
   return {
-    signal: `NEUTRAL regime · alts ${fmtPct(d.altsAvgReturn7d)} (7d)`,
-    implication: 'No conviction in either direction',
+    signal: `BALANCED regime · alts ${fmtPct(d.altsAvgReturn7d)} (7d)`,
+    implication: 'No regime conviction · directional edge absent',
     action: 'Keep position sizes small',
     tone: 'neutral',
   };
@@ -181,19 +181,19 @@ export function fedMacroInsight(d: {
 
   if (inverted) return {
     signal: `Curve inverted ${(spread * 100).toFixed(0)}bps · DXY ${dxy?.toFixed(1) ?? 'n/a'}`,
-    implication: 'Recession signal active, defensive bias historically rewarded',
+    implication: 'Curve inversion active · historical recession lead, defensive bias rewarded',
     action: 'Reduce duration risk, favor quality over beta',
     tone: 'bearish',
   };
   if (strongDxy) return {
     signal: `DXY ${dxy?.toFixed(1)} · 10Y ${yield10y?.toFixed(2)}%`,
-    implication: 'Dollar strength pressures non-USD assets and EM',
+    implication: 'USD strength a headwind for EM, commodities and non-USD risk',
     action: 'Hedge FX exposure, watch commodity weakness',
     tone: 'caution',
   };
   return {
     signal: `10Y ${yield10y?.toFixed(2) ?? 'n/a'}% · DXY ${dxy?.toFixed(1) ?? 'n/a'}`,
-    implication: 'Curve healthy, no immediate macro stress flag',
+    implication: 'Curve and USD within normal range · no macro stress flag',
     action: 'Macro tailwinds neutral, focus on micro setups',
     tone: 'neutral',
   };
@@ -212,31 +212,31 @@ export function stocksMacroInsight(d: {
 
   if (v >= 25) return {
     signal: `VIX ${v.toFixed(1)} · rotation ${r >= 0 ? '+' : ''}${r.toFixed(2)}%`,
-    implication: 'Stress regime, dispersion rising across sectors',
+    implication: 'Stress regime · cross-sector dispersion expanding',
     action: 'Cut size, raise hedges, avoid new beta longs',
     tone: 'bearish',
   };
   if (v < 15 && r > 0.3) return {
     signal: `VIX ${v.toFixed(1)} · cyclicals leading +${r.toFixed(2)}%`,
-    implication: 'Complacency + risk-on rotation, late-cycle setup',
+    implication: 'Compressed vol + cyclical leadership · late-cycle RISK-ON',
     action: 'Stay long but tighten stops on extended winners',
     tone: 'caution',
   };
   if (r > 0.5) return {
     signal: `Cyclicals leading +${r.toFixed(2)}% vs defensives`,
-    implication: 'Risk-on rotation underway, growth/financials bid',
+    implication: 'RISK-ON rotation · growth and financials bid',
     action: 'Lean into XLK, XLF, XLY exposure',
     tone: 'bullish',
   };
   if (r < -0.5) return {
     signal: `Defensives leading ${r.toFixed(2)}% vs cyclicals`,
-    implication: 'Risk-off rotation, capital seeking shelter',
+    implication: 'RISK-OFF rotation · capital seeking shelter',
     action: 'Rotate into XLP, XLU, XLV; trim cyclicals',
     tone: 'bearish',
   };
   return {
     signal: `VIX ${v.toFixed(1)} · neutral rotation ${r >= 0 ? '+' : ''}${r.toFixed(2)}%`,
-    implication: 'No clear sector leadership, choppy regime',
+    implication: 'No sector leadership · choppy, range-bound tape',
     action: 'Trade ranges, avoid trend-following bias',
     tone: 'neutral',
   };
@@ -254,19 +254,19 @@ export function sectorHeatmapInsight(sectors: { symbol: string; name: string; ch
 
   if (breadthPct >= 75) return {
     signal: `Breadth ${breadth}/${total} green · ${top.symbol} +${top.change.toFixed(2)}%`,
-    implication: 'Broad-based bid, healthy market internals',
+    implication: 'Broad bid · healthy market internals',
     action: 'Trend-friendly tape, hold winners',
     tone: 'bullish',
   };
   if (breadthPct <= 25) return {
     signal: `Breadth ${breadth}/${total} green · ${bot.symbol} ${bot.change.toFixed(2)}%`,
-    implication: 'Narrow tape, distribution under the surface',
+    implication: 'Narrow tape · distribution under the surface',
     action: 'Trim weak sectors, wait for breadth to flip',
     tone: 'bearish',
   };
   return {
     signal: `Mixed breadth ${breadth}/${total} · ${top.symbol} +${top.change.toFixed(2)}% leads`,
-    implication: 'Sector dispersion, rotation game over directional',
+    implication: 'Sector dispersion · rotation trade over directional',
     action: `Pair-trade: long ${top.symbol}, short ${bot.symbol}`,
     tone: 'neutral',
   };
@@ -279,27 +279,27 @@ export function commoditiesMacroInsight(ratios: { name: string; value: number; t
   const gs = ratios.find(r => r.name === 'Gold/Silver');
 
   if (cg && cg.trend === 'bullish') return {
-    signal: `Cu/Au ${cg.value.toFixed(5)} · risk-on`,
-    implication: 'Industrial demand strong, growth expectations rising',
+    signal: `Cu/Au ${cg.value.toFixed(5)} · RISK-ON tilt`,
+    implication: 'Industrial demand firm · growth expectations rising',
     action: 'Favor cyclicals, EM equities, base metals',
     tone: 'bullish',
   };
   if (cg && cg.trend === 'bearish') return {
-    signal: `Cu/Au ${cg.value.toFixed(5)} · risk-off`,
-    implication: 'Defensive bid for gold, growth fears building',
+    signal: `Cu/Au ${cg.value.toFixed(5)} · RISK-OFF tilt`,
+    implication: 'Defensive bid for gold · growth fears building',
     action: 'Defensive sectors, gold miners, long duration',
     tone: 'bearish',
   };
   if (gs && gs.trend === 'bearish') return {
     signal: `Au/Ag ${gs.value.toFixed(1)} · silver lagging`,
-    implication: 'Risk aversion, silver discount widening',
+    implication: 'Risk aversion · silver discount widening',
     action: 'Watch for silver mean-reversion setup',
     tone: 'caution',
   };
   return {
     signal: 'Commodity ratios in normal range',
-    implication: 'No extreme regime signal from metals',
-    action: 'Use spot trends, ratios offer no edge now',
+    implication: 'Metal ratios offer no regime signal',
+    action: 'Trade spot trends · ratios offer no edge',
     tone: 'neutral',
   };
 }
@@ -316,19 +316,19 @@ export function cryptoMacroInsight(d: {
 
   if (fundingRate != null && fundingRate > 0.05) return {
     signal: `Funding +${fundingRate.toFixed(3)}% · longs crowded`,
-    implication: 'Perp longs overpaying, squeeze risk to downside',
+    implication: 'Perp longs overpaying funding · downside squeeze risk',
     action: 'Avoid chasing, watch for funding reset',
     tone: 'caution',
   };
   if (fundingRate != null && fundingRate < -0.02) return {
     signal: `Funding ${fundingRate.toFixed(3)}% · shorts crowded`,
-    implication: 'Negative funding setup, short squeeze fuel',
+    implication: 'Negative funding · short squeeze fuel building',
     action: 'Bias for upside surprise on positive catalyst',
     tone: 'bullish',
   };
   if (fearGreed != null && fearGreed >= 75) return {
     signal: `F&G ${fearGreed} · greed extreme`,
-    implication: 'Sentiment euphoric, contrarian risk rising',
+    implication: 'Sentiment euphoric · contrarian risk rising',
     action: 'Tighten stops, take partial profits',
     tone: 'caution',
   };
@@ -342,7 +342,7 @@ export function cryptoMacroInsight(d: {
     const tone: InsightTone = totalMcapChange > 1 ? 'bullish' : totalMcapChange < -1 ? 'bearish' : 'neutral';
     return {
       signal: `Total mcap ${fmtPct(totalMcapChange)} 24h · BTC.D ${btcDom?.toFixed(1) ?? 'n/a'}%`,
-      implication: tone === 'bullish' ? 'Capital inflow, broad bid' : tone === 'bearish' ? 'Outflow, derisking' : 'Stable flows, no conviction',
+      implication: tone === 'bullish' ? 'Capital inflow · broad bid' : tone === 'bearish' ? 'Outflow · broad derisking' : 'Stable flows · no conviction',
       action: tone === 'neutral' ? 'Wait for directional break' : 'Follow the flow, manage size',
       tone,
     };
@@ -361,19 +361,19 @@ export function latamFxInsight(d: {
   if (change1d == null || price == null) return null;
   if (change1d > 1) return {
     signal: `${pair} ${fmtPct(change1d)} (1d) at ${price.toFixed(2)}`,
-    implication: 'Local currency depreciating fast, capital outflow signal',
+    implication: 'Local FX depreciating fast · capital outflow signal (RISK-OFF)',
     action: 'Watch local rates, reduce LCY duration',
     tone: 'bearish',
   };
   if (change1d < -1) return {
     signal: `${pair} ${fmtPct(change1d)} (1d) at ${price.toFixed(2)}`,
-    implication: 'Local currency appreciating, risk-on for LATAM assets',
+    implication: 'Local FX appreciating · RISK-ON tilt for LATAM assets',
     action: 'Constructive on local equities and rates',
     tone: 'bullish',
   };
   return {
     signal: `${pair} ${fmtPct(change1d)} (1d) at ${price.toFixed(2)}`,
-    implication: 'FX stable, no immediate macro stress',
+    implication: 'FX stable · no macro stress signal',
     action: 'Trade local fundamentals, FX neutral',
     tone: 'neutral',
   };
@@ -400,26 +400,26 @@ export function ratiosCategoryInsight(rows: {
 
   if (divergent) return {
     signal: `${extreme.display_name} z ${z.toFixed(2)} · 1M ${fmtPct(ch1m)} (divergent)`,
-    implication: 'Statistical extreme reversing, trend exhaustion likely',
+    implication: 'Statistical extreme reversing · trend exhaustion likely',
     action: 'Watch for mean-reversion entry on this ratio',
     tone: 'caution',
   };
   if (z > 2) return {
     signal: `${extreme.display_name} z ${z.toFixed(2)} · ${pct.toFixed(0)}th pctile`,
-    implication: 'Extreme overshoot vs 5y baseline, statistically stretched',
-    action: 'Fade extreme or hedge correlated exposure',
+    implication: 'Stretched high vs 5Y baseline · mean-reversion bias',
+    action: 'Fade the extreme or hedge correlated exposure',
     tone: 'caution',
   };
   if (z < -2) return {
     signal: `${extreme.display_name} z ${z.toFixed(2)} · ${pct.toFixed(0)}th pctile`,
-    implication: 'Extreme undershoot vs 5y baseline, dislocation building',
-    action: 'Look for mean-reversion long setup',
+    implication: 'Stretched low vs 5Y baseline · dislocation building',
+    action: 'Build mean-reversion long setup',
     tone: 'bullish',
   };
   return {
     signal: `${category} most stretched: ${extreme.display_name} z ${z.toFixed(2)}`,
     implication: 'No extreme dislocations, ratios within normal range',
-    action: 'Wait for z > |2| for actionable signals',
+    action: 'Wait for |z| ≥ 2σ for actionable signals',
     tone: 'neutral',
   };
 }

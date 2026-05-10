@@ -14,7 +14,7 @@ Generate a macro market insight with a MAXIMUM of FOUR short lines.
 
 Requirements:
 - Mention stocks, commodities, and crypto explicitly
-- Clearly describe overall risk sentiment (risk-on or risk-off)
+- Clearly describe the cross-asset risk regime (RISK-ON, RISK-OFF or BALANCED)
 - Reference volatility conditions (VIX)
 - Include the Fed stance or monetary policy expectations
 - Mention at least one important macro or market event from this week or the coming days

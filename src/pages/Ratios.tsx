@@ -14,17 +14,17 @@ export default function Ratios() {
         <div className="mb-6">
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Cross-Asset Ratios</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Z-Score 5Y rolling · Identifies extremes (|z| ≥ 2σ) and risk regime shifts (|z| ≥ 1σ)
+            5Y rolling Z-Score · Flags statistical extremes (|z| ≥ 2σ) and regime shifts (|z| ≥ 1σ)
           </p>
         </div>
 
         <div className="mb-6 flex flex-wrap items-center gap-2 text-[10px]">
           <span className="text-muted-foreground uppercase tracking-wider mr-1">Legend:</span>
-          <span className="inline-flex items-center px-2 py-0.5 rounded bg-emerald-500/25 text-emerald-300 ring-1 ring-emerald-500/40 font-bold uppercase">EXTREME HIGH</span>
+          <span className="inline-flex items-center px-2 py-0.5 rounded bg-emerald-500/25 text-emerald-300 ring-1 ring-emerald-500/40 font-bold uppercase">STRETCHED HIGH</span>
           <span className="inline-flex items-center px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-bold uppercase">RISK-ON</span>
-          <span className="inline-flex items-center px-2 py-0.5 rounded bg-muted/40 text-muted-foreground font-bold uppercase">NEUTRAL</span>
+          <span className="inline-flex items-center px-2 py-0.5 rounded bg-muted/40 text-muted-foreground font-bold uppercase">BALANCED</span>
           <span className="inline-flex items-center px-2 py-0.5 rounded bg-rose-500/15 text-rose-400 font-bold uppercase">RISK-OFF</span>
-          <span className="inline-flex items-center px-2 py-0.5 rounded bg-rose-500/25 text-rose-300 ring-1 ring-rose-500/40 font-bold uppercase">EXTREME LOW</span>
+          <span className="inline-flex items-center px-2 py-0.5 rounded bg-rose-500/25 text-rose-300 ring-1 ring-rose-500/40 font-bold uppercase">STRETCHED LOW</span>
         </div>
 
         <Tabs value={tab} onValueChange={(v) => setTab(v as RatioTab)} className="space-y-6">
@@ -51,7 +51,7 @@ export default function Ratios() {
             <RatioCategoryTable category="commodity" description="Metal, energy & monetary stress ratios. Ranked by absolute Z-Score (extremes first)." />
           </TabsContent>
           <TabsContent value="equity" className="mt-0">
-            <RatioCategoryTable category="equity" description="Risk-on / risk-off equity rotations: small caps, tech leadership, credit spreads, defensives." />
+            <RatioCategoryTable category="equity" description="Equity risk regime rotations: small caps, tech leadership, credit spreads, defensives." />
           </TabsContent>
           <TabsContent value="crypto" className="mt-0">
             <RatioCategoryTable category="crypto" description="BTC vs traditional store of value, alt season indicator, and crypto vs equity beta." />

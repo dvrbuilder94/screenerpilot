@@ -85,13 +85,13 @@ export const DominancePanel = () => {
               <div className="text-xs font-medium text-muted-foreground mb-2">Interpretation</div>
               <p className="text-sm leading-relaxed">
                 {data.change7d > 0 && (
-                  <>Bitcoin dominance is rising, indicating capital is flowing into BTC. This typically signals risk-off sentiment where investors prefer the safety of Bitcoin over altcoins.</>
+                  <>BTC dominance is rising as capital concentrates in Bitcoin. This signals a RISK-OFF rotation: capital favors BTC over higher-beta alts.</>
                 )}
                 {data.change7d < 0 && (
-                  <>Bitcoin dominance is falling, indicating capital is rotating into altcoins. This typically signals risk-on sentiment where investors are seeking higher returns in alternative cryptocurrencies.</>
+                  <>BTC dominance is falling as capital rotates into altcoins. This signals a RISK-ON rotation: liquidity moving down the risk curve into alts.</>
                 )}
                 {Math.abs(data.change7d) < 0.1 && (
-                  <>Bitcoin dominance is stable. Market is in equilibrium without clear rotation between BTC and altcoins.</>
+                  <>BTC dominance is stable · BALANCED regime with no directional rotation between BTC and alts.</>
                 )}
               </p>
             </div>

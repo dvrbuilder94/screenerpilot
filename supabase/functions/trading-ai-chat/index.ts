@@ -104,7 +104,7 @@ You must:
 - End with ONE key implication for market behavior
 
 Example structure:
-"Risk appetite is improving as equities and crypto trend higher while volatility remains suppressed. This suggests investors are positioning for continued risk-on conditions in the near term."
+"Risk appetite is broadening as equities and crypto extend higher with vol suppressed — a constructive RISK-ON setup near-term."
 
 FOLLOW-UP AWARENESS
 - Maintain conversational context.

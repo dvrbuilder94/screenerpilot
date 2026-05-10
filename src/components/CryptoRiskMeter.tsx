@@ -19,7 +19,7 @@ export const CryptoRiskMeter = () => {
       case 'risk_on':
         return {
           label: 'RISK-ON',
-          description: 'Aggressive market mode',
+          description: 'Risk appetite expanding · beta bid',
           color: 'text-bullish',
           bgColor: 'bg-bullish/10',
           borderColor: 'border-bullish/30',
@@ -28,7 +28,7 @@ export const CryptoRiskMeter = () => {
       case 'risk_off':
         return {
           label: 'RISK-OFF',
-          description: 'Defensive market mode',
+          description: 'Defensive flows · beta compressing',
           color: 'text-bearish',
           bgColor: 'bg-bearish/10',
           borderColor: 'border-bearish/30',
@@ -36,8 +36,8 @@ export const CryptoRiskMeter = () => {
         };
       default:
         return {
-          label: 'NEUTRAL',
-          description: 'No clear trend',
+          label: 'BALANCED',
+          description: 'No regime conviction · range-bound',
           color: 'text-neutral',
           bgColor: 'bg-neutral/10',
           borderColor: 'border-neutral/30',
@@ -59,7 +59,7 @@ export const CryptoRiskMeter = () => {
           <div>
             <CardTitle>Crypto Risk Regime</CardTitle>
             <CardDescription>
-              Market risk appetite indicator
+              Cross-asset risk regime gauge
             </CardDescription>
           </div>
         </div>

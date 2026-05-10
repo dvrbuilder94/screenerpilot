@@ -25,15 +25,15 @@ function zBadge(z: number | null) {
   const abs = Math.abs(z);
   if (abs >= 2) {
     return z > 0
-      ? { label: "EXTREME HIGH", cls: "bg-emerald-500/25 text-emerald-300 ring-1 ring-emerald-500/40", icon: AlertTriangle }
-      : { label: "EXTREME LOW", cls: "bg-rose-500/25 text-rose-300 ring-1 ring-rose-500/40", icon: AlertTriangle };
+      ? { label: "STRETCHED HIGH", cls: "bg-emerald-500/25 text-emerald-300 ring-1 ring-emerald-500/40", icon: AlertTriangle }
+      : { label: "STRETCHED LOW", cls: "bg-rose-500/25 text-rose-300 ring-1 ring-rose-500/40", icon: AlertTriangle };
   }
   if (abs >= 1) {
     return z > 0
       ? { label: "RISK-ON", cls: "bg-emerald-500/15 text-emerald-400" }
       : { label: "RISK-OFF", cls: "bg-rose-500/15 text-rose-400" };
   }
-  return { label: "NEUTRAL", cls: "bg-muted/40 text-muted-foreground" };
+  return { label: "BALANCED", cls: "bg-muted/40 text-muted-foreground" };
 }
 
 export function RatioRow({ ratio }: Props) {

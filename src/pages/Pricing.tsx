@@ -207,8 +207,8 @@ export default function Pricing() {
           </p>
           <p className="text-sm text-muted-foreground">
             {language === 'en'
-              ? 'Need a custom plan? Contact us at sales@screenerpilot.com'
-              : '¿Necesitas un plan personalizado? Escríbenos a sales@screenerpilot.com'}
+              ? 'Need a custom plan? Contact us via official channels'
+              : '¿Necesitas un plan personalizado? Contáctanos por canales oficiales'}
           </p>
         </div>
       </div>

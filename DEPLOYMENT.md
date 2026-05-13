@@ -231,4 +231,4 @@ SELECT * FROM cron.job_run_details ORDER BY start_time DESC LIMIT 5;
 
 ---
 
-¿Necesitas ayuda? Contacta a soporte@screenerpilot.com
+¿Necesitas ayuda? Revisa la documentación oficial o contacta soporte anónimo.

@@ -4,6 +4,9 @@ import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+const LOGO_URL = "https://storage.googleapis.com/gpt-engineer-file-uploads/SwWQdnEgbuMrnR9f8RUe0qM0pTi1/uploads/1768527913536-WhatsApp Image 2026-01-15 at 11.30.09 AM.jpeg";
+
+
 export default function Pricing() {
   const navigate = useNavigate();
   const { language } = useLanguage();
@@ -136,6 +139,11 @@ export default function Pricing() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95 py-20 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
+          <img 
+            src={LOGO_URL} 
+            alt="ScreenerPilot Logo" 
+            className="w-20 h-20 mx-auto mb-6 rounded-2xl object-cover shadow-lg"
+          />
           <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
             {t.title}
           </h1>

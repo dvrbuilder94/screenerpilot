@@ -24,7 +24,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <WagmiProvider config={wagmiConfig}>
-      <RainbowKitProvider theme={darkTheme({ accentColor: "hsl(var(--primary))", borderRadius: "medium" })}>
+      <RainbowKitProvider theme={darkTheme({ accentColor: "hsl(160 84% 39%)", borderRadius: "medium" })}>
         <AuthProvider>
           <LanguageProvider>
             <TooltipProvider>
@@ -45,12 +45,10 @@ const App = () => (
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </AppLayout>
-              </Routes>
-            </AppLayout>
-          </BrowserRouter>
-        </TooltipProvider>
-      </LanguageProvider>
-    </AuthProvider>
+              </BrowserRouter>
+            </TooltipProvider>
+          </LanguageProvider>
+        </AuthProvider>
       </RainbowKitProvider>
     </WagmiProvider>
   </QueryClientProvider>

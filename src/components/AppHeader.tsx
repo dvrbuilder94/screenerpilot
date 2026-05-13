@@ -7,7 +7,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { title: "Markets", url: "/", icon: LineChart },
+  { title: "Markets", url: "/markets", icon: LineChart },
   { title: "Macro", url: "/macro", icon: Layers },
   { title: "Ratios", url: "/ratios", icon: GitCompareArrows },
   { title: "Stock Intelligence", url: "/stock-intelligence", icon: Search },

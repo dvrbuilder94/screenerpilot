@@ -10,8 +10,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Settings, LogOut, User, LogIn, CreditCard } from "lucide-react";
+import { Settings, LogOut, User, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export const AccountDropdown = () => {
   const { user, profile, subscription, signOut } = useAuth();
@@ -33,18 +34,9 @@ export const AccountDropdown = () => {
       .slice(0, 2);
   };
 
-  // If no user, show login button
+  // No email user → show wallet connect (Base)
   if (!user) {
-    return (
-      <Button 
-        onClick={() => navigate('/auth')}
-        variant="default"
-        className="flex items-center gap-2 bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-smooth shadow-glow"
-      >
-        <LogIn className="w-4 h-4" />
-        <span className="font-medium">Sign In</span>
-      </Button>
-    );
+    return <ConnectButton showBalance={false} chainStatus="icon" accountStatus="address" />;
   }
 
   return (

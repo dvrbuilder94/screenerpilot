@@ -122,15 +122,16 @@ export default function Pricing() {
       ...t.pro,
       highlighted: true,
       onClick: () => {
-        // TODO: Integrar Stripe aquí
-        alert('Stripe integration coming soon!');
+        // TODO: Integrar checkout de token
+        alert('Token-gated access coming soon!');
       }
     },
     {
       ...t.premium,
       highlighted: false,
       onClick: () => {
-        window.location.href = 'mailto:sales@screenerpilot.com';
+        // Contacto deshabilitado - anonimizado para lanzamiento de token
+        alert('Premium access via token holding - coming soon!');
       }
     }
   ];

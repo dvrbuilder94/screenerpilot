@@ -18,33 +18,40 @@ import Ratios from "./pages/Ratios";
 import Commodities from "./pages/Commodities";
 import NotFound from "./pages/NotFound";
 import StockIntelligence from "./pages/StockIntelligence";
+import Landing from "./pages/Landing";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <WagmiProvider config={wagmiConfig}>
-      <RainbowKitProvider locale="es-419" theme={darkTheme({ accentColor: "hsl(160 84% 39%)", borderRadius: "medium" })}>
+      <RainbowKitProvider locale="en-US" theme={darkTheme({ accentColor: "hsl(160 84% 39%)", borderRadius: "medium" })}>
         <AuthProvider>
           <LanguageProvider>
             <TooltipProvider>
               <Toaster />
               <Sonner />
               <BrowserRouter>
-                <AppLayout>
-                  <Routes>
-                    <Route path="/" element={<Markets />} />
-                    <Route path="/auth" element={<Auth />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/markets" element={<Markets />} />
-                    <Route path="/macro" element={<Macro />} />
-                    <Route path="/ratios" element={<Ratios />} />
-                    <Route path="/commodities" element={<Commodities />} />
-                    <Route path="/stock-intelligence" element={<StockIntelligence />} />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </AppLayout>
+                <Routes>
+                  <Route path="/" element={<Landing />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route
+                    path="*"
+                    element={
+                      <AppLayout>
+                        <Routes>
+                          <Route path="/profile" element={<Profile />} />
+                          <Route path="/markets" element={<Markets />} />
+                          <Route path="/macro" element={<Macro />} />
+                          <Route path="/ratios" element={<Ratios />} />
+                          <Route path="/commodities" element={<Commodities />} />
+                          <Route path="/stock-intelligence" element={<StockIntelligence />} />
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                      </AppLayout>
+                    }
+                  />
+                </Routes>
               </BrowserRouter>
             </TooltipProvider>
           </LanguageProvider>

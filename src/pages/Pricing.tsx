@@ -4,6 +4,9 @@ import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+const LOGO_URL = "https://storage.googleapis.com/gpt-engineer-file-uploads/SwWQdnEgbuMrnR9f8RUe0qM0pTi1/uploads/1768527913536-WhatsApp Image 2026-01-15 at 11.30.09 AM.jpeg";
+
+
 export default function Pricing() {
   const navigate = useNavigate();
   const { language } = useLanguage();

@@ -30,9 +30,9 @@ function PctBadge({ value }: { value: number | null | undefined }) {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mt-6 mb-2 px-1">
+    <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mt-6 mb-2 px-1">
       {children}
-    </h3>
+    </h2>
   );
 }
 

@@ -35,7 +35,7 @@ export default function Landing() {
           <Link to="/" className="flex items-center gap-3">
             <img
               src={LOGO_URL}
-              alt="ScreenerPilot"
+              alt="ScreenerPilot logo"
               className="w-9 h-9 rounded-lg object-cover border border-primary/30"
             />
             <div className="flex flex-col leading-none">
@@ -110,9 +110,9 @@ export default function Landing() {
             {/* Signals */}
             <div className="lg:col-span-2 fin-card p-3">
               <div className="flex items-center justify-between mb-3 px-1">
-                <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   Top Signals
-                </h3>
+                </h2>
                 <span className="text-[11px] text-muted-foreground font-mono-tabular">15m · auto</span>
               </div>
               <table className="fin-table">
@@ -152,9 +152,9 @@ export default function Landing() {
 
             {/* Thesis / context */}
             <div className="fin-card p-4 flex flex-col">
-              <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mb-3">
+              <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mb-3">
                 Macro Context
-              </h3>
+              </h2>
               <p className="text-[13px] text-foreground leading-relaxed">
                 Risk-on bias holds as breadth widens across US large caps.
                 Energy lags on softer crude; rates drift lower into CPI.
@@ -178,9 +178,9 @@ export default function Landing() {
 
           {/* Snapshot */}
           <div className="fin-card p-3 mt-3">
-            <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mb-3 px-1">
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mb-3 px-1">
               Market Snapshot
-            </h3>
+            </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
               {snapshot.map((s) => (
                 <div key={s.sym} className="px-3 py-2.5 rounded-md border border-border bg-background/40">

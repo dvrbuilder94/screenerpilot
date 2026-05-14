@@ -259,7 +259,7 @@ export default function Commodities() {
                 <SelectItem value="1w">1W</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="icon" onClick={fetchAllPrices} disabled={isLoading}>
+            <Button variant="outline" size="icon" onClick={fetchAllPrices} disabled={isLoading} aria-label="Refresh commodity prices">
               <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
             </Button>
           </div>

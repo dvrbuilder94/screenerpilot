@@ -27,7 +27,7 @@ export const AppHeader = () => {
         <Link to="/" className="flex items-center gap-3 flex-shrink-0">
           <img
             src={LOGO_URL}
-            alt="ScreenerPilot"
+            alt="ScreenerPilot logo"
             className="w-9 h-9 rounded-lg object-cover border border-primary/30"
           />
           <div className="hidden sm:flex flex-col leading-none">

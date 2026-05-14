@@ -3,6 +3,8 @@ import { WalletComingSoon } from "@/components/WalletComingSoon";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, LineChart, Brain, Wallet } from "lucide-react";
 
+const LOGO_URL = "https://storage.googleapis.com/gpt-engineer-file-uploads/SwWQdnEgbuMrnR9f8RUe0qM0pTi1/uploads/1768527913536-WhatsApp Image 2026-01-15 at 11.30.09 AM.jpeg";
+
 const Pct = ({ v }: { v: number }) => {
   const cls = v >= 0 ? "badge-positive" : "badge-negative";
   return <span className={cls}>{v >= 0 ? "+" : ""}{v.toFixed(2)}%</span>;

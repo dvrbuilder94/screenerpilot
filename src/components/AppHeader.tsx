@@ -6,6 +6,8 @@ import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
+const LOGO_URL = "https://storage.googleapis.com/gpt-engineer-file-uploads/SwWQdnEgbuMrnR9f8RUe0qM0pTi1/uploads/1768527913536-WhatsApp Image 2026-01-15 at 11.30.09 AM.jpeg";
+
 const navItems = [
   { title: "Markets", url: "/markets", icon: LineChart },
   { title: "Macro", url: "/macro", icon: Layers },

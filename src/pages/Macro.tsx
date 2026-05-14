@@ -4,6 +4,7 @@ import { Landmark, Globe2, Bitcoin } from "lucide-react";
 import { FedMacroPanel } from "@/components/macro/FedMacroPanel";
 import { LatamMacroPanel } from "@/components/macro/LatamMacroPanel";
 import { CryptoMacroPanel } from "@/components/macro/CryptoMacroPanel";
+import { Seo } from "@/components/Seo";
 
 type MacroTab = "fed" | "latam" | "crypto";
 
@@ -12,6 +13,11 @@ export default function Macro() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo
+        title="Macro Intelligence — FED, LATAM & Crypto | ScreenerPilot"
+        description="Real-time macro indicators: Fed policy, US data, LATAM economies and crypto-native macro. Track regime shifts and economic surprises."
+        path="/macro"
+      />
       <main className="container mx-auto px-4 py-6 max-w-7xl">
         <div className="mb-6">
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Macro Intelligence</h1>

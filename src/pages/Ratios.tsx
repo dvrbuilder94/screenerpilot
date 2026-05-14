@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Coins, BarChart3, Bitcoin, Globe2 } from "lucide-react";
 import { RatioCategoryTable } from "@/components/ratios/RatioCategoryTable";
+import { Seo } from "@/components/Seo";
 
 type RatioTab = "commodity" | "equity" | "crypto" | "latam_fx";
 
@@ -10,6 +11,11 @@ export default function Ratios() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo
+        title="Cross-Asset Ratios — Regime Z-Scores | ScreenerPilot"
+        description="5Y rolling Z-scores for cross-asset ratios. Spot statistical extremes (|z| ≥ 2σ) and regime shifts across commodities, equities, crypto and FX."
+        path="/ratios"
+      />
       <main className="container mx-auto px-4 py-6 max-w-7xl">
         <div className="mb-6">
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Cross-Asset Ratios</h1>

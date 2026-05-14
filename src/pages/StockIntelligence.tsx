@@ -22,6 +22,7 @@ import { Radar } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BloombergInsight } from "@/components/BloombergInsight";
 import { stockAnalysisInsight } from "@/lib/bloombergInsights";
+import { Seo } from "@/components/Seo";
 type Timeframe = "daily" | "weekly" | "monthly";
 
 const TIMEFRAMES: { value: Timeframe; label: string; sub: string }[] = [

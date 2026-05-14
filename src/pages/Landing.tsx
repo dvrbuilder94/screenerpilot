@@ -30,6 +30,11 @@ const snapshot = [
 export default function Landing() {
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Seo
+        title="ScreenerPilot — AI Market Intelligence Terminal"
+        description="AI-powered cross-asset trading terminal. Real-time signals, macro context and an on-chain agent across stocks, crypto, ETFs and commodities."
+        path="/"
+      />
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
         <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-5 gap-4">

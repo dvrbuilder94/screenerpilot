@@ -10,6 +10,7 @@ import { ema } from "@/lib/indicators";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import presets from "@/config/presets.json";
+import { Seo } from "@/components/Seo";
 
 interface RatioData {
   name: string;
@@ -237,6 +238,11 @@ export default function Commodities() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo
+        title="Commodities — Spot Prices & Key Ratios | ScreenerPilot"
+        description="Live commodity futures and ETF proxies: precious metals, energy, industrial metals, battery materials and agriculture, plus Copper/Gold and Gold/Silver ratios."
+        path="/commodities"
+      />
       <div className="container mx-auto p-6 space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">

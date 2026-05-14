@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { WalletComingSoon } from "@/components/WalletComingSoon";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, ArrowRight, LineChart, Brain, Wallet } from "lucide-react";
+import { ArrowRight, LineChart, Brain, Wallet } from "lucide-react";
 
 const Pct = ({ v }: { v: number }) => {
   const cls = v >= 0 ? "badge-positive" : "badge-negative";

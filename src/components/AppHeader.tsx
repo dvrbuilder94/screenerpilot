@@ -1,4 +1,4 @@
-import { LineChart, Layers, GitCompareArrows, Bot, Menu, TrendingUp, Search } from "lucide-react";
+import { LineChart, Layers, GitCompareArrows, Bot, Menu, Search } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { WalletComingSoon } from "./WalletComingSoon";
 import { Button } from "./ui/button";

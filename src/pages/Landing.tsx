@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { WalletComingSoon } from "@/components/WalletComingSoon";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, ArrowRight, LineChart, Brain, Wallet } from "lucide-react";
 
@@ -53,7 +53,7 @@ export default function Landing() {
 
           <div className="flex items-center gap-2">
             <div className="hidden sm:block">
-              <ConnectButton showBalance={false} chainStatus="icon" accountStatus="address" label="Connect Wallet" />
+              <WalletComingSoon />
             </div>
             <Button asChild size="sm" className="h-9 text-[13px]">
               <Link to="/markets">Open Terminal</Link>
@@ -82,7 +82,7 @@ export default function Landing() {
                 Open Terminal <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>
-            <ConnectButton showBalance={false} chainStatus="icon" accountStatus="address" label="Connect Wallet" />
+            <WalletComingSoon size="lg" variant="outline" className="h-11 px-5" />
           </div>
         </div>
 

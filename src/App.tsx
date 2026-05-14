@@ -10,8 +10,6 @@ import { wagmiConfig } from "@/lib/wagmi";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
-import Auth from "./pages/Auth";
-import Profile from "./pages/Profile";
 import Macro from "./pages/Macro";
 import Markets from "./pages/Markets";
 import Ratios from "./pages/Ratios";
@@ -19,6 +17,7 @@ import Commodities from "./pages/Commodities";
 import NotFound from "./pages/NotFound";
 import StockIntelligence from "./pages/StockIntelligence";
 import Landing from "./pages/Landing";
+import OnChainAgent from "./pages/OnChainAgent";
 
 const queryClient = new QueryClient();
 
@@ -34,18 +33,17 @@ const App = () => (
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Landing />} />
-                  <Route path="/auth" element={<Auth />} />
                   <Route
                     path="*"
                     element={
                       <AppLayout>
                         <Routes>
-                          <Route path="/profile" element={<Profile />} />
                           <Route path="/markets" element={<Markets />} />
                           <Route path="/macro" element={<Macro />} />
                           <Route path="/ratios" element={<Ratios />} />
                           <Route path="/commodities" element={<Commodities />} />
                           <Route path="/stock-intelligence" element={<StockIntelligence />} />
+                          <Route path="/on-chain-agent" element={<OnChainAgent />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
                       </AppLayout>

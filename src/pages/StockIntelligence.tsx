@@ -246,6 +246,11 @@ export default function StockIntelligence() {
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-6xl mx-auto">
+      <Seo
+        title="Stock Intelligence — AI Analysis & Squeeze Radar | ScreenerPilot"
+        description="On-demand AI technical analysis for US equities, plus a short squeeze radar and quant loaders radar. Spot setups before the crowd."
+        path="/stock-intelligence"
+      />
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3">

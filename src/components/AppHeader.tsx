@@ -1,10 +1,12 @@
-import { LineChart, Layers, GitCompareArrows, Bot, Menu, TrendingUp, Search } from "lucide-react";
+import { LineChart, Layers, GitCompareArrows, Bot, Menu, Search } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { WalletComingSoon } from "./WalletComingSoon";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+
+const LOGO_URL = "https://storage.googleapis.com/gpt-engineer-file-uploads/SwWQdnEgbuMrnR9f8RUe0qM0pTi1/uploads/1768527913536-WhatsApp Image 2026-01-15 at 11.30.09 AM.jpeg";
 
 const navItems = [
   { title: "Markets", url: "/markets", icon: LineChart },
@@ -23,9 +25,11 @@ export const AppHeader = () => {
       <div className="flex h-16 items-center justify-between px-5 gap-4">
         {/* Logo + tagline */}
         <Link to="/" className="flex items-center gap-3 flex-shrink-0">
-          <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/15 border border-primary/30">
-            <TrendingUp className="w-4 h-4 text-primary" />
-          </div>
+          <img
+            src={LOGO_URL}
+            alt="ScreenerPilot"
+            className="w-9 h-9 rounded-lg object-cover border border-primary/30"
+          />
           <div className="hidden sm:flex flex-col leading-none">
             <span className="text-[15px] font-semibold tracking-tight text-foreground">
               ScreenerPilot

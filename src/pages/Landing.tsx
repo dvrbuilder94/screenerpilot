@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import { WalletComingSoon } from "@/components/WalletComingSoon";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, ArrowRight, LineChart, Brain, Wallet } from "lucide-react";
+import { ArrowRight, LineChart, Brain, Wallet } from "lucide-react";
+
+const LOGO_URL = "https://storage.googleapis.com/gpt-engineer-file-uploads/SwWQdnEgbuMrnR9f8RUe0qM0pTi1/uploads/1768527913536-WhatsApp Image 2026-01-15 at 11.30.09 AM.jpeg";
 
 const Pct = ({ v }: { v: number }) => {
   const cls = v >= 0 ? "badge-positive" : "badge-negative";
@@ -31,9 +33,11 @@ export default function Landing() {
       <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
         <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-5 gap-4">
           <Link to="/" className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/15 border border-primary/30">
-              <TrendingUp className="w-4 h-4 text-primary" />
-            </div>
+            <img
+              src={LOGO_URL}
+              alt="ScreenerPilot"
+              className="w-9 h-9 rounded-lg object-cover border border-primary/30"
+            />
             <div className="flex flex-col leading-none">
               <span className="text-[15px] font-semibold tracking-tight">ScreenerPilot</span>
               <span className="hidden sm:block text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground mt-0.5">

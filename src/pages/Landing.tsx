@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { WalletComingSoon } from "@/components/WalletComingSoon";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, LineChart, Brain, Wallet } from "lucide-react";
+import { Seo } from "@/components/Seo";
 
 const LOGO_URL = "https://storage.googleapis.com/gpt-engineer-file-uploads/SwWQdnEgbuMrnR9f8RUe0qM0pTi1/uploads/1768527913536-WhatsApp Image 2026-01-15 at 11.30.09 AM.jpeg";
 
@@ -29,13 +30,18 @@ const snapshot = [
 export default function Landing() {
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Seo
+        title="ScreenerPilot — AI Market Intelligence Terminal"
+        description="AI-powered cross-asset trading terminal. Real-time signals, macro context and an on-chain agent across stocks, crypto, ETFs and commodities."
+        path="/"
+      />
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
         <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-5 gap-4">
           <Link to="/" className="flex items-center gap-3">
             <img
               src={LOGO_URL}
-              alt="ScreenerPilot"
+              alt="ScreenerPilot logo"
               className="w-9 h-9 rounded-lg object-cover border border-primary/30"
             />
             <div className="flex flex-col leading-none">
@@ -110,9 +116,9 @@ export default function Landing() {
             {/* Signals */}
             <div className="lg:col-span-2 fin-card p-3">
               <div className="flex items-center justify-between mb-3 px-1">
-                <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   Top Signals
-                </h3>
+                </h2>
                 <span className="text-[11px] text-muted-foreground font-mono-tabular">15m · auto</span>
               </div>
               <table className="fin-table">
@@ -152,9 +158,9 @@ export default function Landing() {
 
             {/* Thesis / context */}
             <div className="fin-card p-4 flex flex-col">
-              <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mb-3">
+              <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mb-3">
                 Macro Context
-              </h3>
+              </h2>
               <p className="text-[13px] text-foreground leading-relaxed">
                 Risk-on bias holds as breadth widens across US large caps.
                 Energy lags on softer crude; rates drift lower into CPI.
@@ -178,9 +184,9 @@ export default function Landing() {
 
           {/* Snapshot */}
           <div className="fin-card p-3 mt-3">
-            <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mb-3 px-1">
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mb-3 px-1">
               Market Snapshot
-            </h3>
+            </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
               {snapshot.map((s) => (
                 <div key={s.sym} className="px-3 py-2.5 rounded-md border border-border bg-background/40">

@@ -1,6 +1,7 @@
 import { Bot, Sparkles, Wallet, Activity, Network, Zap, ArrowRight, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WalletComingSoon } from "@/components/WalletComingSoon";
+import { Seo } from "@/components/Seo";
 
 const features = [
   {
@@ -34,6 +35,11 @@ const roadmap = [
 export default function OnChainAgent() {
   return (
     <div className="container max-w-5xl mx-auto px-5 py-10 space-y-10">
+      <Seo
+        title="On-Chain Agent (Beta) — AI Crypto Co-pilot | ScreenerPilot"
+        description="Beta preview of the ScreenerPilot on-chain AI agent: smart money tracking, wallet intelligence and intent-based actions on Base."
+        path="/on-chain-agent"
+      />
       {/* Hero */}
       <section className="fin-card p-6 sm:p-10">
         <div className="flex items-center gap-2 mb-5">

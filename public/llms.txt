@@ -1,0 +1,19 @@
+# ScreenerPilot
+
+> AI-powered cross-asset market intelligence terminal for traders. Real-time screening, macro context, and an on-chain AI agent across stocks, crypto, ETFs, indices and commodities.
+
+ScreenerPilot is a premium dark trading terminal that combines technical screening, macro intelligence, and AI-generated context into a single workflow. The product is evolving toward an on-chain AI co-pilot for traders on Base.
+
+## Pages
+
+- [Home](/): Landing page introducing ScreenerPilot, features, and the on-chain agent direction.
+- [Markets](/markets): Cross-asset screener for stocks, crypto, ETFs, indices and commodities with technical signals.
+- [Macro Intelligence](/macro): Global macro indicators, market regime scoring, sector heatmaps, FED data and economic calendar.
+- [Cross-Asset Ratios](/ratios): Multi-year ratio charts (BTC/ETH, Gold/Silver, Copper/Gold, etc.) for regime analysis.
+- [Commodities](/commodities): Spot prices for precious metals, energy, industrial metals and agriculture, plus key commodity ratios.
+- [Stock Intelligence](/stock-intelligence): On-demand AI stock analysis, short squeeze radar and quant loaders radar.
+- [On-Chain Agent](/on-chain-agent): Beta preview of the upcoming AI on-chain agent — smart money tracking, wallet intelligence and intent-based actions.
+
+## Optional
+
+- [Sitemap](/sitemap.xml): Machine-readable list of indexable routes.

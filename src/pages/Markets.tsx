@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMarketSnapshots, MarketSnapshot } from "@/hooks/useMarketSnapshots";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import { Seo } from "@/components/Seo";
 
 const TABS = [
   { id: "today",       label: "Today" },
@@ -30,9 +31,9 @@ function PctBadge({ value }: { value: number | null | undefined }) {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mt-6 mb-2 px-1">
+    <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mt-6 mb-2 px-1">
       {children}
-    </h3>
+    </h2>
   );
 }
 
@@ -264,6 +265,11 @@ const Markets = () => {
 
   return (
     <div className="container max-w-7xl py-6 md:py-8">
+      <Seo
+        title="Markets — Cross-Asset Snapshot | ScreenerPilot"
+        description="Live cross-asset terminal: sectors, factors, yields, currencies and commodities in one view. Spot regime shifts in seconds."
+        path="/markets"
+      />
       <header className="mb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-3">
         <div>
           <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-foreground">Markets</h1>

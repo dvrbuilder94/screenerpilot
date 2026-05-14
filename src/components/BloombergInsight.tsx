@@ -250,6 +250,7 @@ export const BloombergInsight = ({ insight, panel, data, className, noAi }: Prop
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about this panel..."
+              aria-label={`Ask AI about ${panel}`}
               disabled={streaming}
               className="flex-1 bg-transparent text-sm px-2 py-1.5 outline-none placeholder:text-muted-foreground disabled:opacity-50"
             />

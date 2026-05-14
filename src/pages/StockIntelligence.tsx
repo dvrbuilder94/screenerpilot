@@ -22,6 +22,7 @@ import { Radar } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BloombergInsight } from "@/components/BloombergInsight";
 import { stockAnalysisInsight } from "@/lib/bloombergInsights";
+import { Seo } from "@/components/Seo";
 type Timeframe = "daily" | "weekly" | "monthly";
 
 const TIMEFRAMES: { value: Timeframe; label: string; sub: string }[] = [
@@ -245,6 +246,11 @@ export default function StockIntelligence() {
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-6xl mx-auto">
+      <Seo
+        title="Stock Intelligence — AI Analysis & Squeeze Radar | ScreenerPilot"
+        description="On-demand AI technical analysis for US equities, plus a short squeeze radar and quant loaders radar. Spot setups before the crowd."
+        path="/stock-intelligence"
+      />
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3">
@@ -285,6 +291,7 @@ export default function StockIntelligence() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Enter ticker symbol (e.g., SOFI, PLTR, COIN)"
+                aria-label="Stock ticker symbol"
                 value={symbol}
                 onChange={(e) => handleSymbolChange(e.target.value)}
                 onKeyDown={handleKeyDown}

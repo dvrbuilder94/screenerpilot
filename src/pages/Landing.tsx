@@ -241,7 +241,7 @@ export default function Landing() {
             One terminal. More conviction.
           </h2>
           <p className="mt-3 text-[14px] sm:text-[15px] text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Use ScreenerPilot to filter noise, understand setups and move faster across markets.
+            Use ScreenerPilot to filter noise, read market context and understand what looks stretched, depressed or worth monitoring.
           </p>
           <div className="mt-7">
             <Button asChild size="lg" className="h-11 px-5 text-sm">

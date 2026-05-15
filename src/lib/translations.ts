@@ -365,9 +365,9 @@ export const translations = {
     stocks: 'Acciones',
     indices: 'Índices',
     etfs: 'ETFs',
-    hold: 'Hold',
-    strongBuy: 'Strong Buy',
-    strongSell: 'Strong Sell',
+    hold: 'Mixto',
+    strongBuy: 'Alcista de alta convicción',
+    strongSell: 'Bajista de alta convicción',
     
     // Dashboard
     summary: 'Resumen',

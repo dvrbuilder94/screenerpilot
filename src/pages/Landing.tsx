@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
-import { WalletComingSoon } from "@/components/WalletComingSoon";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, LineChart, Brain, Wallet } from "lucide-react";
+import { ArrowRight, LineChart, Brain, Layers } from "lucide-react";
 import { Seo } from "@/components/Seo";
 
 const LOGO_URL = "https://storage.googleapis.com/gpt-engineer-file-uploads/SwWQdnEgbuMrnR9f8RUe0qM0pTi1/uploads/1768527913536-WhatsApp Image 2026-01-15 at 11.30.09 AM.jpeg";
@@ -32,7 +31,7 @@ export default function Landing() {
     <div className="min-h-screen bg-background text-foreground">
       <Seo
         title="ScreenerPilot — AI Market Intelligence Terminal"
-        description="AI-powered cross-asset trading terminal. Real-time signals, macro context and an on-chain agent across stocks, crypto, ETFs and commodities."
+        description="AI-powered cross-asset trading terminal. Real-time signals and macro context across stocks, ETFs, indices and commodities."
         path="/"
       />
       {/* Header */}
@@ -62,9 +61,6 @@ export default function Landing() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <div className="hidden sm:block">
-              <WalletComingSoon />
-            </div>
             <Button asChild size="sm" className="h-9 text-[13px]">
               <Link to="/markets">Open Terminal</Link>
             </Button>
@@ -92,7 +88,9 @@ export default function Landing() {
                 Open Terminal <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>
-            <WalletComingSoon size="lg" variant="outline" className="h-11 px-5" />
+            <Button asChild size="lg" variant="outline" className="h-11 px-5 text-sm">
+              <Link to="/macro">Explore Macro</Link>
+            </Button>
           </div>
         </div>
 
@@ -205,7 +203,7 @@ export default function Landing() {
           {[
             { icon: LineChart, title: "Cross-asset screening", desc: "One workflow across stocks, crypto, ETFs, indices and commodities." },
             { icon: Brain,     title: "AI-generated context",  desc: "Setups explained in plain English with macro and micro evidence." },
-            { icon: Wallet,    title: "Wallet-ready on Base",  desc: "Connect a Base wallet to unlock token-gated features when live." },
+            { icon: Layers,    title: "Macro intelligence",   desc: "Regimes, ratios and commodities mapped to actionable setups." },
           ].map((f) => (
             <div key={f.title} className="fin-card p-5">
               <f.icon className="w-4 h-4 text-muted-foreground mb-4" strokeWidth={1.75} />

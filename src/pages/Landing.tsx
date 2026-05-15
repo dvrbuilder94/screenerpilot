@@ -11,10 +11,10 @@ const Pct = ({ v }: { v: number }) => {
 };
 
 const signals = [
-  { sym: "NVDA",   name: "Nvidia",        sig: "Long",   conf: 82, chg: 2.14 },
-  { sym: "BTC",    name: "Bitcoin",       sig: "Long",   conf: 74, chg: 1.08 },
-  { sym: "XLE",    name: "Energy ETF",    sig: "Short",  conf: 61, chg: -0.92 },
-  { sym: "EURUSD", name: "Euro / Dollar", sig: "Neutral",conf: 50, chg: -0.12 },
+  { sym: "NVDA",   name: "Nvidia",        sig: "Bullish", conf: 82, chg: 2.14 },
+  { sym: "BTC",    name: "Bitcoin",       sig: "Bullish", conf: 74, chg: 1.08 },
+  { sym: "XLE",    name: "Energy ETF",    sig: "Bearish", conf: 61, chg: -0.92 },
+  { sym: "EURUSD", name: "Euro / Dollar", sig: "Mixed",   conf: 50, chg: -0.12 },
 ];
 
 const snapshot = [

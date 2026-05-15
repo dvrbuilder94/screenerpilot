@@ -468,7 +468,7 @@ export function DashboardOverview({
                       </div>
 
                       <Badge className={getSignalBadgeClass(setup.macroSignal.signal)}>
-                        {setup.macroSignal.signal.replace("_", " ")}
+                        {getSignalLabel(setup.macroSignal.signal)}
                       </Badge>
 
                       <ArrowRight className="h-4 w-4 text-muted-foreground" />

@@ -139,8 +139,8 @@ export default function Landing() {
                       </td>
                       <td>
                         <span className={
-                          s.sig === "Long" ? "badge-positive"
-                          : s.sig === "Short" ? "badge-negative"
+                          s.sig === "Bullish" ? "badge-positive"
+                          : s.sig === "Bearish" ? "badge-negative"
                           : "badge-neutral"
                         }>
                           {s.sig}

@@ -283,10 +283,10 @@ export const translations = {
     
     // Top Setups
     topSetups: 'Mejores Setups',
-    confidence: 'Confianza',
-    signal: 'Señal',
-    entry: 'Entrada',
-    stopLoss: 'Stop Loss',
+    confidence: 'Score',
+    signal: 'Sesgo',
+    entry: 'Zona Clave',
+    stopLoss: 'Nivel de Riesgo',
     
     // Buttons
     refresh: 'Actualizar',

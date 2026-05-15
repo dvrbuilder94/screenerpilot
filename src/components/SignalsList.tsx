@@ -53,7 +53,7 @@ export default function SignalsList({ setups, onSelectSetup }: SignalsListProps)
                 <div className="text-right">
                   <div className="text-sm font-mono">${setup.currentPrice.toFixed(2)}</div>
                   <div className="text-xs text-muted-foreground">
-                    {setup.combinedConfidence.toFixed(0)}% confidence
+                    {setup.combinedConfidence.toFixed(0)}% score
                   </div>
                 </div>
               </div>

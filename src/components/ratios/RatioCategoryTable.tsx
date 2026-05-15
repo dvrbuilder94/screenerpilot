@@ -49,7 +49,7 @@ export function RatioCategoryTable({ category, description }: Props) {
               <th className="text-right py-2 px-3 font-medium">Pctile</th>
               <th className="text-right py-2 px-3 font-medium">1M Δ</th>
               <th className="text-left py-2 px-3 font-medium">90D Trend</th>
-              <th className="text-right py-2 px-3 font-medium">Signal</th>
+              <th className="text-right py-2 px-3 font-medium">Bias</th>
             </tr>
           </thead>
           <tbody>

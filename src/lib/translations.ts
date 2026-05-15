@@ -54,10 +54,10 @@ export const translations = {
     
     // Top Setups
     topSetups: 'Top Setups',
-    confidence: 'Confidence',
-    signal: 'Signal',
-    entry: 'Entry',
-    stopLoss: 'Stop Loss',
+    confidence: 'Score',
+    signal: 'Bias',
+    entry: 'Key Price Area',
+    stopLoss: 'Risk Level',
     
     // Buttons
     refresh: 'Refresh',

@@ -136,7 +136,7 @@ export function AssetIntelligencePage({
           <div className="flex items-center justify-between">
             <CardTitle className="text-base font-medium flex items-center gap-2 text-muted-foreground">
               <Clock className="h-4 w-4" />
-              Execution Timing (1H)
+              Short-term Context (1H)
             </CardTitle>
             <Badge variant="secondary" className="text-xs">
               Not Tracked
@@ -149,13 +149,13 @@ export function AssetIntelligencePage({
         <CardContent>
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-sm text-muted-foreground">Micro Signal: </span>
+              <span className="text-sm text-muted-foreground">Micro Bias: </span>
               <span className={`font-medium ${getSignalConfig(microSignal).color}`}>
-                {microSignal.signal.replace("_", " ")}
+                {getSignalLabel(microSignal.signal)}
               </span>
             </div>
             <span className="text-sm text-muted-foreground">
-              Confidence: {microSignal.confidence}%
+              Conviction: {microSignal.confidence}%
             </span>
           </div>
         </CardContent>

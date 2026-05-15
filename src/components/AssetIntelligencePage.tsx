@@ -42,6 +42,17 @@ export function AssetIntelligencePage({
     }
   };
 
+  const getSignalLabel = (signal: string) => {
+    switch (signal) {
+      case "STRONG_BUY": return "High-conviction Bullish";
+      case "BUY": return "Bullish";
+      case "STRONG_SELL": return "High-conviction Bearish";
+      case "SELL": return "Bearish";
+      case "HOLD": return "Mixed";
+      default: return signal.replace("_", " ");
+    }
+  };
+
   const macroConfig = getSignalConfig(macroSignal);
   const MacroIcon = macroConfig.icon;
 

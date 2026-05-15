@@ -159,7 +159,7 @@ export function FedMacro() {
                 )}
               </div>
               <div className="text-right text-sm text-muted-foreground">
-                <p>{yieldCurve?.status === 'warning' ? 'Recession signal' : yieldCurve?.status === 'caution' ? 'Economic uncertainty' : 'Healthy conditions'}</p>
+                <p>{yieldCurve?.status === 'warning' ? 'Recession context' : yieldCurve?.status === 'caution' ? 'Economic uncertainty' : 'Healthy conditions'}</p>
               </div>
             </div>
           </CardContent>

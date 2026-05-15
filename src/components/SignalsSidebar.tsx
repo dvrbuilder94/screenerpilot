@@ -253,3 +253,14 @@ function getSignalBadgeClass(signal: SignalType): string {
       return "bg-secondary hover:bg-secondary/80";
   }
 }
+
+function getSignalLabel(signal: SignalType): string {
+  switch (signal) {
+    case "STRONG_BUY": return "High-conviction Bullish";
+    case "BUY": return "Bullish";
+    case "STRONG_SELL": return "High-conviction Bearish";
+    case "SELL": return "Bearish";
+    case "HOLD": return "Mixed";
+    default: return String(signal).replace("_", " ");
+  }
+}

@@ -203,7 +203,7 @@ export default function Landing() {
           {[
             { icon: LineChart, title: "Cross-asset screening", desc: "One workflow across stocks, crypto, ETFs, indices and commodities." },
             { icon: Brain,     title: "AI-generated context",  desc: "Setups explained in plain English with macro and micro evidence." },
-            { icon: Layers,    title: "Macro intelligence",   desc: "Regimes, ratios and commodities mapped to actionable setups." },
+            { icon: Layers,    title: "Macro intelligence",   desc: "Regimes, ratios and commodities mapped to relative-value setups." },
           ].map((f) => (
             <div key={f.title} className="fin-card p-5">
               <f.icon className="w-4 h-4 text-muted-foreground mb-4" strokeWidth={1.75} />

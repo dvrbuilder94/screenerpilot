@@ -87,7 +87,7 @@ export function SignalsSidebar({
     <div className="flex flex-col h-full border-r border-border bg-background">
       {/* Header */}
       <div className="p-3 border-b border-border">
-        <h2 className="text-sm font-semibold mb-2 text-foreground">Daily Signals</h2>
+        <h2 className="text-sm font-semibold mb-2 text-foreground">Daily Setups</h2>
         
         {/* Stats */}
         <div className="flex gap-2 mb-3 text-xs">

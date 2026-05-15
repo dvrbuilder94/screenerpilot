@@ -3,10 +3,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { WagmiProvider } from "wagmi";
-import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
-import "@rainbow-me/rainbowkit/styles.css";
-import { wagmiConfig } from "@/lib/wagmi";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
@@ -17,45 +13,39 @@ import Commodities from "./pages/Commodities";
 import NotFound from "./pages/NotFound";
 import StockIntelligence from "./pages/StockIntelligence";
 import Landing from "./pages/Landing";
-import OnChainAgent from "./pages/OnChainAgent";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <WagmiProvider config={wagmiConfig}>
-      <RainbowKitProvider locale="en-US" theme={darkTheme({ accentColor: "hsl(160 84% 39%)", borderRadius: "medium" })}>
-        <AuthProvider>
-          <LanguageProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Landing />} />
-                  <Route
-                    path="*"
-                    element={
-                      <AppLayout>
-                        <Routes>
-                          <Route path="/markets" element={<Markets />} />
-                          <Route path="/macro" element={<Macro />} />
-                          <Route path="/ratios" element={<Ratios />} />
-                          <Route path="/commodities" element={<Commodities />} />
-                          <Route path="/stock-intelligence" element={<StockIntelligence />} />
-                          <Route path="/on-chain-agent" element={<OnChainAgent />} />
-                          <Route path="*" element={<NotFound />} />
-                        </Routes>
-                      </AppLayout>
-                    }
-                  />
-                </Routes>
-              </BrowserRouter>
-            </TooltipProvider>
-          </LanguageProvider>
-        </AuthProvider>
-      </RainbowKitProvider>
-    </WagmiProvider>
+    <AuthProvider>
+      <LanguageProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route
+                path="*"
+                element={
+                  <AppLayout>
+                    <Routes>
+                      <Route path="/markets" element={<Markets />} />
+                      <Route path="/macro" element={<Macro />} />
+                      <Route path="/ratios" element={<Ratios />} />
+                      <Route path="/commodities" element={<Commodities />} />
+                      <Route path="/stock-intelligence" element={<StockIntelligence />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </AppLayout>
+                }
+              />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </LanguageProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

@@ -1,6 +1,5 @@
-import { LineChart, Layers, GitCompareArrows, Bot, Menu, Search } from "lucide-react";
+import { LineChart, Layers, GitCompareArrows, Menu, Search } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { WalletComingSoon } from "./WalletComingSoon";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { useState } from "react";
@@ -13,7 +12,6 @@ const navItems = [
   { title: "Macro", url: "/macro", icon: Layers },
   { title: "Ratios", url: "/ratios", icon: GitCompareArrows },
   { title: "Stock Intelligence", url: "/stock-intelligence", icon: Search },
-  { title: "On-Chain Agent", url: "/on-chain-agent", icon: Bot },
 ];
 
 export const AppHeader = () => {
@@ -67,12 +65,8 @@ export const AppHeader = () => {
           })}
         </nav>
 
-        {/* Right: Account + mobile trigger */}
+        {/* Right: mobile trigger */}
         <div className="flex items-center gap-2 ml-auto flex-shrink-0">
-          <div className="hidden sm:block">
-            <WalletComingSoon />
-          </div>
-
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">

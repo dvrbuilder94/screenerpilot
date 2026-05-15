@@ -31,8 +31,4 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://screenerpilot.com/on-chain-agent</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
 </urlset>

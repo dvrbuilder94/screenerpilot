@@ -1,129 +1,63 @@
-## Objetivo
+# Reposition copy: from "trading signals" to "market intelligence"
 
-Pulir únicamente el vocabulario, redacción y consistencia de **todo lo relacionado con señales** (badges, descripciones cortas, tooltips, leyendas, mensajes de la AI). Sin tocar cálculos, columnas, datos, diseño ni otras secciones.
+A copy and framing refactor only. No backend, no logic, no visual identity changes. Existing routes (Landing, Markets, Macro, Ratios, Commodities, Stock Intelligence) and all functionality stay intact.
 
-## Sistema de señales unificado (nuevo léxico)
+## Goal
 
-Estandarizar nombres y tono macro-trading en **todo** el proyecto:
+Reposition ScreenerPilot as an institutional cross-asset **market intelligence terminal** (regimes, relative value, dislocations, stretch monitoring, decision support) — not a buy/sell signals product.
 
-| Actual | Nuevo |
+## Terminology mapping (applied everywhere it appears)
+
+| Old | New |
 |---|---|
-| EXTREME HIGH | STRETCHED HIGH |
-| RISK-ON | RISK-ON (se mantiene) |
-| NEUTRAL | BALANCED |
-| RISK-OFF | RISK-OFF (se mantiene) |
-| EXTREME LOW | STRETCHED LOW |
+| Signals / Signal | Setups / Market context |
+| Signal Score | Market Score / Conviction Score |
+| Top Signals | Top Setups / Top Opportunities |
+| Buy / Sell / Hold | Bullish / Bearish / Mixed (or Extended / Depressed / Balanced by context) |
+| Strong Buy / Strong Sell | High-conviction Bullish / High-conviction Bearish |
+| Long / Short / Neutral | Bullish / Bearish / Mixed |
+| Entry Zone | Key Price Area |
+| Stop-loss | Risk Level |
+| Targets | Reference Levels |
+| Trading calls / recommendations | Market context / observations |
 
-Definiciones cortas (para tooltip/leyenda, una sola fuente de verdad):
+Tone: institutional, Bloomberg-like, analytical, never prescriptive. Avoid retail trading language, crypto-native slang, and hype.
 
-- **STRETCHED HIGH** — `|z| ≥ 2σ` por encima de la media 5Y. Sobreextensión estadística; sesgo a mean-reversion.
-- **RISK-ON** — `+1σ ≤ z < +2σ`. Apetito por riesgo confirmado; favorece beta y cíclicos.
-- **BALANCED** — `|z| < 1σ`. Régimen sin convicción; operar rangos, no tendencia.
-- **RISK-OFF** — `-2σ < z ≤ -1σ`. Aversión al riesgo; favorece defensivos y duración.
-- **STRETCHED LOW** — `z ≤ -2σ`. Dislocación a la baja; setup de mean-reversion al alza.
+## Scope of edits
 
-## Cambios por archivo (solo texto)
+### 1. Landing page (`src/pages/Landing.tsx`)
+- New hero copy, e.g.
+  - H1: "AI market intelligence for cross-asset decision-making."
+  - Sub: "Track market regimes, relative value, and price dislocations from one terminal."
+- Replace "Top Signals" preview table with "Top Setups" / "Top Opportunities" using Bullish / Bearish / Mixed labels and Conviction Score.
+- Rewrite section titles, value props, "How it works" steps, and meta description (no mention of "signals" or "trading calls").
+- CTAs: neutral and analytical ("Open terminal", "Explore market context") — no "Get signals".
 
-### 1. `src/components/ratios/RatioRow.tsx`
-- `EXTREME HIGH` → `STRETCHED HIGH`
-- `EXTREME LOW` → `STRETCHED LOW`
-- `NEUTRAL` → `BALANCED`
-- (RISK-ON / RISK-OFF se mantienen)
+### 2. Translations (`src/lib/translations.ts`) — EN + ES
+Update keys used across the UI: `signal`, `signalType`, `signalLabel`, `buy`, `sell`, `hold`, `strongBuy`, `strongSell`, `entryZone`, `targets`, `target`, `stopLoss`, `allSignals`, all `*SignalDesc` strings, and the Combined Signal narrative strings. Keep the keys (to avoid touching components) but rewrite the **values** to the new vocabulary in both languages.
 
-### 2. `src/pages/Ratios.tsx`
-- Actualizar los 5 chips de la leyenda con los mismos labels.
-- Subtítulo: "Z-Score 5Y rolling · Identifies extremes (|z| ≥ 2σ) and risk regime shifts (|z| ≥ 1σ)" → **"5Y rolling Z-Score · Flags statistical extremes (|z| ≥ 2σ) and regime shifts (|z| ≥ 1σ)"**.
-- Description equity: "Risk-on / risk-off equity rotations…" → **"Equity risk regime rotations: small caps, tech leadership, credit spreads, defensives."**
+### 3. Component-level labels (text only)
+Files with visible copy to rephrase:
+- `TopSetupsPanel.tsx`, `SignalsList.tsx`, `SignalsSidebar.tsx`, `EnhancedSignalCard.tsx`, `CombinedSignal.tsx`
+- `AssetIntelligencePage.tsx`, `IndicatorPanel.tsx`, `IndicatorPanels.tsx`, `GroupRanking.tsx`, `FilterPanel.tsx`
+- `BloombergInsight.tsx`, `DashboardOverview.tsx`, `CryptoMacroInsight.tsx`, `AltseasonPanel.tsx`, `AltseasonIndexPanel.tsx`, `DominancePanel.tsx`, `EthUpsidePanel.tsx`
+- `macro/StocksMacro.tsx`, `macro/FedMacro.tsx`, `macro/FedMacroPanel.tsx`, `macro/CryptoMacroPanel.tsx`, `ratios/RatioCategoryTable.tsx`
+- `TradingAIWidget.tsx` (AlexIA chat surface): rename labels and rewrite placeholder/empty-state to analytical phrasing.
 
-### 3. `src/components/CryptoRiskMeter.tsx`
-- Labels alineados (`RISK-ON`, `RISK-OFF`, `BALANCED`).
-- Descripciones cortas:
-  - RISK-ON: "Aggressive market mode" → **"Risk appetite expanding · beta bid"**
-  - RISK-OFF: "Defensive market mode" → **"Defensive flows · beta compressing"**
-  - NEUTRAL: "No clear trend" → **"No regime conviction · range-bound"**
-- CardDescription: "Market risk appetite indicator" → **"Cross-asset risk regime gauge"**
+For each: change visible strings only. Replace "Signal", "Buy/Sell/Hold", "Entry Zone", "Stop-loss", "Targets" per the table above.
 
-### 4. `src/components/DominancePanel.tsx`
-- Frase "…signals risk-off sentiment where investors prefer the safety of Bitcoin over altcoins." → **"…signals a RISK-OFF rotation: capital favors BTC over higher-beta alts."**
-- Frase "…signals risk-on sentiment where investors are seeking higher returns in alternative cryptocurrencies." → **"…signals a RISK-ON rotation: liquidity moving down the risk curve into alts."**
+### 4. AlexIA / insights tone
+Adjust prompts and on-screen helper copy in `TradingAIWidget.tsx` and the insight panels (`BloombergInsight`, `DashboardOverview`, `CryptoMacroInsight`) so framing reads as analysis ("market looks extended", "reversion candidate", "regime shifting") rather than instructions ("buy this", "sell that"). System prompt of `trading-ai-chat` / `insight-chat` edge functions left as-is unless you also want a tone tweak there — say so and I'll include it.
 
-### 5. `src/lib/bloombergInsights.ts` (todos los `signal` / `implication` / `action`)
-Reescritura puntual para tono institucional, conciso y consistente. Highlights:
+### 5. SEO + metadata
+- Update `<title>`, meta description and OG tags in `index.html`, the `Seo` component default, `public/llms.txt`, and the per-page `Seo` calls (Landing, Markets, Macro, Ratios, Commodities, StockIntelligence). Replace "signals / trading" framing with "market intelligence / cross-asset context".
 
-- `dominanceInsight`:
-  - implication caution: "Capital rotating into BTC, alts under pressure" → **"BTC absorbing flows · alt beta compressing (RISK-OFF tilt)"**
-  - implication bull: "Liquidity flowing into alts, risk-on rotation" → **"Liquidity rotating down the curve into alts (RISK-ON)"**
+## Non-goals (explicitly out of scope)
 
-- `altseasonInsight`:
-  - "Prime window for selective alt longs" → **"Constructive window for selective alt exposure"**
-  - "Defensive: stick to BTC/ETH" → **"Defensive bias: anchor in BTC/ETH"**
+- No changes to scoring math, indicators, edge functions, DB schema, RLS, or routes.
+- No visual / theme / layout changes.
+- Internal variable, type, file, and translation-key names stay (`signal`, `signalType`, etc.) to avoid touching logic — only the user-visible **values** change.
 
-- `riskRegimeInsight`:
-  - signals usan `RISK-ON` / `RISK-OFF` / `BALANCED regime` (en lugar de `NEUTRAL regime`).
-  - implication RISK-ON: "Aggressive bid across higher-beta assets" → **"Broad bid across higher-beta names · beta expanding"**
-  - implication RISK-OFF: "Defensive flows, beta compressing" → **"Risk reduction across the curve · beta compressing"**
-  - implication neutral: "No conviction in either direction" → **"No regime conviction · directional edge absent"**
+## Languages
 
-- `fearGreedInsight`:
-  - "Capitulation zone, contrarian setup forming" → **"Capitulation zone · contrarian long setup forming"**
-  - "Euphoria zone, late-cycle risk" → **"Euphoria · late-cycle distribution risk"**
-  - "Trade the technicals, not the mood" → **"Trade structure, not sentiment"**
-
-- `fedMacroInsight`:
-  - inverted implication: "Recession signal active, defensive bias historically rewarded" → **"Curve inversion active · historical recession lead, defensive bias rewarded"**
-  - strong DXY implication: "Dollar strength pressures non-USD assets and EM" → **"USD strength a headwind for EM, commodities and non-USD risk"**
-  - neutral: "Curve healthy, no immediate macro stress flag" → **"Curve and USD within normal range · no macro stress flag"**
-
-- `stocksMacroInsight`:
-  - VIX≥25: "Stress regime, dispersion rising across sectors" → **"Stress regime · cross-sector dispersion expanding"**
-  - VIX<15 + cyclicals: "Complacency + risk-on rotation, late-cycle setup" → **"Compressed vol + cyclical leadership · late-cycle RISK-ON"**
-  - cyclicals lead: "Risk-on rotation underway, growth/financials bid" → **"RISK-ON rotation · growth and financials bid"**
-  - defensives lead: "Risk-off rotation, capital seeking shelter" → **"RISK-OFF rotation · capital seeking shelter"**
-  - neutral: "No clear sector leadership, choppy regime" → **"No sector leadership · choppy, range-bound tape"**
-
-- `sectorHeatmapInsight`:
-  - bullish: "Broad-based bid, healthy market internals" → **"Broad bid · healthy market internals"**
-  - bearish: "Narrow tape, distribution under the surface" → **"Narrow tape · distribution under the surface"**
-  - neutral: "Sector dispersion, rotation game over directional" → **"Sector dispersion · rotation trade over directional"**
-
-- `commoditiesMacroInsight`:
-  - Cu/Au bull: signal "…risk-on" → **"…RISK-ON tilt"**; implication: "Industrial demand strong, growth expectations rising" → **"Industrial demand firm · growth expectations rising"**
-  - Cu/Au bear: signal "…risk-off" → **"…RISK-OFF tilt"**; implication: "Defensive bid for gold, growth fears building" → **"Defensive bid for gold · growth fears building"**
-  - Au/Ag: implication "Risk aversion, silver discount widening" → **"Risk aversion · silver discount widening"**
-  - neutral: "No extreme regime signal from metals" → **"Metal ratios offer no regime signal"**; action "Use spot trends, ratios offer no edge now" → **"Trade spot trends · ratios offer no edge"**
-
-- `cryptoMacroInsight`:
-  - longs crowded: "Perp longs overpaying, squeeze risk to downside" → **"Perp longs overpaying funding · downside squeeze risk"**
-  - shorts crowded: "Negative funding setup, short squeeze fuel" → **"Negative funding · short squeeze fuel building"**
-  - greed extreme: "Sentiment euphoric, contrarian risk rising" → **"Sentiment euphoric · contrarian risk rising"**
-  - mcap implications: redactar como **"Capital inflow · broad bid"**, **"Outflow · broad derisking"**, **"Stable flows · no conviction"**
-
-- `latamFxInsight`:
-  - depreciating: implication "Local currency depreciating fast, capital outflow signal" → **"Local FX depreciating fast · capital outflow signal (RISK-OFF)"**
-  - appreciating: "Local currency appreciating, risk-on for LATAM assets" → **"Local FX appreciating · RISK-ON tilt for LATAM assets"**
-  - neutral: "FX stable, no immediate macro stress" → **"FX stable · no macro stress signal"**
-
-- `ratiosCategoryInsight`:
-  - divergent implication: "Statistical extreme reversing, trend exhaustion likely" → **"Statistical extreme reversing · trend exhaustion likely"**
-  - z>2 implication: "Extreme overshoot vs 5y baseline, statistically stretched" → **"Stretched high vs 5Y baseline · mean-reversion bias"**
-  - z>2 action: "Fade extreme or hedge correlated exposure" → **"Fade the extreme or hedge correlated exposure"**
-  - z<-2 implication: "Extreme undershoot vs 5y baseline, dislocation building" → **"Stretched low vs 5Y baseline · dislocation building"**
-  - z<-2 action: "Look for mean-reversion long setup" → **"Build mean-reversion long setup"**
-  - neutral action: "Wait for z > |2| for actionable signals" → **"Wait for |z| ≥ 2σ for actionable signals"**
-
-### 6. `supabase/functions/dashboard-insight/index.ts`
-- Línea 17 prompt: "Clearly describe overall risk sentiment (risk-on or risk-off)" → **"Clearly describe the cross-asset risk regime (RISK-ON, RISK-OFF or BALANCED)"**.
-
-### 7. `supabase/functions/trading-ai-chat/index.ts`
-- Frase ejemplo línea 107: ajustar a tono unificado → **"Risk appetite is broadening as equities and crypto extend higher with vol suppressed — a constructive RISK-ON setup near-term."**
-
-## Fuera de alcance (no tocar)
-
-- Cálculos, thresholds (`±1σ`, `±2σ`), columnas, layout, colores, otros componentes (signals técnicos micro/macro de `enhancedSignals.ts`, `CombinedSignal.tsx`, `SignalsList.tsx` que usan BUY/SELL — distinto sistema).
-- Traducciones (`translations.ts`) salvo que sean strings de las señales listadas (no lo son hoy).
-
-## Verificación
-
-- `rg "EXTREME HIGH|EXTREME LOW"` debe quedar vacío.
-- `rg "NEUTRAL"` en `RatioRow.tsx` y `Ratios.tsx` reemplazado por `BALANCED`.
-- Build limpio (sin cambios de tipos).
+Both English and Spanish copy updated in parallel.

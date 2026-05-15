@@ -74,11 +74,11 @@ export const translations = {
     overbought: 'Overbought',
     oversold: 'Oversold',
     
-    // Signal warnings
-    warningExtremeFearbullish: '💡 Extreme fear sentiment - possible contrarian opportunity',
-    warningExtremeGreedbullish: '⚠️ Extreme euphoria - caution with new bullish entries',
-    warningExtremeFearBearish: '⚠️ Already extreme fear - beware of shorts at bottom',
-    warningExtremeGreedBearish: '💡 Extreme euphoria - good timing for bearish positions',
+    // Context warnings
+    warningExtremeFearbullish: '💡 Extreme fear sentiment — possible contrarian context',
+    warningExtremeGreedbullish: '⚠️ Extreme euphoria — caution adding bullish exposure',
+    warningExtremeFearBearish: '⚠️ Already extreme fear — bearish bias looks crowded',
+    warningExtremeGreedBearish: '💡 Extreme euphoria — environment supports bearish bias',
     
     // Time intervals
     '1m': '1 Minute',

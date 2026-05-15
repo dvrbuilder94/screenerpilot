@@ -150,7 +150,7 @@ export default function EnhancedSignalCard({
         </div>
       )}
 
-      {/* Entry Zone & Risk Management */}
+      {/* Key Price Area & Risk Management */}
       {(signal.entryZone || signal.stopLoss || signal.targets) && (
         <div className="pt-4 border-t border-border/50 space-y-3">
           <h4 className="text-sm font-semibold flex items-center gap-2">

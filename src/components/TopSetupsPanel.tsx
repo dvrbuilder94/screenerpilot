@@ -31,6 +31,17 @@ export default function TopSetupsPanel({ setups, onSelectSetup }: TopSetupsPanel
     return 'bg-neutral/10 border-neutral/30';
   };
 
+  const getSignalLabel = (signal: string) => {
+    switch (signal) {
+      case 'STRONG_BUY': return 'High-conviction Bullish';
+      case 'BUY': return 'Bullish';
+      case 'STRONG_SELL': return 'High-conviction Bearish';
+      case 'SELL': return 'Bearish';
+      case 'HOLD': return 'Mixed';
+      default: return signal.replace('_', ' ');
+    }
+  };
+
   return (
     <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/50">
       <div className="flex items-center gap-2 mb-4">
@@ -83,10 +94,10 @@ export default function TopSetupsPanel({ setups, onSelectSetup }: TopSetupsPanel
                 {/* Signals */}
                 <div className="flex gap-2">
                   <div className={`px-3 py-1 rounded-lg text-xs font-semibold ${getSignalBg(setup.macroSignal.signal)} ${getSignalColor(setup.macroSignal.signal)}`}>
-                    {setup.macroSignal.signal.replace('_', ' ')}
+                    {getSignalLabel(setup.macroSignal.signal)}
                   </div>
                   <div className={`px-3 py-1 rounded-lg text-xs font-semibold ${getSignalBg(setup.microSignal.signal)} ${getSignalColor(setup.microSignal.signal)}`}>
-                    {setup.microSignal.signal.replace('_', ' ')}
+                    {getSignalLabel(setup.microSignal.signal)}
                   </div>
                 </div>
 

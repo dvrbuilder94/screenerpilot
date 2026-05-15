@@ -56,7 +56,7 @@ export const CryptoMacroInsight = () => {
           </div>
           <div className="flex-1">
             <p className="text-sm font-medium leading-relaxed">
-              {insight || 'Markets showing mixed signals across metrics. Monitor key levels closely?'}
+              {insight || 'Markets showing mixed context across metrics. Monitor key reference levels closely.'}
             </p>
           </div>
         </div>

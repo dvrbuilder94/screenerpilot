@@ -87,7 +87,7 @@ export function SignalsSidebar({
     <div className="flex flex-col h-full border-r border-border bg-background">
       {/* Header */}
       <div className="p-3 border-b border-border">
-        <h2 className="text-sm font-semibold mb-2 text-foreground">Daily Signals</h2>
+        <h2 className="text-sm font-semibold mb-2 text-foreground">Daily Setups</h2>
         
         {/* Stats */}
         <div className="flex gap-2 mb-3 text-xs">
@@ -135,7 +135,7 @@ export function SignalsSidebar({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="confidence">Confidence</SelectItem>
-              <SelectItem value="signal">Signal</SelectItem>
+              <SelectItem value="signal">Bias</SelectItem>
               <SelectItem value="alphabetical">A-Z</SelectItem>
               <SelectItem value="price">Price</SelectItem>
             </SelectContent>
@@ -196,7 +196,7 @@ export function SignalsSidebar({
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <Badge className={getSignalBadgeClass(setup.macroSignal.signal)}>
-                      {setup.macroSignal.signal.replace("_", " ")}
+                      {getSignalLabel(setup.macroSignal.signal)}
                     </Badge>
                     <span className="text-xs text-muted-foreground">
                       {setup.combinedConfidence}%
@@ -251,5 +251,16 @@ function getSignalBadgeClass(signal: SignalType): string {
       return "bg-red-500 hover:bg-red-600 text-white";
     default:
       return "bg-secondary hover:bg-secondary/80";
+  }
+}
+
+function getSignalLabel(signal: SignalType): string {
+  switch (signal) {
+    case "STRONG_BUY": return "High-conviction Bullish";
+    case "BUY": return "Bullish";
+    case "STRONG_SELL": return "High-conviction Bearish";
+    case "SELL": return "Bearish";
+    case "HOLD": return "Mixed";
+    default: return String(signal).replace("_", " ");
   }
 }

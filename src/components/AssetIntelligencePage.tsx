@@ -42,6 +42,17 @@ export function AssetIntelligencePage({
     }
   };
 
+  const getSignalLabel = (signal: string) => {
+    switch (signal) {
+      case "STRONG_BUY": return "High-conviction Bullish";
+      case "BUY": return "Bullish";
+      case "STRONG_SELL": return "High-conviction Bearish";
+      case "SELL": return "Bearish";
+      case "HOLD": return "Mixed";
+      default: return signal.replace("_", " ");
+    }
+  };
+
   const macroConfig = getSignalConfig(macroSignal);
   const MacroIcon = macroConfig.icon;
 
@@ -66,30 +77,30 @@ export function AssetIntelligencePage({
               <p className="text-3xl font-bold">${currentPrice.toFixed(2)}</p>
             </div>
 
-            {/* System Signal - The Verdict */}
+            {/* Market Bias - The Verdict */}
             <div className={`px-6 py-4 rounded-xl border ${macroConfig.bg}`}>
-              <p className="text-xs text-muted-foreground mb-1">System Signal (Daily)</p>
+              <p className="text-xs text-muted-foreground mb-1">Market Bias (Daily)</p>
               <div className="flex items-center gap-3">
                 <MacroIcon className={`h-6 w-6 ${macroConfig.color}`} />
                 <span className={`text-2xl font-bold ${macroConfig.color}`}>
-                  {macroSignal.signal.replace("_", " ")}
+                  {getSignalLabel(macroSignal.signal)}
                 </span>
               </div>
               <div className="flex items-center gap-4 mt-2 text-sm">
                 <span className="text-muted-foreground">
-                  Confidence: <span className="font-medium text-foreground">{macroSignal.confidence}%</span>
+                  Conviction: <span className="font-medium text-foreground">{macroSignal.confidence}%</span>
                 </span>
                 <Badge variant="outline" className="text-xs">
-                  {macroSignal.trend === "BULLISH" ? "📈 Bullish" : macroSignal.trend === "BEARISH" ? "📉 Bearish" : "➡️ Neutral"}
+                  {macroSignal.trend === "BULLISH" ? "📈 Bullish" : macroSignal.trend === "BEARISH" ? "📉 Bearish" : "➡️ Mixed"}
                 </Badge>
               </div>
             </div>
           </div>
 
-          {/* Signal Reasons */}
+          {/* Drivers */}
           {macroSignal.reasons.length > 0 && (
             <div className="mt-6 pt-6 border-t border-border/50">
-              <p className="text-sm font-medium mb-2">Signal Reasons:</p>
+              <p className="text-sm font-medium mb-2">Drivers:</p>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-1">
                 {macroSignal.reasons.map((reason, idx) => (
                   <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
@@ -125,7 +136,7 @@ export function AssetIntelligencePage({
           <div className="flex items-center justify-between">
             <CardTitle className="text-base font-medium flex items-center gap-2 text-muted-foreground">
               <Clock className="h-4 w-4" />
-              Execution Timing (1H)
+              Short-term Context (1H)
             </CardTitle>
             <Badge variant="secondary" className="text-xs">
               Not Tracked
@@ -138,13 +149,13 @@ export function AssetIntelligencePage({
         <CardContent>
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-sm text-muted-foreground">Micro Signal: </span>
+              <span className="text-sm text-muted-foreground">Micro Bias: </span>
               <span className={`font-medium ${getSignalConfig(microSignal).color}`}>
-                {microSignal.signal.replace("_", " ")}
+                {getSignalLabel(microSignal.signal)}
               </span>
             </div>
             <span className="text-sm text-muted-foreground">
-              Confidence: {microSignal.confidence}%
+              Conviction: {microSignal.confidence}%
             </span>
           </div>
         </CardContent>

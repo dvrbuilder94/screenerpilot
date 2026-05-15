@@ -11,10 +11,10 @@ const Pct = ({ v }: { v: number }) => {
 };
 
 const signals = [
-  { sym: "NVDA",   name: "Nvidia",        sig: "Long",   conf: 82, chg: 2.14 },
-  { sym: "BTC",    name: "Bitcoin",       sig: "Long",   conf: 74, chg: 1.08 },
-  { sym: "XLE",    name: "Energy ETF",    sig: "Short",  conf: 61, chg: -0.92 },
-  { sym: "EURUSD", name: "Euro / Dollar", sig: "Neutral",conf: 50, chg: -0.12 },
+  { sym: "NVDA",   name: "Nvidia",        sig: "Bullish", conf: 82, chg: 2.14 },
+  { sym: "BTC",    name: "Bitcoin",       sig: "Bullish", conf: 74, chg: 1.08 },
+  { sym: "XLE",    name: "Energy ETF",    sig: "Bearish", conf: 61, chg: -0.92 },
+  { sym: "EURUSD", name: "Euro / Dollar", sig: "Mixed",   conf: 50, chg: -0.12 },
 ];
 
 const snapshot = [
@@ -31,7 +31,7 @@ export default function Landing() {
     <div className="min-h-screen bg-background text-foreground">
       <Seo
         title="ScreenerPilot — AI Market Intelligence Terminal"
-        description="AI-powered cross-asset trading terminal. Real-time signals and macro context across stocks, ETFs, indices and commodities."
+        description="AI market intelligence for cross-asset decision-making. Track regimes, relative value and price dislocations across stocks, ETFs, indices, crypto and commodities."
         path="/"
       />
       {/* Header */}
@@ -76,11 +76,11 @@ export default function Landing() {
             Live · v1.0
           </div>
           <h1 className="text-[32px] sm:text-[44px] lg:text-[52px] font-semibold tracking-tight leading-[1.05] text-foreground">
-            AI agents for market intelligence.
+            AI market intelligence for cross-asset decision-making.
           </h1>
           <p className="mt-5 text-[15px] sm:text-base text-muted-foreground max-w-2xl leading-relaxed">
-            Track stocks, crypto, ETFs, indices and commodities from one terminal.
-            Get signals, context and cross-asset insights in a single workflow.
+            Track market regimes, relative value and price dislocations across stocks,
+            crypto, ETFs, indices and commodities — from a single terminal.
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <Button asChild size="lg" className="h-11 px-5 text-sm">
@@ -106,16 +106,16 @@ export default function Landing() {
               </span>
             </div>
             <span className="hidden sm:inline text-[11px] text-muted-foreground font-mono-tabular">
-              Markets · Signals · Context
+              Markets · Setups · Context
             </span>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-3">
-            {/* Signals */}
+            {/* Top setups */}
             <div className="lg:col-span-2 fin-card p-3">
               <div className="flex items-center justify-between mb-3 px-1">
                 <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Top Signals
+                  Top Setups
                 </h2>
                 <span className="text-[11px] text-muted-foreground font-mono-tabular">15m · auto</span>
               </div>
@@ -123,8 +123,8 @@ export default function Landing() {
                 <thead>
                   <tr>
                     <th>Symbol</th>
-                    <th>Signal</th>
-                    <th className="text-right">Conf</th>
+                    <th>Bias</th>
+                    <th className="text-right">Score</th>
                     <th className="text-right">1D</th>
                   </tr>
                 </thead>
@@ -139,8 +139,8 @@ export default function Landing() {
                       </td>
                       <td>
                         <span className={
-                          s.sig === "Long" ? "badge-positive"
-                          : s.sig === "Short" ? "badge-negative"
+                          s.sig === "Bullish" ? "badge-positive"
+                          : s.sig === "Bearish" ? "badge-negative"
                           : "badge-neutral"
                         }>
                           {s.sig}
@@ -203,7 +203,7 @@ export default function Landing() {
           {[
             { icon: LineChart, title: "Cross-asset screening", desc: "One workflow across stocks, crypto, ETFs, indices and commodities." },
             { icon: Brain,     title: "AI-generated context",  desc: "Setups explained in plain English with macro and micro evidence." },
-            { icon: Layers,    title: "Macro intelligence",   desc: "Regimes, ratios and commodities mapped to actionable setups." },
+            { icon: Layers,    title: "Macro intelligence",   desc: "Regimes, ratios and commodities mapped to relative-value setups." },
           ].map((f) => (
             <div key={f.title} className="fin-card p-5">
               <f.icon className="w-4 h-4 text-muted-foreground mb-4" strokeWidth={1.75} />
@@ -222,8 +222,8 @@ export default function Landing() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {[
             { n: "01", t: "Scan the market",      d: "Filter setups across asset classes in seconds." },
-            { n: "02", t: "Understand the signal", d: "Read context, regime and risk before acting." },
-            { n: "03", t: "Act from one terminal", d: "Move from idea to execution without tab-switching." },
+            { n: "02", t: "Read the context",      d: "Understand regime, relative value and risk before acting." },
+            { n: "03", t: "Decide from one terminal", d: "Move from observation to decision without tab-switching." },
           ].map((s) => (
             <div key={s.n} className="fin-card p-5">
               <div className="text-[11px] font-mono-tabular text-muted-foreground">{s.n}</div>
@@ -241,7 +241,7 @@ export default function Landing() {
             One terminal. More conviction.
           </h2>
           <p className="mt-3 text-[14px] sm:text-[15px] text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Use ScreenerPilot to filter noise, understand setups and move faster across markets.
+            Use ScreenerPilot to filter noise, read market context and understand what looks stretched, depressed or worth monitoring.
           </p>
           <div className="mt-7">
             <Button asChild size="lg" className="h-11 px-5 text-sm">

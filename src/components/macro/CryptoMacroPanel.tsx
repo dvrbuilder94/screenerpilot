@@ -186,7 +186,7 @@ export function CryptoMacroPanel() {
               <th className="text-left py-2 px-3 font-medium">Metric</th>
               <th className="text-right py-2 px-3 font-medium">Value</th>
               <th className="text-right py-2 px-3 font-medium">24h Δ</th>
-              <th className="text-right py-2 px-3 font-medium">Signal</th>
+              <th className="text-right py-2 px-3 font-medium">Bias</th>
             </tr>
           </thead>
           <tbody>

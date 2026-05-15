@@ -35,7 +35,7 @@ export default function SignalsList({ setups, onSelectSetup }: SignalsListProps)
       </div>
       <div className="space-y-2">
         {signals.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No signals</p>
+          <p className="text-sm text-muted-foreground">No setups</p>
         ) : (
           signals.map((setup) => (
             <button
@@ -53,7 +53,7 @@ export default function SignalsList({ setups, onSelectSetup }: SignalsListProps)
                 <div className="text-right">
                   <div className="text-sm font-mono">${setup.currentPrice.toFixed(2)}</div>
                   <div className="text-xs text-muted-foreground">
-                    {setup.combinedConfidence.toFixed(0)}% confidence
+                    {setup.combinedConfidence.toFixed(0)}% score
                   </div>
                 </div>
               </div>
@@ -66,10 +66,10 @@ export default function SignalsList({ setups, onSelectSetup }: SignalsListProps)
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {renderSignalGroup("Macro BUY Signals", macroBuySignals, true)}
-      {renderSignalGroup("Macro SELL Signals", macroSellSignals, false)}
-      {renderSignalGroup("Micro BUY Signals", microBuySignals, true)}
-      {renderSignalGroup("Micro SELL Signals", microSellSignals, false)}
+      {renderSignalGroup("Macro Bullish Setups", macroBuySignals, true)}
+      {renderSignalGroup("Macro Bearish Setups", macroSellSignals, false)}
+      {renderSignalGroup("Micro Bullish Setups", microBuySignals, true)}
+      {renderSignalGroup("Micro Bearish Setups", microSellSignals, false)}
     </div>
   );
 }

@@ -393,7 +393,7 @@ export function DashboardOverview({
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge className={getSignalBadgeClass(setup.macroSignal.signal)}>
-                            {setup.macroSignal.signal.replace("_", " ")}
+                            {getSignalLabel(setup.macroSignal.signal)}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-center">
@@ -468,7 +468,7 @@ export function DashboardOverview({
                       </div>
 
                       <Badge className={getSignalBadgeClass(setup.macroSignal.signal)}>
-                        {setup.macroSignal.signal.replace("_", " ")}
+                        {getSignalLabel(setup.macroSignal.signal)}
                       </Badge>
 
                       <ArrowRight className="h-4 w-4 text-muted-foreground" />
@@ -596,5 +596,16 @@ function getSignalBadgeClass(signal: SignalType): string {
       return "bg-bearish hover:bg-bearish/90 text-bearish-foreground";
     default:
       return "bg-secondary hover:bg-secondary/80";
+  }
+}
+
+function getSignalLabel(signal: SignalType): string {
+  switch (signal) {
+    case "STRONG_BUY": return "High-conviction Bullish";
+    case "BUY": return "Bullish";
+    case "STRONG_SELL": return "High-conviction Bearish";
+    case "SELL": return "Bearish";
+    case "HOLD": return "Mixed";
+    default: return String(signal).replace("_", " ");
   }
 }

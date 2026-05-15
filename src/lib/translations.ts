@@ -35,14 +35,14 @@ export const translations = {
     // Filters
     filters: 'Filters',
     trend: 'Trend',
-    signalType: 'Signal Type',
+    signalType: 'Bias',
     assetTypeFilter: 'Asset Type',
-    minConfidence: 'Min. Confidence',
+    minConfidence: 'Min. Score',
     all: 'All',
     bullish: 'Bullish',
     bearish: 'Bearish',
-    buy: 'Buy',
-    sell: 'Sell',
+    buy: 'Bullish',
+    sell: 'Bearish',
     crypto: 'Crypto',
     forex: 'Forex',
     commodities: 'Commodities',
@@ -54,10 +54,10 @@ export const translations = {
     
     // Top Setups
     topSetups: 'Top Setups',
-    confidence: 'Confidence',
-    signal: 'Signal',
-    entry: 'Entry',
-    stopLoss: 'Stop Loss',
+    confidence: 'Score',
+    signal: 'Bias',
+    entry: 'Key Price Area',
+    stopLoss: 'Risk Level',
     
     // Buttons
     refresh: 'Refresh',
@@ -74,11 +74,11 @@ export const translations = {
     overbought: 'Overbought',
     oversold: 'Oversold',
     
-    // Signal warnings
-    warningExtremeFearbullish: '💡 Extreme fear sentiment - possible contrarian opportunity',
-    warningExtremeGreedbullish: '⚠️ Extreme euphoria - caution with new bullish entries',
-    warningExtremeFearBearish: '⚠️ Already extreme fear - beware of shorts at bottom',
-    warningExtremeGreedBearish: '💡 Extreme euphoria - good timing for bearish positions',
+    // Context warnings
+    warningExtremeFearbullish: '💡 Extreme fear sentiment — possible contrarian context',
+    warningExtremeGreedbullish: '⚠️ Extreme euphoria — caution adding bullish exposure',
+    warningExtremeFearBearish: '⚠️ Already extreme fear — bearish bias looks crowded',
+    warningExtremeGreedBearish: '💡 Extreme euphoria — environment supports bearish bias',
     
     // Time intervals
     '1m': '1 Minute',
@@ -110,19 +110,19 @@ export const translations = {
     error: 'Error',
     noData: 'No data available',
     
-    // Enhanced Signal Card
-    reasons: 'Reasons',
+    // Enhanced Setup Card
+    reasons: 'Drivers',
     warnings: 'Warnings',
     riskManagement: 'Risk Management',
-    entryZone: 'Entry Zone',
-    targets: 'Targets',
-    target: 'Target',
+    entryZone: 'Key Price Area',
+    targets: 'Reference Levels',
+    target: 'Reference',
     trendLabel: 'Trend',
     score: 'Score',
     
     // Top Setups
-    topSetupsTitle: 'Top Daily Setups',
-    topSetupsDesc: 'Best technical opportunities ranked by confidence',
+    topSetupsTitle: 'Top Setups Today',
+    topSetupsDesc: 'Cross-asset opportunities ranked by conviction score',
     noSetupsAvailable: 'No setups available. Select a group to analyze.',
     
     // Watchlist
@@ -136,9 +136,9 @@ export const translations = {
     stocks: 'Stocks',
     indices: 'Indices',
     etfs: 'ETFs',
-    hold: 'Hold',
-    strongBuy: 'Strong Buy',
-    strongSell: 'Strong Sell',
+    hold: 'Mixed',
+    strongBuy: 'High-conviction Bullish',
+    strongSell: 'High-conviction Bearish',
     
     // Dashboard
     summary: 'Summary',
@@ -156,30 +156,30 @@ export const translations = {
     csvExported: 'CSV exported successfully',
     cryptocurrencies: 'Cryptocurrencies',
     
-    // Combined Signal
-    strongBuyDesc: 'Macro trend and micro signal bullish. High potential.',
-    strongSellDesc: 'Macro trend and micro signal bearish. Avoid long positions.',
-    bullishTrendWaitEntry: 'BULLISH TREND - Wait for entry 📊',
-    bullishTrendDesc: 'Macro bullish but micro neutral. Look for better entry points.',
-    bearishTrendAvoidLongs: 'BEARISH TREND - Avoid longs 📉',
-    bearishTrendDesc: 'Macro bearish. Wait for trend change to buy.',
-    mixedSignalsPullback: 'MIXED SIGNALS - Pullback in bullish trend 🤔',
-    mixedSignalsPullbackDesc: 'Macro bullish but micro bearish. Possible short-term correction.',
-    mixedSignalsBounce: 'MIXED SIGNALS - Bounce in bearish trend 🤔',
-    mixedSignalsBounceDesc: 'Macro bearish but micro bullish. Possible temporary bounce.',
-    neutralNoSignal: 'NEUTRAL - No clear signal 💤',
-    neutralNoSignalDesc: 'No clear signals. Wait for trend confirmation.',
+    // Combined Context
+    strongBuyDesc: 'Macro and micro context aligned bullish. High conviction.',
+    strongSellDesc: 'Macro and micro context aligned bearish. Bullish exposure looks unfavorable.',
+    bullishTrendWaitEntry: 'BULLISH REGIME — Awaiting better levels 📊',
+    bullishTrendDesc: 'Macro bullish but micro mixed. Better reference levels may emerge.',
+    bearishTrendAvoidLongs: 'BEARISH REGIME — Bullish bias unfavorable 📉',
+    bearishTrendDesc: 'Macro bearish. Wait for regime shift before turning constructive.',
+    mixedSignalsPullback: 'MIXED CONTEXT — Pullback inside bullish regime 🤔',
+    mixedSignalsPullbackDesc: 'Macro bullish but micro bearish. Possible short-term reversion.',
+    mixedSignalsBounce: 'MIXED CONTEXT — Bounce inside bearish regime 🤔',
+    mixedSignalsBounceDesc: 'Macro bearish but micro bullish. Possible counter-trend move.',
+    neutralNoSignal: 'BALANCED — No clear context 💤',
+    neutralNoSignalDesc: 'No directional context. Wait for regime confirmation.',
     scores: 'Scores',
     macro: 'Macro',
     micro: 'Micro',
     
     // Group Ranking
     loadingGroupData: 'Loading group data...',
-    rankingByMicroScore: 'Ranking by micro score (trading)',
+    rankingByMicroScore: 'Ranked by micro score',
     groupSummary: '📈 Group Summary',
     
     // Indicator Panel
-    signalLabel: 'Signal',
+    signalLabel: 'Bias',
     bullishTrend: '↑ Bullish',
     bearishTrend: '↓ Bearish',
     momentum: 'Momentum',
@@ -264,14 +264,14 @@ export const translations = {
     // Filters
     filters: 'Filtros',
     trend: 'Tendencia',
-    signalType: 'Tipo de Señal',
+    signalType: 'Sesgo',
     assetTypeFilter: 'Tipo de Activo',
-    minConfidence: 'Confianza Mín.',
+    minConfidence: 'Score Mín.',
     all: 'Todos',
     bullish: 'Alcista',
     bearish: 'Bajista',
-    buy: 'Compra',
-    sell: 'Venta',
+    buy: 'Alcista',
+    sell: 'Bajista',
     crypto: 'Cripto',
     forex: 'Forex',
     commodities: 'Commodities',
@@ -283,10 +283,10 @@ export const translations = {
     
     // Top Setups
     topSetups: 'Mejores Setups',
-    confidence: 'Confianza',
-    signal: 'Señal',
-    entry: 'Entrada',
-    stopLoss: 'Stop Loss',
+    confidence: 'Score',
+    signal: 'Sesgo',
+    entry: 'Zona Clave',
+    stopLoss: 'Nivel de Riesgo',
     
     // Buttons
     refresh: 'Actualizar',
@@ -303,11 +303,11 @@ export const translations = {
     overbought: 'Sobrecompra',
     oversold: 'Sobreventa',
     
-    // Signal warnings
-    warningExtremeFearbullish: '💡 Sentimiento de miedo extremo - posible oportunidad contrarian',
-    warningExtremeGreedbullish: '⚠️ Euforia extrema - precaución con nuevas entradas alcistas',
-    warningExtremeFearBearish: '⚠️ Ya hay miedo extremo - cuidado con shorts en suelo',
-    warningExtremeGreedBearish: '💡 Euforia extrema - buen timing para posiciones bajistas',
+    // Context warnings
+    warningExtremeFearbullish: '💡 Sentimiento de miedo extremo — posible contexto contrarian',
+    warningExtremeGreedbullish: '⚠️ Euforia extrema — precaución al añadir exposición alcista',
+    warningExtremeFearBearish: '⚠️ Miedo extremo — sesgo bajista parece saturado',
+    warningExtremeGreedBearish: '💡 Euforia extrema — entorno favorable a sesgo bajista',
     
     // Time intervals
     '1m': '1 Minuto',
@@ -339,19 +339,19 @@ export const translations = {
     error: 'Error',
     noData: 'No hay datos disponibles',
     
-    // Enhanced Signal Card
-    reasons: 'Razones',
+    // Enhanced Setup Card
+    reasons: 'Drivers',
     warnings: 'Advertencias',
     riskManagement: 'Gestión de Riesgo',
-    entryZone: 'Zona de entrada',
-    targets: 'Objetivos',
-    target: 'Target',
+    entryZone: 'Zona Clave',
+    targets: 'Niveles de Referencia',
+    target: 'Referencia',
     trendLabel: 'Tendencia',
     score: 'Score',
     
     // Top Setups
     topSetupsTitle: 'Mejores Setups del Día',
-    topSetupsDesc: 'Mejores oportunidades técnicas ordenadas por confianza',
+    topSetupsDesc: 'Oportunidades cross-asset ordenadas por conviction score',
     noSetupsAvailable: 'No hay setups disponibles. Selecciona un grupo para analizar.',
     
     // Watchlist
@@ -365,9 +365,9 @@ export const translations = {
     stocks: 'Acciones',
     indices: 'Índices',
     etfs: 'ETFs',
-    hold: 'Hold',
-    strongBuy: 'Strong Buy',
-    strongSell: 'Strong Sell',
+    hold: 'Mixto',
+    strongBuy: 'Alcista de alta convicción',
+    strongSell: 'Bajista de alta convicción',
     
     // Dashboard
     summary: 'Resumen',
@@ -385,30 +385,30 @@ export const translations = {
     csvExported: 'CSV exportado correctamente',
     cryptocurrencies: 'Criptomonedas',
     
-    // Combined Signal
-    strongBuyDesc: 'Tendencia macro y señal micro alcistas. Alto potencial.',
-    strongSellDesc: 'Tendencia macro y señal micro bajistas. Evitar posiciones largas.',
-    bullishTrendWaitEntry: 'TENDENCIA ALCISTA - Esperar entrada 📊',
-    bullishTrendDesc: 'Macro alcista pero micro neutral. Buscar mejores puntos de entrada.',
-    bearishTrendAvoidLongs: 'TENDENCIA BAJISTA - Evitar largos 📉',
-    bearishTrendDesc: 'Macro bajista. Esperar cambio de tendencia para comprar.',
-    mixedSignalsPullback: 'SEÑALES MIXTAS - Retroceso en tendencia alcista 🤔',
-    mixedSignalsPullbackDesc: 'Macro alcista pero micro bajista. Posible corrección a corto plazo.',
-    mixedSignalsBounce: 'SEÑALES MIXTAS - Rebote en tendencia bajista 🤔',
-    mixedSignalsBounceDesc: 'Macro bajista pero micro alcista. Posible rebote temporal.',
-    neutralNoSignal: 'NEUTRAL - Sin señal clara 💤',
-    neutralNoSignalDesc: 'Sin señales claras. Esperar confirmación de tendencia.',
+    // Combined Context
+    strongBuyDesc: 'Contexto macro y micro alineados al alza. Alta convicción.',
+    strongSellDesc: 'Contexto macro y micro alineados a la baja. Exposición alcista desfavorable.',
+    bullishTrendWaitEntry: 'RÉGIMEN ALCISTA — Esperar mejores niveles 📊',
+    bullishTrendDesc: 'Macro alcista pero micro mixto. Pueden surgir mejores niveles de referencia.',
+    bearishTrendAvoidLongs: 'RÉGIMEN BAJISTA — Sesgo alcista desfavorable 📉',
+    bearishTrendDesc: 'Macro bajista. Esperar cambio de régimen antes de cambiar el sesgo.',
+    mixedSignalsPullback: 'CONTEXTO MIXTO — Retroceso dentro de régimen alcista 🤔',
+    mixedSignalsPullbackDesc: 'Macro alcista pero micro bajista. Posible reversión de corto plazo.',
+    mixedSignalsBounce: 'CONTEXTO MIXTO — Rebote dentro de régimen bajista 🤔',
+    mixedSignalsBounceDesc: 'Macro bajista pero micro alcista. Posible movimiento contra-tendencia.',
+    neutralNoSignal: 'EQUILIBRADO — Sin contexto claro 💤',
+    neutralNoSignalDesc: 'Sin contexto direccional. Esperar confirmación de régimen.',
     scores: 'Scores',
     macro: 'Macro',
     micro: 'Micro',
     
     // Group Ranking
     loadingGroupData: 'Cargando datos del grupo...',
-    rankingByMicroScore: 'Ranking por score micro (operativa)',
+    rankingByMicroScore: 'Ranking por score micro',
     groupSummary: '📈 Resumen del Grupo',
     
     // Indicator Panel
-    signalLabel: 'Señal',
+    signalLabel: 'Sesgo',
     bullishTrend: '↑ Alcista',
     bearishTrend: '↓ Bajista',
     momentum: 'Momentum',

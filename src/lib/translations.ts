@@ -303,11 +303,11 @@ export const translations = {
     overbought: 'Sobrecompra',
     oversold: 'Sobreventa',
     
-    // Signal warnings
-    warningExtremeFearbullish: '💡 Sentimiento de miedo extremo - posible oportunidad contrarian',
-    warningExtremeGreedbullish: '⚠️ Euforia extrema - precaución con nuevas entradas alcistas',
-    warningExtremeFearBearish: '⚠️ Ya hay miedo extremo - cuidado con shorts en suelo',
-    warningExtremeGreedBearish: '💡 Euforia extrema - buen timing para posiciones bajistas',
+    // Context warnings
+    warningExtremeFearbullish: '💡 Sentimiento de miedo extremo — posible contexto contrarian',
+    warningExtremeGreedbullish: '⚠️ Euforia extrema — precaución al añadir exposición alcista',
+    warningExtremeFearBearish: '⚠️ Miedo extremo — sesgo bajista parece saturado',
+    warningExtremeGreedBearish: '💡 Euforia extrema — entorno favorable a sesgo bajista',
     
     // Time intervals
     '1m': '1 Minuto',

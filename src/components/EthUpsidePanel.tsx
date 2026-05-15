@@ -124,7 +124,7 @@ export const EthUpsidePanel = () => {
 
             {/* Signal Factors */}
             <div className="space-y-2">
-              <div className="text-xs font-medium text-muted-foreground mb-2">Signal Factors</div>
+              <div className="text-xs font-medium text-muted-foreground mb-2">Drivers</div>
               <div className="flex flex-wrap gap-2">
                 <Badge variant={data.factors.aboveEma50 ? 'default' : 'secondary'}>
                   {data.factors.aboveEma50 ? '✓' : '✗'} Above EMA50 (+25)

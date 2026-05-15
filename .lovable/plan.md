@@ -52,11 +52,14 @@ Adjust prompts and on-screen helper copy in `TradingAIWidget.tsx` and the insigh
 ### 5. SEO + metadata
 - Update `<title>`, meta description and OG tags in `index.html`, the `Seo` component default, `public/llms.txt`, and the per-page `Seo` calls (Landing, Markets, Macro, Ratios, Commodities, StockIntelligence). Replace "signals / trading" framing with "market intelligence / cross-asset context".
 
-## Non-goals (explicitly out of scope)
+## Hard constraints
 
-- No changes to scoring math, indicators, edge functions, DB schema, RLS, or routes.
+- Visible copy only — strings rendered to users.
+- No renames: files, variables, types, props, hooks, routes, DB fields, translation keys all stay identical.
+- No changes to business logic, scoring, edge functions, or component structure.
+- No refactors. Smallest possible diff.
+- Ambiguous labels → neutral institutional wording, do not invent new concepts.
 - No visual / theme / layout changes.
-- Internal variable, type, file, and translation-key names stay (`signal`, `signalType`, etc.) to avoid touching logic — only the user-visible **values** change.
 
 ## Languages
 

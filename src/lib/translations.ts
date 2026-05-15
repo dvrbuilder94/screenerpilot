@@ -110,19 +110,19 @@ export const translations = {
     error: 'Error',
     noData: 'No data available',
     
-    // Enhanced Signal Card
-    reasons: 'Reasons',
+    // Enhanced Setup Card
+    reasons: 'Drivers',
     warnings: 'Warnings',
     riskManagement: 'Risk Management',
-    entryZone: 'Entry Zone',
-    targets: 'Targets',
-    target: 'Target',
+    entryZone: 'Key Price Area',
+    targets: 'Reference Levels',
+    target: 'Reference',
     trendLabel: 'Trend',
     score: 'Score',
     
     // Top Setups
-    topSetupsTitle: 'Top Daily Setups',
-    topSetupsDesc: 'Best technical opportunities ranked by confidence',
+    topSetupsTitle: 'Top Setups Today',
+    topSetupsDesc: 'Cross-asset opportunities ranked by conviction score',
     noSetupsAvailable: 'No setups available. Select a group to analyze.',
     
     // Watchlist

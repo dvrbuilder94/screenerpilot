@@ -404,11 +404,11 @@ export const translations = {
     
     // Group Ranking
     loadingGroupData: 'Cargando datos del grupo...',
-    rankingByMicroScore: 'Ranking por score micro (operativa)',
+    rankingByMicroScore: 'Ranking por score micro',
     groupSummary: '📈 Resumen del Grupo',
     
     // Indicator Panel
-    signalLabel: 'Señal',
+    signalLabel: 'Sesgo',
     bullishTrend: '↑ Alcista',
     bearishTrend: '↓ Bajista',
     momentum: 'Momentum',

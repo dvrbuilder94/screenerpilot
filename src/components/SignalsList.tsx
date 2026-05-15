@@ -35,7 +35,7 @@ export default function SignalsList({ setups, onSelectSetup }: SignalsListProps)
       </div>
       <div className="space-y-2">
         {signals.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No signals</p>
+          <p className="text-sm text-muted-foreground">No setups</p>
         ) : (
           signals.map((setup) => (
             <button

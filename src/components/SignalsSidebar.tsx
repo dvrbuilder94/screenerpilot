@@ -196,7 +196,7 @@ export function SignalsSidebar({
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <Badge className={getSignalBadgeClass(setup.macroSignal.signal)}>
-                      {setup.macroSignal.signal.replace("_", " ")}
+                      {getSignalLabel(setup.macroSignal.signal)}
                     </Badge>
                     <span className="text-xs text-muted-foreground">
                       {setup.combinedConfidence}%

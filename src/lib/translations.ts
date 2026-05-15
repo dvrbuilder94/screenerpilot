@@ -175,11 +175,11 @@ export const translations = {
     
     // Group Ranking
     loadingGroupData: 'Loading group data...',
-    rankingByMicroScore: 'Ranking by micro score (trading)',
+    rankingByMicroScore: 'Ranked by micro score',
     groupSummary: '📈 Group Summary',
     
     // Indicator Panel
-    signalLabel: 'Signal',
+    signalLabel: 'Bias',
     bullishTrend: '↑ Bullish',
     bearishTrend: '↓ Bearish',
     momentum: 'Momentum',

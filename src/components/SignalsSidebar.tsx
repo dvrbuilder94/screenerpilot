@@ -135,7 +135,7 @@ export function SignalsSidebar({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="confidence">Confidence</SelectItem>
-              <SelectItem value="signal">Signal</SelectItem>
+              <SelectItem value="signal">Bias</SelectItem>
               <SelectItem value="alphabetical">A-Z</SelectItem>
               <SelectItem value="price">Price</SelectItem>
             </SelectContent>

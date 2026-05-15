@@ -89,7 +89,7 @@ export default function EnhancedSignalCard({
                   case 'STRONG_SELL': return 'High-conviction Bearish';
                   case 'SELL': return 'Bearish';
                   case 'HOLD': return 'Mixed';
-                  default: return signal.signal.replace('_', ' ');
+                  default: return String(signal.signal).replace('_', ' ');
                 }
               })()}
             </div>

@@ -74,7 +74,7 @@ export default function EnhancedSignalCard({
           <p className="text-sm text-muted-foreground">{timeframe}</p>
           {isExecutionTiming && (
             <p className="text-xs text-muted-foreground italic mt-1">
-              Execution timing only — not part of system performance tracking
+              Short-term context only — not part of system performance tracking
             </p>
           )}
         </div>
@@ -82,7 +82,16 @@ export default function EnhancedSignalCard({
           <div className="flex items-center gap-2">
             <Icon className={`h-5 w-5 ${config.color}`} />
           <div className={`text-xl font-bold ${config.color}`}>
-              {signal.signal.replace('_', ' ')}
+              {(() => {
+                switch (signal.signal) {
+                  case 'STRONG_BUY': return 'High-conviction Bullish';
+                  case 'BUY': return 'Bullish';
+                  case 'STRONG_SELL': return 'High-conviction Bearish';
+                  case 'SELL': return 'Bearish';
+                  case 'HOLD': return 'Mixed';
+                  default: return signal.signal.replace('_', ' ');
+                }
+              })()}
             </div>
           </div>
           <div className="text-xs text-muted-foreground text-center mt-1">

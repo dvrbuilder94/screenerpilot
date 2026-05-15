@@ -339,19 +339,19 @@ export const translations = {
     error: 'Error',
     noData: 'No hay datos disponibles',
     
-    // Enhanced Signal Card
-    reasons: 'Razones',
+    // Enhanced Setup Card
+    reasons: 'Drivers',
     warnings: 'Advertencias',
     riskManagement: 'Gestión de Riesgo',
-    entryZone: 'Zona de entrada',
-    targets: 'Objetivos',
-    target: 'Target',
+    entryZone: 'Zona Clave',
+    targets: 'Niveles de Referencia',
+    target: 'Referencia',
     trendLabel: 'Tendencia',
     score: 'Score',
     
     // Top Setups
     topSetupsTitle: 'Mejores Setups del Día',
-    topSetupsDesc: 'Mejores oportunidades técnicas ordenadas por confianza',
+    topSetupsDesc: 'Oportunidades cross-asset ordenadas por conviction score',
     noSetupsAvailable: 'No hay setups disponibles. Selecciona un grupo para analizar.',
     
     // Watchlist

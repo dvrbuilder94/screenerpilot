@@ -393,7 +393,7 @@ export function DashboardOverview({
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge className={getSignalBadgeClass(setup.macroSignal.signal)}>
-                            {setup.macroSignal.signal.replace("_", " ")}
+                            {getSignalLabel(setup.macroSignal.signal)}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-center">

@@ -106,16 +106,16 @@ export default function Landing() {
               </span>
             </div>
             <span className="hidden sm:inline text-[11px] text-muted-foreground font-mono-tabular">
-              Markets · Signals · Context
+              Markets · Setups · Context
             </span>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-3">
-            {/* Signals */}
+            {/* Top setups */}
             <div className="lg:col-span-2 fin-card p-3">
               <div className="flex items-center justify-between mb-3 px-1">
                 <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Top Signals
+                  Top Setups
                 </h2>
                 <span className="text-[11px] text-muted-foreground font-mono-tabular">15m · auto</span>
               </div>
@@ -123,8 +123,8 @@ export default function Landing() {
                 <thead>
                   <tr>
                     <th>Symbol</th>
-                    <th>Signal</th>
-                    <th className="text-right">Conf</th>
+                    <th>Bias</th>
+                    <th className="text-right">Score</th>
                     <th className="text-right">1D</th>
                   </tr>
                 </thead>

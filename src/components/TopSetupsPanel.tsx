@@ -94,10 +94,10 @@ export default function TopSetupsPanel({ setups, onSelectSetup }: TopSetupsPanel
                 {/* Signals */}
                 <div className="flex gap-2">
                   <div className={`px-3 py-1 rounded-lg text-xs font-semibold ${getSignalBg(setup.macroSignal.signal)} ${getSignalColor(setup.macroSignal.signal)}`}>
-                    {setup.macroSignal.signal.replace('_', ' ')}
+                    {getSignalLabel(setup.macroSignal.signal)}
                   </div>
                   <div className={`px-3 py-1 rounded-lg text-xs font-semibold ${getSignalBg(setup.microSignal.signal)} ${getSignalColor(setup.microSignal.signal)}`}>
-                    {setup.microSignal.signal.replace('_', ' ')}
+                    {getSignalLabel(setup.microSignal.signal)}
                   </div>
                 </div>
 

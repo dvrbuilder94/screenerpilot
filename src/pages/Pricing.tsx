@@ -1,217 +1,134 @@
-import { Check } from "lucide-react";
+import { useState } from "react";
+import { Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
-import { useLanguage } from "@/contexts/LanguageContext";
-
-const LOGO_URL = "https://storage.googleapis.com/gpt-engineer-file-uploads/SwWQdnEgbuMrnR9f8RUe0qM0pTi1/uploads/1768527913536-WhatsApp Image 2026-01-15 at 11.30.09 AM.jpeg";
-
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
+import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
+import { Seo } from "@/components/Seo";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 export default function Pricing() {
+  const { user } = useAuth();
+  const { isActive } = useSubscription();
+  const { openCheckout, loading } = usePaddleCheckout();
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
 
-  const translations = {
-    en: {
-      title: "Choose Your Plan",
-      subtitle: "Unlock the full power of ScreenerPilot",
-      monthly: "month",
-      free: {
-        name: "Free",
-        price: "$0",
-        description: "Perfect for getting started",
-        features: [
-          "10 AI chat messages/day",
-          "Basic market data",
-          "20 news requests/hour",
-          "30 data requests/hour",
-          "Community support"
-        ],
-        cta: "Current Plan"
-      },
-      pro: {
-        name: "Pro",
-        price: "$29",
-        description: "For serious traders",
-        features: [
-          "Unlimited AI chat",
-          "Real-time market snapshots",
-          "200 news requests/hour",
-          "300 data requests/hour",
-          "Advanced indicators",
-          "Priority support",
-          "Early access to features"
-        ],
-        cta: "Upgrade to Pro"
-      },
-      premium: {
-        name: "Premium",
-        price: "$99",
-        description: "For professional teams",
-        features: [
-          "Everything in Pro",
-          "Custom indicator presets",
-          "1000+ news requests/hour",
-          "1500+ data requests/hour",
-          "Dedicated support",
-          "API access",
-          "White-label options"
-        ],
-        cta: "Contact Sales"
-      }
-    },
-    es: {
-      title: "Elige Tu Plan",
-      subtitle: "Desbloquea todo el poder de ScreenerPilot",
-      monthly: "mes",
-      free: {
-        name: "Gratis",
-        price: "$0",
-        description: "Perfecto para comenzar",
-        features: [
-          "10 mensajes IA/día",
-          "Datos básicos de mercado",
-          "20 consultas de noticias/hora",
-          "30 consultas de datos/hora",
-          "Soporte comunitario"
-        ],
-        cta: "Plan Actual"
-      },
-      pro: {
-        name: "Pro",
-        price: "$29",
-        description: "Para traders serios",
-        features: [
-          "Chat IA ilimitado",
-          "Snapshots en tiempo real",
-          "200 consultas de noticias/hora",
-          "300 consultas de datos/hora",
-          "Indicadores avanzados",
-          "Soporte prioritario",
-          "Acceso anticipado"
-        ],
-        cta: "Actualizar a Pro"
-      },
-      premium: {
-        name: "Premium",
-        price: "$99",
-        description: "Para equipos profesionales",
-        features: [
-          "Todo lo de Pro",
-          "Presets personalizados",
-          "1000+ consultas noticias/hora",
-          "1500+ consultas datos/hora",
-          "Soporte dedicado",
-          "Acceso API",
-          "Opciones white-label"
-        ],
-        cta: "Contactar Ventas"
-      }
+  const handleSubscribe = async () => {
+    if (!user) {
+      navigate("/signup");
+      return;
     }
+    await openCheckout({
+      priceId: billing === "monthly" ? "pro_monthly" : "pro_yearly",
+      customerEmail: user.email,
+      customData: { userId: user.id },
+      successUrl: `${window.location.origin}/checkout/success`,
+    });
   };
 
-  const t = translations[language];
-
-  const plans = [
-    {
-      ...t.free,
-      highlighted: false,
-      onClick: () => navigate('/')
-    },
-    {
-      ...t.pro,
-      highlighted: true,
-      onClick: () => {
-        // TODO: Integrar checkout de token
-        alert('Token-gated access coming soon!');
-      }
-    },
-    {
-      ...t.premium,
-      highlighted: false,
-      onClick: () => {
-        // Contacto deshabilitado - anonimizado para lanzamiento de token
-        alert('Premium access via token holding - coming soon!');
-      }
-    }
+  const features = [
+    "Full Markets terminal (stocks, crypto, indices, commodities)",
+    "Macro intelligence: regimes, ratios, dislocations",
+    "Stock Intelligence with on-demand analysis",
+    "AlexIA macro copilot — unlimited messages",
+    "Real-time data from Binance & Yahoo Finance",
+    "Email support",
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95 py-20 px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <img 
-            src={LOGO_URL} 
-            alt="ScreenerPilot Logo" 
-            className="w-20 h-20 mx-auto mb-6 rounded-2xl object-cover shadow-lg"
-          />
-          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-            {t.title}
-          </h1>
-          <p className="text-xl text-muted-foreground">
-            {t.subtitle}
-          </p>
-        </div>
+    <>
+      <Seo
+        title="Pricing — ScreenerPilot Pro"
+        description="ScreenerPilot Pro: $15/month or $144/year. 30-day free trial. Cancel anytime."
+        path="/pricing"
+      />
+      <PaymentTestModeBanner />
+      <div className="min-h-screen bg-background py-20 px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-semibold text-foreground tracking-tight mb-4">
+              One plan. Full terminal.
+            </h1>
+            <p className="text-lg text-muted-foreground">
+              30 days free. Cancel anytime — no questions.
+            </p>
+          </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {plans.map((plan, index) => (
-            <Card
-              key={index}
-              className={`relative p-8 transition-all duration-300 hover:scale-105 ${
-                plan.highlighted
-                  ? 'border-primary shadow-elegant bg-gradient-to-br from-card via-card to-primary/5'
-                  : 'border-border/50 bg-card/50 backdrop-blur'
-              }`}
-            >
-              {plan.highlighted && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-sm font-semibold rounded-full">
-                  Popular
-                </div>
-              )}
-
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                <p className="text-muted-foreground mb-4">{plan.description}</p>
-                <div className="flex items-baseline justify-center gap-2">
-                  <span className="text-5xl font-bold">{plan.price}</span>
-                  <span className="text-muted-foreground">/{t.monthly}</span>
-                </div>
-              </div>
-
-              <ul className="space-y-4 mb-8">
-                {plan.features.map((feature, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-bullish flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-foreground/90">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                onClick={plan.onClick}
-                variant={plan.highlighted ? "default" : "outline"}
-                className="w-full"
-                size="lg"
+          <div className="flex items-center justify-center mb-8">
+            <div className="inline-flex bg-secondary rounded-full p-1">
+              <button
+                onClick={() => setBilling("monthly")}
+                className={`px-5 py-2 rounded-full text-sm font-medium transition ${
+                  billing === "monthly" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground"
+                }`}
               >
-                {plan.cta}
-              </Button>
-            </Card>
-          ))}
-        </div>
+                Monthly
+              </button>
+              <button
+                onClick={() => setBilling("yearly")}
+                className={`px-5 py-2 rounded-full text-sm font-medium transition ${
+                  billing === "yearly" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground"
+                }`}
+              >
+                Yearly <span className="ml-1 text-xs text-bullish">−20%</span>
+              </button>
+            </div>
+          </div>
 
-        <div className="mt-16 text-center">
-          <p className="text-muted-foreground mb-4">
-            {language === 'en' 
-              ? 'All plans include 14-day money-back guarantee' 
-              : 'Todos los planes incluyen garantía de 14 días'}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {language === 'en'
-              ? 'Need a custom plan? Contact us via official channels'
-              : '¿Necesitas un plan personalizado? Contáctanos por canales oficiales'}
+          <Card className="p-10 border-2 border-foreground/10 shadow-elegant max-w-xl mx-auto">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-xs uppercase tracking-[0.12em] text-muted-foreground font-medium">
+                ScreenerPilot Pro
+              </span>
+            </div>
+            <div className="flex items-baseline gap-2 mb-1">
+              <span className="text-5xl font-semibold text-foreground">
+                ${billing === "monthly" ? "15" : "12"}
+              </span>
+              <span className="text-muted-foreground">/month</span>
+            </div>
+            <p className="text-sm text-muted-foreground mb-6">
+              {billing === "monthly"
+                ? "Billed monthly. 30-day free trial."
+                : "$144 billed yearly. 30-day free trial."}
+            </p>
+
+            <ul className="space-y-3 mb-8">
+              {features.map((f) => (
+                <li key={f} className="flex items-start gap-3">
+                  <Check className="w-4 h-4 text-bullish mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-foreground">{f}</span>
+                </li>
+              ))}
+            </ul>
+
+            {isActive ? (
+              <Button asChild size="lg" className="w-full" variant="outline">
+                <Link to="/markets">Go to terminal</Link>
+              </Button>
+            ) : (
+              <Button onClick={handleSubscribe} size="lg" className="w-full" disabled={loading}>
+                {loading ? "Opening checkout…" : user ? "Start 30-day free trial" : "Sign up & start free trial"}
+              </Button>
+            )}
+
+            <p className="text-[11px] text-muted-foreground text-center mt-4">
+              Payment processed by Paddle. You won't be charged for 30 days. Cancel anytime before then.
+            </p>
+          </Card>
+
+          <p className="text-center text-xs text-muted-foreground mt-8">
+            Questions? See our{" "}
+            <Link to="/refund-policy" className="underline">refund policy</Link>{" "}
+            and{" "}
+            <Link to="/terms" className="underline">terms</Link>.
           </p>
         </div>
       </div>
-    </div>
+    </>
   );
 }

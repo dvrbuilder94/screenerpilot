@@ -221,9 +221,9 @@ export default function Landing() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {[
-            { n: "01", t: "Scan the market",      d: "Filter setups across asset classes in seconds." },
-            { n: "02", t: "Read the context",      d: "Understand regime, relative value and risk before acting." },
-            { n: "03", t: "Decide from one terminal", d: "Move from observation to decision without tab-switching." },
+            { n: "01", t: "Scan the market",      d: "Filter assets across classes in seconds with descriptive scores." },
+            { n: "02", t: "Read the context",     d: "Understand regime, relative value and dislocations at a glance." },
+            { n: "03", t: "Stay informed",        d: "Monitor what looks stretched, depressed or worth watching — from one terminal." },
           ].map((s) => (
             <div key={s.n} className="fin-card p-5">
               <div className="text-[11px] font-mono-tabular text-muted-foreground">{s.n}</div>

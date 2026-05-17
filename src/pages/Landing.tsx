@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, LineChart, Brain, Layers } from "lucide-react";
+import { ArrowRight, LineChart, Layers, Activity } from "lucide-react";
 import { Seo } from "@/components/Seo";
 
 const LOGO_URL = "https://storage.googleapis.com/gpt-engineer-file-uploads/SwWQdnEgbuMrnR9f8RUe0qM0pTi1/uploads/1768527913536-WhatsApp Image 2026-01-15 at 11.30.09 AM.jpeg";

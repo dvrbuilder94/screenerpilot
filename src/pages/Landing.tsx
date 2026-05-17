@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, LineChart, Brain, Layers } from "lucide-react";
+import { ArrowRight, LineChart, Layers, Activity } from "lucide-react";
 import { Seo } from "@/components/Seo";
 
 const LOGO_URL = "https://storage.googleapis.com/gpt-engineer-file-uploads/SwWQdnEgbuMrnR9f8RUe0qM0pTi1/uploads/1768527913536-WhatsApp Image 2026-01-15 at 11.30.09 AM.jpeg";
@@ -10,11 +10,11 @@ const Pct = ({ v }: { v: number }) => {
   return <span className={cls}>{v >= 0 ? "+" : ""}{v.toFixed(2)}%</span>;
 };
 
-const signals = [
-  { sym: "NVDA",   name: "Nvidia",        sig: "Bullish", conf: 82, chg: 2.14 },
-  { sym: "BTC",    name: "Bitcoin",       sig: "Bullish", conf: 74, chg: 1.08 },
-  { sym: "XLE",    name: "Energy ETF",    sig: "Bearish", conf: 61, chg: -0.92 },
-  { sym: "EURUSD", name: "Euro / Dollar", sig: "Mixed",   conf: 50, chg: -0.12 },
+const scans = [
+  { sym: "NVDA",   name: "Nvidia",        bias: "Bullish", score: 82, chg: 2.14 },
+  { sym: "BTC",    name: "Bitcoin",       bias: "Bullish", score: 74, chg: 1.08 },
+  { sym: "XLE",    name: "Energy ETF",    bias: "Bearish", score: 61, chg: -0.92 },
+  { sym: "EURUSD", name: "Euro / Dollar", bias: "Neutral", score: 50, chg: -0.12 },
 ];
 
 const snapshot = [
@@ -30,8 +30,8 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Seo
-        title="ScreenerPilot — AI Market Intelligence Terminal"
-        description="AI market intelligence for cross-asset decision-making. Track regimes, relative value and price dislocations across stocks, ETFs, indices, crypto and commodities."
+        title="ScreenerPilot — Macro Intelligence Terminal"
+        description="A read-only market intelligence terminal. Monitor regimes, relative value and price dislocations across stocks, ETFs, indices, crypto and commodities."
         path="/"
       />
       {/* Header */}
@@ -76,11 +76,11 @@ export default function Landing() {
             Live · v1.0
           </div>
           <h1 className="text-[32px] sm:text-[44px] lg:text-[52px] font-semibold tracking-tight leading-[1.05] text-foreground">
-            AI market intelligence for cross-asset decision-making.
+            A macro intelligence terminal for cross-asset monitoring.
           </h1>
           <p className="mt-5 text-[15px] sm:text-base text-muted-foreground max-w-2xl leading-relaxed">
-            Track market regimes, relative value and price dislocations across stocks,
-            crypto, ETFs, indices and commodities — from a single terminal.
+            Monitor market regimes, relative value and price dislocations across stocks,
+            crypto, ETFs, indices and commodities — from a single terminal. Read-only analytics, no execution, no advice.
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <Button asChild size="lg" className="h-11 px-5 text-sm">
@@ -106,16 +106,16 @@ export default function Landing() {
               </span>
             </div>
             <span className="hidden sm:inline text-[11px] text-muted-foreground font-mono-tabular">
-              Markets · Setups · Context
+              Markets · Scans · Context
             </span>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-3">
-            {/* Top setups */}
+            {/* Top scans */}
             <div className="lg:col-span-2 fin-card p-3">
               <div className="flex items-center justify-between mb-3 px-1">
                 <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Top Setups
+                  Top Market Scans
                 </h2>
                 <span className="text-[11px] text-muted-foreground font-mono-tabular">15m · auto</span>
               </div>
@@ -129,7 +129,7 @@ export default function Landing() {
                   </tr>
                 </thead>
                 <tbody>
-                  {signals.map((s) => (
+                  {scans.map((s) => (
                     <tr key={s.sym}>
                       <td>
                         <div className="flex flex-col">
@@ -139,14 +139,14 @@ export default function Landing() {
                       </td>
                       <td>
                         <span className={
-                          s.sig === "Bullish" ? "badge-positive"
-                          : s.sig === "Bearish" ? "badge-negative"
+                          s.bias === "Bullish" ? "badge-positive"
+                          : s.bias === "Bearish" ? "badge-negative"
                           : "badge-neutral"
                         }>
-                          {s.sig}
+                          {s.bias}
                         </span>
                       </td>
-                      <td className="text-right font-mono-tabular text-foreground">{s.conf}</td>
+                      <td className="text-right font-mono-tabular text-foreground">{s.score}</td>
                       <td className="text-right"><Pct v={s.chg} /></td>
                     </tr>
                   ))}
@@ -201,9 +201,9 @@ export default function Landing() {
       <section id="features" className="max-w-6xl mx-auto px-5 py-14 border-t border-border">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {[
-            { icon: LineChart, title: "Cross-asset screening", desc: "One workflow across stocks, crypto, ETFs, indices and commodities." },
-            { icon: Brain,     title: "AI-generated context",  desc: "Setups explained in plain English with macro and micro evidence." },
-            { icon: Layers,    title: "Macro intelligence",   desc: "Regimes, ratios and commodities mapped to relative-value setups." },
+            { icon: LineChart, title: "Cross-asset scanning", desc: "One workflow across stocks, crypto, ETFs, indices and commodities." },
+            { icon: Activity,  title: "Regime & dislocations", desc: "Descriptive scores for momentum, trend strength and relative value — no buy/sell calls." },
+            { icon: Layers,    title: "Macro intelligence",   desc: "Regimes, cross-asset ratios and commodities mapped into one view." },
           ].map((f) => (
             <div key={f.title} className="fin-card p-5">
               <f.icon className="w-4 h-4 text-muted-foreground mb-4" strokeWidth={1.75} />
@@ -221,9 +221,9 @@ export default function Landing() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {[
-            { n: "01", t: "Scan the market",      d: "Filter setups across asset classes in seconds." },
-            { n: "02", t: "Read the context",      d: "Understand regime, relative value and risk before acting." },
-            { n: "03", t: "Decide from one terminal", d: "Move from observation to decision without tab-switching." },
+            { n: "01", t: "Scan the market",      d: "Filter assets across classes in seconds with descriptive scores." },
+            { n: "02", t: "Read the context",     d: "Understand regime, relative value and dislocations at a glance." },
+            { n: "03", t: "Stay informed",        d: "Monitor what looks stretched, depressed or worth watching — from one terminal." },
           ].map((s) => (
             <div key={s.n} className="fin-card p-5">
               <div className="text-[11px] font-mono-tabular text-muted-foreground">{s.n}</div>
@@ -238,10 +238,10 @@ export default function Landing() {
       <section className="max-w-6xl mx-auto px-5 py-16 border-t border-border">
         <div className="fin-card p-8 sm:p-12 text-center">
           <h2 className="text-[26px] sm:text-[34px] font-semibold tracking-tight text-foreground">
-            One terminal. More conviction.
+            One terminal. Clearer context.
           </h2>
           <p className="mt-3 text-[14px] sm:text-[15px] text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Use ScreenerPilot to filter noise, read market context and understand what looks stretched, depressed or worth monitoring.
+            Use ScreenerPilot to filter noise, read market context and understand what looks stretched, depressed or worth monitoring. Read-only analytics — no execution, no advice.
           </p>
           <div className="mt-7">
             <Button asChild size="lg" className="h-11 px-5 text-sm">

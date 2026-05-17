@@ -65,5 +65,6 @@ export default function Macro() {
         </div>
       </main>
     </div>
+    </ProGate>
   );
 }

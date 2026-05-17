@@ -238,10 +238,10 @@ export default function Landing() {
       <section className="max-w-6xl mx-auto px-5 py-16 border-t border-border">
         <div className="fin-card p-8 sm:p-12 text-center">
           <h2 className="text-[26px] sm:text-[34px] font-semibold tracking-tight text-foreground">
-            One terminal. More conviction.
+            One terminal. Clearer context.
           </h2>
           <p className="mt-3 text-[14px] sm:text-[15px] text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Use ScreenerPilot to filter noise, read market context and understand what looks stretched, depressed or worth monitoring.
+            Use ScreenerPilot to filter noise, read market context and understand what looks stretched, depressed or worth monitoring. Read-only analytics — no execution, no advice.
           </p>
           <div className="mt-7">
             <Button asChild size="lg" className="h-11 px-5 text-sm">

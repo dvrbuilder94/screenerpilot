@@ -201,9 +201,9 @@ export default function Landing() {
       <section id="features" className="max-w-6xl mx-auto px-5 py-14 border-t border-border">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {[
-            { icon: LineChart, title: "Cross-asset screening", desc: "One workflow across stocks, crypto, ETFs, indices and commodities." },
-            { icon: Brain,     title: "AI-generated context",  desc: "Setups explained in plain English with macro and micro evidence." },
-            { icon: Layers,    title: "Macro intelligence",   desc: "Regimes, ratios and commodities mapped to relative-value setups." },
+            { icon: LineChart, title: "Cross-asset scanning", desc: "One workflow across stocks, crypto, ETFs, indices and commodities." },
+            { icon: Activity,  title: "Regime & dislocations", desc: "Descriptive scores for momentum, trend strength and relative value — no buy/sell calls." },
+            { icon: Layers,    title: "Macro intelligence",   desc: "Regimes, cross-asset ratios and commodities mapped into one view." },
           ].map((f) => (
             <div key={f.title} className="fin-card p-5">
               <f.icon className="w-4 h-4 text-muted-foreground mb-4" strokeWidth={1.75} />

@@ -8,19 +8,19 @@ export function dominanceInsight(d: { dominance: number; change7d: number }): Bl
   if (ch > 1.5) return {
     signal: `BTC.D ${fmtPct(ch)} (7d) → ${d.dominance.toFixed(1)}%`,
     implication: 'BTC absorbing flows · alt beta compressing (RISK-OFF tilt)',
-    action: 'Trim alt exposure, hold majors',
+    action: 'Reading: capital concentrating in BTC vs alts',
     tone: 'caution',
   };
   if (ch < -1.5) return {
     signal: `BTC.D ${fmtPct(ch)} (7d) → ${d.dominance.toFixed(1)}%`,
     implication: 'Liquidity rotating down the curve into alts (RISK-ON)',
-    action: 'Selectively add high-quality alts',
+    action: 'Reading: rotation from BTC into alt segment',
     tone: 'bullish',
   };
   return {
     signal: `BTC.D ${d.dominance.toFixed(1)}% · ${fmtPct(ch)} (7d)`,
     implication: 'No clear rotation between BTC and alts',
-    action: 'Wait for directional break',
+    action: 'Reading: no directional rotation detected',
     tone: 'neutral',
   };
 }
@@ -31,19 +31,19 @@ export function altseasonInsight(d: { value?: number; index?: number; altsOutper
   if (v >= 70) return {
     signal: `Altseason ON (${v}/100)`,
     implication: `${d.altsOutperforming}/${d.totalAlts} alts beating BTC`,
-    action: 'Constructive window for selective alt exposure',
+    action: 'Reading: broad alt outperformance regime',
     tone: 'bullish',
   };
   if (v < 30) return {
     signal: `Bitcoin Season (${v}/100)`,
     implication: 'Alts broadly underperforming BTC',
-    action: 'Defensive bias: anchor in BTC/ETH',
+    action: 'Reading: BTC-dominant regime, narrow leadership',
     tone: 'bearish',
   };
   return {
     signal: `Mixed regime (${v}/100)`,
     implication: 'Partial alt strength, no broad rotation yet',
-    action: 'Cherry-pick leaders, avoid laggards',
+    action: 'Reading: dispersion across alts, no broad theme',
     tone: 'neutral',
   };
 }
@@ -57,19 +57,19 @@ export function ethVsBtcInsight(d: {
   if (d.winner === 'ETH') return {
     signal: `ETH leads R/R ${d.eth.riskReward.toFixed(2)} vs ${d.btc.riskReward.toFixed(2)}`,
     implication: `90d ETH ${fmtPct(d.eth.returns)} > BTC ${fmtPct(d.btc.returns)}`,
-    action: 'Favor ETH for risk-adjusted exposure',
+    action: 'Reading: ETH leading on risk-adjusted basis',
     tone: 'bullish',
   };
   if (d.winner === 'BTC') return {
     signal: `BTC leads R/R ${d.btc.riskReward.toFixed(2)} vs ${d.eth.riskReward.toFixed(2)}`,
     implication: `90d BTC ${fmtPct(d.btc.returns)} > ETH ${fmtPct(d.eth.returns)}`,
-    action: 'Anchor portfolio in BTC',
+    action: 'Reading: BTC leading on risk-adjusted basis',
     tone: 'bullish',
   };
   return {
     signal: `ETH ≈ BTC (R/R parity)`,
     implication: 'No statistical edge over 90d window',
-    action: 'Split allocation 50/50',
+    action: 'Reading: ETH and BTC trading in parity',
     tone: 'neutral',
   };
 }
@@ -79,19 +79,19 @@ export function ethUpsideInsight(d: { score: number; emaTrend: string; volatilit
   if (d.score >= 70) return {
     signal: `ETH/BTC upside ${d.score}/100`,
     implication: `${d.emaTrend} trend, ${d.volatilityState} vol`,
-    action: 'Build ETH overweight vs BTC',
+    action: 'Reading: structure favors ETH vs BTC',
     tone: 'bullish',
   };
   if (d.score < 35) return {
     signal: `ETH/BTC upside weak ${d.score}/100`,
     implication: `${d.emaTrend} trend, ${d.volatilityState} vol`,
-    action: 'Stay underweight ETH vs BTC',
+    action: 'Reading: structure favors BTC vs ETH',
     tone: 'bearish',
   };
   return {
     signal: `ETH/BTC neutral ${d.score}/100`,
     implication: 'Mixed structure, no clear edge',
-    action: 'Wait for trend confirmation',
+    action: 'Reading: ETH/BTC structure inconclusive',
     tone: 'neutral',
   };
 }
@@ -100,20 +100,20 @@ export function ethUpsideInsight(d: { score: number; emaTrend: string; volatilit
 export function fearGreedInsight(d: { value: number; category: string }): BloombergInsightData {
   if (d.value <= 25) return {
     signal: `${d.category} (${d.value}/100)`,
-    implication: 'Capitulation zone · contrarian long setup forming',
-    action: 'Scale into majors gradually',
+    implication: 'Capitulation zone · sentiment extreme',
+    action: 'Reading: sentiment at fear extreme',
     tone: 'bullish',
   };
   if (d.value >= 75) return {
     signal: `${d.category} (${d.value}/100)`,
     implication: 'Euphoria · late-cycle distribution risk',
-    action: 'Tighten stops, take partial profits',
+    action: 'Reading: sentiment at greed extreme',
     tone: 'caution',
   };
   return {
     signal: `${d.category} (${d.value}/100)`,
     implication: 'Sentiment balanced, no extreme positioning',
-    action: 'Trade structure, not sentiment',
+    action: 'Reading: sentiment in neutral band',
     tone: 'neutral',
   };
 }
@@ -123,19 +123,19 @@ export function riskRegimeInsight(d: { state: 'risk_on' | 'risk_off' | 'neutral'
   if (d.state === 'risk_on') return {
     signal: `RISK-ON · alts ${fmtPct(d.altsAvgReturn7d)} (7d)`,
     implication: 'Broad bid across higher-beta names · beta expanding',
-    action: 'Increase exposure to high-beta names',
+    action: 'Reading: risk-on regime, beta expanding',
     tone: 'bullish',
   };
   if (d.state === 'risk_off') return {
     signal: `RISK-OFF · alts ${fmtPct(d.altsAvgReturn7d)} (7d)`,
     implication: 'Risk reduction across the curve · beta compressing',
-    action: 'Reduce leverage, raise cash',
+    action: 'Reading: risk-off regime, beta compressing',
     tone: 'bearish',
   };
   return {
     signal: `BALANCED regime · alts ${fmtPct(d.altsAvgReturn7d)} (7d)`,
     implication: 'No regime conviction · directional edge absent',
-    action: 'Keep position sizes small',
+    action: 'Reading: regime indeterminate',
     tone: 'neutral',
   };
 }
@@ -149,19 +149,19 @@ export function bmnrVsEthInsight(d: {
   if (d.winner === 'BMNR') return {
     signal: `BMNR R/R ${d.bmnr.riskReward.toFixed(2)} > ETH ${d.eth.riskReward.toFixed(2)}`,
     implication: `90d BMNR ${fmtPct(d.bmnr.returns)} vs ETH ${fmtPct(d.eth.returns)}`,
-    action: 'Use BMNR as ETH-beta proxy, size for vol',
+    action: 'Reading: BMNR outperforming ETH on R/R',
     tone: 'bullish',
   };
   if (d.winner === 'ETH') return {
     signal: `ETH R/R ${d.eth.riskReward.toFixed(2)} > BMNR ${d.bmnr.riskReward.toFixed(2)}`,
     implication: `Better risk-adjusted than the proxy`,
-    action: 'Prefer ETH spot over BMNR',
+    action: 'Reading: ETH outperforming the proxy on R/R',
     tone: 'bullish',
   };
   return {
     signal: `BMNR ≈ ETH (R/R parity)`,
     implication: 'Proxy tracking ETH closely, no edge',
-    action: 'Use whichever has better liquidity/cost',
+    action: 'Reading: proxy and underlying in parity',
     tone: 'neutral',
   };
 }
@@ -181,20 +181,20 @@ export function fedMacroInsight(d: {
 
   if (inverted) return {
     signal: `Curve inverted ${(spread * 100).toFixed(0)}bps · DXY ${dxy?.toFixed(1) ?? 'n/a'}`,
-    implication: 'Curve inversion active · historical recession lead, defensive bias rewarded',
-    action: 'Reduce duration risk, favor quality over beta',
+    implication: 'Curve inversion active · historical recession lead',
+    action: 'Reading: yield curve inverted',
     tone: 'bearish',
   };
   if (strongDxy) return {
     signal: `DXY ${dxy?.toFixed(1)} · 10Y ${yield10y?.toFixed(2)}%`,
     implication: 'USD strength a headwind for EM, commodities and non-USD risk',
-    action: 'Hedge FX exposure, watch commodity weakness',
+    action: 'Reading: USD strength regime',
     tone: 'caution',
   };
   return {
     signal: `10Y ${yield10y?.toFixed(2) ?? 'n/a'}% · DXY ${dxy?.toFixed(1) ?? 'n/a'}`,
     implication: 'Curve and USD within normal range · no macro stress flag',
-    action: 'Macro tailwinds neutral, focus on micro setups',
+    action: 'Reading: macro indicators in normal range',
     tone: 'neutral',
   };
 }
@@ -203,7 +203,7 @@ export function fedMacroInsight(d: {
 export function stocksMacroInsight(d: {
   vix?: number;
   sp500?: number;
-  rotationDiff?: number; // cyclical avg - defensive avg (%)
+  rotationDiff?: number;
 }): BloombergInsightData | null {
   const { vix, rotationDiff } = d;
   if (vix == null && rotationDiff == null) return null;
@@ -213,31 +213,31 @@ export function stocksMacroInsight(d: {
   if (v >= 25) return {
     signal: `VIX ${v.toFixed(1)} · rotation ${r >= 0 ? '+' : ''}${r.toFixed(2)}%`,
     implication: 'Stress regime · cross-sector dispersion expanding',
-    action: 'Cut size, raise hedges, avoid new beta longs',
+    action: 'Reading: volatility stress regime active',
     tone: 'bearish',
   };
   if (v < 15 && r > 0.3) return {
     signal: `VIX ${v.toFixed(1)} · cyclicals leading +${r.toFixed(2)}%`,
     implication: 'Compressed vol + cyclical leadership · late-cycle RISK-ON',
-    action: 'Stay long but tighten stops on extended winners',
+    action: 'Reading: compressed vol with cyclical leadership',
     tone: 'caution',
   };
   if (r > 0.5) return {
     signal: `Cyclicals leading +${r.toFixed(2)}% vs defensives`,
     implication: 'RISK-ON rotation · growth and financials bid',
-    action: 'Lean into XLK, XLF, XLY exposure',
+    action: 'Reading: cyclical sector leadership',
     tone: 'bullish',
   };
   if (r < -0.5) return {
     signal: `Defensives leading ${r.toFixed(2)}% vs cyclicals`,
     implication: 'RISK-OFF rotation · capital seeking shelter',
-    action: 'Rotate into XLP, XLU, XLV; trim cyclicals',
+    action: 'Reading: defensive sector leadership',
     tone: 'bearish',
   };
   return {
     signal: `VIX ${v.toFixed(1)} · neutral rotation ${r >= 0 ? '+' : ''}${r.toFixed(2)}%`,
     implication: 'No sector leadership · choppy, range-bound tape',
-    action: 'Trade ranges, avoid trend-following bias',
+    action: 'Reading: no sector leadership',
     tone: 'neutral',
   };
 }
@@ -255,19 +255,19 @@ export function sectorHeatmapInsight(sectors: { symbol: string; name: string; ch
   if (breadthPct >= 75) return {
     signal: `Breadth ${breadth}/${total} green · ${top.symbol} +${top.change.toFixed(2)}%`,
     implication: 'Broad bid · healthy market internals',
-    action: 'Trend-friendly tape, hold winners',
+    action: 'Reading: broad-based strength',
     tone: 'bullish',
   };
   if (breadthPct <= 25) return {
     signal: `Breadth ${breadth}/${total} green · ${bot.symbol} ${bot.change.toFixed(2)}%`,
     implication: 'Narrow tape · distribution under the surface',
-    action: 'Trim weak sectors, wait for breadth to flip',
+    action: 'Reading: narrow breadth, weak internals',
     tone: 'bearish',
   };
   return {
     signal: `Mixed breadth ${breadth}/${total} · ${top.symbol} +${top.change.toFixed(2)}% leads`,
-    implication: 'Sector dispersion · rotation trade over directional',
-    action: `Pair-trade: long ${top.symbol}, short ${bot.symbol}`,
+    implication: 'Sector dispersion · rotation over direction',
+    action: `Reading: dispersion — ${top.symbol} leads, ${bot.symbol} lags`,
     tone: 'neutral',
   };
 }
@@ -281,25 +281,25 @@ export function commoditiesMacroInsight(ratios: { name: string; value: number; t
   if (cg && cg.trend === 'bullish') return {
     signal: `Cu/Au ${cg.value.toFixed(5)} · RISK-ON tilt`,
     implication: 'Industrial demand firm · growth expectations rising',
-    action: 'Favor cyclicals, EM equities, base metals',
+    action: 'Reading: Cu/Au signals growth expansion',
     tone: 'bullish',
   };
   if (cg && cg.trend === 'bearish') return {
     signal: `Cu/Au ${cg.value.toFixed(5)} · RISK-OFF tilt`,
     implication: 'Defensive bid for gold · growth fears building',
-    action: 'Defensive sectors, gold miners, long duration',
+    action: 'Reading: Cu/Au signals defensive bid',
     tone: 'bearish',
   };
   if (gs && gs.trend === 'bearish') return {
     signal: `Au/Ag ${gs.value.toFixed(1)} · silver lagging`,
     implication: 'Risk aversion · silver discount widening',
-    action: 'Watch for silver mean-reversion setup',
+    action: 'Reading: Au/Ag signals risk aversion',
     tone: 'caution',
   };
   return {
     signal: 'Commodity ratios in normal range',
     implication: 'Metal ratios offer no regime signal',
-    action: 'Trade spot trends · ratios offer no edge',
+    action: 'Reading: metal ratios neutral',
     tone: 'neutral',
   };
 }
@@ -309,7 +309,7 @@ export function cryptoMacroInsight(d: {
   totalMcapChange?: number;
   btcDom?: number;
   fearGreed?: number;
-  fundingRate?: number; // %
+  fundingRate?: number;
 }): BloombergInsightData | null {
   const { fundingRate, fearGreed, totalMcapChange, btcDom } = d;
   if (fundingRate == null && fearGreed == null && totalMcapChange == null) return null;
@@ -317,25 +317,25 @@ export function cryptoMacroInsight(d: {
   if (fundingRate != null && fundingRate > 0.05) return {
     signal: `Funding +${fundingRate.toFixed(3)}% · longs crowded`,
     implication: 'Perp longs overpaying funding · downside squeeze risk',
-    action: 'Avoid chasing, watch for funding reset',
+    action: 'Reading: long positioning crowded',
     tone: 'caution',
   };
   if (fundingRate != null && fundingRate < -0.02) return {
     signal: `Funding ${fundingRate.toFixed(3)}% · shorts crowded`,
     implication: 'Negative funding · short squeeze fuel building',
-    action: 'Bias for upside surprise on positive catalyst',
+    action: 'Reading: short positioning crowded',
     tone: 'bullish',
   };
   if (fearGreed != null && fearGreed >= 75) return {
     signal: `F&G ${fearGreed} · greed extreme`,
     implication: 'Sentiment euphoric · contrarian risk rising',
-    action: 'Tighten stops, take partial profits',
+    action: 'Reading: sentiment at greed extreme',
     tone: 'caution',
   };
   if (fearGreed != null && fearGreed <= 25) return {
     signal: `F&G ${fearGreed} · fear extreme`,
     implication: 'Capitulation, contrarian setup forming',
-    action: 'Scale into majors gradually',
+    action: 'Reading: sentiment at fear extreme',
     tone: 'bullish',
   };
   if (totalMcapChange != null) {
@@ -343,7 +343,7 @@ export function cryptoMacroInsight(d: {
     return {
       signal: `Total mcap ${fmtPct(totalMcapChange)} 24h · BTC.D ${btcDom?.toFixed(1) ?? 'n/a'}%`,
       implication: tone === 'bullish' ? 'Capital inflow · broad bid' : tone === 'bearish' ? 'Outflow · broad derisking' : 'Stable flows · no conviction',
-      action: tone === 'neutral' ? 'Wait for directional break' : 'Follow the flow, manage size',
+      action: tone === 'neutral' ? 'Reading: stable flows' : `Reading: capital ${tone === 'bullish' ? 'inflow' : 'outflow'} regime`,
       tone,
     };
   }
@@ -362,19 +362,19 @@ export function latamFxInsight(d: {
   if (change1d > 1) return {
     signal: `${pair} ${fmtPct(change1d)} (1d) at ${price.toFixed(2)}`,
     implication: 'Local FX depreciating fast · capital outflow signal (RISK-OFF)',
-    action: 'Watch local rates, reduce LCY duration',
+    action: 'Reading: local FX depreciation regime',
     tone: 'bearish',
   };
   if (change1d < -1) return {
     signal: `${pair} ${fmtPct(change1d)} (1d) at ${price.toFixed(2)}`,
     implication: 'Local FX appreciating · RISK-ON tilt for LATAM assets',
-    action: 'Constructive on local equities and rates',
+    action: 'Reading: local FX appreciation regime',
     tone: 'bullish',
   };
   return {
     signal: `${pair} ${fmtPct(change1d)} (1d) at ${price.toFixed(2)}`,
     implication: 'FX stable · no macro stress signal',
-    action: 'Trade local fundamentals, FX neutral',
+    action: 'Reading: local FX stable',
     tone: 'neutral',
   };
 }
@@ -388,38 +388,36 @@ export function ratiosCategoryInsight(rows: {
 }[], category: string): BloombergInsightData | null {
   if (!rows || rows.length === 0) return null;
 
-  // Sort by abs z-score
   const sorted = [...rows].sort((a, b) => Math.abs(b.z_score ?? 0) - Math.abs(a.z_score ?? 0));
   const extreme = sorted[0];
   const z = extreme.z_score ?? 0;
   const pct = extreme.percentile_5y ?? 50;
   const ch1m = extreme.change_pct_1m ?? 0;
 
-  // Divergence detection: extreme z with opposite 1m move
   const divergent = Math.abs(z) > 1.5 && Math.sign(z) !== Math.sign(ch1m) && Math.abs(ch1m) > 1;
 
   if (divergent) return {
     signal: `${extreme.display_name} z ${z.toFixed(2)} · 1M ${fmtPct(ch1m)} (divergent)`,
     implication: 'Statistical extreme reversing · trend exhaustion likely',
-    action: 'Watch for mean-reversion entry on this ratio',
+    action: 'Reading: divergence between z-score and 1M trend',
     tone: 'caution',
   };
   if (z > 2) return {
     signal: `${extreme.display_name} z ${z.toFixed(2)} · ${pct.toFixed(0)}th pctile`,
     implication: 'Stretched high vs 5Y baseline · mean-reversion bias',
-    action: 'Fade the extreme or hedge correlated exposure',
+    action: 'Reading: ratio stretched high vs 5Y baseline',
     tone: 'caution',
   };
   if (z < -2) return {
     signal: `${extreme.display_name} z ${z.toFixed(2)} · ${pct.toFixed(0)}th pctile`,
     implication: 'Stretched low vs 5Y baseline · dislocation building',
-    action: 'Build mean-reversion long setup',
+    action: 'Reading: ratio stretched low vs 5Y baseline',
     tone: 'bullish',
   };
   return {
     signal: `${category} most stretched: ${extreme.display_name} z ${z.toFixed(2)}`,
     implication: 'No extreme dislocations, ratios within normal range',
-    action: 'Wait for |z| ≥ 2σ for actionable signals',
+    action: 'Reading: no extreme dislocations',
     tone: 'neutral',
   };
 }
@@ -445,37 +443,37 @@ export function stockAnalysisInsight(d: {
   if (isBull && overbought) return {
     signal: `${symbol} ${verdict} · RSI ${rsi?.toFixed(0)} · ${confidence}% conf`,
     implication: 'Bullish structure but momentum stretched short-term',
-    action: 'Pullback entry preferred over chasing',
+    action: 'Reading: bullish structure with stretched momentum',
     tone: 'caution',
   };
   if (isBull && near52wHigh) return {
     signal: `${symbol} ${verdict} · ${pos52w?.toFixed(0)}% of 52w range`,
     implication: 'Breakout territory, leadership candidate',
-    action: 'Trail stops below recent swing low',
+    action: 'Reading: near 52w high, leadership profile',
     tone: 'bullish',
   };
   if (isBull) return {
     signal: `${symbol} ${verdict} · ${confidence}% conf`,
     implication: 'Constructive setup with confirming indicators',
-    action: 'Build position on confirmations, manage size',
+    action: 'Reading: constructive structure with confirmation',
     tone: 'bullish',
   };
   if (isBear && oversold) return {
     signal: `${symbol} ${verdict} · RSI ${rsi?.toFixed(0)} oversold`,
     implication: 'Bearish trend but bounce risk near-term',
-    action: 'Avoid fresh shorts here, wait for bounce to fade',
+    action: 'Reading: bearish trend with oversold momentum',
     tone: 'caution',
   };
   if (isBear || near52wLow) return {
     signal: `${symbol} ${verdict} · ${confidence}% conf`,
     implication: 'Distribution structure, momentum to downside',
-    action: 'Avoid longs, respect downtrend',
+    action: 'Reading: distribution structure detected',
     tone: 'bearish',
   };
   return {
     signal: `${symbol} ${verdict} · ${confidence}% conf`,
     implication: 'Mixed signals, no clear directional edge',
-    action: 'Stand aside until structure clarifies',
+    action: 'Reading: structure mixed, no clear edge',
     tone: 'neutral',
   };
 }
@@ -489,20 +487,20 @@ export function squeezeRadarInsight(rows: { symbol: string; score: number }[]): 
 
   if (top.score >= 80) return {
     signal: `${top.symbol} score ${top.score} · ${hot} candidates >70`,
-    implication: 'High-conviction squeeze setup, conditions aligned',
-    action: 'Watch for volume confirmation on breakout',
+    implication: 'High-conviction squeeze conditions detected',
+    action: 'Reading: squeeze conditions aligned on top name',
     tone: 'bullish',
   };
   if (hot >= 3) return {
     signal: `${hot} squeeze candidates >70 · top ${top.symbol} (${top.score})`,
     implication: 'Broad squeeze regime, multiple setups firing',
-    action: 'Diversify across top names, size for vol',
+    action: 'Reading: broad squeeze regime across multiple names',
     tone: 'bullish',
   };
   return {
     signal: `Top ${top.symbol} score ${top.score}`,
-    implication: 'No high-conviction squeeze setups currently',
-    action: 'Wait for scores to compress >70',
+    implication: 'No high-conviction squeeze conditions currently',
+    action: 'Reading: no high-conviction squeeze conditions',
     tone: 'neutral',
   };
 }

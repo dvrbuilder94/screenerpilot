@@ -73,10 +73,10 @@ export function SignalsSidebar({
   }, [allSignals, searchQuery, filterAsset, sortBy]);
 
   const stats = useMemo(() => {
-    const strongBuy = allSignals.filter(s => s.macroSignal.signal === "STRONG_BUY").length;
-    const buy = allSignals.filter(s => s.macroSignal.signal === "BUY").length;
-    const sell = allSignals.filter(s => s.macroSignal.signal === "SELL").length;
-    const strongSell = allSignals.filter(s => s.macroSignal.signal === "STRONG_SELL").length;
+    const strongBuy = allSignals.filter(s => s.macroSignal.signal === "STRONG_BULLISH").length;
+    const buy = allSignals.filter(s => s.macroSignal.signal === "BULLISH").length;
+    const sell = allSignals.filter(s => s.macroSignal.signal === "BEARISH").length;
+    const strongSell = allSignals.filter(s => s.macroSignal.signal === "STRONG_BEARISH").length;
     const bullish = strongBuy + buy;
     const bearish = sell + strongSell;
 
@@ -228,26 +228,26 @@ export function SignalsSidebar({
 
 function getSignalPriority(signal: SignalType): number {
   const priorities: Record<SignalType, number> = {
-    STRONG_BUY: 5,
+    STRONG_BULLISH: 5,
     BUY: 4,
     HOLD: 3,
     SELL: 2,
-    STRONG_SELL: 1,
+    STRONG_BEARISH: 1,
   };
   return priorities[signal] || 0;
 }
 
 function getSignalBadgeClass(signal: SignalType): string {
   switch (signal) {
-    case "STRONG_BUY":
+    case "STRONG_BULLISH":
       return "bg-green-500 hover:bg-green-600 text-white";
-    case "BUY":
+    case "BULLISH":
       return "bg-green-400 hover:bg-green-500 text-white";
-    case "HOLD":
+    case "NEUTRAL_BIAS":
       return "bg-yellow-500 hover:bg-yellow-600 text-white";
-    case "SELL":
+    case "BEARISH":
       return "bg-red-400 hover:bg-red-500 text-white";
-    case "STRONG_SELL":
+    case "STRONG_BEARISH":
       return "bg-red-500 hover:bg-red-600 text-white";
     default:
       return "bg-secondary hover:bg-secondary/80";
@@ -256,11 +256,11 @@ function getSignalBadgeClass(signal: SignalType): string {
 
 function getSignalLabel(signal: SignalType): string {
   switch (signal) {
-    case "STRONG_BUY": return "High-conviction Bullish";
-    case "BUY": return "Bullish";
-    case "STRONG_SELL": return "High-conviction Bearish";
-    case "SELL": return "Bearish";
-    case "HOLD": return "Mixed";
+    case "STRONG_BULLISH": return "High-conviction Bullish";
+    case "BULLISH": return "Bullish";
+    case "STRONG_BEARISH": return "High-conviction Bearish";
+    case "BEARISH": return "Bearish";
+    case "NEUTRAL_BIAS": return "Mixed";
     default: return String(signal).replace("_", " ");
   }
 }

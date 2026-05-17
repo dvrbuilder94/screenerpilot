@@ -10,16 +10,16 @@ interface SignalsListProps {
 
 export default function SignalsList({ setups, onSelectSetup }: SignalsListProps) {
   const macroBuySignals = setups.filter(s => 
-    s.macroSignal.signal === 'BUY' || s.macroSignal.signal === 'STRONG_BUY'
+    s.macroSignal.signal === 'BULLISH' || s.macroSignal.signal === 'STRONG_BULLISH'
   );
   const macroSellSignals = setups.filter(s => 
-    s.macroSignal.signal === 'SELL' || s.macroSignal.signal === 'STRONG_SELL'
+    s.macroSignal.signal === 'BEARISH' || s.macroSignal.signal === 'STRONG_BEARISH'
   );
   const microBuySignals = setups.filter(s => 
-    s.microSignal.signal === 'BUY' || s.microSignal.signal === 'STRONG_BUY'
+    s.microSignal.signal === 'BULLISH' || s.microSignal.signal === 'STRONG_BULLISH'
   );
   const microSellSignals = setups.filter(s => 
-    s.microSignal.signal === 'SELL' || s.microSignal.signal === 'STRONG_SELL'
+    s.microSignal.signal === 'BEARISH' || s.microSignal.signal === 'STRONG_BEARISH'
   );
 
   const renderSignalGroup = (title: string, signals: TradingSetup[], isBuy: boolean) => (

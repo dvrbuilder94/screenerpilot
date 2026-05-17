@@ -189,11 +189,11 @@ export function calculateEnhancedSignal({
 }
 
 function getSignalFromScore(score: number): SignalType {
-  if (score >= 8) return 'STRONG_BUY';
-  if (score >= 4) return 'BUY';
-  if (score <= -8) return 'STRONG_SELL';
-  if (score <= -4) return 'SELL';
-  return 'HOLD';
+  if (score >= 8) return 'STRONG_BULLISH';
+  if (score >= 4) return 'BULLISH';
+  if (score <= -8) return 'STRONG_BEARISH';
+  if (score <= -4) return 'BEARISH';
+  return 'NEUTRAL_BIAS';
 }
 
 function calculateEntryZone(

@@ -22,28 +22,28 @@ export default function EnhancedSignalCard({
 }: EnhancedSignalCardProps) {
   const getSignalConfig = () => {
     switch (signal.signal) {
-      case 'STRONG_BUY':
+      case 'STRONG_BULLISH':
         return {
           color: 'text-bullish',
           bg: 'bg-bullish/10 border-bullish/30',
           gradient: 'from-bullish to-bullish-light',
           icon: TrendingUp,
         };
-      case 'BUY':
+      case 'BULLISH':
         return {
           color: 'text-bullish',
           bg: 'bg-bullish/10 border-bullish/30',
           gradient: 'from-bullish/80 to-bullish-light/80',
           icon: TrendingUp,
         };
-      case 'STRONG_SELL':
+      case 'STRONG_BEARISH':
         return {
           color: 'text-bearish',
           bg: 'bg-bearish/10 border-bearish/30',
           gradient: 'from-bearish to-bearish-light',
           icon: TrendingDown,
         };
-      case 'SELL':
+      case 'BEARISH':
         return {
           color: 'text-bearish',
           bg: 'bg-bearish/10 border-bearish/30',
@@ -84,11 +84,11 @@ export default function EnhancedSignalCard({
           <div className={`text-xl font-bold ${config.color}`}>
               {(() => {
                 switch (signal.signal) {
-                  case 'STRONG_BUY': return 'High-conviction Bullish';
-                  case 'BUY': return 'Bullish';
-                  case 'STRONG_SELL': return 'High-conviction Bearish';
-                  case 'SELL': return 'Bearish';
-                  case 'HOLD': return 'Mixed';
+                  case 'STRONG_BULLISH': return 'High-conviction Bullish';
+                  case 'BULLISH': return 'Bullish';
+                  case 'STRONG_BEARISH': return 'High-conviction Bearish';
+                  case 'BEARISH': return 'Bearish';
+                  case 'NEUTRAL_BIAS': return 'Mixed';
                   default: return String(signal.signal).replace('_', ' ');
                 }
               })()}

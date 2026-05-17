@@ -300,10 +300,10 @@ export function calculateScore(indicators: IndicatorData): number {
   return score;
 }
 
-export type Signal = 'BUY' | 'SELL' | 'HOLD';
+export type Signal = 'BULLISH' | 'BEARISH' | 'NEUTRAL_BIAS';
 
 export function getSignal(score: number): Signal {
-  if (score >= 3) return 'BUY';
-  if (score <= -3) return 'SELL';
-  return 'HOLD';
+  if (score >= 3) return 'BULLISH';
+  if (score <= -3) return 'BEARISH';
+  return 'NEUTRAL_BIAS';
 }

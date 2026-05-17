@@ -5,6 +5,7 @@ import { FedMacroPanel } from "@/components/macro/FedMacroPanel";
 import { LatamMacroPanel } from "@/components/macro/LatamMacroPanel";
 import { CryptoMacroPanel } from "@/components/macro/CryptoMacroPanel";
 import { Seo } from "@/components/Seo";
+import { ProGate } from "@/components/ProGate";
 
 type MacroTab = "fed" | "latam" | "crypto";
 
@@ -12,6 +13,7 @@ export default function Macro() {
   const [tab, setTab] = useState<MacroTab>("fed");
 
   return (
+    <ProGate preview>
     <div className="min-h-screen bg-background">
       <Seo
         title="Macro Intelligence — FED, LATAM & Crypto | ScreenerPilot"

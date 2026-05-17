@@ -67,11 +67,11 @@ export default function FilterPanel({ filters, onFiltersChange, activeFiltersCou
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ALL">{t.allSignals}</SelectItem>
-              <SelectItem value="STRONG_BUY">🚀 {t.strongBuy}</SelectItem>
-              <SelectItem value="BUY">📈 {t.buy}</SelectItem>
-              <SelectItem value="HOLD">➡️ {t.hold}</SelectItem>
-              <SelectItem value="SELL">📉 {t.sell}</SelectItem>
-              <SelectItem value="STRONG_SELL">⚠️ {t.strongSell}</SelectItem>
+              <SelectItem value="STRONG_BULLISH">🚀 {t.strongBuy}</SelectItem>
+              <SelectItem value="BULLISH">📈 {t.buy}</SelectItem>
+              <SelectItem value="NEUTRAL_BIAS">➡️ {t.hold}</SelectItem>
+              <SelectItem value="BEARISH">📉 {t.sell}</SelectItem>
+              <SelectItem value="STRONG_BEARISH">⚠️ {t.strongSell}</SelectItem>
             </SelectContent>
           </Select>
         </div>

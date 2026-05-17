@@ -263,11 +263,11 @@ function generateSignal(params: {
 
   score *= volatilityAdj;
 
-  let signal = "HOLD";
-  if (score > 60) signal = "STRONG_BUY";
-  else if (score > 30) signal = "BUY";
-  else if (score < -60) signal = "STRONG_SELL";
-  else if (score < -30) signal = "SELL";
+  let signal = "NEUTRAL_BIAS";
+  if (score > 60) signal = "STRONG_BULLISH";
+  else if (score > 30) signal = "BULLISH";
+  else if (score < -60) signal = "STRONG_BEARISH";
+  else if (score < -30) signal = "BEARISH";
 
   return {
     signal,

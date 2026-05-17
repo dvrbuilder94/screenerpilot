@@ -20,7 +20,7 @@ export default function CombinedSignal({
   const t = translations[language];
 
   const getCombinedSignal = () => {
-    if (macroSignal === 'BUY' && microSignal === 'BUY') {
+    if (macroSignal === 'BULLISH' && microSignal === 'BULLISH') {
       return {
         text: t.strongBuy,
         color: 'bullish',
@@ -29,7 +29,7 @@ export default function CombinedSignal({
         description: t.strongBuyDesc,
       };
     }
-    if (macroSignal === 'SELL' && microSignal === 'SELL') {
+    if (macroSignal === 'BEARISH' && microSignal === 'BEARISH') {
       return {
         text: t.strongSell,
         color: 'bearish',
@@ -38,7 +38,7 @@ export default function CombinedSignal({
         description: t.strongSellDesc,
       };
     }
-    if (macroSignal === 'BUY' && microSignal === 'HOLD') {
+    if (macroSignal === 'BULLISH' && microSignal === 'NEUTRAL_BIAS') {
       return {
         text: t.bullishTrendWaitEntry,
         color: 'neutral',
@@ -47,7 +47,7 @@ export default function CombinedSignal({
         description: t.bullishTrendDesc,
       };
     }
-    if (macroSignal === 'SELL' && microSignal === 'HOLD') {
+    if (macroSignal === 'BEARISH' && microSignal === 'NEUTRAL_BIAS') {
       return {
         text: t.bearishTrendAvoidLongs,
         color: 'neutral',
@@ -56,7 +56,7 @@ export default function CombinedSignal({
         description: t.bearishTrendDesc,
       };
     }
-    if (macroSignal === 'BUY' && microSignal === 'SELL') {
+    if (macroSignal === 'BULLISH' && microSignal === 'BEARISH') {
       return {
         text: t.mixedSignalsPullback,
         color: 'muted',
@@ -65,7 +65,7 @@ export default function CombinedSignal({
         description: t.mixedSignalsPullbackDesc,
       };
     }
-    if (macroSignal === 'SELL' && microSignal === 'BUY') {
+    if (macroSignal === 'BEARISH' && microSignal === 'BULLISH') {
       return {
         text: t.mixedSignalsBounce,
         color: 'muted',

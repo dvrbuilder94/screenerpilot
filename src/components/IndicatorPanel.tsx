@@ -25,14 +25,14 @@ export default function IndicatorPanel({
   const t = translations[language];
 
   const getSignalColor = () => {
-    if (signal === 'BUY') return 'text-bullish';
-    if (signal === 'SELL') return 'text-bearish';
+    if (signal === 'BULLISH') return 'text-bullish';
+    if (signal === 'BEARISH') return 'text-bearish';
     return 'text-neutral';
   };
 
   const getSignalBg = () => {
-    if (signal === 'BUY') return 'bg-bullish/10 border-bullish/30';
-    if (signal === 'SELL') return 'bg-bearish/10 border-bearish/30';
+    if (signal === 'BULLISH') return 'bg-bullish/10 border-bullish/30';
+    if (signal === 'BEARISH') return 'bg-bearish/10 border-bearish/30';
     return 'bg-neutral/10 border-neutral/30';
   };
 

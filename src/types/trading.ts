@@ -1,6 +1,6 @@
 // Trading signal types and interfaces
 
-export type SignalType = 'STRONG_BUY' | 'BUY' | 'HOLD' | 'SELL' | 'STRONG_SELL';
+export type SignalType = 'STRONG_BULLISH' | 'BULLISH' | 'NEUTRAL_BIAS' | 'BEARISH' | 'STRONG_BEARISH';
 
 export interface EnhancedSignal {
   signal: SignalType;
@@ -8,9 +8,6 @@ export interface EnhancedSignal {
   confidence: number; // 0-100
   reasons: string[];
   warnings: string[];
-  entryZone?: { min: number; max: number };
-  stopLoss?: number;
-  targets?: number[];
   trend: 'BULLISH' | 'BEARISH' | 'NEUTRAL';
 }
 

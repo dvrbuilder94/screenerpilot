@@ -29,13 +29,13 @@ export function AssetIntelligencePage({
 }: AssetIntelligencePageProps) {
   const getSignalConfig = (signal: EnhancedSignal) => {
     switch (signal.signal) {
-      case "STRONG_BUY":
+      case "STRONG_BULLISH":
         return { color: "text-bullish", bg: "bg-bullish/10 border-bullish/30", icon: TrendingUp };
-      case "BUY":
+      case "BULLISH":
         return { color: "text-bullish", bg: "bg-bullish/10 border-bullish/30", icon: TrendingUp };
-      case "STRONG_SELL":
+      case "STRONG_BEARISH":
         return { color: "text-bearish", bg: "bg-bearish/10 border-bearish/30", icon: TrendingDown };
-      case "SELL":
+      case "BEARISH":
         return { color: "text-bearish", bg: "bg-bearish/10 border-bearish/30", icon: TrendingDown };
       default:
         return { color: "text-neutral", bg: "bg-neutral/10 border-neutral/30", icon: Minus };
@@ -44,11 +44,11 @@ export function AssetIntelligencePage({
 
   const getSignalLabel = (signal: string) => {
     switch (signal) {
-      case "STRONG_BUY": return "High-conviction Bullish";
-      case "BUY": return "Bullish";
-      case "STRONG_SELL": return "High-conviction Bearish";
-      case "SELL": return "Bearish";
-      case "HOLD": return "Mixed";
+      case "STRONG_BULLISH": return "High-conviction Bullish";
+      case "BULLISH": return "Bullish";
+      case "STRONG_BEARISH": return "High-conviction Bearish";
+      case "BEARISH": return "Bearish";
+      case "NEUTRAL_BIAS": return "Mixed";
       default: return signal.replace("_", " ");
     }
   };

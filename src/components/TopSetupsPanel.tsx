@@ -20,24 +20,24 @@ export default function TopSetupsPanel({ setups, onSelectSetup }: TopSetupsPanel
     .slice(0, 10);
 
   const getSignalColor = (signal: string) => {
-    if (signal.includes('BUY')) return 'text-bullish';
-    if (signal.includes('SELL')) return 'text-bearish';
+    if (signal.includes('BULLISH')) return 'text-bullish';
+    if (signal.includes('BEARISH')) return 'text-bearish';
     return 'text-neutral';
   };
 
   const getSignalBg = (signal: string) => {
-    if (signal.includes('BUY')) return 'bg-bullish/10 border-bullish/30';
-    if (signal.includes('SELL')) return 'bg-bearish/10 border-bearish/30';
+    if (signal.includes('BULLISH')) return 'bg-bullish/10 border-bullish/30';
+    if (signal.includes('BEARISH')) return 'bg-bearish/10 border-bearish/30';
     return 'bg-neutral/10 border-neutral/30';
   };
 
   const getSignalLabel = (signal: string) => {
     switch (signal) {
-      case 'STRONG_BUY': return 'High-conviction Bullish';
-      case 'BUY': return 'Bullish';
-      case 'STRONG_SELL': return 'High-conviction Bearish';
-      case 'SELL': return 'Bearish';
-      case 'HOLD': return 'Mixed';
+      case 'STRONG_BULLISH': return 'High-conviction Bullish';
+      case 'BULLISH': return 'Bullish';
+      case 'STRONG_BEARISH': return 'High-conviction Bearish';
+      case 'BEARISH': return 'Bearish';
+      case 'NEUTRAL_BIAS': return 'Mixed';
       default: return signal.replace('_', ' ');
     }
   };

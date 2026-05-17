@@ -44,11 +44,11 @@ interface DashboardOverviewProps {
 }
 
 const signalOrder: Record<SignalType, number> = {
-  STRONG_BUY: 5,
-  BUY: 4,
-  HOLD: 3,
-  SELL: 2,
-  STRONG_SELL: 1,
+  STRONG_BULLISH: 5,
+  BULLISH: 4,
+  NEUTRAL_BIAS: 3,
+  BEARISH: 2,
+  STRONG_BEARISH: 1,
 };
 
 export function DashboardOverview({
@@ -96,13 +96,13 @@ export function DashboardOverview({
   const stats = useMemo(() => {
     const total = filteredSignals.length;
     const bullish = filteredSignals.filter((s) =>
-      ["STRONG_BUY", "BUY"].includes(s.macroSignal.signal)
+      ["STRONG_BULLISH", "BULLISH"].includes(s.macroSignal.signal)
     ).length;
     const bearish = filteredSignals.filter((s) =>
-      ["STRONG_SELL", "SELL"].includes(s.macroSignal.signal)
+      ["STRONG_BEARISH", "BEARISH"].includes(s.macroSignal.signal)
     ).length;
     const strongSignals = filteredSignals.filter((s) =>
-      ["STRONG_BUY", "STRONG_SELL"].includes(s.macroSignal.signal)
+      ["STRONG_BULLISH", "STRONG_BEARISH"].includes(s.macroSignal.signal)
     ).length;
     const avgConfidence = total > 0 
       ? Math.round(filteredSignals.reduce((sum, s) => sum + s.macroSignal.confidence, 0) / total)
@@ -584,15 +584,15 @@ function formatPrice(price: number): string {
 
 function getSignalBadgeClass(signal: SignalType): string {
   switch (signal) {
-    case "STRONG_BUY":
+    case "STRONG_BULLISH":
       return "bg-bullish hover:bg-bullish/90 text-bullish-foreground";
-    case "BUY":
+    case "BULLISH":
       return "bg-bullish/80 hover:bg-bullish/70 text-bullish-foreground";
-    case "HOLD":
+    case "NEUTRAL_BIAS":
       return "bg-neutral hover:bg-neutral/90 text-neutral-foreground";
-    case "SELL":
+    case "BEARISH":
       return "bg-bearish/80 hover:bg-bearish/70 text-bearish-foreground";
-    case "STRONG_SELL":
+    case "STRONG_BEARISH":
       return "bg-bearish hover:bg-bearish/90 text-bearish-foreground";
     default:
       return "bg-secondary hover:bg-secondary/80";
@@ -601,11 +601,11 @@ function getSignalBadgeClass(signal: SignalType): string {
 
 function getSignalLabel(signal: SignalType): string {
   switch (signal) {
-    case "STRONG_BUY": return "High-conviction Bullish";
-    case "BUY": return "Bullish";
-    case "STRONG_SELL": return "High-conviction Bearish";
-    case "SELL": return "Bearish";
-    case "HOLD": return "Mixed";
+    case "STRONG_BULLISH": return "High-conviction Bullish";
+    case "BULLISH": return "Bullish";
+    case "STRONG_BEARISH": return "High-conviction Bearish";
+    case "BEARISH": return "Bearish";
+    case "NEUTRAL_BIAS": return "Mixed";
     default: return String(signal).replace("_", " ");
   }
 }

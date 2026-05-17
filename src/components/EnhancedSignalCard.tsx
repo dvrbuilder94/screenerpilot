@@ -1,7 +1,7 @@
 import { EnhancedSignal } from "@/types/trading";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, Minus, AlertTriangle, Target, ShieldAlert } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, AlertTriangle, Target } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/lib/translations";
 
@@ -22,28 +22,28 @@ export default function EnhancedSignalCard({
 }: EnhancedSignalCardProps) {
   const getSignalConfig = () => {
     switch (signal.signal) {
-      case 'STRONG_BUY':
+      case 'STRONG_BULLISH':
         return {
           color: 'text-bullish',
           bg: 'bg-bullish/10 border-bullish/30',
           gradient: 'from-bullish to-bullish-light',
           icon: TrendingUp,
         };
-      case 'BUY':
+      case 'BULLISH':
         return {
           color: 'text-bullish',
           bg: 'bg-bullish/10 border-bullish/30',
           gradient: 'from-bullish/80 to-bullish-light/80',
           icon: TrendingUp,
         };
-      case 'STRONG_SELL':
+      case 'STRONG_BEARISH':
         return {
           color: 'text-bearish',
           bg: 'bg-bearish/10 border-bearish/30',
           gradient: 'from-bearish to-bearish-light',
           icon: TrendingDown,
         };
-      case 'SELL':
+      case 'BEARISH':
         return {
           color: 'text-bearish',
           bg: 'bg-bearish/10 border-bearish/30',
@@ -84,11 +84,11 @@ export default function EnhancedSignalCard({
           <div className={`text-xl font-bold ${config.color}`}>
               {(() => {
                 switch (signal.signal) {
-                  case 'STRONG_BUY': return 'High-conviction Bullish';
-                  case 'BUY': return 'Bullish';
-                  case 'STRONG_SELL': return 'High-conviction Bearish';
-                  case 'SELL': return 'Bearish';
-                  case 'HOLD': return 'Mixed';
+                  case 'STRONG_BULLISH': return 'High-conviction Bullish';
+                  case 'BULLISH': return 'Bullish';
+                  case 'STRONG_BEARISH': return 'High-conviction Bearish';
+                  case 'BEARISH': return 'Bearish';
+                  case 'NEUTRAL_BIAS': return 'Mixed';
                   default: return String(signal.signal).replace('_', ' ');
                 }
               })()}
@@ -147,48 +147,6 @@ export default function EnhancedSignalCard({
               </li>
             ))}
           </ul>
-        </div>
-      )}
-
-      {/* Key Price Area & Risk Management */}
-      {(signal.entryZone || signal.stopLoss || signal.targets) && (
-        <div className="pt-4 border-t border-border/50 space-y-3">
-          <h4 className="text-sm font-semibold flex items-center gap-2">
-            <ShieldAlert className="h-4 w-4" />
-            {t.riskManagement}
-          </h4>
-
-          {signal.entryZone && (
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-muted-foreground">{t.entryZone}:</span>
-              <span className="font-mono">
-                ${signal.entryZone.min.toFixed(2)} - ${signal.entryZone.max.toFixed(2)}
-              </span>
-            </div>
-          )}
-
-          {signal.stopLoss && (
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-muted-foreground">{t.stopLoss}:</span>
-              <span className="font-mono text-bearish">
-                ${signal.stopLoss.toFixed(2)}
-              </span>
-            </div>
-          )}
-
-          {signal.targets && signal.targets.length > 0 && (
-            <div className="space-y-1">
-              <span className="text-sm text-muted-foreground">{t.targets}:</span>
-              {signal.targets.map((target, idx) => (
-                <div key={idx} className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">{t.target} {idx + 1}:</span>
-                  <span className="font-mono text-bullish">
-                    ${target.toFixed(2)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       )}
 

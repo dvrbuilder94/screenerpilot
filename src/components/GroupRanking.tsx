@@ -36,9 +36,9 @@ export default function GroupRanking({ groupName, data, isLoading }: GroupRankin
 
   const getSignalIcon = (signal: Signal) => {
     switch (signal) {
-      case "BUY":
+      case "BULLISH":
         return <TrendingUp className="h-4 w-4 text-success" />;
-      case "SELL":
+      case "BEARISH":
         return <TrendingDown className="h-4 w-4 text-danger" />;
       default:
         return <Minus className="h-4 w-4 text-muted-foreground" />;
@@ -47,9 +47,9 @@ export default function GroupRanking({ groupName, data, isLoading }: GroupRankin
 
   const getSignalBadge = (signal: Signal) => {
     const variants: Record<Signal, "default" | "secondary" | "destructive"> = {
-      BUY: "default",
-      HOLD: "secondary",
-      SELL: "destructive",
+      BULLISH: "default",
+      NEUTRAL_BIAS: "secondary",
+      BEARISH: "destructive",
     };
     return (
       <Badge variant={variants[signal]} className="font-mono">
@@ -122,19 +122,19 @@ export default function GroupRanking({ groupName, data, isLoading }: GroupRankin
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
             <div className="text-2xl font-bold text-success">
-              {sortedData.filter((d) => d.signal === "BUY").length}
+              {sortedData.filter((d) => d.signal === "BULLISH").length}
             </div>
             <div className="text-xs text-muted-foreground">{t.buy}</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-warning">
-              {sortedData.filter((d) => d.signal === "HOLD").length}
+              {sortedData.filter((d) => d.signal === "NEUTRAL_BIAS").length}
             </div>
             <div className="text-xs text-muted-foreground">{t.hold}</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-danger">
-              {sortedData.filter((d) => d.signal === "SELL").length}
+              {sortedData.filter((d) => d.signal === "BEARISH").length}
             </div>
             <div className="text-xs text-muted-foreground">{t.sell}</div>
           </div>

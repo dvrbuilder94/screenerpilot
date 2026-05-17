@@ -18,9 +18,6 @@ verify_jwt = false
 [functions.send-advertiser-email]
 verify_jwt = false
 
-[functions.resolve-signal-outcomes]
-verify_jwt = false
-
 [functions.dashboard-insight]
 verify_jwt = false
 

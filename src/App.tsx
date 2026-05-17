@@ -13,6 +13,15 @@ import Commodities from "./pages/Commodities";
 import NotFound from "./pages/NotFound";
 import StockIntelligence from "./pages/StockIntelligence";
 import Landing from "./pages/Landing";
+import Pricing from "./pages/Pricing";
+import SignUp from "./pages/SignUp";
+import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import CheckoutSuccess from "./pages/CheckoutSuccess";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import RefundPolicy from "./pages/RefundPolicy";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +35,15 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Landing />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/checkout/success" element={<CheckoutSuccess />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/refund-policy" element={<RefundPolicy />} />
               <Route
                 path="*"
                 element={

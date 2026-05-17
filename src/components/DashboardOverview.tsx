@@ -45,9 +45,9 @@ interface DashboardOverviewProps {
 
 const signalOrder: Record<SignalType, number> = {
   STRONG_BULLISH: 5,
-  BUY: 4,
-  HOLD: 3,
-  SELL: 2,
+  BULLISH: 4,
+  NEUTRAL_BIAS: 3,
+  BEARISH: 2,
   STRONG_BEARISH: 1,
 };
 

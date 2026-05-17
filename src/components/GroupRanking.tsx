@@ -47,9 +47,9 @@ export default function GroupRanking({ groupName, data, isLoading }: GroupRankin
 
   const getSignalBadge = (signal: Signal) => {
     const variants: Record<Signal, "default" | "secondary" | "destructive"> = {
-      BUY: "default",
-      HOLD: "secondary",
-      SELL: "destructive",
+      BULLISH: "default",
+      NEUTRAL_BIAS: "secondary",
+      BEARISH: "destructive",
     };
     return (
       <Badge variant={variants[signal]} className="font-mono">

@@ -115,8 +115,8 @@ export const translations = {
     score: 'Score',
     
     // Top Setups
-    topSetupsTitle: 'Top Setups Today',
-    topSetupsDesc: 'Cross-asset opportunities ranked by conviction score',
+    topSetupsTitle: 'Top Market Scans',
+    topSetupsDesc: 'Cross-asset readings ranked by conviction score',
     noSetupsAvailable: 'No setups available. Select a group to analyze.',
     
     // Watchlist
@@ -338,8 +338,8 @@ export const translations = {
     score: 'Score',
     
     // Top Setups
-    topSetupsTitle: 'Mejores Setups del Día',
-    topSetupsDesc: 'Oportunidades cross-asset ordenadas por conviction score',
+    topSetupsTitle: 'Top Lecturas de Mercado',
+    topSetupsDesc: 'Lecturas cross-asset ordenadas por conviction score',
     noSetupsAvailable: 'No hay setups disponibles. Selecciona un grupo para analizar.',
     
     // Watchlist

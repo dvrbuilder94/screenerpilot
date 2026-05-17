@@ -76,11 +76,11 @@ export default function Landing() {
             Live · v1.0
           </div>
           <h1 className="text-[32px] sm:text-[44px] lg:text-[52px] font-semibold tracking-tight leading-[1.05] text-foreground">
-            AI market intelligence for cross-asset decision-making.
+            A macro intelligence terminal for cross-asset monitoring.
           </h1>
           <p className="mt-5 text-[15px] sm:text-base text-muted-foreground max-w-2xl leading-relaxed">
-            Track market regimes, relative value and price dislocations across stocks,
-            crypto, ETFs, indices and commodities — from a single terminal.
+            Monitor market regimes, relative value and price dislocations across stocks,
+            crypto, ETFs, indices and commodities — from a single terminal. Read-only analytics, no execution, no advice.
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <Button asChild size="lg" className="h-11 px-5 text-sm">

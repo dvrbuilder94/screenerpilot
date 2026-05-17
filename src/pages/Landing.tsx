@@ -106,16 +106,16 @@ export default function Landing() {
               </span>
             </div>
             <span className="hidden sm:inline text-[11px] text-muted-foreground font-mono-tabular">
-              Markets · Setups · Context
+              Markets · Scans · Context
             </span>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-3">
-            {/* Top setups */}
+            {/* Top scans */}
             <div className="lg:col-span-2 fin-card p-3">
               <div className="flex items-center justify-between mb-3 px-1">
                 <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Top Setups
+                  Top Market Scans
                 </h2>
                 <span className="text-[11px] text-muted-foreground font-mono-tabular">15m · auto</span>
               </div>
@@ -129,7 +129,7 @@ export default function Landing() {
                   </tr>
                 </thead>
                 <tbody>
-                  {signals.map((s) => (
+                  {scans.map((s) => (
                     <tr key={s.sym}>
                       <td>
                         <div className="flex flex-col">
@@ -139,14 +139,14 @@ export default function Landing() {
                       </td>
                       <td>
                         <span className={
-                          s.sig === "Bullish" ? "badge-positive"
-                          : s.sig === "Bearish" ? "badge-negative"
+                          s.bias === "Bullish" ? "badge-positive"
+                          : s.bias === "Bearish" ? "badge-negative"
                           : "badge-neutral"
                         }>
-                          {s.sig}
+                          {s.bias}
                         </span>
                       </td>
-                      <td className="text-right font-mono-tabular text-foreground">{s.conf}</td>
+                      <td className="text-right font-mono-tabular text-foreground">{s.score}</td>
                       <td className="text-right"><Pct v={s.chg} /></td>
                     </tr>
                   ))}

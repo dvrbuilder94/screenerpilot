@@ -10,11 +10,11 @@ const Pct = ({ v }: { v: number }) => {
   return <span className={cls}>{v >= 0 ? "+" : ""}{v.toFixed(2)}%</span>;
 };
 
-const signals = [
-  { sym: "NVDA",   name: "Nvidia",        sig: "Bullish", conf: 82, chg: 2.14 },
-  { sym: "BTC",    name: "Bitcoin",       sig: "Bullish", conf: 74, chg: 1.08 },
-  { sym: "XLE",    name: "Energy ETF",    sig: "Bearish", conf: 61, chg: -0.92 },
-  { sym: "EURUSD", name: "Euro / Dollar", sig: "Mixed",   conf: 50, chg: -0.12 },
+const scans = [
+  { sym: "NVDA",   name: "Nvidia",        bias: "Bullish", score: 82, chg: 2.14 },
+  { sym: "BTC",    name: "Bitcoin",       bias: "Bullish", score: 74, chg: 1.08 },
+  { sym: "XLE",    name: "Energy ETF",    bias: "Bearish", score: 61, chg: -0.92 },
+  { sym: "EURUSD", name: "Euro / Dollar", bias: "Neutral", score: 50, chg: -0.12 },
 ];
 
 const snapshot = [

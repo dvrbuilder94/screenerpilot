@@ -56,8 +56,6 @@ export const translations = {
     topSetups: 'Top Setups',
     confidence: 'Score',
     signal: 'Bias',
-    entry: 'Key Price Area',
-    stopLoss: 'Risk Level',
     
     // Buttons
     refresh: 'Refresh',
@@ -113,10 +111,6 @@ export const translations = {
     // Enhanced Setup Card
     reasons: 'Drivers',
     warnings: 'Warnings',
-    riskManagement: 'Risk Management',
-    entryZone: 'Key Price Area',
-    targets: 'Reference Levels',
-    target: 'Reference',
     trendLabel: 'Trend',
     score: 'Score',
     
@@ -285,8 +279,6 @@ export const translations = {
     topSetups: 'Mejores Setups',
     confidence: 'Score',
     signal: 'Sesgo',
-    entry: 'Zona Clave',
-    stopLoss: 'Nivel de Riesgo',
     
     // Buttons
     refresh: 'Actualizar',
@@ -342,10 +334,6 @@ export const translations = {
     // Enhanced Setup Card
     reasons: 'Drivers',
     warnings: 'Advertencias',
-    riskManagement: 'Gestión de Riesgo',
-    entryZone: 'Zona Clave',
-    targets: 'Niveles de Referencia',
-    target: 'Referencia',
     trendLabel: 'Tendencia',
     score: 'Score',
     

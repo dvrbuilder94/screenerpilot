@@ -162,16 +162,11 @@ export function calculateEnhancedSignal({
     confidence += 15;
   }
 
-  // ============= CALCULATE ENTRY ZONES AND STOP LOSS =============
-  const entryZone = calculateEntryZone(currentPrice, lastAtr, trend);
-  const stopLoss = calculateStopLoss(currentPrice, lastAtr, supertrendValue, trend);
-  const targets = calculateTargets(currentPrice, lastAtr, trend);
-
   // Sentiment impact removed in Phase 1 cleanup
 
-  // ============= DETERMINE FINAL SIGNAL =============
+  // ============= DETERMINE FINAL BIAS =============
   const signal = getSignalFromScore(score);
-  
+
   // Adjust confidence maximum to 100
   confidence = Math.min(Math.max(confidence, 0), 100);
 
@@ -181,9 +176,6 @@ export function calculateEnhancedSignal({
     confidence,
     reasons,
     warnings,
-    entryZone,
-    stopLoss,
-    targets,
     trend,
   };
 }
@@ -194,66 +186,4 @@ function getSignalFromScore(score: number): SignalType {
   if (score <= -8) return 'STRONG_BEARISH';
   if (score <= -4) return 'BEARISH';
   return 'NEUTRAL_BIAS';
-}
-
-function calculateEntryZone(
-  price: number,
-  atr: number,
-  trend: 'BULLISH' | 'BEARISH' | 'NEUTRAL'
-): { min: number; max: number } | undefined {
-  if (trend === 'NEUTRAL') return undefined;
-
-  const zone = atr * 0.5; // 50% of ATR as entry zone
-  
-  if (trend === 'BULLISH') {
-    return {
-      min: price - zone,
-      max: price,
-    };
-  } else {
-    return {
-      min: price,
-      max: price + zone,
-    };
-  }
-}
-
-function calculateStopLoss(
-  price: number,
-  atr: number,
-  supertrendValue: number,
-  trend: 'BULLISH' | 'BEARISH' | 'NEUTRAL'
-): number | undefined {
-  if (trend === 'NEUTRAL') return undefined;
-
-  // Use Supertrend as preferred stop loss, or 2x ATR as fallback
-  if (supertrendValue > 0) {
-    return supertrendValue;
-  }
-
-  const stopDistance = atr * 2;
-  return trend === 'BULLISH' ? price - stopDistance : price + stopDistance;
-}
-
-function calculateTargets(
-  price: number,
-  atr: number,
-  trend: 'BULLISH' | 'BEARISH' | 'NEUTRAL'
-): number[] | undefined {
-  if (trend === 'NEUTRAL') return undefined;
-
-  if (trend === 'BULLISH') {
-    return [
-      price + (atr * 2),  // Target 1: 2x ATR above
-      price + (atr * 4),  // Target 2: 4x ATR above
-      price + (atr * 6),  // Target 3: 6x ATR above
-    ];
-  } else {
-    // BEARISH: targets should be below current price
-    return [
-      price - (atr * 2),  // Target 1: 2x ATR below
-      price - (atr * 4),  // Target 2: 4x ATR below
-      price - (atr * 6),  // Target 3: 6x ATR below
-    ];
-  }
 }

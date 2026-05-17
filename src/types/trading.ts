@@ -8,9 +8,6 @@ export interface EnhancedSignal {
   confidence: number; // 0-100
   reasons: string[];
   warnings: string[];
-  entryZone?: { min: number; max: number };
-  stopLoss?: number;
-  targets?: number[];
   trend: 'BULLISH' | 'BEARISH' | 'NEUTRAL';
 }
 

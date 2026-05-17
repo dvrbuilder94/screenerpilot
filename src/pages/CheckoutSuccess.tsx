@@ -6,7 +6,7 @@ import { Seo } from "@/components/Seo";
 export default function CheckoutSuccess() {
   return (
     <>
-      <Seo title="Welcome to Pro — ScreenerPilot" description="Your trial is active." />
+      <Seo title="Welcome to Pro — ScreenerPilot" description="Your trial is active." path="/checkout/success" />
       <div className="min-h-screen flex items-center justify-center bg-background px-4">
         <div className="max-w-md text-center">
           <div className="w-14 h-14 rounded-full bg-bullish/10 flex items-center justify-center mx-auto mb-6">

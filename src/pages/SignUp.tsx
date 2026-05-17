@@ -40,6 +40,7 @@ export default function SignUp() {
       <Seo
         title="Create Account — ScreenerPilot"
         description="Sign up to start your 30-day free trial of ScreenerPilot."
+        path="/signup"
       />
       <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
         <Card className="w-full max-w-md p-8">

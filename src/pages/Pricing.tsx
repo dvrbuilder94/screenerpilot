@@ -43,6 +43,7 @@ export default function Pricing() {
       <Seo
         title="Pricing — ScreenerPilot Pro"
         description="ScreenerPilot Pro: $15/month or $144/year. 30-day free trial. Cancel anytime."
+        path="/pricing"
       />
       <PaymentTestModeBanner />
       <div className="min-h-screen bg-background py-20 px-4">

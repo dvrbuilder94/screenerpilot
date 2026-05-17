@@ -31,7 +31,7 @@ export default function Login() {
 
   return (
     <>
-      <Seo title="Sign In — ScreenerPilot" description="Access your ScreenerPilot terminal." />
+      <Seo title="Sign In — ScreenerPilot" description="Access your ScreenerPilot terminal." path="/login" />
       <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
         <Card className="w-full max-w-md p-8">
           <div className="text-center mb-8">

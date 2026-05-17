@@ -30,8 +30,8 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Seo
-        title="ScreenerPilot — AI Market Intelligence Terminal"
-        description="AI market intelligence for cross-asset decision-making. Track regimes, relative value and price dislocations across stocks, ETFs, indices, crypto and commodities."
+        title="ScreenerPilot — Macro Intelligence Terminal"
+        description="A read-only market intelligence terminal. Monitor regimes, relative value and price dislocations across stocks, ETFs, indices, crypto and commodities."
         path="/"
       />
       {/* Header */}

@@ -55,14 +55,20 @@ export default function Landing() {
             <a href="#features" className="px-3 h-9 inline-flex items-center text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/60 transition-smooth">
               Features
             </a>
+            <Link to="/pricing" className="px-3 h-9 inline-flex items-center text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/60 transition-smooth">
+              Pricing
+            </Link>
             <Link to="/markets" className="px-3 h-9 inline-flex items-center text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/60 transition-smooth">
               Terminal
             </Link>
           </nav>
 
           <div className="flex items-center gap-2">
+            <Button asChild size="sm" variant="ghost" className="h-9 text-[13px] hidden sm:inline-flex">
+              <Link to="/login">Sign in</Link>
+            </Button>
             <Button asChild size="sm" className="h-9 text-[13px]">
-              <Link to="/markets">Open Terminal</Link>
+              <Link to="/signup">Start free trial</Link>
             </Button>
           </div>
         </div>
@@ -84,14 +90,17 @@ export default function Landing() {
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <Button asChild size="lg" className="h-11 px-5 text-sm">
-              <Link to="/markets">
-                Open Terminal <ArrowRight className="w-4 h-4 ml-2" />
+              <Link to="/signup">
+                Start 30-day free trial <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="h-11 px-5 text-sm">
-              <Link to="/macro">Explore Macro</Link>
+              <Link to="/markets">Open Terminal</Link>
             </Button>
           </div>
+          <p className="mt-3 text-[12px] text-muted-foreground">
+            $15/month after trial. Cancel anytime.
+          </p>
         </div>
 
         {/* Mockup terminal */}

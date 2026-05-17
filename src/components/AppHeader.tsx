@@ -27,6 +27,8 @@ const navItems = [
 export const AppHeader = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const { isActive, isTrialing } = useSubscription();
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
@@ -75,8 +77,50 @@ export const AppHeader = () => {
           })}
         </nav>
 
-        {/* Right: mobile trigger */}
+        {/* Right: account + mobile trigger */}
         <div className="flex items-center gap-2 ml-auto flex-shrink-0">
+          {user ? (
+            <>
+              {isActive && (
+                <span className="hidden sm:inline-flex items-center text-[10px] uppercase tracking-[0.12em] text-muted-foreground border border-border rounded-full px-2 py-0.5">
+                  {isTrialing ? "Trial" : "Pro"}
+                </span>
+              )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-9 w-9">
+                    <User className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {!isActive && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/pricing">Upgrade to Pro</Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem asChild>
+                    <Link to="/pricing">Billing & plan</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => signOut()}>
+                    <LogOut className="h-3.5 w-3.5 mr-2" /> Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          ) : (
+            <div className="hidden sm:flex items-center gap-1">
+              <Button asChild size="sm" variant="ghost" className="h-9 text-[13px]">
+                <Link to="/login">Sign in</Link>
+              </Button>
+              <Button asChild size="sm" className="h-9 text-[13px]">
+                <Link to="/signup">Start free trial</Link>
+              </Button>
+            </div>
+          )}
+
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">

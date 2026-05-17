@@ -263,8 +263,14 @@ export default function Landing() {
       </section>
 
       <footer className="max-w-6xl mx-auto px-5 py-8 border-t border-border">
-        <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-          <span>© {new Date().getFullYear()} ScreenerPilot</span>
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-[11px] text-muted-foreground">
+          <span>© {new Date().getFullYear()} ScreenerPilot — operated by Diego Vásquez Riesco</span>
+          <nav className="flex items-center gap-4">
+            <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
+            <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+            <Link to="/refund-policy" className="hover:text-foreground transition-colors">Refunds</Link>
+            <Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
+          </nav>
           <span className="font-mono-tabular uppercase tracking-[0.12em]">Macro Intelligence Terminal</span>
         </div>
       </footer>

@@ -115,26 +115,32 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    let user = null;
-    let tier = 'free';
-
-    if (authHeader) {
-      const token = authHeader.replace('Bearer ', '');
-      const { data: { user: authenticatedUser }, error: authError } = await supabase.auth.getUser(token);
-      
-      if (!authError && authenticatedUser) {
-        user = authenticatedUser;
-        
-        // Get user tier if authenticated
-        const { data: subscription } = await supabase
-          .from('user_subscriptions')
-          .select('tier')
-          .eq('user_id', user.id)
-          .single();
-        
-        tier = subscription?.tier || 'free';
-      }
+    // Require authentication - news is a paid third-party API
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Authentication required' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user: authenticatedUser }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !authenticatedUser) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const user = authenticatedUser;
+    const { data: subscription } = await supabase
+      .from('user_subscriptions')
+      .select('tier')
+      .eq('user_id', user.id)
+      .single();
+
+    const tier = subscription?.tier || 'free';
 
     // Validate input
     const body = await req.json();

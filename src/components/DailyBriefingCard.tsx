@@ -4,6 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshCw, ChevronDown, ChevronUp, Radio } from "lucide-react";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -169,7 +170,7 @@ export const DailyBriefingCard = () => {
                   prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-foreground/80
                 "
               >
-                <ReactMarkdown>{data.content_md}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.content_md}</ReactMarkdown>
               </div>
             )}
 

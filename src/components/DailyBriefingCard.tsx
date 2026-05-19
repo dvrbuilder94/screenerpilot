@@ -170,7 +170,7 @@ export const DailyBriefingCard = () => {
                   prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-foreground/80
                 "
               >
-                <ReactMarkdown>{data.content_md}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.content_md}</ReactMarkdown>
               </div>
             )}
 

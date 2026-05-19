@@ -137,24 +137,25 @@ export const DailyBriefingCard = () => {
               <div
                 className="
                   mt-6 pt-5 border-t border-border
-                  font-sans text-[15px] leading-[1.75] text-foreground/85
+                  font-sans text-[15px] leading-[1.75] text-foreground/90
                   [font-feature-settings:'liga','kern','tnum']
-                  prose prose-sm dark:prose-invert max-w-[68ch]
-                  prose-headings:font-sans prose-headings:font-semibold
+                  prose prose-sm dark:prose-invert max-w-none w-full
+                  prose-headings:font-sans prose-headings:font-bold
                   prose-headings:text-foreground prose-headings:tracking-tight
                   prose-headings:border-b prose-headings:border-border prose-headings:pb-2
                   prose-headings:mt-10 prose-headings:mb-4
                   prose-h1:hidden
-                  prose-h2:text-[15px]
-                  prose-p:my-3 prose-p:leading-[1.75]
-                  prose-strong:font-semibold prose-strong:text-foreground
+                  prose-h2:text-[17px] prose-h2:font-bold
+                  prose-h3:text-[15px] prose-h3:font-bold
+                  prose-p:my-3 prose-p:leading-[1.8] prose-p:text-foreground/85
+                  prose-strong:font-bold prose-strong:text-foreground
                   prose-ul:my-3 prose-ul:pl-5
-                  prose-li:my-1.5 prose-li:leading-[1.7] prose-li:marker:text-muted-foreground/60
-                  prose-table:text-[13.5px] prose-table:my-5
-                  prose-table:border-collapse prose-table:w-full
-                  prose-th:font-medium prose-th:text-muted-foreground
-                  prose-th:text-left prose-th:border-b prose-th:border-border prose-th:pb-2 prose-th:pr-4 prose-th:font-sans
-                  prose-td:py-2.5 prose-td:pr-4 prose-td:border-b prose-td:border-border/40
+                  prose-li:my-2 prose-li:leading-[1.7] prose-li:marker:text-muted-foreground/60
+                  prose-table:text-[14px] prose-table:my-6 prose-table:w-full
+                  prose-table:border-collapse
+                  prose-th:font-semibold prose-th:text-muted-foreground
+                  prose-th:text-left prose-th:border-b prose-th:border-border prose-th:pb-2.5 prose-th:pr-6 prose-th:font-sans
+                  prose-td:py-3 prose-td:pr-6 prose-td:border-b prose-td:border-border/40 prose-td:align-top
                   prose-td:[&:nth-child(2)]:tabular-nums prose-td:[&:nth-child(3)]:tabular-nums
                   prose-hr:my-6 prose-hr:border-border
                   prose-code:font-sans prose-code:font-semibold prose-code:text-foreground

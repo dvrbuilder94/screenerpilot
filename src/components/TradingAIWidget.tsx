@@ -449,7 +449,7 @@ export const TradingAIWidget = () => {
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-emerald-400" />
               <div>
-                <p className="text-sm font-semibold text-white">AlexIA</p>
+                <p className="text-sm font-semibold text-white">BEN</p>
                 <p className="text-xs text-slate-400">Market Intelligence</p>
               </div>
             </div>

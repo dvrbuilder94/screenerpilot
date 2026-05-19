@@ -15,7 +15,7 @@ export default function Privacy() {
           <h2>1. Data we collect</h2>
           <ul>
             <li><strong>Account data</strong> — email, display name, password hash.</li>
-            <li><strong>Usage data</strong> — pages viewed, features used, watchlist contents, AlexIA prompts, timestamps.</li>
+            <li><strong>Usage data</strong> — pages viewed, features used, watchlist contents, BEN prompts, timestamps.</li>
             <li><strong>Technical data</strong> — IP address, device, browser, language, error logs.</li>
             <li><strong>Support data</strong> — messages you send us.</li>
             <li><strong>Billing data</strong> — collected and processed by Paddle (see Section 4). We receive only metadata (subscription status, plan, period).</li>
@@ -38,7 +38,7 @@ export default function Privacy() {
             <li><strong>Paddle.com</strong> — our Merchant of Record. Handles checkout, billing, tax compliance, invoicing, refunds and chargebacks. See Paddle's privacy notice for how they process your data.</li>
             <li><strong>Hosting & infrastructure providers</strong> — Supabase / Cloudflare-class providers that host our backend, database and edge functions.</li>
             <li><strong>Market data providers</strong> — we fetch market data from third parties (Binance, Yahoo Finance, FRED, news APIs). They do not receive your personal data.</li>
-            <li><strong>AI providers</strong> — prompts you send to AlexIA are processed by an AI gateway in order to generate responses.</li>
+            <li><strong>AI providers</strong> — prompts you send to BEN are processed by an AI gateway in order to generate responses.</li>
             <li><strong>Authorities</strong> — where required by law.</li>
             <li><strong>Professional advisers</strong> — legal, accounting.</li>
           </ul>

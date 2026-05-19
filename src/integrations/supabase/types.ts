@@ -161,6 +161,45 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_briefings: {
+        Row: {
+          briefing_date: string
+          content_md: string
+          created_at: string
+          headline: string
+          id: string
+          key_events: Json | null
+          model: string | null
+          regimes: Json | null
+          top_movers: Json | null
+          updated_at: string
+        }
+        Insert: {
+          briefing_date: string
+          content_md: string
+          created_at?: string
+          headline: string
+          id?: string
+          key_events?: Json | null
+          model?: string | null
+          regimes?: Json | null
+          top_movers?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          briefing_date?: string
+          content_md?: string
+          created_at?: string
+          headline?: string
+          id?: string
+          key_events?: Json | null
+          model?: string | null
+          regimes?: Json | null
+          top_movers?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       hidden_gems_metrics: {
         Row: {
           atr_percentile: number | null

@@ -4,6 +4,7 @@ import { useMarketSnapshots, MarketSnapshot } from "@/hooks/useMarketSnapshots";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { Seo } from "@/components/Seo";
+import { DailyBriefingCard } from "@/components/DailyBriefingCard";
 
 const TABS = [
   { id: "today",       label: "Today" },
@@ -283,6 +284,10 @@ const Markets = () => {
           </div>
         )}
       </header>
+
+      <div className="mb-6">
+        <DailyBriefingCard />
+      </div>
 
       {error && (
         <div className="fin-card p-4 mb-4 border-negative/40 text-negative text-sm">

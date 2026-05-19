@@ -124,10 +124,10 @@ Genera el briefing.`;
 }
 
 function extractHeadline(md: string): string {
-  const tldr = md.match(/\*\*TL;DR:\*\*\s*(.+?)(?:\n|$)/i);
+  const tldr = md.match(/\*\*TL;DR\s*[—:-]\*\*\s*(.+?)(?:\n|$)/i);
   if (tldr) return tldr[1].trim();
   const h1 = md.match(/^#\s+(.+)$/m);
-  return h1 ? h1[1].trim() : "Briefing del día";
+  return h1 ? h1[1].trim() : "Morning Wire";
 }
 
 Deno.serve(async (req) => {

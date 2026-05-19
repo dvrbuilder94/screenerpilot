@@ -137,37 +137,29 @@ export const DailyBriefingCard = () => {
               <div
                 className="
                   mt-6 pt-5 border-t border-border
-                  font-serif text-[15px] leading-[1.75] tracking-[0.005em] text-foreground/90
-                  [font-feature-settings:'liga','kern','onum']
+                  font-sans text-[15px] leading-[1.75] text-foreground/85
+                  [font-feature-settings:'liga','kern','tnum']
                   prose prose-sm dark:prose-invert max-w-[68ch]
-                  prose-headings:font-sans prose-headings:uppercase prose-headings:tracking-[0.22em]
-                  prose-headings:text-[10.5px] prose-headings:font-semibold
-                  prose-headings:text-[hsl(28,95%,55%)]
-                  prose-headings:border-b prose-headings:border-border prose-headings:pb-1.5
-                  prose-headings:mt-8 prose-headings:mb-4
+                  prose-headings:font-sans prose-headings:font-semibold
+                  prose-headings:text-foreground prose-headings:tracking-tight
+                  prose-headings:border-b prose-headings:border-border prose-headings:pb-2
+                  prose-headings:mt-10 prose-headings:mb-4
                   prose-h1:hidden
-                  prose-p:font-serif prose-p:my-3 prose-p:leading-[1.75]
-                  prose-strong:font-sans prose-strong:font-semibold prose-strong:text-foreground
-                  prose-em:text-foreground/80
-                  prose-ul:my-3 prose-ul:pl-0 prose-ul:list-none
-                  prose-li:font-serif prose-li:my-1.5 prose-li:leading-[1.7]
-                  prose-li:relative prose-li:pl-5
-                  prose-li:before:content-['—'] prose-li:before:absolute prose-li:before:left-0
-                  prose-li:before:text-[hsl(28,95%,55%)] prose-li:before:font-sans
-                  prose-li:marker:hidden
-                  prose-table:font-sans prose-table:text-[12px] prose-table:my-4
+                  prose-h2:text-[15px]
+                  prose-p:my-3 prose-p:leading-[1.75]
+                  prose-strong:font-semibold prose-strong:text-foreground
+                  prose-ul:my-3 prose-ul:pl-5
+                  prose-li:my-1.5 prose-li:leading-[1.7] prose-li:marker:text-muted-foreground/60
+                  prose-table:text-[13.5px] prose-table:my-5
                   prose-table:border-collapse prose-table:w-full
-                  prose-th:font-sans prose-th:uppercase prose-th:tracking-[0.14em]
-                  prose-th:text-[10px] prose-th:font-semibold prose-th:text-muted-foreground
-                  prose-th:text-left prose-th:border-b prose-th:border-border prose-th:pb-2 prose-th:pr-3
-                  prose-td:font-mono prose-td:tabular-nums
-                  prose-td:py-2 prose-td:pr-3 prose-td:border-b prose-td:border-border/50
-                  prose-hr:my-5 prose-hr:border-border
-                  prose-code:font-mono prose-code:text-[hsl(28,95%,55%)] prose-code:bg-transparent
-                  prose-code:text-[13px] prose-code:font-medium
+                  prose-th:font-medium prose-th:text-muted-foreground
+                  prose-th:text-left prose-th:border-b prose-th:border-border prose-th:pb-2 prose-th:pr-4 prose-th:font-sans
+                  prose-td:py-2.5 prose-td:pr-4 prose-td:border-b prose-td:border-border/40
+                  prose-td:[&:nth-child(2)]:tabular-nums prose-td:[&:nth-child(3)]:tabular-nums
+                  prose-hr:my-6 prose-hr:border-border
+                  prose-code:font-sans prose-code:font-semibold prose-code:text-foreground
+                  prose-code:bg-transparent prose-code:text-[14px]
                   prose-code:before:content-[''] prose-code:after:content-['']
-                  prose-blockquote:border-l-2 prose-blockquote:border-[hsl(28,95%,55%)]
-                  prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-foreground/80
                 "
               >
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.content_md}</ReactMarkdown>

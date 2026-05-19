@@ -11,13 +11,29 @@ const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 
 const MODEL = "google/gemini-2.5-flash";
 
+// Region/category grouping based on symbol patterns
+function classifyRegion(s: any): string {
+  const sym = (s.symbol || "").toUpperCase();
+  const cat = (s.category || "").toLowerCase();
+  const reg = (s.region || "").toLowerCase();
+
+  if (cat.includes("crypto") || /BTC|ETH|SOL|BNB|XRP|DOGE/.test(sym)) return "crypto";
+  if (cat.includes("commodit") || /GC=|CL=|SI=|HG=|NG=|GOLD|OIL|COPPER|SILVER/.test(sym)) return "commodities";
+  if (cat.includes("rate") || cat.includes("bond") || cat.includes("fx") || /\^TNX|\^TYX|\^IRX|DXY|=X|EURUSD|USDJPY/.test(sym)) return "rates_fx";
+  if (reg.includes("eu") || /\^STOXX|\^GDAXI|\^FTSE|\^FCHI|\^IBEX|DAX|CAC/.test(sym)) return "europe";
+  if (reg.includes("as") || /\^N225|\^HSI|\^KS11|\^TWII|\^BSESN|NIKKEI|HSI|SHCOMP/.test(sym)) return "asia";
+  if (reg.includes("latam") || /\^BVSP|\^MXX|\^MERV|BOVESPA|BVSP|MERVAL/.test(sym)) return "americas_ex_us";
+  if (reg.includes("us") || /\^GSPC|\^DJI|\^IXIC|\^RUT|SPX|SPY|QQQ|DIA|IWM/.test(sym)) return "united_states";
+  return "other";
+}
+
 async function fetchContext(supabase: ReturnType<typeof createClient>) {
   const [snapshots, macro, ratios] = await Promise.all([
     supabase
       .from("market_snapshots")
-      .select("symbol,display_name,category,change_pct_1d,change_pct_1w,current_price")
+      .select("symbol,display_name,category,region,change_pct_1d,change_pct_1w,current_price")
       .order("fetched_at", { ascending: false })
-      .limit(200),
+      .limit(300),
     supabase
       .from("macro_indicators")
       .select("display_name,category,current_value,previous_value,change_pct,unit")
@@ -31,12 +47,36 @@ async function fetchContext(supabase: ReturnType<typeof createClient>) {
   ]);
 
   const snaps = snapshots.data ?? [];
+
+  const groups: Record<string, any[]> = {
+    united_states: [],
+    europe: [],
+    asia: [],
+    americas_ex_us: [],
+    rates_fx: [],
+    commodities: [],
+    crypto: [],
+    other: [],
+  };
+  for (const s of snaps) {
+    const g = classifyRegion(s);
+    (groups[g] ||= []).push(s);
+  }
+  // Sort each group by |1D| desc and keep top 6
+  for (const k of Object.keys(groups)) {
+    groups[k] = groups[k]
+      .filter((s) => s.change_pct_1d !== null && s.change_pct_1d !== undefined)
+      .sort((a, b) => Math.abs(b.change_pct_1d) - Math.abs(a.change_pct_1d))
+      .slice(0, 6);
+  }
+
   const movers = [...snaps]
     .filter((s) => s.change_pct_1d !== null)
     .sort((a, b) => Math.abs(b.change_pct_1d) - Math.abs(a.change_pct_1d))
-    .slice(0, 15);
+    .slice(0, 12);
 
   return {
+    groups,
     movers,
     macro: macro.data ?? [],
     ratios: ratios.data ?? [],
@@ -45,58 +85,95 @@ async function fetchContext(supabase: ReturnType<typeof createClient>) {
 }
 
 async function generateBriefing(ctx: Awaited<ReturnType<typeof fetchContext>>) {
-  const systemPrompt = `You are BEN (Benjamin Graham), the chief market strategist behind ScreenerPilot's morning wire.
-You write a Bloomberg-terminal style briefing: dense, decisive, institutional. ENGLISH ONLY.
-No emojis. No disclaimers. No "this is not financial advice". No hedging filler.
+  const systemPrompt = `You are BEN (Benjamin Graham), chief market strategist at ScreenerPilot.
+You write an elegant, globally-structured morning market brief in the style of Goldman Sachs Daily Update or JPM Eye on the Market. ENGLISH ONLY.
 
-Tone: like MLIV Pulse / GS Daily Update — short sentences, data first, present tense, active voice.
+TONE
+- Calm, refined, institutional. Short prose sentences. Active voice, present tense.
+- No emojis. No disclaimers. No hedging filler. No "this is not financial advice".
 
-Output STRICT markdown, no preamble, exact structure:
+HARD FORMATTING RULES
+- Write data in plain prose: "S&P 500 +0.4%, breadth firm with 62% advancers".
+- Never use these symbols anywhere: =, |, Δ, z=, pctl, ~, →, •.
+- Use simple "-" for bullets. No ALL CAPS labels. No bold-prefix labels like "**Risk —**".
+- Sentence case for section headings. No emoji, no decorative characters.
+- Keep paragraphs short and airy. Generous whitespace.
 
-**TL;DR —** a single punchy sentence (max 22 words) with the day's thesis.
+OUTPUT STRUCTURE (exact order, omit any section that lacks data — never write "n/a"):
 
----
+**TL;DR —** one elegant sentence, max 22 words, capturing the day's core thesis.
 
-## TAPE
+## Global overview
+One short paragraph (2-3 sentences) on the overall risk tone across regions.
 
-3 dense bullets. Each bullet starts with an UPPERCASE label followed by " — ":
-- RISK — risk-on / risk-off state with 1 numeric piece of evidence.
-- RATES & USD — rates and dollar behavior with 1 data point.
-- CROSS-ASSET — gold vs equities, crypto vs SPX or similar, with data.
+## United States
+2-3 sentences. Equities, breadth, leading sector or factor.
 
-## MOVERS
+## Europe
+2-3 sentences. Stoxx 600, DAX, FTSE, plus one macro or policy note.
 
-Markdown table, 6-8 rows, sorted by |%|. Exact columns:
-| Ticker | Δ1D | Δ7D | Read |
-Read = 4-7 institutional words, no emoji.
+## Asia
+2-3 sentences. Nikkei, Hang Seng, China, plus one macro note.
 
-## RATIOS
+## Americas ex-US
+2 sentences if data warrants. Brazil, Mexico, regional FX. Skip section entirely if no material data.
 
-2-3 bullets on ratios with extreme z-score (|z|>1) or percentile <10 / >90.
-Format: \`PAIR\` z=X.XX (pctl Y) — implication in one sentence.
+## Rates and FX
+2-3 sentences. US 2y and 10y yields, dollar index, key crosses.
 
-## ON THE RADAR
+## Commodities
+2 sentences. Oil, gold, copper, with the dominant narrative.
 
-2-3 bullets of macro events / technical levels to watch today or this week.
+## Crypto
+2 sentences. BTC, ETH, dominance or flows.
 
-## BEN'S TAKE
+## Key movers
+A clean markdown table, exactly these columns and headers:
 
-A single paragraph of 45-65 words. Clear view on the regime and where the asymmetry sits. Cite 1-2 data points from the briefing. No explicit buy/sell calls but a clear directional bias.`;
+| Ticker | 1D % | 7D % | Read |
 
-  const userPrompt = `Live data:
+6 to 8 rows, sorted by absolute 1D move. "Read" is 4-7 plain words. No symbols.
 
-TOP MOVERS:
-${ctx.movers.map((m: any) => `- ${m.symbol} (${m.category}): ${m.change_pct_1d?.toFixed(2)}% 1d, ${m.change_pct_1w?.toFixed(2)}% 1w @ $${m.current_price}`).join("\n")}
+## Cross-asset signals
+2-3 bullets. Express ratios in prose, for example: "Gold to silver sits at the 92nd percentile of its 5-year range, a level historically aligned with risk-off rotations." No "z=" or "pctl" notation.
+
+## On the radar
+2-3 short bullets. Events, data releases, technical levels to watch.
+
+## BEN's take
+One single, well-written paragraph of 48 to 65 words. Clear view on the regime and where the asymmetry sits. Cite one or two data points already in the brief. Directional bias allowed; no explicit buy/sell calls.`;
+
+  const fmtBlock = (label: string, rows: any[]) => {
+    if (!rows.length) return "";
+    const lines = rows
+      .map((m: any) => {
+        const d1 = m.change_pct_1d != null ? `${m.change_pct_1d.toFixed(2)}% 1d` : "";
+        const d7 = m.change_pct_1w != null ? `${m.change_pct_1w.toFixed(2)}% 7d` : "";
+        const px = m.current_price != null ? `last ${m.current_price}` : "";
+        return `- ${m.display_name || m.symbol} (${m.symbol}): ${[d1, d7, px].filter(Boolean).join(", ")}`;
+      })
+      .join("\n");
+    return `\n${label}:\n${lines}`;
+  };
+
+  const userPrompt = `Live market data, grouped by region/asset class. Use these to write the brief.
+${fmtBlock("UNITED STATES", ctx.groups.united_states)}
+${fmtBlock("EUROPE", ctx.groups.europe)}
+${fmtBlock("ASIA", ctx.groups.asia)}
+${fmtBlock("AMERICAS EX-US", ctx.groups.americas_ex_us)}
+${fmtBlock("RATES AND FX", ctx.groups.rates_fx)}
+${fmtBlock("COMMODITIES", ctx.groups.commodities)}
+${fmtBlock("CRYPTO", ctx.groups.crypto)}
 
 MACRO INDICATORS:
-${ctx.macro.slice(0, 20).map((m: any) => `- ${m.display_name} (${m.category}): ${m.current_value}${m.unit ?? ""} (Δ ${m.change_pct?.toFixed(2)}%)`).join("\n")}
+${ctx.macro.slice(0, 20).map((m: any) => `- ${m.display_name} (${m.category}): current ${m.current_value}${m.unit ?? ""}, previous ${m.previous_value ?? "n/a"}, change ${m.change_pct?.toFixed(2) ?? "n/a"} percent`).join("\n")}
 
-RATIOS:
-${ctx.ratios.map((r: any) => `- ${r.display_name}: ${r.current_value?.toFixed(3)} (z=${r.z_score?.toFixed(2)}, pctl=${r.percentile_5y?.toFixed(0)})`).join("\n")}
+RATIOS (for cross-asset signals — translate any z-scores or percentiles into plain English):
+${ctx.ratios.map((r: any) => `- ${r.display_name}: value ${r.current_value?.toFixed(3)}, 5y percentile ${r.percentile_5y?.toFixed(0)}, 1w change ${r.change_pct_1w?.toFixed(2)} percent`).join("\n")}
 
 Date: ${new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
 
-Generate the briefing.`;
+Write the brief now. Follow the structure exactly. Remember: no =, no |, no Δ, no z=, no pctl, no emoji.`;
 
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
@@ -137,7 +214,6 @@ Deno.serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
     const today = new Date().toISOString().split("T")[0];
 
-    // Check if already generated today (idempotent)
     const { data: existing } = await supabase
       .from("daily_briefings")
       .select("id")

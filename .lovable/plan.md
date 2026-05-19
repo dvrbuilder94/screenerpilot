@@ -1,66 +1,71 @@
-# Reposition copy: from "trading signals" to "market intelligence"
+# BEN Morning Wire — Redesign for elegance and global structure
 
-A copy and framing refactor only. No backend, no logic, no visual identity changes. Existing routes (Landing, Markets, Macro, Ratios, Commodities, Stock Intelligence) and all functionality stay intact.
+Two problems to solve:
 
-## Goal
+1. **Typography is inconsistent.** The expanded "full wire" mixes a serif body with a mono/uppercase header, plus an orange accent on headings and inline code. It reads as noisy, not refined.
+2. **Content is too narrow and too symbol-heavy.** The brief jumps straight into local/LATAM-ish observations and is full of `=`, `z=`, `pctl`, `Δ`, `|` characters. It should open globally (World → US → Europe → Asia → Americas → Rates/FX → Commodities/Crypto) like a real institutional morning note (GS Daily, MLIV Pulse, JPM Eye on the Market).
 
-Reposition ScreenerPilot as an institutional cross-asset **market intelligence terminal** (regimes, relative value, dislocations, stretch monitoring, decision support) — not a buy/sell signals product.
+## What changes
 
-## Terminology mapping (applied everywhere it appears)
+### 1. Typography — one family, quiet hierarchy
 
-| Old | New |
-|---|---|
-| Signals / Signal | Setups / Market context |
-| Signal Score | Market Score / Conviction Score |
-| Top Signals | Top Setups / Top Opportunities |
-| Buy / Sell / Hold | Bullish / Bearish / Mixed (or Extended / Depressed / Balanced by context) |
-| Strong Buy / Strong Sell | High-conviction Bullish / High-conviction Bearish |
-| Long / Short / Neutral | Bullish / Bearish / Mixed |
-| Entry Zone | Key Price Area |
-| Stop-loss | Risk Level |
-| Targets | Reference Levels |
-| Trading calls / recommendations | Market context / observations |
+In `src/components/DailyBriefingCard.tsx`, simplify the expanded prose so it visually belongs to the same document as the headline:
 
-Tone: institutional, Bloomberg-like, analytical, never prescriptive. Avoid retail trading language, crypto-native slang, and hype.
+- Drop the serif body. Use the app's sans (`Inter`) for everything — headline, body, bullets, tables. One family only.
+- Headings: same sans, **sentence case** (not uppercase, not tracked-out), slightly larger and semibold, with a thin `border-b border-border` and generous top margin. No orange.
+- Body: `text-[15px] leading-[1.75]`, `text-foreground/85`, max width `68ch`.
+- Bullets: native `list-disc` with muted markers. Remove the orange em-dash `::before` trick.
+- Tables: sans, normal case headers in `text-muted-foreground`, tabular-nums for numeric cells only. Thin row dividers.
+- Reserve the Bloomberg orange (`hsl(28,95%,55%)`) for **only** the left stripe and the `BEN · MORNING WIRE` chip in the terminal header. Nothing inside the body is orange.
+- Remove inline `code` styling overrides — render `code` as plain semibold sans so tickers (AAPL, SPX) look like text, not terminal tokens.
 
-## Scope of edits
+### 2. Briefing structure — global first, less symbology
 
-### 1. Landing page (`src/pages/Landing.tsx`)
-- New hero copy, e.g.
-  - H1: "AI market intelligence for cross-asset decision-making."
-  - Sub: "Track market regimes, relative value, and price dislocations from one terminal."
-- Replace "Top Signals" preview table with "Top Setups" / "Top Opportunities" using Bullish / Bearish / Mixed labels and Conviction Score.
-- Rewrite section titles, value props, "How it works" steps, and meta description (no mention of "signals" or "trading calls").
-- CTAs: neutral and analytical ("Open terminal", "Explore market context") — no "Get signals".
+Rewrite the system prompt in `supabase/functions/generate-daily-briefing/index.ts` so BEN produces a globally-ordered note with prose-style data instead of symbol soup.
 
-### 2. Translations (`src/lib/translations.ts`) — EN + ES
-Update keys used across the UI: `signal`, `signalType`, `signalLabel`, `buy`, `sell`, `hold`, `strongBuy`, `strongSell`, `entryZone`, `targets`, `target`, `stopLoss`, `allSignals`, all `*SignalDesc` strings, and the Combined Signal narrative strings. Keep the keys (to avoid touching components) but rewrite the **values** to the new vocabulary in both languages.
+New section order:
 
-### 3. Component-level labels (text only)
-Files with visible copy to rephrase:
-- `TopSetupsPanel.tsx`, `SignalsList.tsx`, `SignalsSidebar.tsx`, `EnhancedSignalCard.tsx`, `CombinedSignal.tsx`
-- `AssetIntelligencePage.tsx`, `IndicatorPanel.tsx`, `IndicatorPanels.tsx`, `GroupRanking.tsx`, `FilterPanel.tsx`
-- `BloombergInsight.tsx`, `DashboardOverview.tsx`, `CryptoMacroInsight.tsx`, `AltseasonPanel.tsx`, `AltseasonIndexPanel.tsx`, `DominancePanel.tsx`, `EthUpsidePanel.tsx`
-- `macro/StocksMacro.tsx`, `macro/FedMacro.tsx`, `macro/FedMacroPanel.tsx`, `macro/CryptoMacroPanel.tsx`, `ratios/RatioCategoryTable.tsx`
-- `TradingAIWidget.tsx` (AlexIA chat surface): rename labels and rewrite placeholder/empty-state to analytical phrasing.
+```text
+TL;DR — one sentence
 
-For each: change visible strings only. Replace "Signal", "Buy/Sell/Hold", "Entry Zone", "Stop-loss", "Targets" per the table above.
+Global Overview        (one short paragraph: overall risk tone)
+United States          (equities, breadth, key sector)
+Europe                 (Stoxx, DAX, FTSE, one macro note)
+Asia                   (Nikkei, HSI, China, one macro note)
+Americas ex-US         (LATAM, Brazil, Mexico — only if data warrants)
+Rates & FX             (UST 2y/10y, DXY, EURUSD, JPY)
+Commodities            (Oil, Gold, Copper)
+Crypto                 (BTC, ETH, dominance)
+Key Movers             (table, 6-8 rows)
+Cross-Asset Signals    (ratios in prose, not z= notation)
+On the Radar           (events / levels to watch)
+BEN's Take             (one paragraph, 48-65 words)
+```
 
-### 4. AlexIA / insights tone
-Adjust prompts and on-screen helper copy in `TradingAIWidget.tsx` and the insight panels (`BloombergInsight`, `DashboardOverview`, `CryptoMacroInsight`) so framing reads as analysis ("market looks extended", "reversion candidate", "regime shifting") rather than instructions ("buy this", "sell that"). System prompt of `trading-ai-chat` / `insight-chat` edge functions left as-is unless you also want a tone tweak there — say so and I'll include it.
+Formatting rules tightened in the prompt:
 
-### 5. SEO + metadata
-- Update `<title>`, meta description and OG tags in `index.html`, the `Seo` component default, `public/llms.txt`, and the per-page `Seo` calls (Landing, Markets, Macro, Ratios, Commodities, StockIntelligence). Replace "signals / trading" framing with "market intelligence / cross-asset context".
+- Write data in prose: "SPX +0.4%, breadth firm with 62% advancers" — not `SPX Δ1D=+0.40%`.
+- Ratios in prose: "Gold/Silver stretched at the 92nd percentile, a level historically associated with risk-off rotations." Avoid `z=`, `pctl=`, `|`.
+- Use plain `-` bullets, no labels in ALL CAPS, no `**LABEL —**` pattern.
+- Movers table keeps 4 columns but Δ becomes `1D %` and `7D %` (plain words).
+- Skip any section that has no data — never write "n/a" or placeholder rows.
+- Hard rule in the prompt: "Do not use the symbols `=`, `|`, `Δ`, `z=`, `pctl` anywhere in the output."
 
-## Hard constraints
+### 3. User-prompt context broadened
 
-- Visible copy only — strings rendered to users.
-- No renames: files, variables, types, props, hooks, routes, DB fields, translation keys all stay identical.
-- No changes to business logic, scoring, edge functions, or component structure.
-- No refactors. Smallest possible diff.
-- Ambiguous labels → neutral institutional wording, do not invent new concepts.
-- No visual / theme / layout changes.
+Update the data fetch in the same edge function so BEN actually has global material to work with:
 
-## Languages
+- Group `market_snapshots` by region/category before sending: `us_equities`, `europe`, `asia`, `latam`, `rates_fx`, `commodities`, `crypto`.
+- Pass each group as a short labeled block in the user prompt so the model has structured global context, not just a flat "top movers" list.
+- Keep macro + ratios blocks but feed them as readable lines (no `Δ`, no `z=`).
 
-Both English and Spanish copy updated in parallel.
+## Files touched
+
+- `src/components/DailyBriefingCard.tsx` — prose styling simplified, one font family, orange removed from body.
+- `supabase/functions/generate-daily-briefing/index.ts` — new system prompt (global structure, prose data, banned symbols) and grouped user-prompt context. `extractHeadline` unchanged.
+
+## Out of scope
+
+- No DB schema changes.
+- No new edge functions.
+- No translation feature yet (English-only stays).

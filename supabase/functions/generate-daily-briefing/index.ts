@@ -45,7 +45,7 @@ async function fetchContext(supabase: ReturnType<typeof createClient>) {
 }
 
 async function generateBriefing(ctx: Awaited<ReturnType<typeof fetchContext>>) {
-  const systemPrompt = `You are AlexIA, a hedge fund analyst writing a concise morning briefing for ScreenerPilot users.
+  const systemPrompt = `You are BEN, a hedge fund analyst writing a concise morning briefing for ScreenerPilot users.
 Output STRICT markdown in Spanish, no preamble. Structure:
 
 # 🌅 Briefing del día — {fecha en español}
@@ -64,7 +64,7 @@ Lista 5-7 movers más relevantes con % y un mini contexto (1 línea).
 ## 📅 A vigilar
 2-3 eventos macro o niveles técnicos importantes.
 
-## 🎯 Lectura de AlexIA
+## 🎯 Lectura de BEN
 1 párrafo (max 60 palabras) con tu opinión accionable.
 
 Sé directo, sin disclaimers ni hedging excesivo. Sin "no soy asesor financiero".`;

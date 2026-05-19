@@ -42,7 +42,7 @@ const TIER_LIMITS: Record<string, number> = {
 /* -------------------- SYSTEM PROMPT -------------------- */
 
 const SYSTEM_PROMPT = `
-You are AlexIA, a Market Intelligence Copilot.
+You are BEN, a Market Intelligence Copilot.
 
 This product is NOT a generic chat. It is a Market Intelligence Interface designed to help users quickly understand what is happening in financial markets and what it implies.
 
@@ -188,7 +188,7 @@ serve(async (req) => {
     const lastMessage = messages[messages.length - 1];
 
     if (lastMessage.role === "user" && isGreeting(lastMessage.content)) {
-      const greetingResponse = `Hello, I'm AlexIA — your Market Intelligence Copilot.
+      const greetingResponse = `Hello, I'm BEN — your Market Intelligence Copilot.
 
 I help you understand what's happening in crypto, stocks, FX, commodities, and macro — and what it implies for market behavior.
 

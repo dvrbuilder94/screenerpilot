@@ -6,7 +6,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const SYSTEM_PROMPT = `You are AlexIA, a hedge-fund-style market analyst embedded in a Bloomberg-like terminal.
+const SYSTEM_PROMPT = `You are BEN, a hedge-fund-style market analyst embedded in a Bloomberg-like terminal.
 The user is looking at a specific market panel and clicked an inline "Ask AI" chip on a one-line insight.
 You receive the panel context (panel name, the insight, and the underlying data snapshot) and a short conversation.
 

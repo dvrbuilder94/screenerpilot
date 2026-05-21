@@ -11,10 +11,10 @@ const Pct = ({ v }: { v: number }) => {
 };
 
 const scans = [
-  { sym: "NVDA",   name: "Nvidia",        bias: "Bullish", score: 82, chg: 2.14 },
-  { sym: "BTC",    name: "Bitcoin",       bias: "Bullish", score: 74, chg: 1.08 },
-  { sym: "XLE",    name: "Energy ETF",    bias: "Bearish", score: 61, chg: -0.92 },
-  { sym: "EURUSD", name: "Euro / Dollar", bias: "Neutral", score: 50, chg: -0.12 },
+  { sym: "NVDA",   name: "Nvidia",        trend: "Strong", score: 82, chg: 2.14 },
+  { sym: "BTC",    name: "Bitcoin",       trend: "Strong", score: 74, chg: 1.08 },
+  { sym: "XLE",    name: "Energy ETF",    trend: "Weak",   score: 61, chg: -0.92 },
+  { sym: "EURUSD", name: "Euro / Dollar", trend: "Flat",   score: 50, chg: -0.12 },
 ];
 
 const snapshot = [

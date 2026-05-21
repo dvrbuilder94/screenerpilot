@@ -132,7 +132,7 @@ export default function Landing() {
                 <thead>
                   <tr>
                     <th>Symbol</th>
-                    <th>Bias</th>
+                    <th>Trend</th>
                     <th className="text-right">Score</th>
                     <th className="text-right">1D</th>
                   </tr>
@@ -148,11 +148,11 @@ export default function Landing() {
                       </td>
                       <td>
                         <span className={
-                          s.bias === "Bullish" ? "badge-positive"
-                          : s.bias === "Bearish" ? "badge-negative"
+                          s.trend === "Strong" ? "badge-positive"
+                          : s.trend === "Weak" ? "badge-negative"
                           : "badge-neutral"
                         }>
-                          {s.bias}
+                          {s.trend}
                         </span>
                       </td>
                       <td className="text-right font-mono-tabular text-foreground">{s.score}</td>

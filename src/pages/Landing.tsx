@@ -169,7 +169,7 @@ export default function Landing() {
                 Macro Context
               </h2>
               <p className="text-[13px] text-foreground leading-relaxed">
-                Risk-on bias holds as breadth widens across US large caps.
+                Risk-on regime holds as breadth widens across US large caps.
                 Energy lags on softer crude; rates drift lower into CPI.
               </p>
               <div className="mt-4 pt-4 border-t border-border space-y-2">

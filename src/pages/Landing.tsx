@@ -11,10 +11,10 @@ const Pct = ({ v }: { v: number }) => {
 };
 
 const scans = [
-  { sym: "NVDA",   name: "Nvidia",        bias: "Bullish", score: 82, chg: 2.14 },
-  { sym: "BTC",    name: "Bitcoin",       bias: "Bullish", score: 74, chg: 1.08 },
-  { sym: "XLE",    name: "Energy ETF",    bias: "Bearish", score: 61, chg: -0.92 },
-  { sym: "EURUSD", name: "Euro / Dollar", bias: "Neutral", score: 50, chg: -0.12 },
+  { sym: "NVDA",   name: "Nvidia",        trend: "Strong", score: 82, chg: 2.14 },
+  { sym: "BTC",    name: "Bitcoin",       trend: "Strong", score: 74, chg: 1.08 },
+  { sym: "XLE",    name: "Energy ETF",    trend: "Weak",   score: 61, chg: -0.92 },
+  { sym: "EURUSD", name: "Euro / Dollar", trend: "Flat",   score: 50, chg: -0.12 },
 ];
 
 const snapshot = [
@@ -132,7 +132,7 @@ export default function Landing() {
                 <thead>
                   <tr>
                     <th>Symbol</th>
-                    <th>Bias</th>
+                    <th>Trend</th>
                     <th className="text-right">Score</th>
                     <th className="text-right">1D</th>
                   </tr>
@@ -148,11 +148,11 @@ export default function Landing() {
                       </td>
                       <td>
                         <span className={
-                          s.bias === "Bullish" ? "badge-positive"
-                          : s.bias === "Bearish" ? "badge-negative"
+                          s.trend === "Strong" ? "badge-positive"
+                          : s.trend === "Weak" ? "badge-negative"
                           : "badge-neutral"
                         }>
-                          {s.bias}
+                          {s.trend}
                         </span>
                       </td>
                       <td className="text-right font-mono-tabular text-foreground">{s.score}</td>
@@ -169,7 +169,7 @@ export default function Landing() {
                 Macro Context
               </h2>
               <p className="text-[13px] text-foreground leading-relaxed">
-                Risk-on bias holds as breadth widens across US large caps.
+                Risk-on regime holds as breadth widens across US large caps.
                 Energy lags on softer crude; rates drift lower into CPI.
               </p>
               <div className="mt-4 pt-4 border-t border-border space-y-2">

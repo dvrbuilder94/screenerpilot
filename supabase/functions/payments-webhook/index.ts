@@ -12,6 +12,28 @@ function getSupabase() {
   return _supabase;
 }
 
+// Map Paddle price/product external IDs to internal tier + ticker limits.
+function resolveTier(priceId: string, productId: string): { tier: 'free' | 'pro' | 'premium'; maxTickers: number } {
+  const id = `${productId}:${priceId}`.toLowerCase();
+  if (id.includes('premium')) return { tier: 'premium', maxTickers: 500 };
+  if (id.includes('pro')) return { tier: 'pro', maxTickers: 100 };
+  return { tier: 'free', maxTickers: 10 };
+}
+
+async function syncUserSubscriptionTier(
+  userId: string,
+  tier: 'free' | 'pro' | 'premium',
+  maxTickers: number,
+) {
+  await getSupabase().from('user_subscriptions').upsert({
+    user_id: userId,
+    tier,
+    max_tickers: maxTickers,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: 'user_id' });
+}
+
+
 async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
   const { id, customerId, items, status, currentBillingPeriod, customData } = data;
   const userId = customData?.userId;

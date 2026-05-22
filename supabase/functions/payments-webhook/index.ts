@@ -12,6 +12,28 @@ function getSupabase() {
   return _supabase;
 }
 
+// Map Paddle price/product external IDs to internal tier + ticker limits.
+function resolveTier(priceId: string, productId: string): { tier: 'free' | 'pro' | 'premium'; maxTickers: number } {
+  const id = `${productId}:${priceId}`.toLowerCase();
+  if (id.includes('premium')) return { tier: 'premium', maxTickers: 500 };
+  if (id.includes('pro')) return { tier: 'pro', maxTickers: 100 };
+  return { tier: 'free', maxTickers: 10 };
+}
+
+async function syncUserSubscriptionTier(
+  userId: string,
+  tier: 'free' | 'pro' | 'premium',
+  maxTickers: number,
+) {
+  await getSupabase().from('user_subscriptions').upsert({
+    user_id: userId,
+    tier,
+    max_tickers: maxTickers,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: 'user_id' });
+}
+
+
 async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
   const { id, customerId, items, status, currentBillingPeriod, customData } = data;
   const userId = customData?.userId;
@@ -41,10 +63,16 @@ async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
     environment: env,
     updated_at: new Date().toISOString(),
   }, { onConflict: 'paddle_subscription_id' });
+
+  // Sync tier in user_subscriptions so edge function rate limits apply.
+  if (env === 'live' && ['active', 'trialing', 'past_due'].includes(status)) {
+    const { tier, maxTickers } = resolveTier(priceId, productId);
+    await syncUserSubscriptionTier(userId, tier, maxTickers);
+  }
 }
 
 async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
-  const { id, status, currentBillingPeriod, scheduledChange } = data;
+  const { id, items, status, currentBillingPeriod, scheduledChange } = data;
   await getSupabase().from('subscriptions')
     .update({
       status,
@@ -55,14 +83,52 @@ async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
     })
     .eq('paddle_subscription_id', id)
     .eq('environment', env);
+
+  // Keep tier in sync on upgrades/downgrades/renewals (live only).
+  if (env !== 'live') return;
+  const { data: sub } = await getSupabase()
+    .from('subscriptions')
+    .select('user_id')
+    .eq('paddle_subscription_id', id)
+    .eq('environment', env)
+    .maybeSingle();
+  const userId = (sub as any)?.user_id;
+  if (!userId) return;
+
+  const item = items?.[0];
+  const priceId = item?.price?.importMeta?.externalId;
+  const productId = item?.product?.importMeta?.externalId;
+  const activeLike = ['active', 'trialing', 'past_due'].includes(status);
+  if (activeLike && priceId && productId) {
+    const { tier, maxTickers } = resolveTier(priceId, productId);
+    await syncUserSubscriptionTier(userId, tier, maxTickers);
+  } else if (status === 'canceled' || status === 'paused') {
+    await syncUserSubscriptionTier(userId, 'free', 10);
+  }
 }
 
 async function handleSubscriptionCanceled(data: any, env: PaddleEnv) {
+  const { id, currentBillingPeriod } = data;
   await getSupabase().from('subscriptions')
     .update({ status: 'canceled', updated_at: new Date().toISOString() })
-    .eq('paddle_subscription_id', data.id)
+    .eq('paddle_subscription_id', id)
     .eq('environment', env);
+
+  if (env !== 'live') return;
+  // Only downgrade once grace period ends; if no period_end, downgrade now.
+  const endsAt = currentBillingPeriod?.endsAt ? new Date(currentBillingPeriod.endsAt).getTime() : 0;
+  if (endsAt && endsAt > Date.now()) return;
+
+  const { data: sub } = await getSupabase()
+    .from('subscriptions')
+    .select('user_id')
+    .eq('paddle_subscription_id', id)
+    .eq('environment', env)
+    .maybeSingle();
+  const userId = (sub as any)?.user_id;
+  if (userId) await syncUserSubscriptionTier(userId, 'free', 10);
 }
+
 
 async function handleWebhook(req: Request, env: PaddleEnv) {
   const event = await verifyWebhook(req, env);

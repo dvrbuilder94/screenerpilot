@@ -80,6 +80,9 @@ export default function Landing() {
             <Link to="/markets" className="px-3 h-9 inline-flex items-center text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/60 transition-smooth">
               Terminal
             </Link>
+            <a href="#contact" className="px-3 h-9 inline-flex items-center text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/60 transition-smooth">
+              Contact
+            </a>
           </nav>
 
           <div className="flex items-center gap-2">

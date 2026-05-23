@@ -1,7 +1,12 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { ArrowRight, LineChart, Layers, Activity, MessageSquare } from "lucide-react";
 import { Seo } from "@/components/Seo";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 const LOGO_URL = "https://storage.googleapis.com/gpt-engineer-file-uploads/SwWQdnEgbuMrnR9f8RUe0qM0pTi1/uploads/1768527913536-WhatsApp Image 2026-01-15 at 11.30.09 AM.jpeg";
 
@@ -23,6 +28,26 @@ const snapshot = [
 ];
 
 export default function Landing() {
+  const [contact, setContact] = useState({ name: "", email: "", message: "" });
+  const [sending, setSending] = useState(false);
+
+  const submitContact = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!contact.email || contact.message.trim().length < 5) {
+      toast({ title: "Please complete the form", description: "Email and a short message are required.", variant: "destructive" });
+      return;
+    }
+    setSending(true);
+    const { error } = await supabase.functions.invoke("send-contact-message", { body: contact });
+    setSending(false);
+    if (error) {
+      toast({ title: "Could not send", description: "Please try again in a moment.", variant: "destructive" });
+      return;
+    }
+    setContact({ name: "", email: "", message: "" });
+    toast({ title: "Message sent", description: "Thanks — we'll get back to you shortly." });
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Seo
@@ -55,6 +80,9 @@ export default function Landing() {
             <Link to="/markets" className="px-3 h-9 inline-flex items-center text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/60 transition-smooth">
               Terminal
             </Link>
+            <a href="#contact" className="px-3 h-9 inline-flex items-center text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/60 transition-smooth">
+              Contact
+            </a>
           </nav>
 
           <div className="flex items-center gap-2">
@@ -137,6 +165,48 @@ export default function Landing() {
               <p className="mt-1.5 text-[13px] text-muted-foreground leading-relaxed">{f.desc}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Contact */}
+      <section id="contact" className="max-w-6xl mx-auto px-5 py-12 border-t border-border">
+        <div className="grid md:grid-cols-2 gap-10 items-start">
+          <div>
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mb-3">Contact</h2>
+            <h3 className="text-[22px] sm:text-[26px] font-semibold tracking-tight leading-tight">
+              Questions, feedback or partnership ideas?
+            </h3>
+            <p className="mt-3 text-[14px] text-muted-foreground leading-relaxed max-w-md">
+              Send a message and we'll get back to you. We typically reply within 1–2 business days.
+            </p>
+          </div>
+          <form onSubmit={submitContact} className="fin-card p-5 space-y-3">
+            <Input
+              placeholder="Your name (optional)"
+              value={contact.name}
+              onChange={(e) => setContact({ ...contact, name: e.target.value })}
+              maxLength={100}
+            />
+            <Input
+              type="email"
+              required
+              placeholder="you@email.com"
+              value={contact.email}
+              onChange={(e) => setContact({ ...contact, email: e.target.value })}
+              maxLength={255}
+            />
+            <Textarea
+              required
+              placeholder="Your message"
+              rows={5}
+              value={contact.message}
+              onChange={(e) => setContact({ ...contact, message: e.target.value })}
+              maxLength={2000}
+            />
+            <Button type="submit" disabled={sending} className="w-full">
+              {sending ? "Sending…" : "Send message"}
+            </Button>
+          </form>
         </div>
       </section>
       </main>

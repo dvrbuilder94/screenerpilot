@@ -20,13 +20,10 @@ Deno.serve(async (req) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   // Owner inbox — kept server-side, never exposed to the client.
-  const ownerEmail = Deno.env.get('CONTACT_RECIPIENT_EMAIL')
+  // Override via CONTACT_RECIPIENT_EMAIL secret to change without redeploying.
+  const ownerEmail = Deno.env.get('CONTACT_RECIPIENT_EMAIL') ?? 'magnificbets@gmail.com'
 
   if (!supabaseUrl || !serviceKey) return json({ error: 'Server config error' }, 500)
-  if (!ownerEmail) {
-    console.error('CONTACT_RECIPIENT_EMAIL is not set')
-    return json({ error: 'Recipient not configured' }, 500)
-  }
 
   let name = ''
   let email = ''

@@ -28,6 +28,26 @@ const snapshot = [
 ];
 
 export default function Landing() {
+  const [contact, setContact] = useState({ name: "", email: "", message: "" });
+  const [sending, setSending] = useState(false);
+
+  const submitContact = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!contact.email || contact.message.trim().length < 5) {
+      toast({ title: "Please complete the form", description: "Email and a short message are required.", variant: "destructive" });
+      return;
+    }
+    setSending(true);
+    const { error } = await supabase.functions.invoke("send-contact-message", { body: contact });
+    setSending(false);
+    if (error) {
+      toast({ title: "Could not send", description: "Please try again in a moment.", variant: "destructive" });
+      return;
+    }
+    setContact({ name: "", email: "", message: "" });
+    toast({ title: "Message sent", description: "Thanks — we'll get back to you shortly." });
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Seo

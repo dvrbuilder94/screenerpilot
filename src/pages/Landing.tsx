@@ -68,6 +68,7 @@ export default function Landing() {
         </div>
       </header>
 
+      <main>
       {/* Hero */}
       <section className="max-w-6xl mx-auto px-5 pt-14 pb-10 sm:pt-20 sm:pb-14">
         <div className="max-w-3xl">
@@ -138,6 +139,7 @@ export default function Landing() {
           ))}
         </div>
       </section>
+      </main>
 
       <footer className="max-w-6xl mx-auto px-5 py-8 border-t border-border">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-[11px] text-muted-foreground">

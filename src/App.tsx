@@ -22,6 +22,7 @@ import CheckoutSuccess from "./pages/CheckoutSuccess";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import RefundPolicy from "./pages/RefundPolicy";
+import Unsubscribe from "./pages/Unsubscribe";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/refund-policy" element={<RefundPolicy />} />
+              <Route path="/unsubscribe" element={<Unsubscribe />} />
               <Route
                 path="*"
                 element={

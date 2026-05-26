@@ -1,4 +1,4 @@
-import { LineChart, Layers, GitCompareArrows, Menu, Search, LogOut, User } from "lucide-react";
+import { LineChart, Layers, GitCompareArrows, Menu, Search, LogOut, User, Brain } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
@@ -22,6 +22,7 @@ const navItems = [
   { title: "Macro", url: "/macro", icon: Layers },
   { title: "Ratios", url: "/ratios", icon: GitCompareArrows },
   { title: "Stock Intelligence", url: "/stock-intelligence", icon: Search },
+  { title: "Committee", url: "/committee", icon: Brain },
 ];
 
 export const AppHeader = () => {

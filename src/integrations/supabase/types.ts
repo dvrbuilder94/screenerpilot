@@ -161,6 +161,33 @@ export type Database = {
         }
         Relationships: []
       }
+      committee_queries: {
+        Row: {
+          created_at: string
+          id: string
+          market_context: Json | null
+          question: string
+          response: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          market_context?: Json | null
+          question: string
+          response: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          market_context?: Json | null
+          question?: string
+          response?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_briefings: {
         Row: {
           briefing_date: string

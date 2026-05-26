@@ -145,6 +145,7 @@ export default function Committee() {
       <Seo
         title="AI Market Intelligence Committee | ScreenerPilot"
         description="A multi-agent AI committee analyzing markets across macro, momentum and quant signals in real time."
+        path="/committee"
       />
       <ProGate
         title="Committee is a premium feature"

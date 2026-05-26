@@ -8,10 +8,12 @@ interface CommitteeInputProps {
 }
 
 const SUGGESTIONS = [
-  "Why is the market moving today?",
-  "What's the macro setup right now?",
-  "Risk-on or risk-off?",
-  "Where is volatility heading?",
+  "Bullish on AI stocks?",
+  "How does the committee view NVDA?",
+  "Is the market entering risk-off mode?",
+  "Where is smart money rotating?",
+  "Tesla long term?",
+  "BTC sigue fuerte?",
 ];
 
 export function CommitteeInput({ onSubmit, loading }: CommitteeInputProps) {

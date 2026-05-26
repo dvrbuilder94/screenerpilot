@@ -70,7 +70,14 @@ RULES:
 - Agents may disagree — that's the point. Do not force consensus.
 - Summary: 1 neutral sentence capturing the committee's net view.
 
-If the question is not about financial markets, return all three agents with bias "neutral", confidence 0, thesis "Out of scope — committee only analyzes financial markets.", evidence [].`;
+QUERY INTERPRETATION (CRITICAL):
+- Users write messy, casual, multilingual (Spanish/English) prompts. Interpret intent generously.
+- Tolerate typos and partial words. Map likely company names to tickers (e.g. "nvidi"/"nvidia" -> NVDA, "tesla" -> TSLA, "apple" -> AAPL, "microsoft" -> MSFT, "amazon" -> AMZN, "google" -> GOOGL, "meta"/"facebook" -> META, "btc"/"bitcoin" -> BTC, "eth" -> ETH, "spy"/"s&p" -> SPY, "qqq"/"nasdaq" -> QQQ, "oro"/"gold" -> GLD, "dolar"/"dxy" -> DXY).
+- Casual prompts like "tesla?", "nvda long term", "invertir en nvidi?", "btc sigue fuerte?", "hay riesgo de crash?", "como ven el mercado?", "qqq o spy?", "dolar?" are ALL valid — interpret them as serious market questions and analyze.
+- If a ticker/topic is ambiguous, pick the most likely interpretation and proceed. You may mention the inference briefly in the thesis (e.g. "Interpreting as Nvidia (NVDA)…").
+- Respond in the SAME language as the user's question (Spanish in -> Spanish out, English in -> English out).
+
+ONLY mark as out-of-scope (all agents neutral, confidence 0, thesis "Out of scope — committee only analyzes financial markets.") when the prompt is CLEARLY unrelated to markets/finance/economy/companies/crypto/commodities (e.g. recipes, personal chat, code help, unsafe content). When in doubt, ANALYZE.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {

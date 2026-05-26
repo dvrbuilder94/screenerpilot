@@ -1,71 +1,74 @@
-# BEN Morning Wire — Redesign for elegance and global structure
+# AI Market Intelligence Committee
 
-Two problems to solve:
+Nueva ruta premium `/committee` con un "comité" de 3 agentes IA que analizan el mercado desde ángulos distintos, alimentados por datos reales que ya tienes en la app. Sin humo: cero data inventada en producción.
 
-1. **Typography is inconsistent.** The expanded "full wire" mixes a serif body with a mono/uppercase header, plus an orange accent on headings and inline code. It reads as noisy, not refined.
-2. **Content is too narrow and too symbol-heavy.** The brief jumps straight into local/LATAM-ish observations and is full of `=`, `z=`, `pctl`, `Δ`, `|` characters. It should open globally (World → US → Europe → Asia → Americas → Rates/FX → Commodities/Crypto) like a real institutional morning note (GS Daily, MLIV Pulse, JPM Eye on the Market).
+## Filosofía
 
-## What changes
+- **3 agentes, no 6.** Bull/Bear forzados se sienten a teatro. En lugar de eso: Macro, Momentum, Quant — perspectivas complementarias, no opuestas artificiales.
+- **1 llamada al modelo por consulta.** Un prompt estructurado devuelve las 3 opiniones + consensus en una sola request a Gemini. Barato y rápido.
+- **Consensus derivado de datos reales**, no de la IA. Score calculado desde Market Regime Badges, Fear & Greed, Squeeze Radar, Sector Heatmap que ya existen.
+- **Sin mocks en producción.** Smart Money Tracker y Unusual Options Flow se omiten hasta tener data real.
 
-### 1. Typography — one family, quiet hierarchy
+## Estructura de página
 
-In `src/components/DailyBriefingCard.tsx`, simplify the expanded prose so it visually belongs to the same document as the headline:
-
-- Drop the serif body. Use the app's sans (`Inter`) for everything — headline, body, bullets, tables. One family only.
-- Headings: same sans, **sentence case** (not uppercase, not tracked-out), slightly larger and semibold, with a thin `border-b border-border` and generous top margin. No orange.
-- Body: `text-[15px] leading-[1.75]`, `text-foreground/85`, max width `68ch`.
-- Bullets: native `list-disc` with muted markers. Remove the orange em-dash `::before` trick.
-- Tables: sans, normal case headers in `text-muted-foreground`, tabular-nums for numeric cells only. Thin row dividers.
-- Reserve the Bloomberg orange (`hsl(28,95%,55%)`) for **only** the left stripe and the `BEN · MORNING WIRE` chip in the terminal header. Nothing inside the body is orange.
-- Remove inline `code` styling overrides — render `code` as plain semibold sans so tickers (AAPL, SPX) look like text, not terminal tokens.
-
-### 2. Briefing structure — global first, less symbology
-
-Rewrite the system prompt in `supabase/functions/generate-daily-briefing/index.ts` so BEN produces a globally-ordered note with prose-style data instead of symbol soup.
-
-New section order:
-
-```text
-TL;DR — one sentence
-
-Global Overview        (one short paragraph: overall risk tone)
-United States          (equities, breadth, key sector)
-Europe                 (Stoxx, DAX, FTSE, one macro note)
-Asia                   (Nikkei, HSI, China, one macro note)
-Americas ex-US         (LATAM, Brazil, Mexico — only if data warrants)
-Rates & FX             (UST 2y/10y, DXY, EURUSD, JPY)
-Commodities            (Oil, Gold, Copper)
-Crypto                 (BTC, ETH, dominance)
-Key Movers             (table, 6-8 rows)
-Cross-Asset Signals    (ratios in prose, not z= notation)
-On the Radar           (events / levels to watch)
-BEN's Take             (one paragraph, 48-65 words)
+```
+/committee  (premium-only, gate con ProGate existente)
+├── Header
+│   ├── "AI Market Intelligence Committee"
+│   ├── Subtítulo + live dot + timestamp
+│   └── Input: "Ask the committee…"
+├── Consensus Panel  (datos reales)
+│   ├── Sentiment bar (Bullish/Neutral/Bearish %)
+│   ├── Market Regime label (reusa MarketRegimeBadges)
+│   ├── Risk meter (reusa CryptoRiskMeter logic)
+│   └── Volatility indicator (VIX desde Yahoo)
+├── Agents Grid  (3 cards glassmorphism)
+│   ├── Macro Agent (azul)
+│   ├── Momentum Agent (verde)
+│   └── Quant Agent (púrpura)
+├── Committee Debate  (transcript de la última query)
+│   └── Mensajes de los 3 agentes con typing animation
+└── Live Signals Panel  (reusa componentes existentes)
+    ├── Regime Badges
+    ├── Squeeze Radar (preview, link a Stock Intelligence)
+    ├── Sector Heatmap
+    └── Fear & Greed
 ```
 
-Formatting rules tightened in the prompt:
+## Flujo de una consulta
 
-- Write data in prose: "SPX +0.4%, breadth firm with 62% advancers" — not `SPX Δ1D=+0.40%`.
-- Ratios in prose: "Gold/Silver stretched at the 92nd percentile, a level historically associated with risk-off rotations." Avoid `z=`, `pctl=`, `|`.
-- Use plain `-` bullets, no labels in ALL CAPS, no `**LABEL —**` pattern.
-- Movers table keeps 4 columns but Δ becomes `1D %` and `7D %` (plain words).
-- Skip any section that has no data — never write "n/a" or placeholder rows.
-- Hard rule in the prompt: "Do not use the symbols `=`, `|`, `Δ`, `z=`, `pctl` anywhere in the output."
+1. Usuario escribe pregunta o selecciona "Ask the market" sin texto (= briefing general).
+2. Frontend recolecta snapshot de datos reales: regime, fear&greed, top movers, sector performance, VIX.
+3. Edge function `committee-analysis` envía 1 prompt estructurado a Gemini con:
+   - Contexto de datos reales
+   - Instrucción de devolver JSON con 3 perspectivas (macro/momentum/quant) + bias + confidence + 1-2 frases cada uno
+4. Frontend renderiza las 3 respuestas con animación typing escalonada (efecto debate sin ser 3 requests).
+5. Consensus se calcula client-side promediando bias + confidence de los 3 agentes ponderado por señales reales.
 
-### 3. User-prompt context broadened
+## Detalles técnicos
 
-Update the data fetch in the same edge function so BEN actually has global material to work with:
+- **Ruta:** nueva `/committee` dentro de `AppLayout` (protegida con `ProGate` configurado a tier `premium`).
+- **Edge function:** `committee-analysis` (verify_jwt=true), modelo `google/gemini-2.5-flash`, structured output con Zod schema, límite 10 queries/día premium.
+- **Componentes nuevos:**
+  - `pages/Committee.tsx`
+  - `components/committee/ConsensusPanel.tsx`
+  - `components/committee/AgentCard.tsx`
+  - `components/committee/DebateTranscript.tsx`
+  - `components/committee/CommitteeInput.tsx`
+  - `hooks/useCommitteeAnalysis.ts`
+- **Reuso:** `MarketRegimeBadges`, `FearGreedPanel`, `CryptoRiskMeter`, `MiniChart`, `Sparkline`, ProGate, AppHeader.
+- **Tabla nueva:** `committee_queries` (user_id, question, response_json, created_at) + RLS + GRANTs. Permite historial.
+- **Estilo:** glassmorphism sobre el fondo blanco actual con acentos de color por agente (no tema oscuro completo — rompería tu sistema de diseño establecido). Si quieres dark mode solo en este módulo, lo marcamos como decisión aparte.
+- **Mobile:** grid de agentes colapsa a scroll horizontal swipeable; debate transcript en columna; input sticky bottom.
+- **Nav:** entrada nueva en `AppHeader` ("Committee") con badge "Premium".
 
-- Group `market_snapshots` by region/category before sending: `us_equities`, `europe`, `asia`, `latam`, `rates_fx`, `commodities`, `crypto`.
-- Pass each group as a short labeled block in the user prompt so the model has structured global context, not just a flat "top movers" list.
-- Keep macro + ratios blocks but feed them as readable lines (no `Δ`, no `z=`).
+## Lo que NO se incluye (por decisión consciente)
 
-## Files touched
+- Bull Agent / Bear Agent / Sentiment Agent → se pueden añadir después si la base funciona.
+- Smart Money Tracker / Unusual Options Flow → requieren APIs pagas. Se etiqueta como "Coming Q3" en el footer del módulo.
+- Hedge Fund Positioning → idem.
+- Debate "en tiempo real continuo" → solo se dispara con queries del usuario (controla costos).
 
-- `src/components/DailyBriefingCard.tsx` — prose styling simplified, one font family, orange removed from body.
-- `supabase/functions/generate-daily-briefing/index.ts` — new system prompt (global structure, prose data, banned symbols) and grouped user-prompt context. `extractHeadline` unchanged.
+## Notas sobre tu sistema actual
 
-## Out of scope
-
-- No DB schema changes.
-- No new edge functions.
-- No translation feature yet (English-only stays).
+Tu memoria marca el UI como **fintech premium blanco/gris/negro**. El brief original pide "dark institutional Bloomberg". Propuesta: mantener fondo claro pero los cards de agentes en glass oscuro con acentos de color → contraste premium sin romper el resto de la app. Si prefieres dark completo solo aquí, lo confirmamos antes de implementar.

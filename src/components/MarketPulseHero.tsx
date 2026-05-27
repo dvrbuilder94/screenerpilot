@@ -74,9 +74,9 @@ export function MarketPulseHero() {
               </span>
               Streaming
             </div>
-            <div>15min · auto-refresh</div>
           </div>
         </div>
+
 
         {/* Animated bar chart */}
         <div className="flex items-end gap-[3px] h-32 sm:h-40">

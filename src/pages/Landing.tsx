@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowRight, LineChart, Layers, Activity, MessageSquare } from "lucide-react";
 import { Seo } from "@/components/Seo";
+import { LiveTickerTape } from "@/components/LiveTickerTape";
+import { MarketPulseHero } from "@/components/MarketPulseHero";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -49,7 +51,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <Seo
         title="ScreenerPilot — Macro Intelligence Terminal"
         description="A read-only market intelligence terminal. Monitor regimes, relative value and price dislocations across stocks, ETFs, indices, crypto and commodities."
@@ -97,11 +99,14 @@ export default function Landing() {
       </header>
 
       <main>
+      {/* Live ticker tape — premium fintech motion */}
+      <LiveTickerTape />
+
       {/* Hero */}
       <section className="max-w-6xl mx-auto px-5 pt-14 pb-10 sm:pt-20 sm:pb-14">
         <div className="max-w-3xl">
           <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-border bg-secondary/40 text-[11px] uppercase tracking-[0.12em] text-muted-foreground mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-positive" />
+            <span className="w-1.5 h-1.5 rounded-full bg-positive animate-pulse-dot" />
             Live · v1.0
           </div>
           <h1 className="text-[32px] sm:text-[44px] lg:text-[52px] font-semibold tracking-tight leading-[1.05] text-foreground">
@@ -126,24 +131,9 @@ export default function Landing() {
           </p>
         </div>
 
-        {/* Snapshot mockup — mirrors the actual Markets page */}
-        <div className="mt-12 fin-card p-3 sm:p-4">
-          <div className="flex items-center justify-between px-1 pb-3 border-b border-border">
-            <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-              Market Snapshot · sample
-            </span>
-            <span className="hidden sm:inline text-[11px] text-muted-foreground font-mono-tabular">
-              Yahoo Finance · Binance
-            </span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
-            {snapshot.map((s) => (
-              <div key={s.sym} className="px-3 py-2.5 rounded-md border border-border bg-background/40">
-                <div className="text-[11px] text-muted-foreground">{s.sym}</div>
-                <div className="mt-1"><Pct v={s.chg} /></div>
-              </div>
-            ))}
-          </div>
+        {/* Premium animated pulse hero */}
+        <div className="mt-12">
+          <MarketPulseHero />
         </div>
       </section>
 

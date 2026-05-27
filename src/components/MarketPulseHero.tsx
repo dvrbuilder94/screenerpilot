@@ -74,7 +74,7 @@ export function MarketPulseHero() {
               </span>
               Streaming
             </div>
-            <div>15min · auto-refresh</div>
+            </div>
           </div>
         </div>
 

@@ -8,10 +8,10 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   return (
-    <div className="flex flex-col min-h-screen w-full bg-background">
+    <div className="flex flex-col min-h-screen w-full bg-background overflow-x-hidden">
       <PaymentTestModeBanner />
       <AppHeader />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 w-full max-w-full overflow-x-hidden">
         {children}
       </main>
     </div>

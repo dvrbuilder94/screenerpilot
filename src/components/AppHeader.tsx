@@ -33,26 +33,26 @@ export const AppHeader = () => {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
-      <div className="flex h-16 items-center justify-between px-5 gap-4">
+      <div className="flex h-16 items-center justify-between px-3 sm:px-5 gap-2 sm:gap-4 max-w-full overflow-hidden">
         {/* Logo + tagline */}
-        <Link to="/" className="flex items-center gap-3 flex-shrink-0">
+        <Link to="/" className="flex items-center gap-2 sm:gap-3 flex-shrink-0 min-w-0">
           <img
             src={LOGO_URL}
             alt="ScreenerPilot logo"
             className="w-9 h-9 rounded-lg object-cover border border-primary/30"
           />
-          <div className="hidden sm:flex flex-col leading-none">
-            <span className="text-[15px] font-semibold tracking-tight text-foreground">
+          <div className="hidden sm:flex flex-col leading-none min-w-0">
+            <span className="text-[15px] font-semibold tracking-tight text-foreground truncate">
               ScreenerPilot
             </span>
-            <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground mt-0.5">
+            <span className="hidden lg:block text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground mt-0.5 truncate">
               Macro Intelligence Terminal
             </span>
           </div>
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-1 ml-4">
+        <nav className="hidden lg:flex items-center gap-1 ml-4">
           {navItems.map((item) => {
             const isActive =
               item.url === "/"
@@ -124,7 +124,7 @@ export const AppHeader = () => {
 
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
+              <Button variant="ghost" size="icon" className="lg:hidden">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Open menu</span>
               </Button>

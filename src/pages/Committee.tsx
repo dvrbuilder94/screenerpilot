@@ -81,6 +81,9 @@ function CommitteeContent() {
         <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
           <Brain className="w-3 h-3" />
           Premium · AI Committee
+          <span className="ml-1 inline-flex items-center text-[9px] font-semibold uppercase tracking-wider text-primary border border-primary/40 rounded px-1.5 py-px">
+            Beta
+          </span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground">
           AI Market Intelligence Committee

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Sparkles } from "lucide-react";
+import { Check, Sparkles, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Link, useNavigate } from "react-router-dom";
@@ -46,8 +46,17 @@ export default function Pricing() {
         path="/pricing"
       />
       <PaymentTestModeBanner />
-      <div className="min-h-screen bg-background py-20 px-4">
+      <div className="min-h-screen bg-background py-10 sm:py-16 px-4">
         <div className="max-w-3xl mx-auto">
+          <div className="mb-8">
+            <Link
+              to={user ? "/markets" : "/"}
+              className="inline-flex items-center gap-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              {user ? "Back to Terminal" : "Back to Home"}
+            </Link>
+          </div>
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-semibold text-foreground tracking-tight mb-4">
               One plan. Full terminal.

@@ -110,7 +110,11 @@ const Markets = () => {
 
   return (
     <div className="space-y-10 pb-12">
-      <Seo title="Markets - ScreenerPilot" />
+      <Seo
+        title="Markets - ScreenerPilot"
+        description="Cross-asset macro snapshot: sectors, factors, yields, currencies and commodities."
+        path="/markets"
+      />
 
       <div>
         <h1 className="text-4xl font-semibold tracking-tighter">Markets</h1>

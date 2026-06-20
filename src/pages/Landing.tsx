@@ -33,7 +33,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+    <div className="landing-light min-h-screen bg-background text-foreground overflow-x-hidden">
       <Seo
         title="ScreenerPilot — Macro Intelligence Terminal"
         description="A read-only market intelligence terminal. Monitor regimes, relative value and price dislocations across stocks, ETFs, indices, crypto and commodities."
@@ -77,16 +77,16 @@ export default function Landing() {
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div
-          className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 w-[900px] h-[500px] opacity-40 blur-3xl"
+          className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 w-[900px] h-[460px] opacity-70 blur-3xl"
           style={{
             background:
-              "radial-gradient(closest-side, rgba(34,211,238,0.35), rgba(59,130,246,0.18), transparent)",
+              "radial-gradient(closest-side, rgba(34,211,238,0.16), rgba(59,130,246,0.08), transparent)",
           }}
         />
         <div className="relative max-w-6xl mx-auto px-5 pt-14 pb-10 sm:pt-20 sm:pb-14">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-cyan-400/30 bg-cyan-400/5 text-[11px] uppercase tracking-[0.12em] text-cyan-300 mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse-dot" />
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-cyan-500/25 bg-cyan-50 text-[11px] uppercase tracking-[0.12em] text-cyan-700 mb-6">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse-dot" />
               Live cross-asset data
             </div>
             <h1 className="text-[32px] sm:text-[44px] lg:text-[52px] font-semibold tracking-tight leading-[1.05] text-foreground">

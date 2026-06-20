@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { NotificationBell } from "./NotificationBell";
+import { Logo } from "./Logo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,8 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-
-const LOGO_URL = "https://storage.googleapis.com/gpt-engineer-file-uploads/SwWQdnEgbuMrnR9f8RUe0qM0pTi1/uploads/1768527913536-WhatsApp Image 2026-01-15 at 11.30.09 AM.jpeg";
 
 type NavItem = {
   title: string;
@@ -76,20 +75,8 @@ export const AppHeader = () => {
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
       <div className="flex h-16 items-center justify-between px-2 sm:px-5 gap-1 sm:gap-3 max-w-full overflow-hidden">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 flex-shrink-0 min-w-0">
-          <img
-            src={LOGO_URL}
-            alt="ScreenerPilot logo"
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg object-cover border border-primary/30"
-          />
-          <div className="hidden md:flex flex-col leading-none min-w-0">
-            <span className="text-[15px] font-semibold tracking-tight text-foreground truncate">
-              ScreenerPilot
-            </span>
-            <span className="hidden xl:block text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground mt-0.5 truncate">
-              Macro Intelligence Terminal
-            </span>
-          </div>
+        <Link to="/" className="flex-shrink-0 min-w-0">
+          <Logo />
         </Link>
 
         {/* Inline nav: primary always visible, secondary hidden behind More on < lg */}

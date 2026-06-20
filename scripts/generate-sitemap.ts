@@ -17,7 +17,8 @@ const entries: SitemapEntry[] = [
   { path: "/ratios", changefreq: "daily", priority: "0.8" },
   { path: "/commodities", changefreq: "daily", priority: "0.8" },
   { path: "/stock-intelligence", changefreq: "weekly", priority: "0.8" },
-  { path: "/on-chain-agent", changefreq: "weekly", priority: "0.9" },
+  { path: "/squeeze-radar", changefreq: "daily", priority: "0.9" },
+  { path: "/pricing", changefreq: "monthly", priority: "0.6" },
 ];
 
 function generateSitemap(entries: SitemapEntry[]) {

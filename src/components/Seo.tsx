@@ -6,6 +6,8 @@ export interface SeoProps {
   path: string;
 }
 
+const DEFAULT_IMAGE = "https://screenerpilot.com/og-image.svg";
+
 export const Seo = ({ title, description, path }: SeoProps) => {
   const url = `https://screenerpilot.com${path}`;
   return (
@@ -17,8 +19,13 @@ export const Seo = ({ title, description, path }: SeoProps) => {
       <meta property="og:description" content={description} />
       <meta property="og:url" content={url} />
       <meta property="og:type" content="website" />
+      <meta property="og:image" content={DEFAULT_IMAGE} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={DEFAULT_IMAGE} />
     </Helmet>
   );
 };

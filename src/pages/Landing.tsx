@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowRight, LineChart, Layers, Activity, MessageSquare } from "lucide-react";
+import { ArrowRight, LineChart, Layers, Activity, MessageSquare, Flame } from "lucide-react";
 import { Seo } from "@/components/Seo";
 import { LiveTickerTape } from "@/components/LiveTickerTape";
 import { MarketPulseHero } from "@/components/MarketPulseHero";
@@ -54,9 +54,6 @@ export default function Landing() {
             </Link>
             <Link to="/markets" className="px-3 h-9 inline-flex items-center text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/60 transition-smooth">
               Terminal
-            </Link>
-            <Link to="/squeeze-radar" className="px-3 h-9 inline-flex items-center text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/60 transition-smooth">
-              Squeeze Screener
             </Link>
             <a href="#contact" className="px-3 h-9 inline-flex items-center text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/60 transition-smooth">
               Contact
@@ -170,6 +167,30 @@ export default function Landing() {
               <div className="mt-1 text-[12px] text-muted-foreground">{d.desc}</div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Free lead magnet — kept separate from the read-only terminal positioning */}
+      <section className="max-w-6xl mx-auto px-5 py-12 border-t border-border">
+        <div className="fin-card p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-orange-500/30 bg-orange-500/10 text-[10px] font-bold uppercase tracking-[0.1em] text-orange-600 mb-3">
+              <Flame className="w-3 h-3" />
+              Free · updated daily · no signup
+            </div>
+            <h3 className="text-[18px] sm:text-[20px] font-semibold text-foreground">
+              Curious what a technical screener looks like? Try it free.
+            </h3>
+            <p className="mt-1.5 text-[13px] text-muted-foreground max-w-md">
+              A separate, free daily short squeeze screener — technical heuristics only, not part of the
+              core terminal and not investment advice.
+            </p>
+          </div>
+          <Button asChild size="lg" variant="outline" className="h-11 px-5 text-sm flex-shrink-0">
+            <Link to="/squeeze-radar">
+              See today's screener <ArrowRight className="w-4 h-4 ml-2" />
+            </Link>
+          </Button>
         </div>
       </section>
 

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Flame, TrendingUp, ArrowUp, ArrowDown, RefreshCw, Search } from "lucide-react";
+import { ProGate } from "@/components/ProGate";
 
 interface Coin {
   id: number;
@@ -91,6 +92,7 @@ export default function CryptoMomentum() {
   }, [coins, timeframe]);
 
   return (
+    <ProGate preview>
     <div className="px-3 sm:px-6 py-6 max-w-[1400px] mx-auto">
       <Seo
         title="Crypto Momentum Scanner — ScreenerPilot"
@@ -286,6 +288,7 @@ export default function CryptoMomentum() {
         Data: CoinMarketCap · refreshed every 5 minutes · {filtered.length} coins shown
       </p>
     </div>
+    </ProGate>
   );
 }
 

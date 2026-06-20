@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { Seo } from "@/components/Seo";
 import { DailyBriefingCard } from "@/components/DailyBriefingCard";
+import { ProGate } from "@/components/ProGate";
 
 // ==================== FORMATO ====================
 
@@ -109,6 +110,7 @@ const Markets = () => {
   const usEquity = rows.filter(r => ["SPY", "QQQ", "DIA", "IWM", "^VIX"].includes(r.symbol));
 
   return (
+    <ProGate preview>
     <div className="space-y-10 pb-12">
       <Seo
         title="Markets - ScreenerPilot"
@@ -155,6 +157,7 @@ const Markets = () => {
         </TabsContent>
       </Tabs>
     </div>
+    </ProGate>
   );
 };
 

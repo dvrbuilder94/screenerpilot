@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BloombergInsight } from "@/components/BloombergInsight";
 import { stockAnalysisInsight } from "@/lib/bloombergInsights";
 import { Seo } from "@/components/Seo";
+import { ProGate } from "@/components/ProGate";
 type Timeframe = "daily" | "weekly" | "monthly";
 
 const TIMEFRAMES: { value: Timeframe; label: string; sub: string }[] = [
@@ -245,6 +246,7 @@ export default function StockIntelligence() {
   };
 
   return (
+    <ProGate preview>
     <div className="p-4 md:p-6 lg:p-8 max-w-6xl mx-auto">
       <Seo
         title="Stock Intelligence — AI Analysis & Squeeze Radar | ScreenerPilot"
@@ -507,5 +509,6 @@ export default function StockIntelligence() {
         </TabsContent>
       </Tabs>
     </div>
+    </ProGate>
   );
 }

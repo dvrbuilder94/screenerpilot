@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import presets from "@/config/presets.json";
 import { Seo } from "@/components/Seo";
+import { ProGate } from "@/components/ProGate";
 
 interface RatioData {
   name: string;
@@ -237,6 +238,7 @@ export default function Commodities() {
   };
 
   return (
+    <ProGate preview>
     <div className="min-h-screen bg-background">
       <Seo
         title="Commodities — Spot Prices & Key Ratios | ScreenerPilot"
@@ -392,5 +394,6 @@ export default function Commodities() {
         </p>
       </div>
     </div>
+    </ProGate>
   );
 }

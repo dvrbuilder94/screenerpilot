@@ -5,7 +5,8 @@ import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { Seo } from "@/components/Seo";
 import { DailyBriefingCard } from "@/components/DailyBriefingCard";
-import { ProGate } from "@/components/ProGate";
+import { useTierLimit } from "@/hooks/useTierLimit";
+import { UpgradeTease } from "@/components/UpgradeTease";
 
 // ==================== FORMATO ====================
 
@@ -95,6 +96,7 @@ const MarketTable = ({ rows, title }: { rows: MarketSnapshot[]; title: string })
 
 const Markets = () => {
   const { data: rows = [], isLoading } = useMarketSnapshots();
+  const { limit } = useTierLimit();
 
   if (isLoading) {
     return (
@@ -108,9 +110,11 @@ const Markets = () => {
   }
 
   const usEquity = rows.filter(r => ["SPY", "QQQ", "DIA", "IWM", "^VIX"].includes(r.symbol));
+  const sectors = rows.filter(r => r.category === "sector");
+  const visibleSectors = sectors.slice(0, limit);
+  const hiddenSectors = Math.max(0, sectors.length - limit);
 
   return (
-    <ProGate preview>
     <div className="space-y-10 pb-12">
       <Seo
         title="Markets - ScreenerPilot"
@@ -149,15 +153,15 @@ const Markets = () => {
           {/* Global Snapshot se puede mejorar más adelante */}
         </TabsContent>
 
-        <TabsContent value="sectors" className="mt-0">
-          <MarketTable 
-            rows={rows.filter(r => r.category === "sector")} 
-            title="US Sectors" 
+        <TabsContent value="sectors" className="mt-0 space-y-3">
+          <MarketTable
+            rows={visibleSectors}
+            title="US Sectors"
           />
+          <UpgradeTease hiddenCount={hiddenSectors} label="sectors" />
         </TabsContent>
       </Tabs>
     </div>
-    </ProGate>
   );
 };
 

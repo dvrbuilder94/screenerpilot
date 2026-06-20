@@ -3,7 +3,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Coins, BarChart3, Bitcoin, Globe2 } from "lucide-react";
 import { RatioCategoryTable } from "@/components/ratios/RatioCategoryTable";
 import { Seo } from "@/components/Seo";
-import { ProGate } from "@/components/ProGate";
 
 type RatioTab = "commodity" | "equity" | "crypto" | "latam_fx";
 
@@ -11,7 +10,6 @@ export default function Ratios() {
   const [tab, setTab] = useState<RatioTab>("commodity");
 
   return (
-    <ProGate preview>
     <div className="min-h-screen bg-background">
       <Seo
         title="Cross-Asset Ratios — Regime Z-Scores | ScreenerPilot"
@@ -76,6 +74,5 @@ export default function Ratios() {
         </div>
       </main>
     </div>
-    </ProGate>
   );
 }

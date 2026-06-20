@@ -25,6 +25,7 @@ import RefundPolicy from "./pages/RefundPolicy";
 import Unsubscribe from "./pages/Unsubscribe";
 import Committee from "./pages/Committee";
 import Settings from "./pages/Settings";
+import SqueezeRadarPublic from "./pages/SqueezeRadarPublic";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
               <Route path="/refund-policy" element={<RefundPolicy />} />
               <Route path="/unsubscribe" element={<Unsubscribe />} />
               <Route path="/committee" element={<Committee />} />
+              <Route path="/squeeze-radar" element={<SqueezeRadarPublic />} />
               <Route
                 path="*"
                 element={

@@ -142,6 +142,30 @@
   }
 }
 
+/* Light theme scope for the marketing landing page only — terminal pages
+   never get this class, so they keep the dark variables above untouched. */
+.landing-light {
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --border: 220 13% 91%;
+  --border-strong: 220 13% 83%;
+  --input: 220 13% 91%;
+  --muted: 220 14% 96%;
+  --muted-foreground: 215 16% 47%;
+  --secondary: 220 14% 96%;
+  --secondary-foreground: 222 47% 11%;
+  color-scheme: light;
+}
+
+.landing-light .fin-card {
+  background: hsl(0 0% 0% / 0.015);
+  border: 1px solid hsl(0 0% 0% / 0.08);
+}
+
 @layer components {
   /* Financial card — frosted glass surface over the soft background wash */
   .fin-card {

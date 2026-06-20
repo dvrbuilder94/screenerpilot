@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { Seo } from "@/components/Seo";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight, Flame, Loader2, Info } from "lucide-react";
+import { ArrowRight, ChevronRight, Flame, Loader2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Candidate {
@@ -140,12 +140,17 @@ export default function SqueezeRadarPublic() {
                     <th className="text-right py-3 px-4 font-normal hidden sm:table-cell">Vol×</th>
                     <th className="text-right py-3 px-4 font-normal">5d %</th>
                     <th className="text-right py-3 px-4 font-normal hidden lg:table-cell">Mkt Cap</th>
+                    <th className="w-8"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/30 font-mono">
                   {data?.candidates.slice(0, 15).map((c) => (
                     <tr key={c.symbol} className="hover:bg-muted/30 transition-colors">
-                      <td className="py-3 px-4 font-bold text-foreground">{c.symbol}</td>
+                      <td className="py-3 px-4 font-bold text-foreground">
+                        <Link to={`/squeeze-radar/${c.symbol}`} className="hover:text-primary transition-colors">
+                          {c.symbol}
+                        </Link>
+                      </td>
                       <td className="py-3 px-4 hidden md:table-cell text-muted-foreground truncate max-w-[200px]">
                         {c.companyName}
                       </td>
@@ -154,6 +159,11 @@ export default function SqueezeRadarPublic() {
                       <td className="py-3 px-4 text-right tabular-nums hidden sm:table-cell">{c.volumeRatio.toFixed(1)}x</td>
                       <td className="py-3 px-4 text-right"><PctCell value={c.change5d} /></td>
                       <td className="py-3 px-4 text-right text-xs text-muted-foreground hidden lg:table-cell">{c.marketCapLabel}</td>
+                      <td className="py-3 px-4 text-right">
+                        <Link to={`/squeeze-radar/${c.symbol}`}>
+                          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                        </Link>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

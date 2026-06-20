@@ -26,6 +26,7 @@ import Unsubscribe from "./pages/Unsubscribe";
 import Committee from "./pages/Committee";
 import Settings from "./pages/Settings";
 import SqueezeRadarPublic from "./pages/SqueezeRadarPublic";
+import StockArticle from "./pages/StockArticle";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const App = () => (
               <Route path="/unsubscribe" element={<Unsubscribe />} />
               <Route path="/committee" element={<Committee />} />
               <Route path="/squeeze-radar" element={<SqueezeRadarPublic />} />
+              <Route path="/squeeze-radar/:symbol" element={<StockArticle />} />
               <Route
                 path="*"
                 element={

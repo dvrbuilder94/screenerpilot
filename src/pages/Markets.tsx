@@ -114,6 +114,17 @@ const Markets = () => {
   const visibleSectors = sectors.slice(0, limit);
   const hiddenSectors = Math.max(0, sectors.length - limit);
 
+  const factors = rows.filter(r => r.category === "factor");
+  const yields = rows.filter(r => ["^IRX", "^FVX", "^TNX", "^TYX"].includes(r.symbol));
+  const latamFx = rows.filter(r => ["USDCLP=X", "USDBRL=X", "USDMXN=X", "USDCOP=X", "USDPEN=X", "USDARS=X"].includes(r.symbol));
+  const majorFx = rows.filter(r => ["EURUSD=X", "GBPUSD=X", "USDJPY=X", "USDCHF=X", "AUDUSD=X", "USDCAD=X"].includes(r.symbol));
+  const dxy = rows.filter(r => r.symbol === "DX-Y.NYB");
+  const energy = rows.filter(r => ["CL=F", "BZ=F", "NG=F", "RB=F", "HO=F"].includes(r.symbol));
+  const metals = rows.filter(r => ["GC=F", "SI=F", "HG=F", "PL=F", "PA=F"].includes(r.symbol));
+  const softs = rows.filter(r => ["ZC=F", "ZW=F", "ZS=F", "SB=F", "KC=F", "CT=F"].includes(r.symbol));
+  const americas = rows.filter(r => ["SPY", "ECH", "EWZ", "EWW", "EPU", "GXG", "ARGT", "EWC"].includes(r.symbol));
+  const restOfWorld = rows.filter(r => r.category === "country" && (r.region === "europe" || r.region === "asia"));
+
   return (
     <div className="space-y-10 pb-12">
       <Seo
@@ -159,6 +170,37 @@ const Markets = () => {
             title="US Sectors"
           />
           <UpgradeTease hiddenCount={hiddenSectors} label="sectors" />
+        </TabsContent>
+
+        <TabsContent value="factors" className="mt-0 space-y-3">
+          <MarketTable rows={factors} title="Factor & Style ETFs" />
+          <p className="text-xs text-muted-foreground px-1">
+            Tracks style ETFs vs. the broad market. YTD % helps identify factor rotations.
+          </p>
+        </TabsContent>
+
+        <TabsContent value="yields" className="mt-0 space-y-3">
+          <MarketTable rows={yields} title="US Treasury Yield Curve" />
+          <p className="text-xs text-muted-foreground px-1">
+            Yields shown in %. A flattening curve historically precedes recessions.
+          </p>
+        </TabsContent>
+
+        <TabsContent value="currencies" className="mt-0 space-y-3">
+          <MarketTable rows={latamFx} title="LATAM FX" />
+          <MarketTable rows={majorFx} title="Major Pairs" />
+          <MarketTable rows={dxy} title="US Dollar Index" />
+        </TabsContent>
+
+        <TabsContent value="commodities" className="mt-0 space-y-3">
+          <MarketTable rows={energy} title="Energy" />
+          <MarketTable rows={metals} title="Metals" />
+          <MarketTable rows={softs} title="Soft Commodities" />
+        </TabsContent>
+
+        <TabsContent value="countries" className="mt-0 space-y-3">
+          <MarketTable rows={americas} title="Americas — Country ETFs" />
+          <MarketTable rows={restOfWorld} title="Rest of World" />
         </TabsContent>
       </Tabs>
     </div>

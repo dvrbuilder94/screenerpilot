@@ -8,6 +8,7 @@ interface Profile {
   wallet_address: string | null;
   display_name: string | null;
   email: string | null;
+  email_digest_enabled: boolean;
 }
 
 interface Subscription {
@@ -27,6 +28,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -128,6 +130,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setSubscription(null);
   };
 
+  const refreshProfile = async () => {
+    if (user) await fetchUserData(user.id);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -140,6 +146,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         signIn,
         resetPassword,
         signOut,
+        refreshProfile,
       }}
     >
       {children}

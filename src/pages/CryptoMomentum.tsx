@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Flame, TrendingUp, ArrowUp, ArrowDown, RefreshCw, Search } from "lucide-react";
+import { useTierLimit } from "@/hooks/useTierLimit";
+import { UpgradeTease } from "@/components/UpgradeTease";
 
 interface Coin {
   id: number;
@@ -58,6 +60,7 @@ export default function CryptoMomentum() {
   const [timeframe, setTimeframe] = useState<Timeframe>("change_7d");
   const [threshold, setThreshold] = useState<Threshold>(10);
   const [search, setSearch] = useState("");
+  const { limit } = useTierLimit();
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["crypto-momentum"],
@@ -81,6 +84,9 @@ export default function CryptoMomentum() {
       )
       .sort((a, b) => (b[timeframe] ?? 0) - (a[timeframe] ?? 0));
   }, [coins, timeframe, threshold, search]);
+
+  const visibleCoins = filtered.slice(0, limit);
+  const hiddenCoinCount = Math.max(0, filtered.length - limit);
 
   const stats = useMemo(() => {
     const gainers = coins.filter((c) => (c[timeframe] ?? 0) > 0).length;
@@ -230,7 +236,7 @@ export default function CryptoMomentum() {
                   </td>
                 </tr>
               )}
-              {filtered.map((c) => {
+              {visibleCoins.map((c) => {
                 const tfVal = c[timeframe];
                 const extreme = tfVal >= 20;
                 return (
@@ -282,8 +288,10 @@ export default function CryptoMomentum() {
         </div>
       </div>
 
+      <UpgradeTease hiddenCount={hiddenCoinCount} label="coins" />
+
       <p className="text-[10px] text-muted-foreground mt-3 text-center">
-        Data: CoinMarketCap · refreshed every 5 minutes · {filtered.length} coins shown
+        Data: CoinMarketCap · refreshed every 5 minutes · {visibleCoins.length} coins shown
       </p>
     </div>
   );

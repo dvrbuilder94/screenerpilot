@@ -25,6 +25,7 @@ import Privacy from "./pages/Privacy";
 import RefundPolicy from "./pages/RefundPolicy";
 import Unsubscribe from "./pages/Unsubscribe";
 import Committee from "./pages/Committee";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ const App = () => (
                       <Route path="/commodities" element={<Commodities />} />
                       <Route path="/stock-intelligence" element={<StockIntelligence />} />
                       <Route path="/crypto-momentum" element={<CryptoMomentum />} />
+                      <Route path="/settings" element={<Settings />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </AppLayout>

@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import { NotificationBell } from "./NotificationBell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -134,6 +135,7 @@ export const AppHeader = () => {
 
         {/* Right: account */}
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+          <NotificationBell />
           {user ? (
             <>
               {isActive && (
@@ -157,6 +159,9 @@ export const AppHeader = () => {
                   )}
                   <DropdownMenuItem asChild>
                     <Link to="/pricing">Billing & plan</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings">Settings</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => signOut()}>

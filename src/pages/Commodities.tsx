@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import presets from "@/config/presets.json";
 import { Seo } from "@/components/Seo";
+import { useTierLimit } from "@/hooks/useTierLimit";
+import { UpgradeTease } from "@/components/UpgradeTease";
 
 interface RatioData {
   name: string;
@@ -101,8 +103,11 @@ export default function Commodities() {
   const [chartData, setChartData] = useState<{ candles: Candle[]; ema20: number[]; ema50: number[] } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [ratioValues, setRatioValues] = useState<Record<string, number>>({});
+  const { limit } = useTierLimit();
 
   const ratios: RatioData[] = presets.commodity_ratios || [];
+  const visibleCommodities = commodityData.slice(0, limit);
+  const hiddenCommodityCount = Math.max(0, commodityData.length - limit);
 
   // Fetch all commodity prices
   const fetchAllPrices = useCallback(async () => {
@@ -278,7 +283,7 @@ export default function Commodities() {
             Spot Prices
           </h2>
           {(["Precious", "Energy", "Industrial", "Battery / Critical", "Agriculture"] as const).map((cat) => {
-            const items = commodityData.filter((c) => c.category === cat);
+            const items = visibleCommodities.filter((c) => c.category === cat);
             if (items.length === 0) return null;
             return (
               <div key={cat}>
@@ -324,6 +329,7 @@ export default function Commodities() {
               </div>
             );
           })}
+          <UpgradeTease hiddenCount={hiddenCommodityCount} label="commodities" />
         </section>
 
         {/* Chart Section */}

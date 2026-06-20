@@ -500,6 +500,42 @@ export type Database = {
         }
         Relationships: []
       }
+      market_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          entity_id: string
+          entity_label: string
+          id: string
+          message: string
+          metadata: Json | null
+          severity: string
+          title: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          entity_id: string
+          entity_label: string
+          id?: string
+          message: string
+          metadata?: Json | null
+          severity?: string
+          title: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          entity_id?: string
+          entity_label?: string
+          id?: string
+          message?: string
+          metadata?: Json | null
+          severity?: string
+          title?: string
+        }
+        Relationships: []
+      }
       market_snapshots: {
         Row: {
           category: string
@@ -571,6 +607,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           email: string | null
+          email_digest_enabled: boolean
           id: string
           updated_at: string
           user_id: string
@@ -580,6 +617,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
+          email_digest_enabled?: boolean
           id?: string
           updated_at?: string
           user_id: string
@@ -589,6 +627,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
+          email_digest_enabled?: boolean
           id?: string
           updated_at?: string
           user_id?: string
@@ -745,6 +784,27 @@ export type Database = {
           signal?: string
           symbol?: string
           timeframe?: string
+        }
+        Relationships: []
+      }
+      squeeze_alert_state: {
+        Row: {
+          last_alerted_at: string | null
+          last_score: number
+          ticker: string
+          updated_at: string
+        }
+        Insert: {
+          last_alerted_at?: string | null
+          last_score: number
+          ticker: string
+          updated_at?: string
+        }
+        Update: {
+          last_alerted_at?: string | null
+          last_score?: number
+          ticker?: string
+          updated_at?: string
         }
         Relationships: []
       }

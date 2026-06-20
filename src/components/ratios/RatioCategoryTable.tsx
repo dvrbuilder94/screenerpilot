@@ -3,6 +3,8 @@ import { RatioRow } from "./RatioRow";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BloombergInsight } from "@/components/BloombergInsight";
 import { ratiosCategoryInsight } from "@/lib/bloombergInsights";
+import { useTierLimit } from "@/hooks/useTierLimit";
+import { UpgradeTease } from "@/components/UpgradeTease";
 
 interface Props {
   category: string;
@@ -11,6 +13,7 @@ interface Props {
 
 export function RatioCategoryTable({ category, description }: Props) {
   const { data, isLoading } = useRatioSnapshots(category);
+  const { limit } = useTierLimit();
 
   if (isLoading) {
     return (
@@ -21,6 +24,8 @@ export function RatioCategoryTable({ category, description }: Props) {
   }
 
   const rows = (data ?? []).sort((a, b) => Math.abs(b.z_score ?? 0) - Math.abs(a.z_score ?? 0));
+  const visibleRows = rows.slice(0, limit);
+  const hiddenCount = Math.max(0, rows.length - limit);
 
   if (rows.length === 0) {
     return (
@@ -53,10 +58,11 @@ export function RatioCategoryTable({ category, description }: Props) {
             </tr>
           </thead>
           <tbody>
-            {rows.map((r: RatioSnapshot) => <RatioRow key={r.ratio_id} ratio={r} />)}
+            {visibleRows.map((r: RatioSnapshot) => <RatioRow key={r.ratio_id} ratio={r} />)}
           </tbody>
         </table>
       </div>
+      <UpgradeTease hiddenCount={hiddenCount} label="ratios" />
     </div>
   );
 }

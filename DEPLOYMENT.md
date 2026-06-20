@@ -85,6 +85,77 @@ SELECT cron.alter_job(
 
 ---
 
+## 📧 Daily Digest Email
+
+`generate-daily-briefing` ya corre por su propio cron a las 08:00 UTC y guarda el wire del día en `daily_briefings`. `send-daily-digest` lee esa fila y la encola (vía `send-transactional-email`) para cada usuario con `profiles.email_digest_enabled = true`.
+
+A diferencia de `market-collector`, esta función **no es pública**: requiere un JWT de `service_role` (`verify_jwt = true` en `config.toml` + chequeo de `role` dentro de la función), porque dispara un envío real de email a toda la base de usuarios. El cron debe llamarla usando la service role key guardada en `vault` (el mismo secreto `email_queue_service_role_key` que ya usa el cron de `process-email-queue`), nunca la anon key.
+
+#### Crear el Cron Job
+
+Ejecuta en el SQL Editor de Supabase, **después** de que el cron de `generate-daily-briefing` corra (p. ej. 15 minutos después):
+
+```sql
+SELECT cron.schedule(
+  'send-daily-digest-job',
+  '15 8 * * 1-5',   -- 08:15 UTC, lunes a viernes
+  $$
+  SELECT net.http_post(
+    url := 'https://qceatovcjqhiqdpgfdzm.supabase.co/functions/v1/send-daily-digest',
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'Authorization', 'Bearer ' || (
+        SELECT decrypted_secret FROM vault.decrypted_secrets
+        WHERE name = 'email_queue_service_role_key'
+      )
+    ),
+    body := '{}'::jsonb
+  ) AS request_id;
+  $$
+);
+```
+
+#### Verificar y depurar
+
+```sql
+SELECT * FROM cron.job WHERE jobname = 'send-daily-digest-job';
+SELECT * FROM cron.job_run_details
+WHERE jobid = (SELECT jobid FROM cron.job WHERE jobname = 'send-daily-digest-job')
+ORDER BY start_time DESC LIMIT 10;
+```
+
+Los usuarios pueden desactivar el digest desde `/settings` sin afectar emails transaccionales (reset de contraseña, recibos, etc.), que se rigen por la lista de suppression global.
+
+---
+
+## 🔔 Market Alerts (regime change & squeeze)
+
+`market_alerts` alimenta la campana de notificaciones in-app (todos los usuarios, sin login requerido). Se llena desde dos fuentes:
+
+1. **Regime change**: `ratios-collector` ya corre por su propio cron y ahora, antes de sobrescribir cada fila de `ratio_snapshots`, compara el régimen anterior (BALANCED / RISK-ON / RISK-OFF / STRETCHED HIGH/LOW, mismo umbral de `|z|` que usa `RatioRow.tsx`) contra el nuevo. Si cambió, inserta una alerta. No requiere un cron nuevo.
+
+2. **Squeeze**: `squeeze-radar` es stateless (rescanea Yahoo en vivo en cada llamada, sin persistencia), así que no puede detectar cruces de umbral por sí solo. `squeeze-alert-scan` lo llama internamente, compara el score de cada ticker contra `squeeze_alert_state` (último score visto) y crea una alerta cuando un ticker cruza por encima de 70 viniendo de abajo (con cooldown de 24h para no repetir mientras se mantiene caliente).
+
+#### Crear el Cron Job de squeeze-alert-scan
+
+```sql
+SELECT cron.schedule(
+  'squeeze-alert-scan-job',
+  '*/30 * * * *',   -- Cada 30 minutos
+  $$
+  SELECT net.http_post(
+      url:='https://qceatovcjqhiqdpgfdzm.supabase.co/functions/v1/squeeze-alert-scan',
+      headers:='{"Content-Type": "application/json"}'::jsonb,
+      body:='{}'::jsonb
+  ) as request_id;
+  $$
+);
+```
+
+Es pública (igual que `market-collector`) porque solo escribe filas en `market_alerts`/`squeeze_alert_state`, no dispara emails ni acciones sobre cuentas de usuario.
+
+---
+
 ## 🔐 Seguridad de Edge Functions
 
 Todas las edge functions tienen `verify_jwt = true` excepto el collector:

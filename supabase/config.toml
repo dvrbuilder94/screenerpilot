@@ -59,3 +59,9 @@ verify_jwt = false
 
 [functions.crypto-momentum]
 verify_jwt = false
+
+[functions.send-daily-digest]
+verify_jwt = true
+
+[functions.squeeze-alert-scan]
+verify_jwt = false

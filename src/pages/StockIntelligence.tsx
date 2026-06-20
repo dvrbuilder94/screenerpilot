@@ -18,6 +18,7 @@ import StockChart from "@/components/stock/StockChart";
 import IndicatorPanels from "@/components/stock/IndicatorPanels";
 import ShortSqueezeRadar from "@/components/stock/ShortSqueezeRadar";
 import QuantLoadersRadar from "@/components/stock/QuantLoadersRadar";
+import { TopPicksStrip } from "@/components/stock/TopPicksStrip";
 import { Radar } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BloombergInsight } from "@/components/BloombergInsight";
@@ -263,6 +264,8 @@ export default function StockIntelligence() {
           On-demand technical analysis and short squeeze radar for US equities.
         </p>
       </div>
+
+      <TopPicksStrip onPick={handleAnalyzeFromRadar} />
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "analyze" | "squeeze" | "quant")} className="w-full">
         <TabsList className="mb-6">

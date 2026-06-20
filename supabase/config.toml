@@ -24,6 +24,9 @@ verify_jwt = false
 [functions.analyze-stock]
 verify_jwt = false
 
+[functions.generate-stock-articles]
+verify_jwt = false
+
 [functions.market-snapshots-collector]
 verify_jwt = false
 

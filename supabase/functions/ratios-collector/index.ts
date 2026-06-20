@@ -94,6 +94,14 @@ function pctChange(series: number[], lookback: number): number | null {
   return ((cur - past) / past) * 100;
 }
 
+function regimeLabel(z: number | null): string | null {
+  if (z === null || z === undefined || Number.isNaN(z)) return null;
+  const abs = Math.abs(z);
+  if (abs >= 2) return z > 0 ? "STRETCHED HIGH" : "STRETCHED LOW";
+  if (abs >= 1) return z > 0 ? "RISK-ON" : "RISK-OFF";
+  return "BALANCED";
+}
+
 async function processRatio(cfg: RatioConfig) {
   const [numCloses, denCloses] = await Promise.all([
     fetchCloses(cfg.numerator),
@@ -149,6 +157,12 @@ Deno.serve(async (req) => {
   const results: any[] = [];
   let success = 0;
   let failed = 0;
+  let alerts = 0;
+
+  const { data: prevRows } = await supabase
+    .from("ratio_snapshots")
+    .select("ratio_id, z_score");
+  const prevZByRatioId = new Map((prevRows ?? []).map((r) => [r.ratio_id, r.z_score as number | null]));
 
   // Process in small batches to avoid Yahoo rate limiting
   const batchSize = 4;
@@ -168,6 +182,21 @@ Deno.serve(async (req) => {
         } else {
           success++;
           results.push({ ratio_id: cfg.ratio_id, status: "ok", z: r.value.z_score?.toFixed(2) });
+
+          const prevRegime = regimeLabel(prevZByRatioId.get(cfg.ratio_id) ?? null);
+          const newRegime = regimeLabel(r.value.z_score);
+          if (prevRegime && newRegime && prevRegime !== newRegime) {
+            const { error: alertError } = await supabase.from("market_alerts").insert({
+              alert_type: "regime_change",
+              entity_id: cfg.ratio_id,
+              entity_label: r.value.display_name,
+              title: `${r.value.display_name}: ${prevRegime} → ${newRegime}`,
+              message: `${r.value.display_name} moved from ${prevRegime} to ${newRegime} (z = ${r.value.z_score?.toFixed(2)}σ).`,
+              severity: newRegime.startsWith("STRETCHED") ? "warning" : "info",
+              metadata: { previous_regime: prevRegime, new_regime: newRegime, z_score: r.value.z_score, category: r.value.category },
+            });
+            if (!alertError) alerts++;
+          }
         }
       } else {
         failed++;
@@ -178,7 +207,7 @@ Deno.serve(async (req) => {
   }
 
   return new Response(
-    JSON.stringify({ success, failed, total: RATIOS.length, results }),
+    JSON.stringify({ success, failed, alerts, total: RATIOS.length, results }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
 });

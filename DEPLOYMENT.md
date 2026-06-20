@@ -128,6 +128,34 @@ Los usuarios pueden desactivar el digest desde `/settings` sin afectar emails tr
 
 ---
 
+## 🔔 Market Alerts (regime change & squeeze)
+
+`market_alerts` alimenta la campana de notificaciones in-app (todos los usuarios, sin login requerido). Se llena desde dos fuentes:
+
+1. **Regime change**: `ratios-collector` ya corre por su propio cron y ahora, antes de sobrescribir cada fila de `ratio_snapshots`, compara el régimen anterior (BALANCED / RISK-ON / RISK-OFF / STRETCHED HIGH/LOW, mismo umbral de `|z|` que usa `RatioRow.tsx`) contra el nuevo. Si cambió, inserta una alerta. No requiere un cron nuevo.
+
+2. **Squeeze**: `squeeze-radar` es stateless (rescanea Yahoo en vivo en cada llamada, sin persistencia), así que no puede detectar cruces de umbral por sí solo. `squeeze-alert-scan` lo llama internamente, compara el score de cada ticker contra `squeeze_alert_state` (último score visto) y crea una alerta cuando un ticker cruza por encima de 70 viniendo de abajo (con cooldown de 24h para no repetir mientras se mantiene caliente).
+
+#### Crear el Cron Job de squeeze-alert-scan
+
+```sql
+SELECT cron.schedule(
+  'squeeze-alert-scan-job',
+  '*/30 * * * *',   -- Cada 30 minutos
+  $$
+  SELECT net.http_post(
+      url:='https://qceatovcjqhiqdpgfdzm.supabase.co/functions/v1/squeeze-alert-scan',
+      headers:='{"Content-Type": "application/json"}'::jsonb,
+      body:='{}'::jsonb
+  ) as request_id;
+  $$
+);
+```
+
+Es pública (igual que `market-collector`) porque solo escribe filas en `market_alerts`/`squeeze_alert_state`, no dispara emails ni acciones sobre cuentas de usuario.
+
+---
+
 ## 🔐 Seguridad de Edge Functions
 
 Todas las edge functions tienen `verify_jwt = true` excepto el collector:

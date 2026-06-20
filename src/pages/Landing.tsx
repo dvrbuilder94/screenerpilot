@@ -54,6 +54,9 @@ export default function Landing() {
             <Link to="/markets" className="px-3 h-9 inline-flex items-center text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/60 transition-smooth">
               Terminal
             </Link>
+            <Link to="/squeeze-radar" className="px-3 h-9 inline-flex items-center text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/60 transition-smooth">
+              Squeeze Screener
+            </Link>
             <a href="#contact" className="px-3 h-9 inline-flex items-center text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/60 transition-smooth">
               Contact
             </a>
@@ -216,6 +219,7 @@ export default function Landing() {
             <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
             <Link to="/refund-policy" className="hover:text-foreground transition-colors">Refunds</Link>
             <Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
+            <Link to="/squeeze-radar" className="hover:text-foreground transition-colors">Squeeze Screener</Link>
           </nav>
           <span className="font-mono-tabular uppercase tracking-[0.12em]">Read-only · no advice</span>
         </div>

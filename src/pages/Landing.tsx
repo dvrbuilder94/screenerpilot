@@ -3,12 +3,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowRight, LineChart, Layers, Activity, MessageSquare, Flame } from "lucide-react";
+import { ArrowRight, Terminal, Users, Zap, Shield } from "lucide-react";
 import { Seo } from "@/components/Seo";
 import { LiveTickerTape } from "@/components/LiveTickerTape";
 import { MarketPulseHero } from "@/components/MarketPulseHero";
 import { BenMascot } from "@/components/BenMascot";
-import { Logo } from "@/components/Logo";
+import { LogoMark } from "@/components/Logo";
+import { TerminalDemo } from "@/components/TerminalDemo";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -19,14 +20,18 @@ export default function Landing() {
   const submitContact = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!contact.email || contact.message.trim().length < 5) {
-      toast({ title: "Please complete the form", description: "Email and a short message are required.", variant: "destructive" });
+      toast({
+        title: "Please complete the form",
+        description: "Email and a short message are required.",
+        variant: "destructive",
+      });
       return;
     }
     setSending(true);
     const { error } = await supabase.functions.invoke("send-contact-message", { body: contact });
     setSending(false);
     if (error) {
-      toast({ title: "Could not send", description: "Please try again in a moment.", variant: "destructive" });
+      toast({ title: "Could not send", description: "Please try again.", variant: "destructive" });
       return;
     }
     setContact({ name: "", email: "", message: "" });
@@ -34,37 +39,41 @@ export default function Landing() {
   };
 
   return (
-    <div className="landing-light min-h-screen bg-background text-foreground overflow-x-hidden">
+    <div className="min-h-screen bg-[#0A0C14] text-white overflow-x-hidden">
       <Seo
-        title="ScreenerPilot — Macro Intelligence Terminal"
-        description="A read-only market intelligence terminal. Monitor regimes, relative value and price dislocations across stocks, ETFs, indices, crypto and commodities."
+        title="ScreenerPilot — AI Agents for Serious Investors"
+        description="Benjamin is your team of specialized AI agents. Professional macro intelligence and cross-asset analysis in one clean terminal."
         path="/"
       />
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-5 gap-4">
-          <Link to="/">
-            <Logo />
+      {/* Header - más limpio */}
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0A0C14]/95 backdrop-blur-xl">
+        <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-6">
+          <Link to="/" className="flex items-center gap-2">
+            <LogoMark className="w-8 h-[26px] sm:w-9 sm:h-[28px]" />
+            <span className="hidden md:inline text-[15px] font-semibold tracking-tight text-white">ScreenerPilot</span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-1">
-            <Link to="/pricing" className="px-3 h-9 inline-flex items-center text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/60 transition-smooth">
+          <nav className="hidden md:flex items-center gap-x-8 text-sm">
+            <Link to="/pricing" className="text-zinc-400 hover:text-white transition-colors">
               Pricing
             </Link>
-            <Link to="/markets" className="px-3 h-9 inline-flex items-center text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/60 transition-smooth">
+            <Link to="/markets" className="text-zinc-400 hover:text-white transition-colors">
               Terminal
             </Link>
-            <a href="#contact" className="px-3 h-9 inline-flex items-center text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary/60 transition-smooth">
+            <Link to="/squeeze-radar" className="text-zinc-400 hover:text-white transition-colors">
+              Squeeze Screener
+            </Link>
+            <a href="#contact" className="text-zinc-400 hover:text-white transition-colors">
               Contact
             </a>
           </nav>
 
-          <div className="flex items-center gap-2">
-            <Button asChild size="sm" variant="ghost" className="h-9 text-[13px] hidden sm:inline-flex">
+          <div className="flex items-center gap-3">
+            <Button asChild variant="ghost" size="sm" className="text-sm text-zinc-400 hover:text-white">
               <Link to="/login">Sign in</Link>
             </Button>
-            <Button asChild size="sm" className="h-9 text-[13px]">
+            <Button asChild size="sm" className="bg-white text-black hover:bg-zinc-200 text-sm h-9 px-5">
               <Link to="/signup">Start free trial</Link>
             </Button>
           </div>
@@ -72,192 +81,167 @@ export default function Landing() {
       </header>
 
       <main>
-      {/* Live ticker tape — premium fintech motion */}
-      <LiveTickerTape />
+        <LiveTickerTape />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div
-          className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 w-[900px] h-[460px] opacity-70 blur-3xl"
-          style={{
-            background:
-              "radial-gradient(closest-side, rgba(34,211,238,0.16), rgba(59,130,246,0.08), transparent)",
-          }}
-        />
-        <div className="relative max-w-6xl mx-auto px-5 pt-14 pb-10 sm:pt-20 sm:pb-14">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10">
-            <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-cyan-500/25 bg-cyan-50 text-[11px] uppercase tracking-[0.12em] text-cyan-700 mb-6">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse-dot" />
-                Live cross-asset data
-              </div>
-              <h1 className="text-[32px] sm:text-[44px] lg:text-[52px] font-semibold tracking-tight leading-[1.05] text-foreground">
-                A macro intelligence terminal for cross-asset monitoring.
-              </h1>
-              <p className="mt-5 text-[15px] sm:text-base text-muted-foreground max-w-2xl leading-relaxed">
-                Snapshots, regimes and cross-asset ratios across stocks, crypto, ETFs, indices and commodities —
-                in one read-only terminal. No execution, no signals, no advice.
-              </p>
-              <div className="mt-7 flex flex-wrap items-center gap-3">
-                <Button
-                  asChild
-                  size="lg"
-                  className="h-11 px-5 text-sm bg-gradient-to-r from-cyan-400 to-blue-500 text-white hover:opacity-90 border-0"
-                >
-                  <Link to="/signup">
-                    Start 30-day free trial <ArrowRight className="w-4 h-4 ml-2" />
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="h-11 px-5 text-sm">
-                  <Link to="/markets">Open Terminal</Link>
-                </Button>
-              </div>
-              <p className="mt-3 text-[12px] text-muted-foreground">
-                $15/month after trial. Cancel anytime.
-              </p>
+        {/* Hero - estilo FinRobot (más limpio y AI-first) */}
+        <section className="pt-20 pb-16 border-b border-white/10">
+          <div className="max-w-5xl mx-auto px-6 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full border border-white/10 bg-white/5 text-xs tracking-[2px] text-zinc-400 mb-6">
+              POWERED BY BENJAMIN
             </div>
 
-            <BenMascot />
-          </div>
+            <h1 className="text-6xl lg:text-7xl font-semibold tracking-tighter leading-none">
+              Your team of
+              <br />
+              specialized AI agents.
+            </h1>
 
-          {/* Real-data pulse hero */}
-          <div className="mt-12">
-            <MarketPulseHero />
-          </div>
-        </div>
-      </section>
-
-      {/* What's inside — matches actual terminal pages */}
-      <section className="max-w-6xl mx-auto px-5 py-12 border-t border-border">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mb-6">
-          What's inside
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          {[
-            { icon: LineChart, title: "Markets",     desc: "Live snapshots and sparklines across stocks, crypto, ETFs, indices and commodities." },
-            { icon: Activity,  title: "Macro",       desc: "Fed, LatAm, crypto macro, commodities and an economic calendar in one view." },
-            { icon: Layers,    title: "Ratios",      desc: "Cross-asset ratio charts with 5y mean, z-score and percentile context." },
-            { icon: MessageSquare, title: "BEN copilot", desc: "Ask about regimes, momentum or relative value. Answers in two sentences, no advice." },
-          ].map((f) => (
-            <div key={f.title} className="fin-card p-5 transition-smooth hover:bg-secondary/30 hover:border-primary/30">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                <f.icon className="w-4 h-4 text-primary" strokeWidth={1.75} />
-              </div>
-              <h3 className="text-[14px] font-semibold text-foreground">{f.title}</h3>
-              <p className="mt-1.5 text-[13px] text-muted-foreground leading-relaxed">{f.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Trust / data sources */}
-      <section className="max-w-6xl mx-auto px-5 py-12 border-t border-border">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mb-6">
-          Data you can trust
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { src: "Binance", desc: "Real-time crypto pricing" },
-            { src: "Yahoo Finance", desc: "Equities, ETFs & indices" },
-            { src: "FRED / Federal Reserve", desc: "Macro & rates data" },
-            { src: "CoinGecko & CMC", desc: "Crypto market structure" },
-          ].map((d) => (
-            <div key={d.src} className="fin-card p-4">
-              <div className="text-[13px] font-semibold text-foreground">{d.src}</div>
-              <div className="mt-1 text-[12px] text-muted-foreground">{d.desc}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Free lead magnet — kept separate from the read-only terminal positioning */}
-      <section className="max-w-6xl mx-auto px-5 py-12 border-t border-border">
-        <div className="fin-card p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-orange-500/30 bg-orange-500/10 text-[10px] font-bold uppercase tracking-[0.1em] text-orange-600 mb-3">
-              <Flame className="w-3 h-3" />
-              Free · updated daily · no signup
-            </div>
-            <h3 className="text-[18px] sm:text-[20px] font-semibold text-foreground">
-              Curious what a technical screener looks like? Try it free.
-            </h3>
-            <p className="mt-1.5 text-[13px] text-muted-foreground max-w-md">
-              A separate, free daily short squeeze screener — technical heuristics only, not part of the
-              core terminal and not investment advice.
+            <p className="mt-6 text-xl text-zinc-400 max-w-2xl mx-auto">
+              Professional macro intelligence, cross-asset analysis and intelligent agents.
+              <br />
+              One clean terminal. Built for serious investors.
             </p>
-          </div>
-          <Button asChild size="lg" variant="outline" className="h-11 px-5 text-sm flex-shrink-0">
-            <Link to="/squeeze-radar">
-              See today's screener <ArrowRight className="w-4 h-4 ml-2" />
-            </Link>
-          </Button>
-        </div>
-      </section>
 
-      {/* Contact */}
-      <section id="contact" className="max-w-6xl mx-auto px-5 py-12 border-t border-border">
-        <div className="grid md:grid-cols-2 gap-10 items-start">
-          <div>
-            <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mb-3">Contact</h2>
-            <h3 className="text-[22px] sm:text-[26px] font-semibold tracking-tight leading-tight">
-              Questions, feedback or partnership ideas?
-            </h3>
-            <p className="mt-3 text-[14px] text-muted-foreground leading-relaxed max-w-md">
-              Send a message and we'll get back to you. We typically reply within 1–2 business days.
-            </p>
+            <div className="flex justify-center gap-4 mt-10">
+              <Button asChild size="lg" className="h-12 px-8 text-base bg-white text-black hover:bg-zinc-100">
+                <Link to="/signup">Start 30-day free trial</Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="h-12 px-8 text-base border-white/20 hover:bg-white/5"
+              >
+                <Link to="/markets">Open Terminal</Link>
+              </Button>
+            </div>
+            <p className="mt-3 text-xs text-zinc-500">$15/month after trial. Cancel anytime.</p>
           </div>
-          <form onSubmit={submitContact} className="fin-card p-5 space-y-3">
-            <Input
-              placeholder="Your name (optional)"
-              value={contact.name}
-              onChange={(e) => setContact({ ...contact, name: e.target.value })}
-              maxLength={100}
-            />
-            <Input
-              type="email"
-              required
-              placeholder="you@email.com"
-              value={contact.email}
-              onChange={(e) => setContact({ ...contact, email: e.target.value })}
-              maxLength={255}
-            />
-            <Textarea
-              required
-              placeholder="Your message"
-              rows={5}
-              value={contact.message}
-              onChange={(e) => setContact({ ...contact, message: e.target.value })}
-              maxLength={2000}
-            />
-            <Button type="submit" disabled={sending} className="w-full">
-              {sending ? "Sending…" : "Send message"}
-            </Button>
-          </form>
-        </div>
-      </section>
+
+          {/* Visual principal */}
+          <div className="mt-16 max-w-5xl mx-auto px-6">
+            <div className="rounded-3xl border border-white/10 bg-[#11131C] p-2 shadow-2xl">
+              <TerminalDemo />
+            </div>
+          </div>
+        </section>
+
+        {/* Features - más limpio y pro */}
+        <section className="max-w-6xl mx-auto px-6 py-20">
+          <div className="text-center mb-12">
+            <div className="text-xs tracking-[2px] text-zinc-500 mb-3">WHAT'S INSIDE</div>
+            <h2 className="text-4xl font-semibold tracking-tight">
+              Everything you need.
+              <br />
+              Nothing you don't.
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              {
+                icon: Terminal,
+                title: "Professional Terminal",
+                desc: "Clean command interface with live data across stocks, crypto, ETFs and macro.",
+              },
+              {
+                icon: Users,
+                title: "BEN Agents",
+                desc: "Specialized AI agents that research, screen and analyze for you in seconds.",
+              },
+              {
+                icon: Zap,
+                title: "Cross-Asset Intelligence",
+                desc: "Regimes, ratios, dislocations and relative value in one unified view.",
+              },
+              {
+                icon: Shield,
+                title: "Read-only & Private",
+                desc: "No execution. No signals. No advice. Built for professional use.",
+              },
+            ].map((item, index) => (
+              <div
+                key={index}
+                className="group rounded-3xl border border-white/10 bg-[#11131C] p-7 transition-all hover:border-white/20 hover:bg-[#161A25]"
+              >
+                <div className="w-11 h-11 rounded-2xl bg-white/5 flex items-center justify-center mb-6 group-hover:bg-white/10 transition-colors">
+                  <item.icon className="w-5 h-5 text-cyan-400" />
+                </div>
+                <h3 className="font-semibold text-xl tracking-tight mb-3">{item.title}</h3>
+                <p className="text-zinc-400 leading-relaxed text-[15px]">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Trust + Data */}
+        <section className="max-w-6xl mx-auto px-6 pb-20">
+          <div className="text-center mb-10">
+            <div className="text-xs tracking-[2px] text-zinc-500 mb-2">TRUSTED DATA SOURCES</div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { name: "Binance & CoinGecko", desc: "Real-time crypto data" },
+              { name: "Yahoo Finance", desc: "Global equities & ETFs" },
+              { name: "FRED & Central Banks", desc: "Macro & rates data" },
+              { name: "On-chain + News", desc: "Sentiment & structure" },
+            ].map((item, i) => (
+              <div key={i} className="rounded-2xl border border-white/10 bg-[#11131C] p-6">
+                <div className="font-medium">{item.name}</div>
+                <div className="text-sm text-zinc-400 mt-1">{item.desc}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Contact */}
+        <section id="contact" className="border-t border-white/10 py-20 bg-[#0A0C14]">
+          <div className="max-w-4xl mx-auto px-6 grid md:grid-cols-2 gap-12">
+            <div>
+              <div className="text-xs tracking-[2px] text-zinc-500 mb-3">GET IN TOUCH</div>
+              <h2 className="text-4xl font-semibold tracking-tight">Questions or partnership ideas?</h2>
+              <p className="mt-4 text-zinc-400">We usually reply within 1–2 business days.</p>
+            </div>
+
+            <form onSubmit={submitContact} className="space-y-4">
+              <Input
+                className="text-foreground"
+                placeholder="Your name"
+                value={contact.name}
+                onChange={(e) => setContact({ ...contact, name: e.target.value })}
+              />
+              <Input
+                className="text-foreground"
+                type="email"
+                required
+                placeholder="you@email.com"
+                value={contact.email}
+                onChange={(e) => setContact({ ...contact, email: e.target.value })}
+              />
+              <Textarea
+                className="text-foreground"
+                required
+                placeholder="Your message"
+                rows={5}
+                value={contact.message}
+                onChange={(e) => setContact({ ...contact, message: e.target.value })}
+              />
+              <Button type="submit" disabled={sending} className="w-full h-12 text-base">
+                {sending ? "Sending..." : "Send message"}
+              </Button>
+            </form>
+          </div>
+        </section>
       </main>
 
-      <footer className="max-w-6xl mx-auto px-5 py-8 border-t border-border">
-        <div className="flex justify-center md:justify-start mb-6">
-          <a href="https://orynth.dev/projects/screenerpilot" target="_blank" rel="noopener noreferrer">
-            <img
-              src="https://orynth.dev/api/badge/screenerpilot?theme=light&style=default"
-              alt="Featured on Orynth"
-              width="260"
-              height="80"
-            />
-          </a>
-        </div>
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-[11px] text-muted-foreground">
-          <span>© {new Date().getFullYear()} ScreenerPilot</span>
-          <nav className="flex items-center gap-4">
-            <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
-            <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-            <Link to="/refund-policy" className="hover:text-foreground transition-colors">Refunds</Link>
-            <Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
-            <Link to="/squeeze-radar" className="hover:text-foreground transition-colors">Squeeze Screener</Link>
-          </nav>
-          <span className="font-mono-tabular uppercase tracking-[0.12em]">Read-only · no advice</span>
+      <footer className="border-t border-white/10 py-8 text-xs text-zinc-500">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between gap-y-4">
+          <div>© {new Date().getFullYear()} ScreenerPilot — Read-only · No advice</div>
+          <div className="flex gap-x-6">
+            <Link to="/terms">Terms</Link>
+            <Link to="/privacy">Privacy</Link>
+            <Link to="/pricing">Pricing</Link>
+          </div>
         </div>
       </footer>
     </div>

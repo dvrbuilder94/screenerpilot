@@ -12,7 +12,6 @@ import Ratios from "./pages/Ratios";
 import Commodities from "./pages/Commodities";
 import NotFound from "./pages/NotFound";
 import StockIntelligence from "./pages/StockIntelligence";
-import CryptoMomentum from "./pages/CryptoMomentum";
 import Landing from "./pages/Landing";
 import Pricing from "./pages/Pricing";
 import SignUp from "./pages/SignUp";
@@ -60,7 +59,6 @@ const App = () => (
                       <Route path="/ratios" element={<Ratios />} />
                       <Route path="/commodities" element={<Commodities />} />
                       <Route path="/stock-intelligence" element={<StockIntelligence />} />
-                      <Route path="/crypto-momentum" element={<CryptoMomentum />} />
                       <Route path="/settings" element={<Settings />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>

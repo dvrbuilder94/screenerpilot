@@ -1,4 +1,4 @@
-import { LineChart, Layers, GitCompareArrows, Search, LogOut, User, Brain, MoreHorizontal, Flame } from "lucide-react";
+import { LineChart, Layers, GitCompareArrows, Search, LogOut, User, Brain, MoreHorizontal } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -26,13 +26,12 @@ type NavItem = {
 const primaryNav: NavItem[] = [
   { title: "Markets", url: "/markets", icon: LineChart },
   { title: "Macro", url: "/macro", icon: Layers },
-  { title: "Crypto", url: "/crypto-momentum", icon: Flame, badge: "New" },
+  { title: "Stock Intelligence", url: "/stock-intelligence", icon: Search },
   { title: "Committee", url: "/committee", icon: Brain, badge: "Beta" },
 ];
 
 const secondaryNav: NavItem[] = [
   { title: "Ratios", url: "/ratios", icon: GitCompareArrows },
-  { title: "Stock Intelligence", url: "/stock-intelligence", icon: Search },
 ];
 
 const allNav: NavItem[] = [...primaryNav, ...secondaryNav];

@@ -212,6 +212,16 @@ export default function Landing() {
       </main>
 
       <footer className="max-w-6xl mx-auto px-5 py-8 border-t border-border">
+        <div className="flex justify-center md:justify-start mb-6">
+          <a href="https://orynth.dev/projects/screenerpilot" target="_blank" rel="noopener noreferrer">
+            <img
+              src="https://orynth.dev/api/badge/screenerpilot?theme=light&style=default"
+              alt="Featured on Orynth"
+              width="260"
+              height="80"
+            />
+          </a>
+        </div>
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-[11px] text-muted-foreground">
           <span>© {new Date().getFullYear()} ScreenerPilot</span>
           <nav className="flex items-center gap-4">

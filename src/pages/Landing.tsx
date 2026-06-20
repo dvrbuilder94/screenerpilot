@@ -7,6 +7,7 @@ import { ArrowRight, LineChart, Layers, Activity, MessageSquare } from "lucide-r
 import { Seo } from "@/components/Seo";
 import { LiveTickerTape } from "@/components/LiveTickerTape";
 import { MarketPulseHero } from "@/components/MarketPulseHero";
+import { BenMascot } from "@/components/BenMascot";
 import { Logo } from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -87,35 +88,39 @@ export default function Landing() {
           }}
         />
         <div className="relative max-w-6xl mx-auto px-5 pt-14 pb-10 sm:pt-20 sm:pb-14">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-cyan-500/25 bg-cyan-50 text-[11px] uppercase tracking-[0.12em] text-cyan-700 mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse-dot" />
-              Live cross-asset data
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10">
+            <div className="max-w-3xl">
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-cyan-500/25 bg-cyan-50 text-[11px] uppercase tracking-[0.12em] text-cyan-700 mb-6">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse-dot" />
+                Live cross-asset data
+              </div>
+              <h1 className="text-[32px] sm:text-[44px] lg:text-[52px] font-semibold tracking-tight leading-[1.05] text-foreground">
+                A macro intelligence terminal for cross-asset monitoring.
+              </h1>
+              <p className="mt-5 text-[15px] sm:text-base text-muted-foreground max-w-2xl leading-relaxed">
+                Snapshots, regimes and cross-asset ratios across stocks, crypto, ETFs, indices and commodities —
+                in one read-only terminal. No execution, no signals, no advice.
+              </p>
+              <div className="mt-7 flex flex-wrap items-center gap-3">
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-11 px-5 text-sm bg-gradient-to-r from-cyan-400 to-blue-500 text-white hover:opacity-90 border-0"
+                >
+                  <Link to="/signup">
+                    Start 30-day free trial <ArrowRight className="w-4 h-4 ml-2" />
+                  </Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="h-11 px-5 text-sm">
+                  <Link to="/markets">Open Terminal</Link>
+                </Button>
+              </div>
+              <p className="mt-3 text-[12px] text-muted-foreground">
+                $15/month after trial. Cancel anytime.
+              </p>
             </div>
-            <h1 className="text-[32px] sm:text-[44px] lg:text-[52px] font-semibold tracking-tight leading-[1.05] text-foreground">
-              A macro intelligence terminal for cross-asset monitoring.
-            </h1>
-            <p className="mt-5 text-[15px] sm:text-base text-muted-foreground max-w-2xl leading-relaxed">
-              Snapshots, regimes and cross-asset ratios across stocks, crypto, ETFs, indices and commodities —
-              in one read-only terminal. No execution, no signals, no advice.
-            </p>
-            <div className="mt-7 flex flex-wrap items-center gap-3">
-              <Button
-                asChild
-                size="lg"
-                className="h-11 px-5 text-sm bg-gradient-to-r from-cyan-400 to-blue-500 text-white hover:opacity-90 border-0"
-              >
-                <Link to="/signup">
-                  Start 30-day free trial <ArrowRight className="w-4 h-4 ml-2" />
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="h-11 px-5 text-sm">
-                <Link to="/markets">Open Terminal</Link>
-              </Button>
-            </div>
-            <p className="mt-3 text-[12px] text-muted-foreground">
-              $15/month after trial. Cancel anytime.
-            </p>
+
+            <BenMascot />
           </div>
 
           {/* Real-data pulse hero */}

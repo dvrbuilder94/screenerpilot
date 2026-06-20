@@ -14,92 +14,86 @@
 @layer base {
   :root,
   .dark {
-    /* Backgrounds — translated from #0A0A0F / #111118 / #1A1A24 */
-    --background: 240 22% 5%;          /* #0A0A0F */
-    --bg-secondary: 240 18% 8%;        /* #111118 */
-    --bg-tertiary: 240 16% 12%;        /* #1A1A24 */
+    /* "Glass water" — light, frosted-glass surfaces over a soft blue/cyan wash */
+    --background: 210 45% 97%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 14%;
 
-    --card: 240 18% 8%;                /* solid card surface */
-    --card-foreground: 240 20% 92%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 14%;
 
-    --popover: 240 18% 9%;
-    --popover-foreground: 240 20% 92%;
+    --foreground: 222 47% 14%;
+    --muted: 210 30% 93%;
+    --muted-foreground: 215 20% 45%;
 
-    /* Text — #E8E8F0 / #8888AA / #55556A */
-    --foreground: 240 20% 92%;
-    --muted: 240 16% 12%;
-    --muted-foreground: 240 17% 60%;
-    --text-muted: 240 11% 38%;
+    --border: 210 25% 88%;
+    --border-strong: 210 25% 78%;
+    --input: 210 25% 90%;
+    --ring: 217 91% 60%;
 
-    /* Borders — rgba(255,255,255,0.07) ≈ very low alpha; use solid HSL approximation */
-    --border: 240 14% 14%;
-    --border-strong: 240 14% 20%;
-    --input: 240 14% 16%;
-    --ring: 224 100% 65%;
-
-    /* Brand / Accent — #4F7FFF */
-    --primary: 224 100% 65%;
+    /* Brand / Accent — cyan-to-blue, matches the logo gradient */
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
-    --accent: 224 100% 65%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 188 95% 50%;
+    --accent-foreground: 222 47% 14%;
 
     /* Secondary surfaces */
-    --secondary: 240 16% 14%;
-    --secondary-foreground: 240 20% 92%;
+    --secondary: 210 30% 95%;
+    --secondary-foreground: 222 47% 14%;
 
-    /* Financial signals */
-    --positive: 165 100% 42%;          /* #00D4AA */
-    --negative: 350 100% 65%;          /* #FF4D6D */
-    --warning: 42 100% 50%;            /* #FFB800 */
-    --neutral: 240 17% 60%;            /* #8888AA */
+    /* Financial signals — deepened slightly for contrast on light glass */
+    --positive: 160 84% 35%;
+    --negative: 350 80% 50%;
+    --warning: 38 92% 45%;
+    --neutral: 215 20% 50%;
 
     /* Map to existing semantic tokens used across the app */
-    --bullish: 165 100% 42%;
-    --bullish-light: 165 100% 12%;
+    --bullish: 160 84% 35%;
+    --bullish-light: 160 84% 95%;
     --bullish-foreground: 0 0% 100%;
-    --bearish: 350 100% 65%;
-    --bearish-light: 350 100% 14%;
+    --bearish: 350 80% 50%;
+    --bearish-light: 350 80% 96%;
     --bearish-foreground: 0 0% 100%;
-    --neutral-light: 240 14% 16%;
+    --neutral-light: 210 25% 92%;
     --neutral-foreground: 0 0% 100%;
 
-    --destructive: 350 100% 65%;
+    --destructive: 350 80% 50%;
     --destructive-foreground: 0 0% 100%;
 
     --radius: 0.5rem;
 
     /* Sidebar */
-    --sidebar: 240 18% 7%;
-    --sidebar-foreground: 240 20% 92%;
-    --sidebar-primary: 224 100% 65%;
+    --sidebar: 210 45% 98%;
+    --sidebar-foreground: 222 47% 14%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 16% 14%;
-    --sidebar-accent-foreground: 240 20% 92%;
-    --sidebar-border: 240 14% 14%;
-    --sidebar-ring: 224 100% 65%;
+    --sidebar-accent: 210 30% 93%;
+    --sidebar-accent-foreground: 222 47% 14%;
+    --sidebar-border: 210 25% 88%;
+    --sidebar-ring: 217 91% 60%;
 
     /* Charts */
-    --chart-1: 224 100% 65%;
-    --chart-2: 165 100% 42%;
-    --chart-3: 350 100% 65%;
-    --chart-4: 42 100% 50%;
-    --chart-5: 280 80% 65%;
+    --chart-1: 217 91% 60%;
+    --chart-2: 160 84% 35%;
+    --chart-3: 350 80% 50%;
+    --chart-4: 38 92% 45%;
+    --chart-5: 280 70% 55%;
 
-    /* Shadows — subtle for dark UI */
-    --shadow-2xs: 0 1px 2px 0 hsl(0 0% 0% / 0.3);
-    --shadow-xs: 0 1px 3px 0 hsl(0 0% 0% / 0.35);
-    --shadow-sm: 0 2px 4px -1px hsl(0 0% 0% / 0.4);
-    --shadow: 0 4px 6px -2px hsl(0 0% 0% / 0.4);
-    --shadow-md: 0 6px 12px -3px hsl(0 0% 0% / 0.45);
-    --shadow-lg: 0 10px 24px -5px hsl(0 0% 0% / 0.5);
-    --shadow-xl: 0 18px 36px -8px hsl(0 0% 0% / 0.55);
-    --shadow-2xl: 0 28px 60px -12px hsl(0 0% 0% / 0.6);
+    /* Shadows — soft, cool-toned for light glass surfaces */
+    --shadow-2xs: 0 1px 2px 0 hsl(217 50% 30% / 0.05);
+    --shadow-xs: 0 1px 3px 0 hsl(217 50% 30% / 0.07);
+    --shadow-sm: 0 2px 6px -1px hsl(217 50% 30% / 0.08);
+    --shadow: 0 4px 10px -2px hsl(217 50% 30% / 0.1);
+    --shadow-md: 0 8px 18px -4px hsl(217 50% 30% / 0.1);
+    --shadow-lg: 0 14px 30px -6px hsl(217 50% 30% / 0.12);
+    --shadow-xl: 0 22px 46px -10px hsl(217 50% 30% / 0.14);
+    --shadow-2xl: 0 32px 64px -14px hsl(217 50% 30% / 0.16);
 
-    --shadow-glow: 0 0 16px hsl(224 100% 65% / 0.25);
-    --shadow-glow-bullish: 0 0 14px hsl(165 100% 42% / 0.25);
-    --shadow-glow-bearish: 0 0 14px hsl(350 100% 65% / 0.25);
-    --shadow-elevated: 0 10px 30px -8px hsl(0 0% 0% / 0.6);
-    --shadow-card: 0 1px 3px hsl(0 0% 0% / 0.4);
+    --shadow-glow: 0 0 20px hsl(217 91% 60% / 0.25);
+    --shadow-glow-bullish: 0 0 16px hsl(160 84% 35% / 0.2);
+    --shadow-glow-bearish: 0 0 16px hsl(350 80% 50% / 0.2);
+    --shadow-elevated: 0 16px 40px -10px hsl(217 50% 30% / 0.14);
+    --shadow-card: 0 1px 3px hsl(217 50% 30% / 0.08);
 
     --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
@@ -112,11 +106,16 @@
   }
 
   html {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    background-image:
+      radial-gradient(900px 520px at 8% -8%, hsl(199 89% 60% / 0.14), transparent),
+      radial-gradient(800px 520px at 100% 0%, hsl(188 95% 50% / 0.12), transparent),
+      radial-gradient(1100px 640px at 50% 110%, hsl(217 91% 60% / 0.07), transparent);
+    background-attachment: fixed;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
@@ -143,36 +142,15 @@
   }
 }
 
-/* Light theme scope for the marketing landing page only — terminal pages
-   never get this class, so they keep the dark variables above untouched. */
-.landing-light {
-  --background: 0 0% 100%;
-  --foreground: 222 47% 11%;
-  --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
-  --border: 220 13% 91%;
-  --border-strong: 220 13% 83%;
-  --input: 220 13% 91%;
-  --muted: 220 14% 96%;
-  --muted-foreground: 215 16% 47%;
-  --secondary: 220 14% 96%;
-  --secondary-foreground: 222 47% 11%;
-  color-scheme: light;
-}
-
-.landing-light .fin-card {
-  background: hsl(0 0% 0% / 0.015);
-  border: 1px solid hsl(0 0% 0% / 0.08);
-}
-
 @layer components {
-  /* Financial card — translucent surface with subtle border */
+  /* Financial card — frosted glass surface over the soft background wash */
   .fin-card {
-    background: hsl(0 0% 100% / 0.03);
-    border: 1px solid hsl(0 0% 100% / 0.07);
+    background: hsl(0 0% 100% / 0.55);
+    border: 1px solid hsl(0 0% 100% / 0.7);
     border-radius: 8px;
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    box-shadow: var(--shadow-card);
   }
 
   /* Dense financial table */
@@ -188,13 +166,13 @@
   }
   .fin-table tbody td {
     @apply px-3 py-2.5;
-    border-bottom: 1px solid hsl(0 0% 100% / 0.04);
+    border-bottom: 1px solid hsl(217 30% 30% / 0.07);
   }
   .fin-table tbody tr {
     transition: background-color 0.12s ease;
   }
   .fin-table tbody tr:hover {
-    background-color: hsl(0 0% 100% / 0.025);
+    background-color: hsl(217 50% 30% / 0.04);
   }
 
   /* Number badges */

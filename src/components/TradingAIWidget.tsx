@@ -438,24 +438,24 @@ export const TradingAIWidget = () => {
       {isOpen && (
         <div
           className="
-            fixed z-50 flex flex-col bg-slate-950/95 backdrop-blur-xl
-            border border-slate-700 shadow-2xl
+            fixed z-50 flex flex-col bg-white/70 backdrop-blur-xl
+            border border-white/80 shadow-2xl
             inset-x-0 bottom-0 h-[85vh] rounded-t-2xl
             sm:inset-auto sm:bottom-24 sm:right-6 sm:h-[600px] sm:w-96 sm:rounded-2xl
           "
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-emerald-400" />
+              <Sparkles className="h-4 w-4 text-emerald-500" />
               <div>
-                <p className="text-sm font-semibold text-white">BEN</p>
-                <p className="text-xs text-slate-400">Market Intelligence</p>
+                <p className="text-sm font-semibold text-foreground">BEN</p>
+                <p className="text-xs text-muted-foreground">Market Intelligence</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-muted-foreground">
                 {dailyCount}/{getMessageLimit()}
               </span>
               <Button variant="ghost" size="icon" onClick={handleClose} className="h-8 w-8">
@@ -466,13 +466,13 @@ export const TradingAIWidget = () => {
 
           {/* Active Scope Indicator */}
           {messages.length > 0 && activeScope !== 'global' && (
-            <div className="flex items-center gap-2 px-4 py-1.5 border-b border-slate-800">
-              <span className="text-xs bg-emerald-600/20 text-emerald-400 px-2 py-0.5 rounded-full">
+            <div className="flex items-center gap-2 px-4 py-1.5 border-b border-border">
+              <span className="text-xs bg-emerald-500/15 text-emerald-600 px-2 py-0.5 rounded-full">
                 Focus: {SCOPE_LABELS[activeScope]}
               </span>
               <button
                 onClick={clearScope}
-                className="text-xs text-slate-500 hover:text-white transition-colors"
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 Clear
               </button>
@@ -486,9 +486,9 @@ export const TradingAIWidget = () => {
               <div className="flex flex-col h-full px-1">
                 {/* Header */}
                 <div className="text-center mb-4">
-                  <Sparkles className="h-6 w-6 text-emerald-400 mx-auto mb-2" />
-                  <p className="text-sm font-medium text-white">Market Intelligence</p>
-                  <p className="text-xs text-slate-400">Select a category to explore</p>
+                  <Sparkles className="h-6 w-6 text-emerald-500 mx-auto mb-2" />
+                  <p className="text-sm font-medium text-foreground">Market Intelligence</p>
+                  <p className="text-xs text-muted-foreground">Select a category to explore</p>
                 </div>
 
                 {/* Category Pills */}
@@ -500,8 +500,8 @@ export const TradingAIWidget = () => {
                       className={cn(
                         "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
                         promptCategory === key
-                          ? "bg-emerald-600 text-white"
-                          : "bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white"
+                          ? "bg-emerald-500 text-white"
+                          : "bg-secondary text-muted-foreground hover:bg-secondary/70 hover:text-foreground"
                       )}
                     >
                       <Icon className="h-3.5 w-3.5" />
@@ -514,12 +514,12 @@ export const TradingAIWidget = () => {
                 <div className="flex-1 space-y-2">
                   {isLoadingContext ? (
                     <div className="flex items-center justify-center py-4">
-                      <Loader2 className="h-5 w-5 animate-spin text-emerald-400" />
-                      <span className="ml-2 text-sm text-slate-400">Loading market data...</span>
+                      <Loader2 className="h-5 w-5 animate-spin text-emerald-500" />
+                      <span className="ml-2 text-sm text-muted-foreground">Loading market data...</span>
                     </div>
                   ) : !isContextReady ? (
                     <>
-                      <p className="text-center text-xs text-slate-500 py-2">
+                      <p className="text-center text-xs text-muted-foreground py-2">
                         Market data unavailable. You can still ask questions.
                       </p>
                       {CATEGORIZED_PROMPTS[promptCategory].prompts.map((q) => (
@@ -527,7 +527,7 @@ export const TradingAIWidget = () => {
                           key={q}
                           onClick={() => handleQuickPrompt(q)}
                           disabled={isLoading || !canSendMessage()}
-                          className="w-full text-left px-3 py-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-sm text-white border border-slate-700 hover:border-emerald-500/50 transition-all disabled:opacity-50"
+                          className="w-full text-left px-3 py-2.5 rounded-lg bg-secondary/70 hover:bg-secondary text-sm text-foreground border border-border hover:border-emerald-500/50 transition-all disabled:opacity-50"
                         >
                           {q}
                         </button>
@@ -539,7 +539,7 @@ export const TradingAIWidget = () => {
                         key={q}
                         onClick={() => handleQuickPrompt(q)}
                         disabled={isLoading || !canSendMessage()}
-                        className="w-full text-left px-3 py-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-sm text-white border border-slate-700 hover:border-emerald-500/50 transition-all disabled:opacity-50"
+                        className="w-full text-left px-3 py-2.5 rounded-lg bg-secondary/70 hover:bg-secondary text-sm text-foreground border border-border hover:border-emerald-500/50 transition-all disabled:opacity-50"
                       >
                         {q}
                       </button>
@@ -556,7 +556,7 @@ export const TradingAIWidget = () => {
                   <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                     <div
                       className={`max-w-[85%] px-3 py-2 rounded-xl text-sm whitespace-pre-wrap ${
-                        m.role === "user" ? "bg-emerald-500 text-white" : "bg-slate-800 text-white"
+                        m.role === "user" ? "bg-emerald-500 text-white" : "bg-secondary text-foreground"
                       }`}
                     >
                       {m.content}
@@ -566,13 +566,13 @@ export const TradingAIWidget = () => {
 
                 {/* Follow-up Prompts */}
                 {showFollowUps && (
-                  <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-slate-800">
+                  <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-border">
                     {FOLLOW_UP_PROMPTS.map((q) => (
                       <button
                         key={q}
                         onClick={() => handleFollowUp(q)}
                         disabled={isLoading || !canSendMessage()}
-                        className="px-2.5 py-1 rounded-md text-xs bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors disabled:opacity-50"
+                        className="px-2.5 py-1 rounded-md text-xs bg-secondary text-muted-foreground hover:bg-secondary/70 hover:text-foreground transition-colors disabled:opacity-50"
                       >
                         {q}
                       </button>
@@ -582,9 +582,9 @@ export const TradingAIWidget = () => {
 
                 {isLoading && (
                   <div className="flex gap-1">
-                    <div className="h-2 w-2 bg-emerald-400 rounded-full animate-pulse" />
-                    <div className="h-2 w-2 bg-emerald-400 rounded-full animate-pulse delay-75" />
-                    <div className="h-2 w-2 bg-emerald-400 rounded-full animate-pulse delay-150" />
+                    <div className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse" />
+                    <div className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse delay-75" />
+                    <div className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse delay-150" />
                   </div>
                 )}
               </div>
@@ -592,12 +592,12 @@ export const TradingAIWidget = () => {
           </ScrollArea>
 
           {/* Input */}
-          <div className="flex gap-2 p-3 border-t border-slate-700">
+          <div className="flex gap-2 p-3 border-t border-border">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask a specific market question..."
-              className="bg-slate-800 border-slate-600 text-white text-sm placeholder:text-slate-500"
+              className="bg-secondary/70 border-border text-foreground text-sm placeholder:text-muted-foreground"
               disabled={isLoading}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
             />

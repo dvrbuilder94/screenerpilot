@@ -12,23 +12,6 @@ import { toast } from "@/hooks/use-toast";
 
 const LOGO_URL = "https://storage.googleapis.com/gpt-engineer-file-uploads/SwWQdnEgbuMrnR9f8RUe0qM0pTi1/uploads/1768527913536-WhatsApp Image 2026-01-15 at 11.30.09 AM.jpeg";
 
-const Pct = ({ v }: { v: number }) => {
-  const cls = v >= 0 ? "badge-positive" : "badge-negative";
-  return <span className={cls}>{v >= 0 ? "+" : ""}{v.toFixed(2)}%</span>;
-};
-
-// Sample snapshot — matches what the real Markets terminal renders.
-const snapshot = [
-  { sym: "S&P 500",   chg: 0.34 },
-  { sym: "Nasdaq",    chg: 0.71 },
-  { sym: "BTC",       chg: 1.08 },
-  { sym: "Gold",      chg: -0.18 },
-  { sym: "WTI Oil",   chg: 1.42 },
-  { sym: "10Y Yield", chg: -0.05 },
-  { sym: "DXY",       chg: 0.08 },
-  { sym: "VIX",       chg: -1.20 },
-];
-
 export default function Landing() {
   const [contact, setContact] = useState({ name: "", email: "", message: "" });
   const [sending, setSending] = useState(false);
@@ -107,7 +90,7 @@ export default function Landing() {
         <div className="max-w-3xl">
           <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-border bg-secondary/40 text-[11px] uppercase tracking-[0.12em] text-muted-foreground mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-positive animate-pulse-dot" />
-            Live · v1.0
+            Live cross-asset data
           </div>
           <h1 className="text-[32px] sm:text-[44px] lg:text-[52px] font-semibold tracking-tight leading-[1.05] text-foreground">
             A macro intelligence terminal for cross-asset monitoring.
@@ -149,10 +132,32 @@ export default function Landing() {
             { icon: Layers,    title: "Ratios",      desc: "Cross-asset ratio charts with 5y mean, z-score and percentile context." },
             { icon: MessageSquare, title: "BEN copilot", desc: "Ask about regimes, momentum or relative value. Answers in two sentences, no advice." },
           ].map((f) => (
-            <div key={f.title} className="fin-card p-5">
-              <f.icon className="w-4 h-4 text-muted-foreground mb-4" strokeWidth={1.75} />
+            <div key={f.title} className="fin-card p-5 transition-smooth hover:bg-secondary/30 hover:border-primary/30">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                <f.icon className="w-4 h-4 text-primary" strokeWidth={1.75} />
+              </div>
               <h3 className="text-[14px] font-semibold text-foreground">{f.title}</h3>
               <p className="mt-1.5 text-[13px] text-muted-foreground leading-relaxed">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Trust / data sources */}
+      <section className="max-w-6xl mx-auto px-5 py-12 border-t border-border">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mb-6">
+          Data you can trust
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { src: "Binance", desc: "Real-time crypto pricing" },
+            { src: "Yahoo Finance", desc: "Equities, ETFs & indices" },
+            { src: "FRED / Federal Reserve", desc: "Macro & rates data" },
+            { src: "CoinGecko & CMC", desc: "Crypto market structure" },
+          ].map((d) => (
+            <div key={d.src} className="fin-card p-4">
+              <div className="text-[13px] font-semibold text-foreground">{d.src}</div>
+              <div className="mt-1 text-[12px] text-muted-foreground">{d.desc}</div>
             </div>
           ))}
         </div>

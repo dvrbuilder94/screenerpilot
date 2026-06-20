@@ -1,4 +1,5 @@
 import { useMarketSnapshots } from "@/hooks/useMarketSnapshots";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { TrendingUp, TrendingDown } from "lucide-react";
 
@@ -10,26 +11,24 @@ const PRIORITY = [
 ];
 
 export function LiveTickerTape() {
-  const { data: rows = [] } = useMarketSnapshots();
+  const { data: rows = [], isLoading } = useMarketSnapshots();
 
   const items = (() => {
     const map = new Map(rows.map((r) => [r.symbol, r]));
-    const picked = PRIORITY.map((s) => map.get(s)).filter(Boolean) as typeof rows;
-    if (picked.length >= 8) return picked;
-    // fallback dummy
-    return [
-      { symbol: "S&P 500", display_name: "S&P 500", current_price: 5832.4, change_pct_1d: 0.34 },
-      { symbol: "NDX", display_name: "Nasdaq", current_price: 20451.2, change_pct_1d: 0.71 },
-      { symbol: "BTC", display_name: "Bitcoin", current_price: 98420, change_pct_1d: 1.08 },
-      { symbol: "ETH", display_name: "Ethereum", current_price: 3540, change_pct_1d: 1.42 },
-      { symbol: "GOLD", display_name: "Gold", current_price: 2715, change_pct_1d: -0.18 },
-      { symbol: "WTI", display_name: "WTI Oil", current_price: 71.4, change_pct_1d: 1.42 },
-      { symbol: "DXY", display_name: "Dollar", current_price: 106.2, change_pct_1d: 0.08 },
-      { symbol: "VIX", display_name: "VIX", current_price: 14.8, change_pct_1d: -1.2 },
-      { symbol: "10Y", display_name: "US 10Y", current_price: 4.32, change_pct_1d: -0.05 },
-      { symbol: "EURUSD", display_name: "EUR/USD", current_price: 1.046, change_pct_1d: 0.12 },
-    ] as any;
+    return PRIORITY.map((s) => map.get(s)).filter(Boolean) as typeof rows;
   })();
+
+  if (isLoading || items.length < 8) {
+    return (
+      <div className="relative w-full overflow-hidden border-y border-border bg-card/40 backdrop-blur-sm">
+        <div className="flex gap-6 py-3 px-5">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <Skeleton key={i} className="h-4 w-24 flex-shrink-0" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   // Duplicate items for seamless infinite scroll
   const loop = [...items, ...items];

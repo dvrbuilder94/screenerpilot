@@ -158,6 +158,9 @@ export const AppHeader = () => {
                   <DropdownMenuItem asChild>
                     <Link to="/pricing">Billing & plan</Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings">Settings</Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => signOut()}>
                     <LogOut className="h-3.5 w-3.5 mr-2" /> Sign out

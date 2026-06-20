@@ -85,6 +85,49 @@ SELECT cron.alter_job(
 
 ---
 
+## 📧 Daily Digest Email
+
+`generate-daily-briefing` ya corre por su propio cron a las 08:00 UTC y guarda el wire del día en `daily_briefings`. `send-daily-digest` lee esa fila y la encola (vía `send-transactional-email`) para cada usuario con `profiles.email_digest_enabled = true`.
+
+A diferencia de `market-collector`, esta función **no es pública**: requiere un JWT de `service_role` (`verify_jwt = true` en `config.toml` + chequeo de `role` dentro de la función), porque dispara un envío real de email a toda la base de usuarios. El cron debe llamarla usando la service role key guardada en `vault` (el mismo secreto `email_queue_service_role_key` que ya usa el cron de `process-email-queue`), nunca la anon key.
+
+#### Crear el Cron Job
+
+Ejecuta en el SQL Editor de Supabase, **después** de que el cron de `generate-daily-briefing` corra (p. ej. 15 minutos después):
+
+```sql
+SELECT cron.schedule(
+  'send-daily-digest-job',
+  '15 8 * * 1-5',   -- 08:15 UTC, lunes a viernes
+  $$
+  SELECT net.http_post(
+    url := 'https://qceatovcjqhiqdpgfdzm.supabase.co/functions/v1/send-daily-digest',
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'Authorization', 'Bearer ' || (
+        SELECT decrypted_secret FROM vault.decrypted_secrets
+        WHERE name = 'email_queue_service_role_key'
+      )
+    ),
+    body := '{}'::jsonb
+  ) AS request_id;
+  $$
+);
+```
+
+#### Verificar y depurar
+
+```sql
+SELECT * FROM cron.job WHERE jobname = 'send-daily-digest-job';
+SELECT * FROM cron.job_run_details
+WHERE jobid = (SELECT jobid FROM cron.job WHERE jobname = 'send-daily-digest-job')
+ORDER BY start_time DESC LIMIT 10;
+```
+
+Los usuarios pueden desactivar el digest desde `/settings` sin afectar emails transaccionales (reset de contraseña, recibos, etc.), que se rigen por la lista de suppression global.
+
+---
+
 ## 🔐 Seguridad de Edge Functions
 
 Todas las edge functions tienen `verify_jwt = true` excepto el collector:

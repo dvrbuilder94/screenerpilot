@@ -4,8 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { Seo } from "@/components/Seo";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight, ChevronRight, Flame, Loader2, Info } from "lucide-react";
+import { ArrowRight, ChevronRight, Flame, Loader2, Info, TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+interface DailyPick {
+  symbol: string;
+  rank: number;
+  change_pct: number | null;
+}
 
 interface Candidate {
   symbol: string;
@@ -51,22 +57,33 @@ export default function SqueezeRadarPublic() {
   const [data, setData] = useState<ScanResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [prevPicks, setPrevPicks] = useState<DailyPick[]>([]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data: res, error: fnError } = await supabase.functions.invoke("squeeze-radar", { body: {} });
+      // Load yesterday's performance in parallel with the live scan
+      const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+      const [scanResult, picksResult] = await Promise.all([
+        supabase.functions.invoke("squeeze-radar", { body: {} }),
+        supabase
+          .from("squeeze_daily_picks")
+          .select("symbol, rank, change_pct")
+          .eq("pick_date", yesterday)
+          .not("change_pct", "is", null)
+          .order("rank")
+          .limit(5),
+      ]);
       if (cancelled) return;
-      if (fnError || res?.error) {
+      if (scanResult.error || scanResult.data?.error) {
         setError("Scan temporarily unavailable. Please check back shortly.");
       } else {
-        setData(res as ScanResult);
+        setData(scanResult.data as ScanResult);
       }
+      setPrevPicks((picksResult.data ?? []) as DailyPick[]);
       setLoading(false);
     })();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   const today = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
@@ -109,6 +126,25 @@ export default function SqueezeRadarPublic() {
           drawdown depth, market cap bias and short-term momentum. No real short-interest data
           (days-to-cover, % float shorted) is used — this is a technical screener, not a guarantee.
         </p>
+
+        {/* Yesterday's performance banner */}
+        {prevPicks.length > 0 && (
+          <div className="mt-6 rounded-xl border border-border bg-muted/30 px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <span className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground font-medium flex-shrink-0">
+              Yesterday's picks
+            </span>
+            {prevPicks.map((p) => {
+              const pct = p.change_pct ?? 0;
+              const up = pct >= 0;
+              return (
+                <span key={p.symbol} className={cn("inline-flex items-center gap-1 text-[13px] font-mono font-semibold tabular-nums", up ? "text-emerald-600" : "text-red-600")}>
+                  {up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                  {p.symbol} {up ? "+" : ""}{pct.toFixed(1)}%
+                </span>
+              );
+            })}
+          </div>
+        )}
 
         <div className="mt-8 fin-card">
           <div className="px-4 py-3 border-b border-border/50 flex items-center justify-between">

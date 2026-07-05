@@ -1,5 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,8 +15,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
 export default function Landing() {
+  const { user, loading } = useAuth();
   const [contact, setContact] = useState({ name: "", email: "", message: "" });
   const [sending, setSending] = useState(false);
+
+  // Logged-in users skip the marketing page and land in the terminal.
+  if (!loading && user) return <Navigate to="/home" replace />;
 
   const submitContact = async (e: React.FormEvent) => {
     e.preventDefault();

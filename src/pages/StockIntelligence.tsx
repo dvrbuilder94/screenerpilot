@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Search,
@@ -219,6 +220,19 @@ export default function StockIntelligence() {
     },
     [symbol, timeframe]
   );
+
+  // Auto-analyze when arriving with ?symbol= (e.g. from Watchlist "Open")
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
+    const sp = searchParams.get("symbol");
+    if (sp) {
+      const upper = sp.toUpperCase();
+      setSymbol(upper);
+      setActiveTab("analyze");
+      analyzeStock(undefined, upper);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const handleSymbolChange = (value: string) => {
     const next = value.toUpperCase();

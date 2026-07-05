@@ -1,4 +1,4 @@
-import { LineChart, Layers, GitCompareArrows, Search, LogOut, User, Brain, Star, ChevronDown, Flame, Droplets } from "lucide-react";
+import { LineChart, Layers, GitCompareArrows, Search, LogOut, User, Star, ChevronDown, Flame, Droplets } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -33,7 +33,6 @@ const marketsGroup: NavItem[] = [
 
 const intelligenceGroup: NavItem[] = [
   { title: "Stock Intelligence", url: "/stock-intelligence", icon: Search, desc: "Deep dive on any ticker" },
-  { title: "Committee", url: "/committee", icon: Brain, badge: "Beta", desc: "Multi-agent AI debate" },
   { title: "Squeeze Radar", url: "/squeeze-radar", icon: Flame, desc: "Short squeeze setups" },
 ];
 

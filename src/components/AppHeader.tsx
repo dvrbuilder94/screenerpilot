@@ -1,4 +1,4 @@
-import { LineChart, Layers, GitCompareArrows, Search, LogOut, User, Brain, MoreHorizontal } from "lucide-react";
+import { LineChart, Layers, GitCompareArrows, Search, LogOut, User, Brain, Star, ChevronDown, Flame, Droplets } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -20,21 +20,22 @@ type NavItem = {
   url: string;
   icon: typeof LineChart;
   badge?: string;
+  desc?: string;
 };
 
-// Primary items always visible; the rest collapse into "More" on small screens.
-const primaryNav: NavItem[] = [
-  { title: "Markets", url: "/markets", icon: LineChart },
-  { title: "Macro", url: "/macro", icon: Layers },
-  { title: "Stock Intelligence", url: "/stock-intelligence", icon: Search },
-  { title: "Committee", url: "/committee", icon: Brain, badge: "Beta" },
+// Grouped navigation for a "pro terminal" feel.
+const marketsGroup: NavItem[] = [
+  { title: "Markets", url: "/markets", icon: LineChart, desc: "Sectors, factors, yields, FX" },
+  { title: "Macro", url: "/macro", icon: Layers, desc: "Regime, indicators, calendar" },
+  { title: "Commodities", url: "/commodities", icon: Droplets, desc: "Energy, metals, softs" },
+  { title: "Ratios", url: "/ratios", icon: GitCompareArrows, desc: "Cross-asset relative strength" },
 ];
 
-const secondaryNav: NavItem[] = [
-  { title: "Ratios", url: "/ratios", icon: GitCompareArrows },
+const intelligenceGroup: NavItem[] = [
+  { title: "Stock Intelligence", url: "/stock-intelligence", icon: Search, desc: "Deep dive on any ticker" },
+  { title: "Committee", url: "/committee", icon: Brain, badge: "Beta", desc: "Multi-agent AI debate" },
+  { title: "Squeeze Radar", url: "/squeeze-radar", icon: Flame, desc: "Short squeeze setups" },
 ];
-
-const allNav: NavItem[] = [...primaryNav, ...secondaryNav];
 
 export const AppHeader = () => {
   const location = useLocation();
@@ -44,27 +45,68 @@ export const AppHeader = () => {
   const isItemActive = (url: string) =>
     url === "/" ? location.pathname === "/" : location.pathname.startsWith(url);
 
-  const renderNavBtn = (item: NavItem, opts?: { compact?: boolean }) => {
-    const active = isItemActive(item.url);
+  const anyActive = (items: NavItem[]) => items.some((i) => isItemActive(i.url));
+
+  const GroupMenu = ({ label, items }: { label: string; items: NavItem[] }) => {
+    const active = anyActive(items);
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn(
+              "h-9 px-3 text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 rounded-md gap-1",
+              active && "text-foreground"
+            )}
+          >
+            {label}
+            <ChevronDown className="w-3 h-3 opacity-60" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-64">
+          <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+            {label}
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {items.map((item) => (
+            <DropdownMenuItem key={item.url} asChild>
+              <Link to={item.url} className="flex items-start gap-2.5 py-2">
+                <item.icon className="w-4 h-4 mt-0.5 text-muted-foreground" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">{item.title}</span>
+                    {item.badge && (
+                      <span className="text-[9px] font-semibold uppercase tracking-wider text-primary border border-primary/40 rounded px-1 py-px">
+                        {item.badge}
+                      </span>
+                    )}
+                  </div>
+                  {item.desc && <div className="text-[11px] text-muted-foreground">{item.desc}</div>}
+                </div>
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
+
+  const WatchlistLink = () => {
+    const active = isItemActive("/watchlist");
     return (
       <Button
-        key={item.url}
         variant="ghost"
         size="sm"
         asChild
         className={cn(
-          "h-9 px-2 sm:px-3 text-[12px] sm:text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 rounded-md",
+          "h-9 px-3 text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 rounded-md",
           active && "bg-secondary text-foreground"
         )}
       >
-        <Link to={item.url} className="flex items-center">
-          <item.icon className="w-3.5 h-3.5 sm:mr-2" />
-          <span className={cn("hidden sm:inline", opts?.compact && "lg:inline")}>{item.title}</span>
-          {item.badge && (
-            <span className="ml-1.5 hidden sm:inline-flex items-center text-[9px] font-semibold uppercase tracking-wider text-primary border border-primary/40 rounded px-1 py-px">
-              {item.badge}
-            </span>
-          )}
+        <Link to="/watchlist" className="flex items-center gap-1.5">
+          <Star className="w-3.5 h-3.5" />
+          Watchlist
         </Link>
       </Button>
     );
@@ -72,55 +114,20 @@ export const AppHeader = () => {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
-      <div className="flex h-16 items-center justify-between px-2 sm:px-5 gap-1 sm:gap-3 max-w-full overflow-hidden">
-        {/* Logo */}
+      <div className="flex h-14 sm:h-16 items-center justify-between px-3 sm:px-5 gap-2 sm:gap-3 max-w-full">
         <Link to="/" className="flex-shrink-0 min-w-0">
           <Logo />
         </Link>
 
-        {/* Inline nav: primary always visible, secondary hidden behind More on < lg */}
-        <nav className="flex items-center gap-0.5 sm:gap-1 flex-1 justify-center sm:justify-start sm:ml-2 min-w-0">
-          {primaryNav.map((item) => renderNavBtn(item))}
-          {/* Secondary visible from lg up */}
-          <div className="hidden lg:flex items-center gap-1">
-            {secondaryNav.map((item) => renderNavBtn(item))}
-          </div>
-          {/* More menu on < lg */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="lg:hidden h-9 px-2 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 rounded-md"
-              >
-                <MoreHorizontal className="w-4 h-4 sm:mr-1.5" />
-                <span className="hidden sm:inline">More</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
-              <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-                Modules
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {allNav.map((item) => (
-                <DropdownMenuItem key={item.url} asChild>
-                  <Link to={item.url} className="flex items-center">
-                    <item.icon className="w-3.5 h-3.5 mr-2" />
-                    <span>{item.title}</span>
-                    {item.badge && (
-                      <span className="ml-auto text-[9px] font-semibold uppercase tracking-wider text-primary border border-primary/40 rounded px-1 py-px">
-                        {item.badge}
-                      </span>
-                    )}
-                  </Link>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+        {/* Desktop grouped nav (hidden on mobile — mobile uses bottom bar) */}
+        <nav className="hidden lg:flex items-center gap-1 flex-1 ml-4">
+          <GroupMenu label="Markets" items={marketsGroup} />
+          <GroupMenu label="Intelligence" items={intelligenceGroup} />
+          {user && <WatchlistLink />}
         </nav>
 
-        {/* Right: account */}
-        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+        {/* Right cluster */}
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 ml-auto">
           <NotificationBell />
           {user ? (
             <>
@@ -138,6 +145,11 @@ export const AppHeader = () => {
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/watchlist">
+                      <Star className="h-3.5 w-3.5 mr-2" /> My Watchlist
+                    </Link>
+                  </DropdownMenuItem>
                   {!isActive && (
                     <DropdownMenuItem asChild>
                       <Link to="/pricing">Upgrade to Pro</Link>
@@ -158,10 +170,10 @@ export const AppHeader = () => {
             </>
           ) : (
             <div className="flex items-center gap-1">
-              <Button asChild size="sm" variant="ghost" className="h-9 text-[12px] sm:text-[13px] px-2 sm:px-3">
+              <Button asChild size="sm" variant="ghost" className="h-9 text-[13px] px-3">
                 <Link to="/login">Sign in</Link>
               </Button>
-              <Button asChild size="sm" className="h-9 text-[12px] sm:text-[13px] px-2 sm:px-3">
+              <Button asChild size="sm" className="h-9 text-[13px] px-3">
                 <Link to="/signup">
                   <span className="hidden sm:inline">Start free trial</span>
                   <span className="sm:hidden">Start</span>

@@ -27,6 +27,7 @@ import Committee from "./pages/Committee";
 import Settings from "./pages/Settings";
 import SqueezeRadarPublic from "./pages/SqueezeRadarPublic";
 import StockArticle from "./pages/StockArticle";
+import Watchlist from "./pages/Watchlist";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ const App = () => (
                       <Route path="/ratios" element={<Ratios />} />
                       <Route path="/commodities" element={<Commodities />} />
                       <Route path="/stock-intelligence" element={<StockIntelligence />} />
+                      <Route path="/watchlist" element={<Watchlist />} />
                       <Route path="/settings" element={<Settings />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>

@@ -7,6 +7,7 @@ import { Seo } from "@/components/Seo";
 import { DailyBriefingCard } from "@/components/DailyBriefingCard";
 import { useTierLimit } from "@/hooks/useTierLimit";
 import { UpgradeTease } from "@/components/UpgradeTease";
+import { WatchlistStar } from "@/components/WatchlistStar";
 
 // ==================== FORMATO ====================
 
@@ -50,11 +51,13 @@ const MarketTable = ({ rows, title }: { rows: MarketSnapshot[]; title: string })
       <div className="px-4 py-3 border-b border-border/50">
         <h3 className="text-xs uppercase tracking-[0.08em] text-muted-foreground font-medium">{title}</h3>
       </div>
-      
-      <div className="overflow-x-auto">
+
+      {/* Desktop / tablet table */}
+      <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border/50 text-xs uppercase tracking-widest text-muted-foreground">
+              <th className="w-8"></th>
               <th className="text-left py-3 px-4 font-normal">Asset</th>
               <th className="text-right py-3 px-4 font-normal">Last</th>
               <th className="text-right py-3 px-4 font-normal">1D Chg</th>
@@ -65,28 +68,42 @@ const MarketTable = ({ rows, title }: { rows: MarketSnapshot[]; title: string })
           <tbody className="divide-y divide-border/30 font-mono">
             {rows.map((row) => (
               <tr key={row.symbol} className="hover:bg-muted/30 transition-colors">
+                <td className="px-2">
+                  <WatchlistStar symbol={row.symbol} assetType={row.category} />
+                </td>
                 <td className="py-3 px-4">
                   <div>
                     <span className="font-medium text-foreground">{row.display_name}</span>
                     <span className="text-xs text-muted-foreground ml-2">{row.symbol}</span>
                   </div>
                 </td>
-                <td className="py-3 px-4 text-right tabular-nums">
-                  {fmtNum(row.current_price)}
-                </td>
-                <td className="py-3 px-4 text-right tabular-nums">
-                  {fmtNum(row.change_1d)}
-                </td>
-                <td className="py-3 px-4 text-right">
-                  <PctChange value={row.change_pct_1d} />
-                </td>
-                <td className="py-3 px-4 text-right">
-                  <PctChange value={row.change_pct_ytd} />
-                </td>
+                <td className="py-3 px-4 text-right tabular-nums">{fmtNum(row.current_price)}</td>
+                <td className="py-3 px-4 text-right tabular-nums">{fmtNum(row.change_1d)}</td>
+                <td className="py-3 px-4 text-right"><PctChange value={row.change_pct_1d} /></td>
+                <td className="py-3 px-4 text-right"><PctChange value={row.change_pct_ytd} /></td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile stacked list */}
+      <div className="sm:hidden divide-y divide-border/30">
+        {rows.map((row) => (
+          <div key={row.symbol} className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <WatchlistStar symbol={row.symbol} assetType={row.category} />
+              <div className="min-w-0">
+                <div className="text-sm font-medium text-foreground truncate">{row.display_name}</div>
+                <div className="text-[11px] text-muted-foreground truncate">{row.symbol}</div>
+              </div>
+            </div>
+            <div className="text-right ml-3 shrink-0">
+              <div className="font-mono text-sm tabular-nums">{fmtNum(row.current_price)}</div>
+              <PctChange value={row.change_pct_1d} />
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

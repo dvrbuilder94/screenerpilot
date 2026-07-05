@@ -31,7 +31,7 @@ export default function StockArticle() {
   const [genError, setGenError] = useState<string | null>(null);
 
   const load = async () => {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("stock_articles")
       .select("symbol,article_date,company_name,headline,content_md,squeeze_score,price,change_5d,volume_ratio,market_cap_label")
       .eq("symbol", sym)

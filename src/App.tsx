@@ -29,6 +29,7 @@ import SqueezeRadarPublic from "./pages/SqueezeRadarPublic";
 import StockArticle from "./pages/StockArticle";
 import Watchlist from "./pages/Watchlist";
 import Home from "./pages/Home";
+import TopPicks from "./pages/TopPicks";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = () => (
                   <AppLayout>
                     <Routes>
                       <Route path="/home" element={<Home />} />
+                      <Route path="/top-picks" element={<TopPicks />} />
                       <Route path="/markets" element={<Markets />} />
                       <Route path="/macro" element={<Macro />} />
                       <Route path="/ratios" element={<Ratios />} />

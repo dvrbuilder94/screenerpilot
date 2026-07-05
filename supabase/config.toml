@@ -72,6 +72,9 @@ verify_jwt = true
 [functions.squeeze-alert-scan]
 verify_jwt = false
 
+[functions.refresh-founder-picks]
+verify_jwt = false
+
 [functions.save-daily-picks]
 verify_jwt = false
 

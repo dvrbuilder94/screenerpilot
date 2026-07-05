@@ -1,12 +1,12 @@
-import { LineChart, Layers, Search, Star, Home } from "lucide-react";
+import { LineChart, Search, Star, Home, Trophy } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const items = [
   { title: "Home", url: "/home", icon: Home },
-  { title: "Markets", url: "/markets", icon: LineChart },
+  { title: "Top Picks", url: "/top-picks", icon: Trophy },
   { title: "Search", url: "/stock-intelligence", icon: Search },
-  { title: "Macro", url: "/macro", icon: Layers },
+  { title: "Markets", url: "/markets", icon: LineChart },
   { title: "Watchlist", url: "/watchlist", icon: Star },
 ];
 

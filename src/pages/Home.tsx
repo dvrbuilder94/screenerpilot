@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
-import { LineChart, Flame, Search, Layers, Star, ArrowRight, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { LineChart, Flame, Search, Layers, Star, ArrowRight, Loader2, Trophy, TrendingUp, TrendingDown } from "lucide-react";
 import { MarketPulseHero } from "@/components/MarketPulseHero";
 import { useWatchlist } from "@/hooks/useWatchlist";
 import { useMarketSnapshotsBySymbols } from "@/hooks/useMarketSnapshots";
+import { supabase } from "@/integrations/supabase/client";
 import { Seo } from "@/components/Seo";
 import { cn } from "@/lib/utils";
 
@@ -23,11 +25,21 @@ const Pct = ({ v }: { v: number | null | undefined }) => {
   );
 };
 
+async function fetchTopPicks() {
+  const { data } = await (supabase as any)
+    .from("founder_picks")
+    .select("id, symbol, thesis, change_pct, status")
+    .order("rank", { ascending: true })
+    .limit(3);
+  return (data ?? []) as { id: string; symbol: string; thesis: string; change_pct: number | null; status: string }[];
+}
+
 export default function Home() {
   const { items, isAuthed } = useWatchlist();
   const symbols = items.slice(0, 6).map((i) => i.symbol);
   const { data: snapshots = [], isLoading } = useMarketSnapshotsBySymbols(symbols);
   const bySymbol = new Map(snapshots.map((s) => [s.symbol, s]));
+  const { data: topPicks = [] } = useQuery({ queryKey: ["home-top-picks"], queryFn: fetchTopPicks });
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8 pb-24 lg:pb-12">
@@ -36,6 +48,41 @@ export default function Home() {
       <div>
         <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">Terminal</h1>
         <p className="text-muted-foreground mt-1 text-sm">Live market pulse, your watchlist and every module in one place.</p>
+      </div>
+
+      {/* Top Picks — the alpha, front and center */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-[13px] font-semibold uppercase tracking-[0.1em] text-muted-foreground flex items-center gap-2">
+            <Trophy className="w-3.5 h-3.5 text-primary" /> Top Picks
+          </h2>
+          <Link to="/top-picks" className="text-[12px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+            Track record <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
+        <Link to="/top-picks" className="block fin-card p-4 hover:border-primary/40 transition-colors">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {topPicks.length === 0 ? (
+              <div className="text-sm text-muted-foreground col-span-3">Cargando picks…</div>
+            ) : (
+              topPicks.map((p) => {
+                const up = (p.change_pct ?? 0) >= 0;
+                return (
+                  <div key={p.id} className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-foreground">{p.symbol}</span>
+                      <span className={cn("inline-flex items-center gap-0.5 text-[12px] font-mono font-semibold tabular-nums", p.change_pct == null ? "text-muted-foreground" : up ? "text-emerald-400" : "text-red-400")}>
+                        {p.change_pct != null && (up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />)}
+                        {p.change_pct == null ? "—" : `${up ? "+" : ""}${p.change_pct.toFixed(0)}%`}
+                      </span>
+                    </div>
+                    <p className="text-[12px] text-muted-foreground mt-1 line-clamp-2">{p.thesis}</p>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </Link>
       </div>
 
       {/* Live pulse */}

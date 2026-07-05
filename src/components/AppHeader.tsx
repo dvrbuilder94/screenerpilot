@@ -1,4 +1,4 @@
-import { LineChart, Layers, GitCompareArrows, Search, LogOut, User, Star, ChevronDown, Flame, Droplets } from "lucide-react";
+import { LineChart, Layers, GitCompareArrows, Search, LogOut, User, Star, ChevronDown, Flame, Droplets, Trophy } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -120,6 +120,22 @@ export const AppHeader = () => {
 
         {/* Desktop grouped nav (hidden on mobile — mobile uses bottom bar) */}
         <nav className="hidden lg:flex items-center gap-1 flex-1 ml-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className={cn(
+              "h-9 px-3 text-[13px] font-semibold rounded-md gap-1.5",
+              isItemActive("/top-picks")
+                ? "bg-primary/15 text-primary"
+                : "text-foreground hover:bg-secondary/60"
+            )}
+          >
+            <Link to="/top-picks" className="flex items-center">
+              <Trophy className="w-3.5 h-3.5" />
+              Top Picks
+            </Link>
+          </Button>
           <GroupMenu label="Markets" items={marketsGroup} />
           <GroupMenu label="Intelligence" items={intelligenceGroup} />
           {user && <WatchlistLink />}

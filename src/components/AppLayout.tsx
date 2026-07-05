@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { AppHeader } from "@/components/AppHeader";
+import { MobileBottomBar } from "@/components/MobileBottomBar";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 interface AppLayoutProps {
@@ -11,9 +12,10 @@ export function AppLayout({ children }: AppLayoutProps) {
     <div className="flex flex-col min-h-screen w-full bg-background overflow-x-hidden">
       <PaymentTestModeBanner />
       <AppHeader />
-      <main className="flex-1 w-full max-w-full overflow-x-hidden">
+      <main className="flex-1 w-full max-w-full overflow-x-hidden pb-16 lg:pb-0">
         {children}
       </main>
+      <MobileBottomBar />
     </div>
   );
 }

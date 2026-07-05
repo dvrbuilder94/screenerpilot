@@ -17,7 +17,7 @@ export function useMarketAlerts(limit = 20) {
   return useQuery({
     queryKey: ["market_alerts", limit],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("market_alerts")
         .select("*")
         .order("created_at", { ascending: false })

@@ -66,7 +66,7 @@ export default function SqueezeRadarPublic() {
       const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
       const [scanResult, picksResult] = await Promise.all([
         supabase.functions.invoke("squeeze-radar", { body: {} }),
-        supabase
+        (supabase as any)
           .from("squeeze_daily_picks")
           .select("symbol, rank, change_pct")
           .eq("pick_date", yesterday)

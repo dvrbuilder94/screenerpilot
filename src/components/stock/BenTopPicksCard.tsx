@@ -25,7 +25,7 @@ interface LatestPicks {
 }
 
 async function fetchLatestPicks(): Promise<LatestPicks | null> {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("ben_top_picks")
     .select("pick_date,rank,symbol,company_name,price,squeeze_score,change_5d,conviction,thesis")
     .order("pick_date", { ascending: false })

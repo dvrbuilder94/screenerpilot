@@ -13,7 +13,7 @@ export default function Settings() {
   const handleToggleDigest = async (checked: boolean) => {
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from("profiles")
       .update({ email_digest_enabled: checked })
       .eq("user_id", user.id);

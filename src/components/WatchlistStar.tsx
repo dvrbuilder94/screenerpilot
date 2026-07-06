@@ -1,8 +1,6 @@
 import { Star } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useWatchlist } from "@/hooks/useWatchlist";
-import { toast } from "sonner";
 
 interface Props {
   symbol: string;
@@ -12,19 +10,13 @@ interface Props {
 }
 
 export function WatchlistStar({ symbol, assetType = "stock", size = "sm", className }: Props) {
-  const { has, toggle, isAuthed } = useWatchlist();
-  const navigate = useNavigate();
+  const { has, toggle } = useWatchlist();
   const active = has(symbol);
   const dim = size === "sm" ? "w-3.5 h-3.5" : "w-4 h-4";
 
   const onClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    if (!isAuthed) {
-      toast.info("Sign in to build your watchlist");
-      navigate("/login");
-      return;
-    }
     toggle(symbol, assetType);
   };
 

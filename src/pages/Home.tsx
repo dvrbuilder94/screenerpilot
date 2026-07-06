@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { LineChart, Flame, Search, Layers, Star, ArrowRight, Loader2, Trophy, TrendingUp, TrendingDown } from "lucide-react";
 import { MarketPulseHero } from "@/components/MarketPulseHero";
 import { useWatchlist } from "@/hooks/useWatchlist";
-import { useMarketSnapshotsBySymbols } from "@/hooks/useMarketSnapshots";
+import { useQuotes } from "@/hooks/useQuotes";
 import { supabase } from "@/integrations/supabase/client";
 import { Seo } from "@/components/Seo";
 import { cn } from "@/lib/utils";
@@ -35,10 +35,9 @@ async function fetchTopPicks() {
 }
 
 export default function Home() {
-  const { items, isAuthed } = useWatchlist();
+  const { items } = useWatchlist();
   const symbols = items.slice(0, 6).map((i) => i.symbol);
-  const { data: snapshots = [], isLoading } = useMarketSnapshotsBySymbols(symbols);
-  const bySymbol = new Map(snapshots.map((s) => [s.symbol, s]));
+  const { data: quotes = {}, isLoading } = useQuotes(symbols);
   const { data: topPicks = [] } = useQuery({ queryKey: ["home-top-picks"], queryFn: fetchTopPicks });
 
   return (
@@ -119,18 +118,14 @@ export default function Home() {
           </Link>
         </div>
 
-        {!isAuthed ? (
-          <div className="fin-card p-6 text-center text-sm text-muted-foreground">
-            <Link to="/login" className="text-primary hover:underline">Sign in</Link> to build your watchlist.
-          </div>
-        ) : items.length === 0 ? (
+        {items.length === 0 ? (
           <div className="fin-card p-8 text-center space-y-3">
             <Star className="w-8 h-8 text-muted-foreground mx-auto" />
             <p className="text-sm text-muted-foreground">
-              Your watchlist is empty. Tap the ⭐ on any ticker in Markets or Stock Intelligence.
+              Tu watchlist está vacía. Agrega cualquier acción para seguirla.
             </p>
-            <Link to="/stock-intelligence" className="text-primary text-sm hover:underline inline-flex items-center gap-1">
-              Find a stock <ArrowRight className="w-3 h-3" />
+            <Link to="/watchlist" className="text-primary text-sm hover:underline inline-flex items-center gap-1">
+              Agregar una acción <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
         ) : isLoading ? (
@@ -138,7 +133,7 @@ export default function Home() {
         ) : (
           <div className="fin-card divide-y divide-border/40">
             {items.slice(0, 6).map((it) => {
-              const s = bySymbol.get(it.symbol);
+              const q = quotes[it.symbol];
               return (
                 <Link
                   key={it.id}
@@ -147,13 +142,13 @@ export default function Home() {
                 >
                   <div className="min-w-0">
                     <div className="font-medium text-foreground text-sm">{it.symbol}</div>
-                    {s?.display_name && <div className="text-[11px] text-muted-foreground truncate">{s.display_name}</div>}
+                    {q?.name && q.name !== it.symbol && <div className="text-[11px] text-muted-foreground truncate">{q.name}</div>}
                   </div>
                   <div className="text-right shrink-0 ml-3">
                     <div className="font-mono text-[13px] tabular-nums text-foreground">
-                      {s?.current_price != null ? s.current_price.toLocaleString("en-US", { maximumFractionDigits: 2 }) : "—"}
+                      {q?.price != null ? q.price.toLocaleString("en-US", { maximumFractionDigits: 2 }) : "—"}
                     </div>
-                    <Pct v={s?.change_pct_1d ?? null} />
+                    <Pct v={q?.changePct ?? null} />
                   </div>
                 </Link>
               );

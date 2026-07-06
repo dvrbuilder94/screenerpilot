@@ -1,7 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+
+// Device-local watchlist — works with no login, persists across sessions.
+// (Cross-device DB sync can layer on later; the key goal is: add any ticker,
+// see it, remove it — end to end, no friction.)
+const KEY = "sp_watchlist_v1";
 
 export interface WatchlistItem {
   id: string;
@@ -10,65 +14,67 @@ export interface WatchlistItem {
   created_at: string;
 }
 
+function read(): WatchlistItem[] {
+  try {
+    const raw = localStorage.getItem(KEY);
+    return raw ? (JSON.parse(raw) as WatchlistItem[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function write(items: WatchlistItem[]) {
+  localStorage.setItem(KEY, JSON.stringify(items));
+}
+
 export function useWatchlist() {
   const { user } = useAuth();
   const qc = useQueryClient();
 
   const query = useQuery({
-    queryKey: ["watchlist", user?.id],
-    queryFn: async () => {
-      if (!user) return [] as WatchlistItem[];
-      const { data, error } = await supabase
-        .from("user_watchlists")
-        .select("id, symbol, asset_type, created_at")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return (data ?? []) as WatchlistItem[];
-    },
-    enabled: !!user,
-    staleTime: 30_000,
+    queryKey: ["watchlist"],
+    queryFn: async () => read(),
+    staleTime: Infinity,
   });
 
   const add = useMutation({
     mutationFn: async ({ symbol, asset_type = "stock" }: { symbol: string; asset_type?: string }) => {
-      if (!user) throw new Error("Sign in required");
-      const { error } = await supabase
-        .from("user_watchlists")
-        .insert({ user_id: user.id, symbol: symbol.toUpperCase(), asset_type });
-      if (error && !String(error.message).includes("duplicate")) throw error;
+      const sym = symbol.trim().toUpperCase();
+      if (!sym) return;
+      const items = read();
+      if (items.some((i) => i.symbol === sym)) return;
+      write([
+        { id: crypto.randomUUID(), symbol: sym, asset_type, created_at: new Date().toISOString() },
+        ...items,
+      ]);
     },
     onSuccess: (_d, v) => {
       qc.invalidateQueries({ queryKey: ["watchlist"] });
-      toast.success(`${v.symbol.toUpperCase()} added to watchlist`);
+      toast.success(`${v.symbol.trim().toUpperCase()} agregada a tu watchlist`);
     },
-    onError: (e: any) => toast.error(e?.message || "Could not add to watchlist"),
+    onError: (e: any) => toast.error(e?.message || "No se pudo agregar"),
   });
 
   const remove = useMutation({
     mutationFn: async (symbol: string) => {
-      if (!user) throw new Error("Sign in required");
-      const { error } = await supabase
-        .from("user_watchlists")
-        .delete()
-        .eq("user_id", user.id)
-        .eq("symbol", symbol.toUpperCase());
-      if (error) throw error;
+      const sym = symbol.toUpperCase();
+      write(read().filter((i) => i.symbol !== sym));
     },
     onSuccess: (_d, symbol) => {
       qc.invalidateQueries({ queryKey: ["watchlist"] });
-      toast.success(`${symbol.toUpperCase()} removed from watchlist`);
+      toast.success(`${symbol.toUpperCase()} quitada`);
     },
-    onError: (e: any) => toast.error(e?.message || "Could not remove from watchlist"),
+    onError: (e: any) => toast.error(e?.message || "No se pudo quitar"),
   });
 
-  const symbols = (query.data ?? []).map((w) => w.symbol);
+  const items = query.data ?? [];
+  const symbols = items.map((w) => w.symbol);
   const has = (symbol: string) => symbols.includes(symbol.toUpperCase());
   const toggle = (symbol: string, asset_type = "stock") =>
     has(symbol) ? remove.mutate(symbol) : add.mutate({ symbol, asset_type });
 
   return {
-    items: query.data ?? [],
+    items,
     symbols,
     isLoading: query.isLoading,
     has,

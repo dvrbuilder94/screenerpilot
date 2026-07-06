@@ -5,6 +5,7 @@ import { MarketPulseHero } from "@/components/MarketPulseHero";
 import { useWatchlist } from "@/hooks/useWatchlist";
 import { useQuotes } from "@/hooks/useQuotes";
 import { supabase } from "@/integrations/supabase/client";
+import { FALLBACK_PICKS } from "@/pages/TopPicks";
 import { Seo } from "@/components/Seo";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +32,10 @@ async function fetchTopPicks() {
     .select("id, symbol, thesis, change_pct, status")
     .order("rank", { ascending: true })
     .limit(3);
-  return (data ?? []) as { id: string; symbol: string; thesis: string; change_pct: number | null; status: string }[];
+  if (!data || data.length === 0) {
+    return FALLBACK_PICKS.slice(0, 3).map((p) => ({ id: p.id, symbol: p.symbol, thesis: p.thesis, change_pct: p.change_pct, status: p.status }));
+  }
+  return data as { id: string; symbol: string; thesis: string; change_pct: number | null; status: string }[];
 }
 
 export default function Home() {

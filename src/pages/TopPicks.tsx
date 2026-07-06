@@ -29,13 +29,25 @@ const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
   broken: { label: "Rota", cls: "text-red-400 border-red-500/30 bg-red-500/10" },
 };
 
+// Fallback so the page is never empty even before the DB migration is applied.
+// Illustrative entries/prices — replaced by real DB data + live prices once wired.
+export const FALLBACK_PICKS: FounderPick[] = [
+  { id: "f1", symbol: "PLTR", company_name: "Palantir Technologies", entry_date: "2023-01-15", entry_price: 6.5, thesis: "AI/data platform mal entendido — el mercado no veía el pivote de gobierno a comercial.", ben_note: null, conviction: "HIGH", status: "playing_out", is_live_logged: false, current_price: 165, change_pct: 2438, rank: 1 },
+  { id: "f2", symbol: "RGTI", company_name: "Rigetti Computing", entry_date: "2023-11-01", entry_price: 1.1, thesis: "Quantum de superconductores a valuación de descarte — opción asimétrica.", ben_note: null, conviction: "MEDIUM", status: "playing_out", is_live_logged: false, current_price: 14, change_pct: 1173, rank: 2 },
+  { id: "f3", symbol: "HIMS", company_name: "Hims & Hers Health", entry_date: "2024-02-01", entry_price: 9, thesis: "Telehealth con marca real y márgenes; GLP-1 como catalizador ignorado.", ben_note: null, conviction: "HIGH", status: "playing_out", is_live_logged: false, current_price: 55, change_pct: 511, rank: 3 },
+  { id: "f4", symbol: "IONQ", company_name: "IonQ Inc.", entry_date: "2023-05-01", entry_price: 7.2, thesis: "Trapped-ion es la arquitectura correcta y ya factura, algo raro en quantum.", ben_note: null, conviction: "HIGH", status: "playing_out", is_live_logged: false, current_price: 42, change_pct: 483, rank: 4 },
+  { id: "f5", symbol: "AMD", company_name: "Advanced Micro Devices", entry_date: "2023-01-10", entry_price: 65, thesis: "El único retador real de NVIDIA en AI; el mercado subestimaba MI300.", ben_note: null, conviction: "HIGH", status: "playing_out", is_live_logged: false, current_price: 170, change_pct: 162, rank: 5 },
+  { id: "f6", symbol: "OSCR", company_name: "Oscar Health", entry_date: "2024-04-01", entry_price: 6.5, thesis: "Insurtech dada por muerta; el camino a rentabilidad no estaba en precio.", ben_note: null, conviction: "MEDIUM", status: "active", is_live_logged: false, current_price: 16, change_pct: 146, rank: 6 },
+  { id: "f7", symbol: "LAC", company_name: "Lithium Americas", entry_date: "2025-03-01", entry_price: 3.5, thesis: "Litio en el fondo del ciclo; Thacker Pass + respaldo de GM. Pick actual.", ben_note: null, conviction: "HIGH", status: "active", is_live_logged: false, current_price: 3.1, change_pct: -11, rank: 7 },
+];
+
 async function fetchPicks(): Promise<FounderPick[]> {
   const { data, error } = await (supabase as any)
     .from("founder_picks")
     .select("*")
     .order("rank", { ascending: true });
-  if (error) throw error;
-  return (data ?? []) as FounderPick[];
+  if (error || !data || data.length === 0) return FALLBACK_PICKS;
+  return data as FounderPick[];
 }
 
 function fmtDate(d: string) {
@@ -53,6 +65,7 @@ export default function TopPicks() {
     setRefreshing(false);
   };
 
+  const usingFallback = picks.length > 0 && picks[0].id.startsWith("f");
   const scored = picks.filter((p) => p.change_pct != null);
   const avg = scored.length ? scored.reduce((a, p) => a + (p.change_pct ?? 0), 0) / scored.length : null;
   const best = scored.length ? scored.reduce((a, p) => ((p.change_pct ?? 0) > (a.change_pct ?? 0) ? p : a)) : null;
@@ -100,6 +113,13 @@ export default function TopPicks() {
           {best && best.change_pct != null && <div className="text-[11px] text-muted-foreground mt-0.5">{best.symbol}</div>}
         </div>
       </div>
+
+      {usingFallback && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[12.5px] text-amber-300/90">
+          <span className="font-semibold">Datos de ejemplo.</span> Así se ve el producto. Los números y tesis reales
+          se cargan cuando conectemos la base de datos y tus entradas verdaderas.
+        </div>
+      )}
 
       {isLoading ? (
         <div className="fin-card p-10 text-center text-sm text-muted-foreground">Cargando…</div>

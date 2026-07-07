@@ -11,6 +11,7 @@ export interface WatchlistItem {
   id: string;
   symbol: string;
   asset_type: string;
+  sector?: string;
   created_at: string;
 }
 
@@ -38,13 +39,13 @@ export function useWatchlist() {
   });
 
   const add = useMutation({
-    mutationFn: async ({ symbol, asset_type = "stock" }: { symbol: string; asset_type?: string }) => {
+    mutationFn: async ({ symbol, asset_type = "stock", sector }: { symbol: string; asset_type?: string; sector?: string }) => {
       const sym = symbol.trim().toUpperCase();
       if (!sym) return;
       const items = read();
       if (items.some((i) => i.symbol === sym)) return;
       write([
-        { id: crypto.randomUUID(), symbol: sym, asset_type, created_at: new Date().toISOString() },
+        { id: crypto.randomUUID(), symbol: sym, asset_type, sector, created_at: new Date().toISOString() },
         ...items,
       ]);
     },
@@ -53,6 +54,14 @@ export function useWatchlist() {
       toast.success(`${v.symbol.trim().toUpperCase()} agregada a tu watchlist`);
     },
     onError: (e: any) => toast.error(e?.message || "No se pudo agregar"),
+  });
+
+  const setSector = useMutation({
+    mutationFn: async ({ symbol, sector }: { symbol: string; sector?: string }) => {
+      const sym = symbol.toUpperCase();
+      write(read().map((i) => (i.symbol === sym ? { ...i, sector } : i)));
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["watchlist"] }),
   });
 
   const remove = useMutation({
@@ -80,6 +89,7 @@ export function useWatchlist() {
     has,
     add: add.mutate,
     remove: remove.mutate,
+    setSector: setSector.mutate,
     toggle,
     isAuthed: !!user,
   };

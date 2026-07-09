@@ -141,7 +141,7 @@ export default function Home() {
               return (
                 <Link
                   key={it.id}
-                  to={`/stock-intelligence?symbol=${it.symbol}`}
+                  to={`/gem/${it.symbol}`}
                   className="flex items-center justify-between px-4 py-3 hover:bg-secondary/40 transition-colors"
                 >
                   <div className="min-w-0">

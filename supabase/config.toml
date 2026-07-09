@@ -75,6 +75,9 @@ verify_jwt = false
 [functions.quotes]
 verify_jwt = false
 
+[functions.generate-gem-thesis]
+verify_jwt = false
+
 [functions.refresh-founder-picks]
 verify_jwt = false
 

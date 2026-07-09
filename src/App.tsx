@@ -30,6 +30,7 @@ import StockArticle from "./pages/StockArticle";
 import Watchlist from "./pages/Watchlist";
 import Home from "./pages/Home";
 import TopPicks from "./pages/TopPicks";
+import GemDetail from "./pages/GemDetail";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ const App = () => (
                     <Routes>
                       <Route path="/home" element={<Home />} />
                       <Route path="/top-picks" element={<TopPicks />} />
+                      <Route path="/gem/:symbol" element={<GemDetail />} />
                       <Route path="/markets" element={<Markets />} />
                       <Route path="/macro" element={<Macro />} />
                       <Route path="/ratios" element={<Ratios />} />

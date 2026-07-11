@@ -1,4 +1,4 @@
-import { LineChart, Layers, GitCompareArrows, Search, LogOut, User, Star, ChevronDown, Flame, Droplets, Trophy } from "lucide-react";
+import { LineChart, Search, LogOut, User, Star, Home } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -15,25 +15,14 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
-type NavItem = {
-  title: string;
-  url: string;
-  icon: typeof LineChart;
-  badge?: string;
-  desc?: string;
-};
+type NavItem = { title: string; url: string; icon: typeof LineChart };
 
-// Grouped navigation for a "pro terminal" feel.
-const marketsGroup: NavItem[] = [
-  { title: "Markets", url: "/markets", icon: LineChart, desc: "Sectors, factors, yields, FX" },
-  { title: "Macro", url: "/macro", icon: Layers, desc: "Regime, indicators, calendar" },
-  { title: "Commodities", url: "/commodities", icon: Droplets, desc: "Energy, metals, softs" },
-  { title: "Ratios", url: "/ratios", icon: GitCompareArrows, desc: "Cross-asset relative strength" },
-];
-
-const intelligenceGroup: NavItem[] = [
-  { title: "Stock Intelligence", url: "/stock-intelligence", icon: Search, desc: "Deep dive on any ticker" },
-  { title: "Squeeze Radar", url: "/squeeze-radar", icon: Flame, desc: "Short squeeze setups" },
+// 4 tabs. That's it. Everything else lives inside these sections or on direct URLs.
+const NAV: NavItem[] = [
+  { title: "Home", url: "/home", icon: Home },
+  { title: "Markets", url: "/markets", icon: LineChart },
+  { title: "Stock Intelligence", url: "/stock-intelligence", icon: Search },
+  { title: "Watchlist", url: "/watchlist", icon: Star },
 ];
 
 export const AppHeader = () => {
@@ -41,104 +30,39 @@ export const AppHeader = () => {
   const { user, signOut } = useAuth();
   const { isActive, isTrialing } = useSubscription();
 
-  const isItemActive = (url: string) =>
-    url === "/" ? location.pathname === "/" : location.pathname.startsWith(url);
-
-  const anyActive = (items: NavItem[]) => items.some((i) => isItemActive(i.url));
-
-  const GroupMenu = ({ label, items }: { label: string; items: NavItem[] }) => {
-    const active = anyActive(items);
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(
-              "h-9 px-3 text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 rounded-md gap-1",
-              active && "text-foreground"
-            )}
-          >
-            {label}
-            <ChevronDown className="w-3 h-3 opacity-60" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-64">
-          <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-            {label}
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {items.map((item) => (
-            <DropdownMenuItem key={item.url} asChild>
-              <Link to={item.url} className="flex items-start gap-2.5 py-2">
-                <item.icon className="w-4 h-4 mt-0.5 text-muted-foreground" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">{item.title}</span>
-                    {item.badge && (
-                      <span className="text-[9px] font-semibold uppercase tracking-wider text-primary border border-primary/40 rounded px-1 py-px">
-                        {item.badge}
-                      </span>
-                    )}
-                  </div>
-                  {item.desc && <div className="text-[11px] text-muted-foreground">{item.desc}</div>}
-                </div>
-              </Link>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  };
-
-  const WatchlistLink = () => {
-    const active = isItemActive("/watchlist");
-    return (
-      <Button
-        variant="ghost"
-        size="sm"
-        asChild
-        className={cn(
-          "h-9 px-3 text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 rounded-md",
-          active && "bg-secondary text-foreground"
-        )}
-      >
-        <Link to="/watchlist" className="flex items-center gap-1.5">
-          <Star className="w-3.5 h-3.5" />
-          Watchlist
-        </Link>
-      </Button>
-    );
-  };
+  const isItemActive = (url: string) => location.pathname.startsWith(url);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
-      <div className="flex h-14 sm:h-16 items-center justify-between px-3 sm:px-5 gap-2 sm:gap-3 max-w-full">
-        <Link to="/" className="flex-shrink-0 min-w-0">
+      <div className="flex h-14 sm:h-16 items-center justify-between px-3 sm:px-5 gap-3 max-w-full">
+        <Link to={user ? "/home" : "/"} className="flex-shrink-0 min-w-0">
           <Logo />
         </Link>
 
-        {/* Desktop grouped nav (hidden on mobile — mobile uses bottom bar) */}
+        {/* Desktop nav — 4 tabs, always visible on lg+. Mobile uses bottom bar. */}
         <nav className="hidden lg:flex items-center gap-1 flex-1 ml-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className={cn(
-              "h-9 px-3 text-[13px] font-semibold rounded-md gap-1.5",
-              isItemActive("/top-picks")
-                ? "bg-primary/15 text-primary"
-                : "text-foreground hover:bg-secondary/60"
-            )}
-          >
-            <Link to="/top-picks" className="flex items-center">
-              <Trophy className="w-3.5 h-3.5" />
-              Top Picks
-            </Link>
-          </Button>
-          <GroupMenu label="Markets" items={marketsGroup} />
-          <GroupMenu label="Intelligence" items={intelligenceGroup} />
-          {user && <WatchlistLink />}
+          {NAV.map((item) => {
+            const active = isItemActive(item.url);
+            return (
+              <Button
+                key={item.url}
+                variant="ghost"
+                size="sm"
+                asChild
+                className={cn(
+                  "h-9 px-3 text-[13px] font-medium rounded-md gap-1.5",
+                  active
+                    ? "bg-secondary text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+                )}
+              >
+                <Link to={item.url} className="flex items-center">
+                  <item.icon className="w-3.5 h-3.5" />
+                  {item.title}
+                </Link>
+              </Button>
+            );
+          })}
         </nav>
 
         {/* Right cluster */}

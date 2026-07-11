@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowRight, Terminal, Users, Zap, Shield } from "lucide-react";
+import { ArrowRight, Terminal, LineChart, Search, Shield } from "lucide-react";
 import { Seo } from "@/components/Seo";
 import { LiveTickerTape } from "@/components/LiveTickerTape";
 import { MarketPulseHero } from "@/components/MarketPulseHero";
@@ -46,8 +46,8 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-[#0A0C14] text-white overflow-x-hidden">
       <Seo
-        title="ScreenerPilot — AI Agents for Serious Investors"
-        description="Benjamin is your team of specialized AI agents. Professional macro intelligence and cross-asset analysis in one clean terminal."
+        title="ScreenerPilot — The market terminal for independent investors"
+        description="Live prices, movers, macro regime and deep ticker analysis. One clean terminal built for serious investors. No fluff."
         path="/"
       />
 
@@ -91,24 +91,24 @@ export default function Landing() {
         <section className="pt-20 pb-16 border-b border-white/10">
           <div className="max-w-5xl mx-auto px-6 text-center">
             <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full border border-white/10 bg-white/5 text-xs tracking-[2px] text-zinc-400 mb-6">
-              POWERED BY BENJAMIN
+              MARKET TERMINAL
             </div>
 
-            <h1 className="text-6xl lg:text-7xl font-semibold tracking-tighter leading-none">
-              Your team of
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-tighter leading-[1.02]">
+              The market terminal
               <br />
-              specialized AI agents.
+              for independent investors.
             </h1>
 
-            <p className="mt-6 text-xl text-zinc-400 max-w-2xl mx-auto">
-              Professional macro intelligence, cross-asset analysis and intelligent agents.
-              <br />
-              One clean terminal. Built for serious investors.
+            <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-2xl mx-auto">
+              Live prices, movers, macro regime and deep ticker analysis.
+              <br className="hidden sm:block" />
+              One clean terminal. No fluff.
             </p>
 
-            <div className="flex justify-center gap-4 mt-10">
+            <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-10">
               <Button asChild size="lg" className="h-12 px-8 text-base bg-white text-black hover:bg-zinc-100">
-                <Link to="/signup">Start 30-day free trial</Link>
+                <Link to="/signup">Start free trial</Link>
               </Button>
               <Button
                 asChild
@@ -116,7 +116,7 @@ export default function Landing() {
                 variant="outline"
                 className="h-12 px-8 text-base border-white/20 hover:bg-white/5"
               >
-                <Link to="/markets">Open Terminal</Link>
+                <Link to="/home">Open Terminal</Link>
               </Button>
             </div>
             <p className="mt-3 text-xs text-zinc-500">$15/month after trial. Cancel anytime.</p>
@@ -141,39 +141,44 @@ export default function Landing() {
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               {
                 icon: Terminal,
-                title: "Professional Terminal",
-                desc: "Clean command interface with live data across stocks, crypto, ETFs and macro.",
+                title: "Home Dashboard",
+                desc: "S&P, Nasdaq, VIX, BTC, rates and today's biggest movers in one glance.",
+                to: "/home",
               },
               {
-                icon: Users,
-                title: "BEN Agents",
-                desc: "Specialized AI agents that research, screen and analyze for you in seconds.",
+                icon: LineChart,
+                title: "Live Markets",
+                desc: "Cross-asset snapshots across stocks, crypto, macro and commodities.",
+                to: "/markets",
               },
               {
-                icon: Zap,
-                title: "Cross-Asset Intelligence",
-                desc: "Regimes, ratios, dislocations and relative value in one unified view.",
+                icon: Search,
+                title: "Stock Intelligence",
+                desc: "Deep dive on any ticker — fundamentals, technicals, news and structure.",
+                to: "/stock-intelligence",
               },
               {
                 icon: Shield,
-                title: "Read-only & Private",
-                desc: "No execution. No signals. No advice. Built for professional use.",
+                title: "Watchlist",
+                desc: "Track any ticker with live quotes. No noise, no ads, no advice.",
+                to: "/watchlist",
               },
             ].map((item, index) => (
-              <div
+              <Link
                 key={index}
+                to={item.to}
                 className="group rounded-3xl border border-white/10 bg-[#11131C] p-7 transition-all hover:border-white/20 hover:bg-[#161A25]"
               >
                 <div className="w-11 h-11 rounded-2xl bg-white/5 flex items-center justify-center mb-6 group-hover:bg-white/10 transition-colors">
-                  <item.icon className="w-5 h-5 text-cyan-400" />
+                  <item.icon className="w-5 h-5 text-white" />
                 </div>
                 <h3 className="font-semibold text-xl tracking-tight mb-3">{item.title}</h3>
                 <p className="text-zinc-400 leading-relaxed text-[15px]">{item.desc}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </section>

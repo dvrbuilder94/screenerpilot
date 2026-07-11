@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Star, ArrowRight, TrendingUp, TrendingDown, Loader2, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";

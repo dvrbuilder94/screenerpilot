@@ -51,9 +51,9 @@ export function useWatchlist() {
     },
     onSuccess: (_d, v) => {
       qc.invalidateQueries({ queryKey: ["watchlist"] });
-      toast.success(`${v.symbol.trim().toUpperCase()} agregada a tu watchlist`);
+      toast.success(`${v.symbol.trim().toUpperCase()} added to your watchlist`);
     },
-    onError: (e: any) => toast.error(e?.message || "No se pudo agregar"),
+    onError: (e: any) => toast.error(e?.message || "Could not add ticker"),
   });
 
   const setSector = useMutation({

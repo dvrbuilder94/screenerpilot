@@ -125,7 +125,7 @@ export default function Home() {
     e.preventDefault();
     const sym = q.trim().toUpperCase();
     if (!sym) return;
-    navigate(`/stock-intelligence?symbol=${encodeURIComponent(sym)}`);
+    navigate(`/gem/${encodeURIComponent(sym)}`);
   };
 
   return (
@@ -161,6 +161,21 @@ export default function Home() {
           Analyze
         </Button>
       </form>
+
+      {/* On-chain Agent — beta teaser */}
+      <Link
+        to="/agent"
+        className="flex items-center gap-3 rounded-2xl border border-primary/30 bg-primary/[0.06] hover:bg-primary/[0.1] transition-colors px-4 py-3"
+      >
+        <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-primary border border-primary/40 rounded-full px-2 py-0.5 flex-shrink-0">
+          Beta
+        </span>
+        <span className="text-[13px] text-foreground flex-1 min-w-0">
+          <span className="font-semibold">On-chain Agent</span>
+          <span className="text-muted-foreground"> — BEN watching the on-chain market 24/7. Join the waitlist.</span>
+        </span>
+        <ArrowRight className="w-4 h-4 text-primary flex-shrink-0" />
+      </Link>
 
       {/* Today's tape — horizontal scroll on mobile, grid on desktop */}
       <section>
@@ -226,7 +241,7 @@ export default function Home() {
             movers.map((s) => (
               <Link
                 key={s.id}
-                to={`/stock-intelligence?symbol=${encodeURIComponent(s.symbol)}`}
+                to={`/gem/${encodeURIComponent(s.symbol)}`}
                 className="flex items-center justify-between px-4 py-3 hover:bg-secondary/40 transition-colors"
               >
                 <div className="min-w-0">
@@ -284,7 +299,7 @@ export default function Home() {
               return (
                 <Link
                   key={it.id}
-                  to={`/stock-intelligence?symbol=${encodeURIComponent(it.symbol)}`}
+                  to={`/gem/${encodeURIComponent(it.symbol)}`}
                   className="flex items-center justify-between px-4 py-3 hover:bg-secondary/40 transition-colors"
                 >
                   <div className="min-w-0">

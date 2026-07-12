@@ -23,13 +23,12 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import RefundPolicy from "./pages/RefundPolicy";
 import Unsubscribe from "./pages/Unsubscribe";
-import Committee from "./pages/Committee";
+import OnchainAgent from "./pages/OnchainAgent";
 import Settings from "./pages/Settings";
 import SqueezeRadarPublic from "./pages/SqueezeRadarPublic";
 import StockArticle from "./pages/StockArticle";
 import Watchlist from "./pages/Watchlist";
 import Home from "./pages/Home";
-import TopPicks from "./pages/TopPicks";
 import GemDetail from "./pages/GemDetail";
 
 const queryClient = new QueryClient();
@@ -54,7 +53,6 @@ const App = () => (
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/refund-policy" element={<RefundPolicy />} />
               <Route path="/unsubscribe" element={<Unsubscribe />} />
-              <Route path="/committee" element={<Committee />} />
               <Route path="/squeeze-radar" element={<SqueezeRadarPublic />} />
               <Route path="/squeeze-radar/:symbol" element={<StockArticle />} />
               <Route
@@ -63,8 +61,8 @@ const App = () => (
                   <AppLayout>
                     <Routes>
                       <Route path="/home" element={<Home />} />
-                      <Route path="/top-picks" element={<TopPicks />} />
                       <Route path="/gem/:symbol" element={<GemDetail />} />
+                      <Route path="/agent" element={<OnchainAgent />} />
                       <Route path="/markets" element={<Markets />} />
                       <Route path="/macro" element={<Macro />} />
                       <Route path="/ratios" element={<Ratios />} />

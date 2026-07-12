@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -47,16 +47,19 @@ function InteractiveChart({
   onHover: (info: { price: number; date: string } | null) => void;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
-  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  const hoverRef = useRef<number | null>(null);
   const pad = 6;
 
-  useEffect(() => {
+  const draw = useCallback(() => {
     const cv = ref.current;
     if (!cv || close.length < 2) return;
-    const ctx = cv.getContext("2d")!;
+    const ctx = cv.getContext("2d");
+    if (!ctx) return;
     const r = cv.getBoundingClientRect();
+    if (r.width < 2 || r.height < 2) return;
     const dpr = Math.min(devicePixelRatio || 1, 2);
-    cv.width = r.width * dpr; cv.height = r.height * dpr;
+    cv.width = Math.round(r.width * dpr);
+    cv.height = Math.round(r.height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const W = r.width, H = r.height;
     const min = Math.min(...close), max = Math.max(...close);
@@ -64,24 +67,37 @@ function InteractiveChart({
     const Y = (v: number) => H - pad - ((v - min) / (max - min || 1)) * (H - pad * 2);
 
     ctx.clearRect(0, 0, W, H);
+    // area
     ctx.beginPath(); ctx.moveTo(X(0), Y(close[0]));
     for (let i = 1; i < close.length; i++) ctx.lineTo(X(i), Y(close[i]));
     ctx.lineTo(X(close.length - 1), H - pad); ctx.lineTo(X(0), H - pad); ctx.closePath();
     const g = ctx.createLinearGradient(0, pad, 0, H);
-    g.addColorStop(0, "rgba(201,247,63,0.18)"); g.addColorStop(1, "rgba(201,247,63,0)");
+    g.addColorStop(0, "rgba(201,247,63,0.22)"); g.addColorStop(1, "rgba(201,247,63,0)");
     ctx.fillStyle = g; ctx.fill();
+    // line
     ctx.beginPath(); ctx.moveTo(X(0), Y(close[0]));
     for (let i = 1; i < close.length; i++) ctx.lineTo(X(i), Y(close[i]));
-    ctx.strokeStyle = "#C9F73F"; ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.stroke();
-
-    if (hoverIdx != null) {
-      const hx = X(hoverIdx), hy = Y(close[hoverIdx]);
+    ctx.strokeStyle = "#C9F73F"; ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.stroke();
+    // crosshair
+    const hi = hoverRef.current;
+    if (hi != null) {
+      const hx = X(hi), hy = Y(close[hi]);
       ctx.strokeStyle = "rgba(255,255,255,0.25)"; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(hx, pad); ctx.lineTo(hx, H - pad); ctx.stroke();
       ctx.beginPath(); ctx.fillStyle = "#C9F73F"; ctx.arc(hx, hy, 4, 0, 7); ctx.fill();
       ctx.beginPath(); ctx.strokeStyle = "rgba(201,247,63,0.4)"; ctx.lineWidth = 2; ctx.arc(hx, hy, 7, 0, 7); ctx.stroke();
     }
-  }, [close, hoverIdx]);
+  }, [close]);
+
+  // draw on mount + whenever the canvas actually gets a size (ResizeObserver)
+  useEffect(() => {
+    draw();
+    const cv = ref.current;
+    if (!cv || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => draw());
+    ro.observe(cv);
+    return () => ro.disconnect();
+  }, [draw]);
 
   const move = (clientX: number) => {
     const cv = ref.current;
@@ -89,7 +105,8 @@ function InteractiveChart({
     const rect = cv.getBoundingClientRect();
     const t = (clientX - rect.left - pad) / (rect.width - pad * 2);
     const i = Math.max(0, Math.min(close.length - 1, Math.round(t * (close.length - 1))));
-    setHoverIdx(i);
+    hoverRef.current = i;
+    draw();
     const ts = timestamps?.[i];
     onHover({
       price: close[i],
@@ -104,7 +121,7 @@ function InteractiveChart({
       style={{ touchAction: "none" }}
       onPointerMove={(e) => move(e.clientX)}
       onPointerDown={(e) => move(e.clientX)}
-      onPointerLeave={() => { setHoverIdx(null); onHover(null); }}
+      onPointerLeave={() => { hoverRef.current = null; draw(); onHover(null); }}
     />
   );
 }

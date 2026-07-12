@@ -21,7 +21,7 @@ type NavItem = { title: string; url: string; icon: typeof LineChart };
 const NAV: NavItem[] = [
   { title: "Home", url: "/home", icon: Home },
   { title: "Markets", url: "/markets", icon: LineChart },
-  { title: "Stock Intelligence", url: "/stock-intelligence", icon: Search },
+  { title: "Search", url: "/search", icon: Search },
   { title: "Watchlist", url: "/watchlist", icon: Star },
 ];
 

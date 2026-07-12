@@ -30,6 +30,7 @@ import StockArticle from "./pages/StockArticle";
 import Watchlist from "./pages/Watchlist";
 import Home from "./pages/Home";
 import AssetDetail from "./pages/AssetDetail";
+import Search from "./pages/Search";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ const App = () => (
                     <Routes>
                       <Route path="/home" element={<Home />} />
                       <Route path="/asset/:symbol" element={<AssetDetail />} />
+                      <Route path="/search" element={<Search />} />
                       <Route path="/agent" element={<OnchainAgent />} />
                       <Route path="/markets" element={<Markets />} />
                       <Route path="/macro" element={<Macro />} />

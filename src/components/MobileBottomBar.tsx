@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 const items = [
   { title: "Home", url: "/home", icon: Home },
   { title: "Markets", url: "/markets", icon: LineChart },
-  { title: "Search", url: "/stock-intelligence", icon: Search },
+  { title: "Search", url: "/search", icon: Search },
   { title: "Watchlist", url: "/watchlist", icon: Star },
 ];
 

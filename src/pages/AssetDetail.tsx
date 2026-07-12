@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useWatchlist } from "@/hooks/useWatchlist";
+import { cleanTicker } from "@/lib/ticker";
 import { Seo } from "@/components/Seo";
 import { ChevronLeft, Loader2, Bell, Heart, Sparkles } from "lucide-react";
 
@@ -154,7 +155,7 @@ export default function AssetDetail() {
             <div className="mt-3 flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-baseline gap-2.5 flex-wrap">
-                  <span className="mono" style={{ fontSize: 30, fontWeight: 700, letterSpacing: "-0.02em" }}>{a.symbol}</span>
+                  <span className="mono" style={{ fontSize: 30, fontWeight: 700, letterSpacing: "-0.02em" }}>{cleanTicker(a.symbol)}</span>
                   <span style={{ fontSize: 14, color: "var(--muted)" }}>{a.companyName}</span>
                 </div>
                 <div className="mt-1.5 flex items-baseline gap-3">

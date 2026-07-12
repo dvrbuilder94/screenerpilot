@@ -9,6 +9,7 @@ import { useQuotes } from "@/hooks/useQuotes";
 import { useMarketSnapshots } from "@/hooks/useMarketSnapshots";
 import { Seo } from "@/components/Seo";
 import { cn } from "@/lib/utils";
+import { cleanTicker, assetLabel } from "@/lib/ticker";
 
 const TAPE_SYMBOLS: { symbol: string; label: string }[] = [
   { symbol: "^GSPC", label: "S&P 500" },
@@ -246,10 +247,10 @@ export default function Home() {
               >
                 <div className="min-w-0">
                   <div className="font-medium text-foreground text-sm truncate">
-                    {s.symbol}
+                    {assetLabel(s.symbol, s.display_name)}
                   </div>
-                  <div className="text-[11px] text-muted-foreground truncate">
-                    {s.display_name}
+                  <div className="text-[11px] text-muted-foreground truncate font-mono">
+                    {cleanTicker(s.symbol)}
                   </div>
                 </div>
                 <div className="text-right shrink-0 ml-3">

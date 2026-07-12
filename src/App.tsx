@@ -29,7 +29,7 @@ import SqueezeRadarPublic from "./pages/SqueezeRadarPublic";
 import StockArticle from "./pages/StockArticle";
 import Watchlist from "./pages/Watchlist";
 import Home from "./pages/Home";
-import GemDetail from "./pages/GemDetail";
+import AssetDetail from "./pages/AssetDetail";
 
 const queryClient = new QueryClient();
 
@@ -61,7 +61,7 @@ const App = () => (
                   <AppLayout>
                     <Routes>
                       <Route path="/home" element={<Home />} />
-                      <Route path="/gem/:symbol" element={<GemDetail />} />
+                      <Route path="/asset/:symbol" element={<AssetDetail />} />
                       <Route path="/agent" element={<OnchainAgent />} />
                       <Route path="/markets" element={<Markets />} />
                       <Route path="/macro" element={<Macro />} />

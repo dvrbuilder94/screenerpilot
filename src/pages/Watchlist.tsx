@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-// Custom themes rather than rigid GICS sectors — how a gem-hunter groups ideas.
+// Custom themes rather than rigid GICS sectors — how a trader groups ideas.
 const SECTORS = [
   "AI & Data",
   "Semiconductors",
@@ -67,7 +67,7 @@ export default function Watchlist() {
     const priceMissing = !isLoading && q?.price == null;
     return (
       <div className="flex items-center gap-2.5 px-4 py-3">
-        <Link to={`/gem/${it.symbol}`} className="flex-1 min-w-0">
+        <Link to={`/asset/${it.symbol}`} className="flex-1 min-w-0">
           <div className="font-mono font-semibold text-foreground text-[15px]">{it.symbol}</div>
           <div className="text-[11.5px] text-muted-foreground truncate">
             {q?.name && q.name !== it.symbol ? q.name : priceMissing ? "Ticker not found" : "—"}

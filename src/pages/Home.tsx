@@ -125,7 +125,7 @@ export default function Home() {
     e.preventDefault();
     const sym = q.trim().toUpperCase();
     if (!sym) return;
-    navigate(`/gem/${encodeURIComponent(sym)}`);
+    navigate(`/asset/${encodeURIComponent(sym)}`);
   };
 
   return (
@@ -241,7 +241,7 @@ export default function Home() {
             movers.map((s) => (
               <Link
                 key={s.id}
-                to={`/gem/${encodeURIComponent(s.symbol)}`}
+                to={`/asset/${encodeURIComponent(s.symbol)}`}
                 className="flex items-center justify-between px-4 py-3 hover:bg-secondary/40 transition-colors"
               >
                 <div className="min-w-0">
@@ -299,7 +299,7 @@ export default function Home() {
               return (
                 <Link
                   key={it.id}
-                  to={`/gem/${encodeURIComponent(it.symbol)}`}
+                  to={`/asset/${encodeURIComponent(it.symbol)}`}
                   className="flex items-center justify-between px-4 py-3 hover:bg-secondary/40 transition-colors"
                 >
                   <div className="min-w-0">

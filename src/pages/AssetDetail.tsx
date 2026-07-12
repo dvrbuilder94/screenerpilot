@@ -90,14 +90,14 @@ function Chart({ close }: { close: number[] }) {
   return <canvas ref={ref} className="w-full h-[148px] block" />;
 }
 
-export default function GemDetail() {
+export default function AssetDetail() {
   const { symbol = "" } = useParams<{ symbol: string }>();
   const sym = symbol.toUpperCase();
   const [tf, setTf] = useState<Timeframe>("daily");
 
-  const analysisQ = useQuery({ queryKey: ["gem-analysis", sym, tf], queryFn: () => fetchAnalysis(sym, tf), enabled: !!sym });
+  const analysisQ = useQuery({ queryKey: ["asset-analysis", sym, tf], queryFn: () => fetchAnalysis(sym, tf), enabled: !!sym });
   const a = analysisQ.data;
-  const thesisQ = useQuery({ queryKey: ["gem-thesis", sym], queryFn: () => fetchThesis(a, sym), enabled: !!sym && !!a });
+  const thesisQ = useQuery({ queryKey: ["asset-thesis", sym], queryFn: () => fetchThesis(a, sym), enabled: !!sym && !!a });
 
   const noteKey = `sp_note_${sym}`;
   const [note, setNote] = useState("");
@@ -108,23 +108,23 @@ export default function GemDetail() {
   const up = (a?.dayChangePercent ?? 0) >= 0;
 
   return (
-    <div className="gemd min-h-screen pb-24 lg:pb-10">
+    <div className="assetdetail min-h-screen pb-24 lg:pb-10">
       <style>{`
-        .gemd { --bg:#0A0A0A; --panel:#141414; --panel2:#1A1A1A; --ink:#FAFAFA; --ink2:#DADADA;
+        .assetdetail { --bg:#0A0A0A; --panel:#141414; --panel2:#1A1A1A; --ink:#FAFAFA; --ink2:#DADADA;
           --muted:#9A9AA5; --faint:#5A5A62; --line:rgba(255,255,255,0.08); --lime:#C9F73F; --up:#4ADE80; --down:#FF5252;
           --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
           --mono:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,monospace;
           background:var(--bg); color:var(--ink); }
-        .gemd .wrap { max-width:640px; margin:0 auto; padding:14px 20px 40px; }
-        .gemd .mono { font-family:var(--mono); }
-        .gemd .card { background:var(--panel); border:1px solid var(--line); border-radius:16px; }
-        .gemd .stat { background:var(--bg); padding:11px 13px; }
-        .gemd select, .gemd textarea:focus { outline:none; }
-        .gemd .per { font-family:var(--mono); font-size:11px; padding:6px 0; border-radius:8px; border:0; background:none; color:var(--muted); cursor:pointer; flex:1; }
-        .gemd .per.on { background:var(--lime); color:#0A0A0A; font-weight:600; }
+        .assetdetail .wrap { max-width:640px; margin:0 auto; padding:14px 20px 40px; }
+        .assetdetail .mono { font-family:var(--mono); }
+        .assetdetail .card { background:var(--panel); border:1px solid var(--line); border-radius:16px; }
+        .assetdetail .stat { background:var(--bg); padding:11px 13px; }
+        .assetdetail select, .assetdetail textarea:focus { outline:none; }
+        .assetdetail .per { font-family:var(--mono); font-size:11px; padding:6px 0; border-radius:8px; border:0; background:none; color:var(--muted); cursor:pointer; flex:1; }
+        .assetdetail .per.on { background:var(--lime); color:#0A0A0A; font-weight:600; }
       `}</style>
 
-      <Seo title={`${sym} — Thesis | ScreenerPilot`} description={`Summary, chart and BEN thesis for ${sym}.`} path={`/gem/${sym}`} />
+      <Seo title={`${sym} — Thesis | ScreenerPilot`} description={`Summary, chart and BEN thesis for ${sym}.`} path={`/asset/${sym}`} />
 
       <div className="wrap">
         <Link to="/watchlist" className="inline-flex items-center gap-1 text-[13px]" style={{ color: "var(--muted)" }}>

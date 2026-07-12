@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useSearchParams } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
@@ -11,7 +11,6 @@ import Markets from "./pages/Markets";
 import Ratios from "./pages/Ratios";
 import Commodities from "./pages/Commodities";
 import NotFound from "./pages/NotFound";
-import StockIntelligence from "./pages/StockIntelligence";
 import Landing from "./pages/Landing";
 import Pricing from "./pages/Pricing";
 import SignUp from "./pages/SignUp";
@@ -33,6 +32,13 @@ import AssetDetail from "./pages/AssetDetail";
 import Search from "./pages/Search";
 
 const queryClient = new QueryClient();
+
+// Old Stock Intelligence page is retired — send everyone to the clean flow.
+function StockIntelRedirect() {
+  const [params] = useSearchParams();
+  const sym = params.get("symbol");
+  return <Navigate to={sym ? `/asset/${encodeURIComponent(sym)}` : "/search"} replace />;
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -69,7 +75,7 @@ const App = () => (
                       <Route path="/macro" element={<Macro />} />
                       <Route path="/ratios" element={<Ratios />} />
                       <Route path="/commodities" element={<Commodities />} />
-                      <Route path="/stock-intelligence" element={<StockIntelligence />} />
+                      <Route path="/stock-intelligence" element={<StockIntelRedirect />} />
                       <Route path="/watchlist" element={<Watchlist />} />
                       <Route path="/settings" element={<Settings />} />
                       <Route path="*" element={<NotFound />} />

@@ -101,9 +101,17 @@ export default function Home() {
   const { data: wlQuotes = {} } = useQuotes(wlSymbols);
   const { data: snapshots = [], isLoading: snapLoading } = useMarketSnapshots();
 
+  // Keep movers to recognizable things (sectors, crypto, indices) — not
+  // random commodity futures (Corn) or country ETFs (Argentina).
+  const MOVER_CATEGORIES = ["sector", "crypto", "equity"];
   const { gainers, losers } = useMemo(() => {
     const withChange = snapshots
-      .filter((s) => s.change_pct_1d != null && isFinite(s.change_pct_1d as number))
+      .filter(
+        (s) =>
+          MOVER_CATEGORIES.includes(s.category) &&
+          s.change_pct_1d != null &&
+          isFinite(s.change_pct_1d as number)
+      )
       .sort((a, b) => (b.change_pct_1d! - a.change_pct_1d!));
     return { gainers: withChange.slice(0, 5), losers: withChange.slice(-5).reverse() };
   }, [snapshots]);

@@ -157,9 +157,9 @@ export default function Landing() {
               },
               {
                 icon: Search,
-                title: "Stock Intelligence",
-                desc: "Deep dive on any ticker — fundamentals, technicals, news and structure.",
-                to: "/stock-intelligence",
+                title: "Ticker Analysis",
+                desc: "Search any stock or crypto — live chart, technicals and BEN's read.",
+                to: "/search",
               },
               {
                 icon: Shield,

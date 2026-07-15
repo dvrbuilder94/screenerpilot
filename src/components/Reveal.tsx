@@ -44,9 +44,10 @@ export function Reveal({
     return () => io.disconnect();
   }, [delay]);
 
+  const Component = Tag as any;
   return (
-    <Tag
-      ref={ref as never}
+    <Component
+      ref={ref}
       className={cn(
         "transition-all duration-700 ease-out will-change-transform",
         show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
@@ -54,6 +55,7 @@ export function Reveal({
       )}
     >
       {children}
-    </Tag>
+    </Component>
   );
 }
+

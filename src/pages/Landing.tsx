@@ -62,7 +62,7 @@ export default function Landing() {
           <nav className="hidden md:flex items-center gap-x-8 text-[13px] text-white/60">
             <Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link>
             <Link to="/markets" className="hover:text-white transition-colors">Terminal</Link>
-            <Link to="/squeeze-radar" className="hover:text-white transition-colors">Squeeze Radar</Link>
+            <Link to="/search" className="hover:text-white transition-colors">Search</Link>
             <a href="#contact" className="hover:text-white transition-colors">Contact</a>
           </nav>
 
@@ -213,7 +213,7 @@ export default function Landing() {
                 icon: Radio,
                 title: "On-chain agent",
                 desc: "Whale flows, exchange balances and momentum shifts as they happen.",
-                to: "/onchain-agent",
+                to: "/agent",
                 beta: true,
               },
             ].map((item, i) => (

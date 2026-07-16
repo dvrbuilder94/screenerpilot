@@ -27,9 +27,6 @@ verify_jwt = false
 [functions.generate-stock-articles]
 verify_jwt = false
 
-[functions.generate-ben-top-picks]
-verify_jwt = false
-
 [functions.market-snapshots-collector]
 verify_jwt = false
 
@@ -37,9 +34,6 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.ratios-collector]
-verify_jwt = false
-
-[functions.quant-loaders-scan]
 verify_jwt = false
 
 [functions.generate-daily-briefing]
@@ -73,9 +67,6 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.quotes]
-verify_jwt = false
-
-[functions.generate-gem-thesis]
 verify_jwt = false
 
 [functions.refresh-founder-picks]

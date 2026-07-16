@@ -48,6 +48,12 @@ export function ProGate({ children, preview = false, title, description }: ProGa
 
         {scrp.live && (
           <div className="mt-3 pt-3 border-t border-border">
+            <div className="flex items-center justify-center gap-1.5 mb-2">
+              <span className="text-[9px] uppercase tracking-[0.16em] font-mono text-primary border border-primary/30 rounded-full px-1.5 py-0.5">
+                Beta
+              </span>
+              <span className="text-[10px] text-muted-foreground">Token access is experimental</span>
+            </div>
             {!scrp.wallet ? (
               <button
                 onClick={scrp.connect}

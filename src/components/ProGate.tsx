@@ -1,6 +1,8 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
-import { Lock, Sparkles } from "lucide-react";
+import { useScrpAccess } from "@/hooks/useScrpAccess";
+import { SCRP_MIN_HOLD } from "@/lib/scrp";
+import { Lock, Sparkles, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -15,12 +17,14 @@ interface ProGateProps {
 export function ProGate({ children, preview = false, title, description }: ProGateProps) {
   const { user, loading } = useAuth();
   const { isActive, isLoading: subLoading } = useSubscription();
+  const scrp = useScrpAccess();
 
   if (loading || subLoading) {
     return <div className="h-32 flex items-center justify-center text-muted-foreground text-sm">Loading…</div>;
   }
 
-  if (isActive) return <>{children}</>;
+  // Two keys unlock the terminal: an active subscription, or holding SCRP.
+  if (isActive || scrp.hasAccess) return <>{children}</>;
 
   const ctaTitle = title || (user ? "Pro feature" : "Sign in to continue");
   const ctaDesc = description || (user
@@ -41,6 +45,27 @@ export function ProGate({ children, preview = false, title, description }: ProGa
             {user ? "Start free trial" : "Sign up free"}
           </Link>
         </Button>
+
+        {scrp.live && (
+          <div className="mt-3 pt-3 border-t border-border">
+            {!scrp.wallet ? (
+              <button
+                onClick={scrp.connect}
+                disabled={scrp.connecting}
+                className="w-full inline-flex items-center justify-center gap-2 text-xs font-medium text-muted-foreground hover:text-primary transition-colors disabled:opacity-60"
+              >
+                <Wallet className="w-3.5 h-3.5" />
+                {scrp.connecting ? "Connecting…" : "Or unlock by holding SCRP"}
+              </button>
+            ) : (
+              <p className="text-[11px] text-muted-foreground">
+                Holding <span className="font-mono text-foreground">{(scrp.balance ?? 0).toLocaleString()}</span> SCRP
+                {" · "}need <span className="font-mono">{SCRP_MIN_HOLD.toLocaleString()}</span> to unlock
+              </p>
+            )}
+            {scrp.error && <p className="mt-1 text-[11px] text-destructive">{scrp.error}</p>}
+          </div>
+        )}
       </div>
     </div>
   );

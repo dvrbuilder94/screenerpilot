@@ -9,6 +9,7 @@ import { Seo } from "@/components/Seo";
 import { LiveTickerTape } from "@/components/LiveTickerTape";
 import { Logo } from "@/components/Logo";
 import { HeroTerminalMock } from "@/components/HeroTerminalMock";
+import { WorkflowPipeline } from "@/components/WorkflowPipeline";
 import { Reveal } from "@/components/Reveal";
 import { CountUp } from "@/components/CountUp";
 import { supabase } from "@/integrations/supabase/client";
@@ -171,6 +172,29 @@ export default function Landing() {
                 </div>
               </Reveal>
             ))}
+          </div>
+        </section>
+
+        {/* ── AI pipeline ────────────────────────────────────────── */}
+        <section className="border-b border-white/[0.06] overflow-hidden">
+          <div className="max-w-6xl mx-auto px-5 sm:px-6 py-20 sm:py-28">
+            <Reveal>
+              <div className="max-w-2xl">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-[#C9F73F] font-mono mb-3">
+                  How it works
+                </div>
+                <h2 className="text-3xl sm:text-5xl font-semibold tracking-[-0.02em] leading-[1.05]">
+                  From raw market data
+                  <br />
+                  <span className="text-white/40">to your read — in real time.</span>
+                </h2>
+              </div>
+            </Reveal>
+            <Reveal delay={140}>
+              <div className="mt-14 max-w-3xl mx-auto">
+                <WorkflowPipeline />
+              </div>
+            </Reveal>
           </div>
         </section>
 

@@ -10,7 +10,7 @@ export default function Privacy() {
           <h1 className="text-3xl font-semibold mb-2">Privacy Notice</h1>
           <p className="text-xs text-muted-foreground mb-8">Last updated: May 17, 2026</p>
 
-          <p>This Notice explains how ScreenerPilot, operated by <strong>Diego Vasquez Riesco</strong> (sole proprietor trading as ScreenerPilot), collects and uses personal data. Diego Vasquez Riesco is the <strong>data controller</strong> for the personal data described here.</p>
+          <p>This Notice explains how ScreenerPilot collects and uses personal data. ScreenerPilot is the <strong>data controller</strong> for the personal data described here.</p>
 
           <h2>1. Data we collect</h2>
           <ul>

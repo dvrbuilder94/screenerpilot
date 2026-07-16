@@ -12,6 +12,14 @@ dist
 dist-ssr
 *.local
 
+# Environment — real secrets NEVER go here. Server-side secrets (service role
+# key, API keys, X credentials) live in the Supabase dashboard. Only public
+# VITE_ build vars may sit in the tracked .env.
+.env.local
+.env.*.local
+.env.secret
+secrets.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

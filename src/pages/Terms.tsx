@@ -10,7 +10,7 @@ export default function Terms() {
           <h1 className="text-3xl font-semibold mb-2">Terms & Conditions</h1>
           <p className="text-xs text-muted-foreground mb-8">Last updated: May 17, 2026</p>
 
-          <p>These Terms govern your use of ScreenerPilot ("the Service"), operated by <strong>Diego Vasquez Riesco</strong>, a sole proprietor trading as ScreenerPilot ("we", "us", "our"). By accessing or using the Service you agree to these Terms.</p>
+          <p>These Terms govern your use of ScreenerPilot ("the Service", "we", "us", "our"). By accessing or using the Service you agree to these Terms.</p>
 
           <h2>1. The Service</h2>
           <p>ScreenerPilot is a <strong>read-only macro intelligence terminal</strong> for monitoring market regimes, ratios, dislocations and macro indicators across crypto, equities, commodities, and indices. The Service does not execute trades and does not provide personalized financial, investment, legal or tax advice.</p>

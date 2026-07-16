@@ -40,7 +40,7 @@ Layout mobile-first, una sola columna, scroll natural:
 
 ```text
 ┌─────────────────────────────────┐
-│  Good morning, Diego            │  ← saludo + fecha
+│  Good morning, there            │  ← saludo + fecha
 │  Markets are [green/red] today  │
 ├─────────────────────────────────┤
 │  🔍  Search any ticker...       │  ← input grande, foco al abrir

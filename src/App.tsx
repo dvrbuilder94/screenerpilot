@@ -24,8 +24,6 @@ import RefundPolicy from "./pages/RefundPolicy";
 import Unsubscribe from "./pages/Unsubscribe";
 import OnchainAgent from "./pages/OnchainAgent";
 import Settings from "./pages/Settings";
-import SqueezeRadarPublic from "./pages/SqueezeRadarPublic";
-import StockArticle from "./pages/StockArticle";
 import Watchlist from "./pages/Watchlist";
 import Home from "./pages/Home";
 import AssetDetail from "./pages/AssetDetail";
@@ -60,8 +58,6 @@ const App = () => (
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/refund-policy" element={<RefundPolicy />} />
               <Route path="/unsubscribe" element={<Unsubscribe />} />
-              <Route path="/squeeze-radar" element={<SqueezeRadarPublic />} />
-              <Route path="/squeeze-radar/:symbol" element={<StockArticle />} />
               <Route
                 path="*"
                 element={

@@ -24,9 +24,6 @@ verify_jwt = false
 [functions.analyze-stock]
 verify_jwt = false
 
-[functions.generate-stock-articles]
-verify_jwt = false
-
 [functions.market-snapshots-collector]
 verify_jwt = false
 
@@ -63,17 +60,5 @@ verify_jwt = false
 [functions.send-daily-digest]
 verify_jwt = true
 
-[functions.squeeze-alert-scan]
-verify_jwt = false
-
 [functions.quotes]
-verify_jwt = false
-
-[functions.refresh-founder-picks]
-verify_jwt = false
-
-[functions.save-daily-picks]
-verify_jwt = false
-
-[functions.post-to-x]
 verify_jwt = false

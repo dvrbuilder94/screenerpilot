@@ -19,6 +19,15 @@ export const RH_CHAIN = {
 // ⬇️ Paste the SCRP contract address here after launching on hood.fun.
 export const SCRP_ADDRESS = "";
 
+// Connecting the Robinhood Wallet:
+//  • Inside the Robinhood Wallet's in-app web3 browser, it injects
+//    window.ethereum — the app connects with no extra setup (works today).
+//  • From a desktop browser, the Robinhood Wallet connects over WalletConnect
+//    (scan a QR). That path is wired at launch: create a free projectId at
+//    cloud.reown.com and set VITE_WALLETCONNECT_PROJECT_ID.
+export const WALLETCONNECT_PROJECT_ID: string =
+  (import.meta.env.VITE_WALLETCONNECT_PROJECT_ID as string | undefined) ?? "";
+
 // Minimum SCRP a wallet must hold to unlock Pro. Tune at launch based on price
 // (hood.fun tokens are typically 1B supply — 100k is ~0.01%, cheap and open).
 export const SCRP_MIN_HOLD = 100_000;

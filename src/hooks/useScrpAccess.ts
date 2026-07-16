@@ -1,13 +1,23 @@
 import { useState, useEffect, useCallback } from "react";
 import { RH_CHAIN, SCRP_MIN_HOLD, readScrpBalance, isScrpLive } from "@/lib/scrp";
 
-// Links an injected wallet (MetaMask etc.) and reads its SCRP balance so the app
-// can unlock Pro for holders. No wallet library — just window.ethereum + a raw
-// balance read. The connected address is remembered locally so access sticks.
+// Links the Robinhood Wallet (or any injected EVM wallet) and reads its SCRP
+// balance so the app can unlock Pro for holders. Inside the Robinhood Wallet's
+// in-app web3 browser, window.ethereum is injected and this works with no extra
+// setup; desktop QR connection over WalletConnect is added at launch. No wallet
+// library — just window.ethereum + a raw balance read. The connected address is
+// remembered locally so access sticks.
 const WALLET_KEY = "sp_scrp_wallet";
+
+type InjectedProvider = { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> };
+
+const getInjected = (): InjectedProvider | undefined =>
+  (window as unknown as { ethereum?: InjectedProvider }).ethereum;
 
 export interface ScrpAccess {
   live: boolean;
+  /** An injected wallet is available (e.g. inside the Robinhood Wallet browser). */
+  hasInjected: boolean;
   wallet: string | null;
   balance: number | null;
   connecting: boolean;
@@ -38,9 +48,9 @@ export function useScrpAccess(): ScrpAccess {
   }, [wallet]);
 
   const connect = useCallback(async () => {
-    const eth = (window as unknown as { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+    const eth = getInjected();
     if (!eth) {
-      setError("No wallet found. Install MetaMask to hold SCRP.");
+      setError("Open ScreenerPilot inside the Robinhood Wallet browser to connect.");
       return;
     }
     setConnecting(true);
@@ -73,5 +83,5 @@ export function useScrpAccess(): ScrpAccess {
 
   const hasAccess = isScrpLive() && balance !== null && balance >= SCRP_MIN_HOLD;
 
-  return { live: isScrpLive(), wallet, balance, connecting, error, hasAccess, connect, disconnect };
+  return { live: isScrpLive(), hasInjected: !!getInjected(), wallet, balance, connecting, error, hasAccess, connect, disconnect };
 }

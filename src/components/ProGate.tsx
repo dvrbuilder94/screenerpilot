@@ -55,7 +55,7 @@ export function ProGate({ children, preview = false, title, description }: ProGa
                 className="w-full inline-flex items-center justify-center gap-2 text-xs font-medium text-muted-foreground hover:text-primary transition-colors disabled:opacity-60"
               >
                 <Wallet className="w-3.5 h-3.5" />
-                {scrp.connecting ? "Connecting…" : "Or unlock by holding SCRP"}
+                {scrp.connecting ? "Connecting…" : "Hold SCRP? Connect Robinhood Wallet"}
               </button>
             ) : (
               <p className="text-[11px] text-muted-foreground">

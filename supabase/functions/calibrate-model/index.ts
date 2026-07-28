@@ -42,16 +42,16 @@ interface Row { return_pct: number; signal_snapshots: { asset_type: string; fact
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const expected = Deno.env.get("CRON_SECRET");
-  if (!expected || req.headers.get("x-cron-secret") !== expected) {
+  const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+  if (!(await isAuthorizedCron(req, supabase))) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
   try {
-    const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
     const { data } = await supabase
+
       .from("signal_outcomes")
       .select("return_pct, signal_snapshots!inner(asset_type, factors)")
       .eq("horizon", HORIZON)

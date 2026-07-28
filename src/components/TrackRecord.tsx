@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Activity, TrendingUp } from "lucide-react";
+import { Info, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface HorizonAgg { count: number; hitRate: number; avgReturn: number; avgDrawdown: number }
@@ -19,8 +19,46 @@ const HZ_LABEL: Record<string, string> = { "1d": "1 day", "1w": "1 week", "1m": 
 
 const retColor = (v: number) => (v > 0 ? "#4ADE80" : v < 0 ? "#FF5252" : "#9A9AA5");
 
+// Populated fallback so the track record always demos the full view before the
+// recorder/resolver have accrued real, matured outcomes.
+const SAMPLE_TRACK: TR = {
+  recorded: 1240,
+  resolved: 418,
+  byHorizon: {
+    "1d": { count: 402, hitRate: 57.5, avgReturn: 1.3, avgDrawdown: -3.0 },
+    "1w": { count: 418, hitRate: 63.4, avgReturn: 4.82, avgDrawdown: -6.8 },
+    "1m": { count: 305, hitRate: 60.7, avgReturn: 9.6, avgDrawdown: -12.1 },
+  },
+  byBucket: {
+    "1d": [
+      { label: "<40", count: 92, hitRate: 46.0, avgReturn: -0.4 },
+      { label: "40–55", count: 138, hitRate: 54.1, avgReturn: 0.8 },
+      { label: "55–75", count: 114, hitRate: 61.4, avgReturn: 1.9 },
+      { label: "75+", count: 58, hitRate: 69.0, avgReturn: 3.6 },
+    ],
+    "1w": [
+      { label: "<40", count: 96, hitRate: 44.1, avgReturn: -1.2 },
+      { label: "40–55", count: 142, hitRate: 53.0, avgReturn: 1.9 },
+      { label: "55–75", count: 118, hitRate: 66.2, avgReturn: 5.4 },
+      { label: "75+", count: 62, hitRate: 74.5, avgReturn: 11.8 },
+    ],
+    "1m": [
+      { label: "<40", count: 70, hitRate: 45.7, avgReturn: -2.1 },
+      { label: "40–55", count: 104, hitRate: 55.8, avgReturn: 4.2 },
+      { label: "55–75", count: 88, hitRate: 64.8, avgReturn: 10.9 },
+      { label: "75+", count: 43, hitRate: 72.1, avgReturn: 21.4 },
+    ],
+  },
+  models: [
+    { asset_type: "crypto", n_samples: 418, updated_at: new Date().toISOString() },
+    { asset_type: "stock", n_samples: 206, updated_at: new Date().toISOString() },
+  ],
+  updatedAt: new Date().toISOString(),
+};
+
 export function TrackRecord() {
-  const [data, setData] = useState<TR | null>(null);
+  const [data, setData] = useState<TR>(SAMPLE_TRACK);
+  const [live, setLive] = useState(false);
   const [loading, setLoading] = useState(true);
   const [hz, setHz] = useState<string>("1w");
 
@@ -28,9 +66,17 @@ export function TrackRecord() {
     (async () => {
       try {
         const { data: d } = await supabase.functions.invoke("track-record", { body: {} });
-        setData(d as TR);
+        const tr = d as TR | null;
+        if (tr && tr.resolved > 0) {
+          setData(tr);
+          setLive(true);
+        } else {
+          setData(SAMPLE_TRACK);
+          setLive(false);
+        }
       } catch {
-        setData(null);
+        setData(SAMPLE_TRACK);
+        setLive(false);
       } finally {
         setLoading(false);
       }
@@ -41,31 +87,20 @@ export function TrackRecord() {
     return <div className="py-16 text-center text-sm text-muted-foreground">Loading track record…</div>;
   }
 
-  const resolved = data?.resolved ?? 0;
-  const recorded = data?.recorded ?? 0;
-
-  // Nothing resolved yet — the clock has started but no horizon has matured.
-  if (resolved === 0) {
-    return (
-      <div className="mt-6 fin-card p-8 text-center">
-        <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-          <Activity className="w-5 h-5 text-primary" />
-        </div>
-        <h3 className="text-base font-semibold">Track record is building</h3>
-        <p className="text-sm text-muted-foreground mt-1.5 max-w-sm mx-auto">
-          {recorded > 0
-            ? `${recorded.toLocaleString()} signals recorded. Outcomes appear here once the first horizon (1 day) matures.`
-            : "No signals recorded yet. Once the daily recorder runs, results will accrue here — timestamped and verifiable."}
-        </p>
-      </div>
-    );
-  }
+  const resolved = data.resolved;
+  const recorded = data.recorded;
 
   const h = data!.byHorizon[hz] ?? { count: 0, hitRate: 0, avgReturn: 0, avgDrawdown: 0 };
   const buckets = data!.byBucket[hz] ?? [];
 
   return (
     <div className="mt-5">
+      {!live && (
+        <div className="mb-4 flex items-start gap-2 text-[12px] text-muted-foreground bg-secondary/40 border border-border rounded-xl px-3 py-2.5">
+          <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-primary" />
+          <span>Sample track record — real, timestamped results appear here once the recorder + resolver run for a few days.</span>
+        </div>
+      )}
       {/* Horizon selector */}
       <div className="flex gap-1.5">
         {HORIZONS.map((x) => (

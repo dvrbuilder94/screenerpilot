@@ -38,15 +38,15 @@ async function stockPath(sb: ReturnType<typeof createClient>, symbol: string): P
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const expected = Deno.env.get("CRON_SECRET");
-  if (!expected || req.headers.get("x-cron-secret") !== expected) {
+  const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+  if (!(await isAuthorizedCron(req, supabase))) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
   try {
-    const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+
     const since = new Date(Date.now() - 35 * DAY).toISOString();
 
     const [{ data: snaps }, { data: outs }] = await Promise.all([

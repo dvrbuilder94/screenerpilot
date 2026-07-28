@@ -65,3 +65,6 @@ verify_jwt = false
 
 [functions.token-squeeze-scan]
 verify_jwt = false
+
+[functions.record-signals]
+verify_jwt = false

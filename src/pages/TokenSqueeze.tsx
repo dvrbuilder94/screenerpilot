@@ -99,7 +99,15 @@ export default function TokenSqueeze() {
                 className="grid grid-cols-[28px_1fr_auto_auto_auto] sm:grid-cols-[32px_1fr_100px_110px_90px] gap-2 sm:gap-3 items-center px-3 py-3 hover:bg-secondary/40 transition-colors"
               >
                 <span className="font-mono text-[13px] text-muted-foreground">{i + 1}</span>
-                <span className="font-mono font-semibold text-[15px]">{t.symbol}</span>
+                <div className="min-w-0">
+                  <span className="font-mono font-semibold text-[15px]">{t.symbol}</span>
+                  <div className="flex items-center gap-1.5 mt-1" title={`Model confidence ${Math.round(t.confidence * 100)}%`}>
+                    <div className="h-1 w-14 rounded-full bg-secondary overflow-hidden">
+                      <div className="h-full bg-primary/70" style={{ width: `${Math.round(t.confidence * 100)}%` }} />
+                    </div>
+                    <span className="text-[9px] font-mono text-muted-foreground">{Math.round(t.confidence * 100)}%</span>
+                  </div>
+                </div>
                 {/* Funding — negative is the squeeze fuel, highlight it */}
                 <span className="text-right hidden sm:block font-mono text-[13px] text-primary">
                   {fmtFunding(t.funding)}
@@ -124,9 +132,10 @@ export default function TokenSqueeze() {
         </div>
 
         <p className="mt-4 text-[11px] text-muted-foreground leading-relaxed">
-          Squeeze score blends negative funding (shorts paying), short-term momentum and volume.
-          Not financial advice — a high score is a setup, not a guarantee. Crypto perps only;
-          fresh on-chain memecoins without perp markets aren't covered.
+          Score is a multi-factor model: each signal (negative funding, momentum, liquidity) is
+          normalized against the whole universe and blended logistically. The bar under each ticker
+          is model confidence. Not financial advice — a high score is a setup, not a guarantee.
+          Crypto perps only; fresh on-chain memecoins without perp markets aren't covered.
         </p>
       </div>
     </div>

@@ -14,8 +14,10 @@ export interface SqueezeToken {
   change24h: number; // percent
   funding: number; // last funding rate as a fraction per interval (e.g. -0.00042)
   volume24h: number; // quote volume, USD
-  score: number; // 0–100
+  score: number; // 0–100 (computed server-side by the quant core)
+  confidence: number; // 0–1 factor-agreement confidence
   signal: SqueezeSignal;
+  factors?: Record<string, number>; // per-factor z-scores (breakdown)
 }
 
 export function signalFor(score: number): SqueezeSignal {
@@ -72,5 +74,5 @@ export const SAMPLE_SQUEEZE: SqueezeToken[] = [
   { symbol: "DOGE", price: 0.412, change24h: 1.2, funding: -0.00009, volume24h: 640_000_000, score: 0, signal: "neutral" },
 ].map((t) => {
   const score = scoreSqueeze(t);
-  return { ...t, score, signal: signalFor(score) };
+  return { ...t, score, signal: signalFor(score), confidence: Math.min(0.95, 0.4 + score / 160) };
 });

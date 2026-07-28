@@ -8,17 +8,29 @@
 
 export type SqueezeSignal = "extreme" | "high" | "building" | "neutral";
 
+export type SqueezeAsset = "crypto" | "stock";
+
 export interface SqueezeToken {
-  symbol: string; // "BTC"
+  symbol: string; // "BTC" / "NVDA"
   price: number;
   change24h: number; // percent
-  funding: number; // last funding rate as a fraction per interval (e.g. -0.00042)
-  volume24h: number; // quote volume, USD
+  funding?: number; // crypto: last funding rate (fraction)
+  volume24h?: number; // crypto: quote volume, USD
+  setup?: string; // stock: "Coiled" / "Firing ↑"
   score: number; // 0–100 (computed server-side by the quant core)
   confidence: number; // 0–1 factor-agreement confidence
   signal: SqueezeSignal;
   factors?: Record<string, number>; // per-factor z-scores (breakdown)
 }
+
+export const FACTOR_LABELS: Record<string, string> = {
+  funding: "Funding fuel",
+  momentum: "Momentum",
+  liquidity: "Liquidity",
+  compression: "Coil (squeeze)",
+  trend: "Trend",
+  rvol: "Rel. volume",
+};
 
 export function signalFor(score: number): SqueezeSignal {
   if (score >= 75) return "extreme";
@@ -76,3 +88,14 @@ export const SAMPLE_SQUEEZE: SqueezeToken[] = [
   const score = scoreSqueeze(t);
   return { ...t, score, signal: signalFor(score), confidence: Math.min(0.95, 0.4 + score / 160) };
 });
+
+// Stock lane sample (TTM-squeeze style setups) — real data comes from
+// stock-squeeze-scan once asset_candles is populated.
+export const SAMPLE_SQUEEZE_STOCKS: SqueezeToken[] = [
+  { symbol: "SMCI", price: 48.9, change24h: 7.2, setup: "Firing ↑", score: 82, confidence: 0.86, signal: "extreme", factors: { momentum: 2.1, compression: 1.4, trend: 1.2, rvol: 1.8 } },
+  { symbol: "PLTR", price: 71.3, change24h: 3.1, setup: "Coiled", score: 68, confidence: 0.74, signal: "high", factors: { momentum: 1.1, compression: 1.9, trend: 0.8, rvol: 0.6 } },
+  { symbol: "MARA", price: 22.4, change24h: 5.4, setup: "Firing ↑", score: 61, confidence: 0.7, signal: "high", factors: { momentum: 1.6, compression: 0.7, trend: 0.5, rvol: 1.1 } },
+  { symbol: "COIN", price: 268.1, change24h: 2.0, setup: "Coiled", score: 54, confidence: 0.63, signal: "building", factors: { momentum: 0.6, compression: 1.7, trend: 0.4, rvol: 0.3 } },
+  { symbol: "RBLX", price: 52.7, change24h: 1.4, setup: "Coiled", score: 41, confidence: 0.55, signal: "building", factors: { momentum: 0.3, compression: 1.2, trend: 0.1, rvol: 0.2 } },
+  { symbol: "SOFI", price: 14.8, change24h: -0.6, setup: "—", score: 28, confidence: 0.48, signal: "neutral", factors: { momentum: -0.4, compression: 0.5, trend: -0.2, rvol: -0.1 } },
+];

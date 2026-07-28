@@ -1,4 +1,4 @@
-import { LineChart, Search, Star, Home } from "lucide-react";
+import { LineChart, Search, Star, Home, Flame } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -6,6 +6,7 @@ const items = [
   { title: "Home", url: "/home", icon: Home },
   { title: "Markets", url: "/markets", icon: LineChart },
   { title: "Search", url: "/search", icon: Search },
+  { title: "Squeeze", url: "/squeeze", icon: Flame },
   { title: "Watchlist", url: "/watchlist", icon: Star },
 ];
 
@@ -18,7 +19,7 @@ export function MobileBottomBar() {
       className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur-md"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="grid grid-cols-4">
+      <div className="grid grid-cols-5">
         {items.map((it) => {
           const active = isActive(it.url);
           return (

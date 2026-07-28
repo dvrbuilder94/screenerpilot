@@ -28,6 +28,7 @@ import Watchlist from "./pages/Watchlist";
 import Home from "./pages/Home";
 import AssetDetail from "./pages/AssetDetail";
 import Search from "./pages/Search";
+import TokenSqueeze from "./pages/TokenSqueeze";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,7 @@ const App = () => (
                       <Route path="/home" element={<Home />} />
                       <Route path="/asset/:symbol" element={<AssetDetail />} />
                       <Route path="/search" element={<Search />} />
+                      <Route path="/squeeze" element={<TokenSqueeze />} />
                       <Route path="/agent" element={<OnchainAgent />} />
                       <Route path="/markets" element={<Markets />} />
                       <Route path="/macro" element={<Macro />} />

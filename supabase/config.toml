@@ -62,3 +62,6 @@ verify_jwt = true
 
 [functions.quotes]
 verify_jwt = false
+
+[functions.token-squeeze-scan]
+verify_jwt = false

@@ -1,4 +1,4 @@
-import { LineChart, Search, LogOut, User, Star, Home } from "lucide-react";
+import { LineChart, Search, LogOut, User, Star, Home, Flame } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -22,6 +22,7 @@ const NAV: NavItem[] = [
   { title: "Home", url: "/home", icon: Home },
   { title: "Markets", url: "/markets", icon: LineChart },
   { title: "Search", url: "/search", icon: Search },
+  { title: "Squeeze", url: "/squeeze", icon: Flame },
   { title: "Watchlist", url: "/watchlist", icon: Star },
 ];
 

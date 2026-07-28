@@ -1100,6 +1100,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      verify_cron_secret: { Args: { candidate: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

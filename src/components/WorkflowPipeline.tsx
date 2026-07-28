@@ -3,9 +3,9 @@
 // at your terminal. Pure SVG — a traveling lime packet on each connector plus
 // an arrow that lands. No libraries, no icon clip-art. Respects reduced motion.
 
-const NODE_BG = "#141414";
+const NODE_BG = "#1B1F29";
 const LINE = "rgba(255,255,255,0.12)";
-const LIME = "#C9F73F";
+const LIME = "#8E9BE3";
 
 function Pill({
   x,
@@ -128,7 +128,7 @@ export function WorkflowPipeline() {
             height={90}
             rx={16}
             fill={NODE_BG}
-            stroke="rgba(201,247,63,0.45)"
+            stroke="rgba(142,155,227,0.45)"
           />
           <text
             x={423}

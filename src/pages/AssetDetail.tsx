@@ -72,20 +72,20 @@ function InteractiveChart({
     for (let i = 1; i < close.length; i++) ctx.lineTo(X(i), Y(close[i]));
     ctx.lineTo(X(close.length - 1), H - pad); ctx.lineTo(X(0), H - pad); ctx.closePath();
     const g = ctx.createLinearGradient(0, pad, 0, H);
-    g.addColorStop(0, "rgba(201,247,63,0.22)"); g.addColorStop(1, "rgba(201,247,63,0)");
+    g.addColorStop(0, "rgba(142,155,227,0.22)"); g.addColorStop(1, "rgba(142,155,227,0)");
     ctx.fillStyle = g; ctx.fill();
     // line
     ctx.beginPath(); ctx.moveTo(X(0), Y(close[0]));
     for (let i = 1; i < close.length; i++) ctx.lineTo(X(i), Y(close[i]));
-    ctx.strokeStyle = "#C9F73F"; ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.stroke();
+    ctx.strokeStyle = "#8E9BE3"; ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.stroke();
     // crosshair
     const hi = hoverRef.current;
     if (hi != null) {
       const hx = X(hi), hy = Y(close[hi]);
       ctx.strokeStyle = "rgba(255,255,255,0.25)"; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(hx, pad); ctx.lineTo(hx, H - pad); ctx.stroke();
-      ctx.beginPath(); ctx.fillStyle = "#C9F73F"; ctx.arc(hx, hy, 4, 0, 7); ctx.fill();
-      ctx.beginPath(); ctx.strokeStyle = "rgba(201,247,63,0.4)"; ctx.lineWidth = 2; ctx.arc(hx, hy, 7, 0, 7); ctx.stroke();
+      ctx.beginPath(); ctx.fillStyle = "#8E9BE3"; ctx.arc(hx, hy, 4, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.strokeStyle = "rgba(142,155,227,0.4)"; ctx.lineWidth = 2; ctx.arc(hx, hy, 7, 0, 7); ctx.stroke();
     }
   }, [close]);
 
@@ -143,8 +143,8 @@ export default function AssetDetail() {
   return (
     <div className="assetdetail min-h-screen pb-28 lg:pb-12">
       <style>{`
-        .assetdetail { --bg:#0A0A0A; --panel:#141414; --panel2:#1A1A1A; --ink:#FAFAFA; --ink2:#DADADA;
-          --muted:#9A9AA5; --faint:#5A5A62; --line:rgba(255,255,255,0.08); --lime:#C9F73F; --up:#4ADE80; --down:#FF5252;
+        .assetdetail { --bg:#13161F; --panel:#1B1F29; --panel2:#21262F; --ink:#F0F1F7; --ink2:#C7CBD8;
+          --muted:#9A9AA5; --faint:#5A5A62; --line:rgba(255,255,255,0.08); --lime:#8E9BE3; --up:#4ADE80; --down:#FF5252;
           --mono:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,monospace;
           background:var(--bg); color:var(--ink); }
         .assetdetail .wrap { max-width:640px; margin:0 auto; padding:14px 20px 40px; }
@@ -190,7 +190,7 @@ export default function AssetDetail() {
                 className="flex-shrink-0 w-10 h-10 rounded-full grid place-items-center border transition-colors"
                 style={{
                   borderColor: inWatchlist ? "var(--lime)" : "var(--line)",
-                  background: inWatchlist ? "rgba(201,247,63,0.12)" : "transparent",
+                  background: inWatchlist ? "rgba(142,155,227,0.12)" : "transparent",
                   color: inWatchlist ? "var(--lime)" : "var(--muted)",
                 }}
               >
@@ -230,13 +230,13 @@ export default function AssetDetail() {
 
             {/* AI thesis — upcoming */}
             <div className="card mt-6 p-5 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl grid place-items-center flex-shrink-0" style={{ background: "rgba(201,247,63,0.12)" }}>
+              <div className="w-10 h-10 rounded-xl grid place-items-center flex-shrink-0" style={{ background: "rgba(142,155,227,0.12)" }}>
                 <Sparkles className="w-5 h-5" style={{ color: "var(--lime)" }} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span style={{ fontSize: 14, fontWeight: 600 }}>AI Thesis by BEN</span>
-                  <span className="mono" style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--lime)", border: "1px solid rgba(201,247,63,0.4)", borderRadius: 5, padding: "2px 6px" }}>Upcoming</span>
+                  <span className="mono" style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--lime)", border: "1px solid rgba(142,155,227,0.4)", borderRadius: 5, padding: "2px 6px" }}>Upcoming</span>
                 </div>
                 <p style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 3 }}>Auto-generated bull/bear thesis, coming soon. Ask BEN anything with the chat button.</p>
               </div>

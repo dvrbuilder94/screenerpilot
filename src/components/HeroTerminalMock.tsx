@@ -43,7 +43,7 @@ export function HeroTerminalMock() {
         }}
       />
 
-      <div className="rounded-2xl border border-white/[0.08] bg-[#0F0F10] shadow-[0_40px_80px_-40px_rgba(0,0,0,0.8)] overflow-hidden">
+      <div className="rounded-2xl border border-white/[0.08] bg-[#13161F] shadow-[0_40px_80px_-40px_rgba(0,0,0,0.8)] overflow-hidden">
         {/* Window chrome */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06]">
           <div className="flex items-center gap-3">
@@ -57,7 +57,7 @@ export function HeroTerminalMock() {
             </div>
           </div>
           <div className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-white/50 font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#C9F73F] animate-pulse-dot" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#8E9BE3] animate-pulse-dot" />
             Live
           </div>
         </div>
@@ -83,7 +83,7 @@ export function HeroTerminalMock() {
                     key={t}
                     className={`px-2 py-0.5 rounded-md text-[10px] font-mono ${
                       i === 0
-                        ? "bg-[#C9F73F] text-black"
+                        ? "bg-[#8E9BE3] text-black"
                         : "text-white/50 border border-white/[0.06]"
                     }`}
                   >
@@ -96,8 +96,8 @@ export function HeroTerminalMock() {
             <svg viewBox="0 0 560 160" className="w-full h-[160px] mt-4">
               <defs>
                 <linearGradient id="limeArea" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stopColor="#C9F73F" stopOpacity="0.35" />
-                  <stop offset="100%" stopColor="#C9F73F" stopOpacity="0" />
+                  <stop offset="0%" stopColor="#8E9BE3" stopOpacity="0.35" />
+                  <stop offset="100%" stopColor="#8E9BE3" stopOpacity="0" />
                 </linearGradient>
               </defs>
               {/* Grid */}
@@ -116,7 +116,7 @@ export function HeroTerminalMock() {
               <path
                 d={path.line}
                 fill="none"
-                stroke="#C9F73F"
+                stroke="#8E9BE3"
                 strokeWidth="1.75"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -126,7 +126,7 @@ export function HeroTerminalMock() {
             {/* BEN thesis snippet */}
             <div className="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
               <div className="flex items-center gap-2 mb-2">
-                <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-[#C9F73F] text-black font-mono text-[10px] font-bold">
+                <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-[#8E9BE3] text-black font-mono text-[10px] font-bold">
                   BEN
                 </span>
                 <span className="text-[10px] uppercase tracking-[0.18em] text-white/40 font-mono">
@@ -169,7 +169,7 @@ export function HeroTerminalMock() {
               ))}
             </div>
 
-            <div className="mt-4 rounded-lg bg-[#C9F73F] text-black text-center text-[11px] font-medium py-2 tracking-tight">
+            <div className="mt-4 rounded-lg bg-[#8E9BE3] text-black text-center text-[11px] font-medium py-2 tracking-tight">
               Add ticker
             </div>
           </div>

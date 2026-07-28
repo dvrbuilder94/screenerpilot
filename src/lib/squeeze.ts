@@ -71,7 +71,7 @@ export function fmtVolume(v: number): string {
 
 export const SIGNAL_META: Record<SqueezeSignal, { label: string; color: string }> = {
   extreme: { label: "Extreme", color: "#FF5252" },
-  high: { label: "High", color: "#C9F73F" },
+  high: { label: "High", color: "#8E9BE3" },
   building: { label: "Building", color: "#FFB020" },
   neutral: { label: "Neutral", color: "#9A9AA5" },
 };

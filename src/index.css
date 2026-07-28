@@ -14,48 +14,48 @@
 @layer base {
   :root,
   .dark {
-    /* Robinhood-style — pure black, lime accent, white text */
-    --background: 0 0% 4%;
-    --card: 0 0% 8%;
-    --card-foreground: 0 0% 98%;
+    /* Elegant slate — deep blue-grey, periwinkle accent, soft cool white text */
+    --background: 224 24% 10%;
+    --card: 223 20% 14%;
+    --card-foreground: 224 30% 96%;
 
-    --popover: 0 0% 8%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 223 22% 13%;
+    --popover-foreground: 224 30% 96%;
 
-    --foreground: 0 0% 98%;
-    --muted: 0 0% 13%;
-    --muted-foreground: 0 0% 63%;
+    --foreground: 224 30% 96%;
+    --muted: 223 16% 20%;
+    --muted-foreground: 222 12% 63%;
 
-    --border: 0 0% 16%;
-    --border-strong: 0 0% 24%;
-    --input: 0 0% 16%;
-    --ring: 74 91% 61%;
+    --border: 222 16% 22%;
+    --border-strong: 222 16% 32%;
+    --input: 222 16% 22%;
+    --ring: 232 62% 72%;
 
-    /* Brand / Accent — lime, with black text on top */
-    --primary: 74 91% 61%;
-    --primary-foreground: 0 0% 5%;
-    --accent: 258 90% 66%;
-    --accent-foreground: 0 0% 100%;
+    /* Brand / Accent — periwinkle, with dark slate text on top */
+    --primary: 232 62% 72%;
+    --primary-foreground: 224 40% 10%;
+    --accent: 199 78% 66%;
+    --accent-foreground: 224 40% 10%;
 
     /* Secondary surfaces */
-    --secondary: 0 0% 11%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 223 18% 18%;
+    --secondary-foreground: 224 30% 96%;
 
-    /* Financial signals — bright on black */
-    --positive: 145 63% 55%;
-    --negative: 0 84% 65%;
-    --warning: 38 92% 55%;
-    --neutral: 0 0% 62%;
+    /* Financial signals — softened for the slate surface */
+    --positive: 152 46% 56%;
+    --negative: 356 72% 66%;
+    --warning: 38 90% 60%;
+    --neutral: 222 12% 62%;
 
     /* Map to existing semantic tokens used across the app */
-    --bullish: 145 63% 55%;
-    --bullish-light: 145 40% 12%;
-    --bullish-foreground: 0 0% 5%;
-    --bearish: 0 84% 65%;
-    --bearish-light: 0 45% 14%;
+    --bullish: 152 46% 56%;
+    --bullish-light: 152 30% 16%;
+    --bullish-foreground: 224 40% 10%;
+    --bearish: 356 72% 66%;
+    --bearish-light: 356 40% 18%;
     --bearish-foreground: 0 0% 100%;
-    --neutral-light: 0 0% 16%;
-    --neutral-foreground: 0 0% 100%;
+    --neutral-light: 222 16% 22%;
+    --neutral-foreground: 224 30% 96%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -63,14 +63,14 @@
     --radius: 0.5rem;
 
     /* Sidebar */
-    --sidebar: 0 0% 6%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 74 91% 61%;
-    --sidebar-primary-foreground: 0 0% 5%;
-    --sidebar-accent: 0 0% 12%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 16%;
-    --sidebar-ring: 74 91% 61%;
+    --sidebar: 224 24% 8%;
+    --sidebar-foreground: 224 30% 96%;
+    --sidebar-primary: 232 62% 72%;
+    --sidebar-primary-foreground: 224 40% 10%;
+    --sidebar-accent: 223 18% 16%;
+    --sidebar-accent-foreground: 224 30% 96%;
+    --sidebar-border: 222 16% 22%;
+    --sidebar-ring: 232 62% 72%;
 
     /* Charts */
     --chart-1: 217 91% 60%;
@@ -112,9 +112,9 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     background-image:
-      radial-gradient(900px 520px at 8% -8%, hsl(74 91% 61% / 0.06), transparent),
-      radial-gradient(800px 520px at 100% 0%, hsl(258 90% 66% / 0.07), transparent),
-      radial-gradient(1100px 640px at 50% 110%, hsl(74 91% 61% / 0.04), transparent);
+      radial-gradient(900px 520px at 8% -8%, hsl(232 62% 72% / 0.10), transparent),
+      radial-gradient(800px 520px at 100% 0%, hsl(199 78% 66% / 0.08), transparent),
+      radial-gradient(1100px 640px at 50% 110%, hsl(232 62% 72% / 0.06), transparent);
     background-attachment: fixed;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
@@ -169,7 +169,7 @@
 @layer components {
   /* Financial card — frosted glass surface over the soft background wash */
   .fin-card {
-    background: hsl(0 0% 8% / 0.7);
+    background: hsl(223 20% 14% / 0.7);
     border: 1px solid hsl(0 0% 100% / 0.08);
     border-radius: 8px;
     backdrop-filter: blur(16px) saturate(150%);

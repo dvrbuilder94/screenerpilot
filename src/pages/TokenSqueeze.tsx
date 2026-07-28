@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Flame, Info, RefreshCw } from "lucide-react";
 import { Seo } from "@/components/Seo";
+import { TrackRecord } from "@/components/TrackRecord";
 import { supabase } from "@/integrations/supabase/client";
 import {
   SAMPLE_SQUEEZE,
@@ -21,6 +22,7 @@ export default function TokenSqueeze() {
   const [tokens, setTokens] = useState<SqueezeToken[]>(SAMPLE_SQUEEZE);
   const [loading, setLoading] = useState(true);
   const [live, setLive] = useState(false);
+  const [tab, setTab] = useState<"radar" | "record">("radar");
 
   const load = async () => {
     setLoading(true);
@@ -73,6 +75,25 @@ export default function TokenSqueeze() {
           </button>
         </div>
 
+        {/* Tabs */}
+        <div className="flex gap-1.5 mt-5 border-b border-border/40 pb-3">
+          {([["radar", "Radar"], ["record", "Track record"]] as const).map(([k, label]) => (
+            <button
+              key={k}
+              onClick={() => setTab(k)}
+              className={`text-[13px] font-medium px-3 py-1.5 rounded-lg transition-colors ${
+                tab === k ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {tab === "record" && <TrackRecord />}
+
+        {tab === "radar" && (
+        <>
         {!live && (
           <div className="mt-4 flex items-start gap-2 text-[12px] text-muted-foreground bg-secondary/40 border border-border rounded-xl px-3 py-2.5">
             <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-primary" />
@@ -137,6 +158,8 @@ export default function TokenSqueeze() {
           is model confidence. Not financial advice — a high score is a setup, not a guarantee.
           Crypto perps only; fresh on-chain memecoins without perp markets aren't covered.
         </p>
+        </>
+        )}
       </div>
     </div>
   );

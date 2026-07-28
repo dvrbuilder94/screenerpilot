@@ -68,3 +68,9 @@ verify_jwt = false
 
 [functions.record-signals]
 verify_jwt = false
+
+[functions.resolve-signals]
+verify_jwt = false
+
+[functions.track-record]
+verify_jwt = false

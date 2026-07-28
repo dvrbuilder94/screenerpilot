@@ -80,3 +80,7 @@ verify_jwt = false
 
 [functions.calibrate-model]
 verify_jwt = false
+
+[functions.stock-candles-collector]
+verify_jwt = false
+

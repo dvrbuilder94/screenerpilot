@@ -4,11 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface HorizonAgg { count: number; hitRate: number; avgReturn: number; avgDrawdown: number }
 interface BucketRow { label: string; count: number; hitRate: number; avgReturn: number }
+interface ModelInfo { asset_type: string; n_samples: number; updated_at: string }
 interface TR {
   recorded: number;
   resolved: number;
   byHorizon: Record<string, HorizonAgg>;
   byBucket: Record<string, BucketRow[]>;
+  models?: ModelInfo[];
   updatedAt: string;
 }
 
@@ -131,6 +133,13 @@ export function TrackRecord() {
         {recorded.toLocaleString()} signals recorded · {resolved.toLocaleString()} outcomes resolved.
         Timestamped on-record — not back-fitted.
       </p>
+
+      {data!.models && data!.models.some((m) => m.n_samples > 0) && (
+        <p className="mt-1.5 text-[11px] text-primary/90">
+          ⚙︎ Self-calibrating — weights re-fit on realized outcomes:{" "}
+          {data!.models.filter((m) => m.n_samples > 0).map((m) => `${m.asset_type} (n=${m.n_samples})`).join(" · ")}
+        </p>
+      )}
     </div>
   );
 }

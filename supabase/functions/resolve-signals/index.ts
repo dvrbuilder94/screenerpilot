@@ -1,29 +1,37 @@
-// Resolves matured signals into signal_outcomes so the track record can be
-// measured. For each recorded snapshot, once a horizon (1d / 1w / 1m) has
-// elapsed it computes forward return + max drawdown from Binance daily klines
-// and stores the outcome. Idempotent (skips already-resolved pairs). Meant to
-// run daily. Strict cron guard.
+// Resolves matured signals (crypto + stocks) into signal_outcomes. Crypto prices
+// come from Binance klines, stock prices from asset_candles. For each snapshot,
+// once a horizon (1d / 1w / 1m) elapses it stores forward return + max drawdown.
+// Idempotent. Daily schedule. Strict cron guard.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-const HORIZONS: Record<string, number> = { "1d": 1, "1w": 7, "1m": 30 }; // days
+const HORIZONS: Record<string, number> = { "1d": 1, "1w": 7, "1m": 30 };
 const DAY = 86_400_000;
 
-type Kline = { t: number; high: number; low: number; close: number };
+type Bar = { t: number; low: number; close: number };
 
-async function fetchKlines(symbol: string): Promise<Kline[]> {
-  const url = `https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}USDT&interval=1d&limit=40`;
-  const res = await fetch(url);
+async function cryptoPath(symbol: string): Promise<Bar[]> {
+  const res = await fetch(`https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}USDT&interval=1d&limit=40`);
   if (!res.ok) return [];
   const raw = (await res.json()) as unknown[][];
-  return raw.map((k) => ({
-    t: k[0] as number,
-    high: parseFloat(k[2] as string),
-    low: parseFloat(k[3] as string),
-    close: parseFloat(k[4] as string),
+  return raw.map((k) => ({ t: k[0] as number, low: parseFloat(k[3] as string), close: parseFloat(k[4] as string) }));
+}
+
+async function stockPath(sb: ReturnType<typeof createClient>, symbol: string): Promise<Bar[]> {
+  const { data } = await sb
+    .from("asset_candles")
+    .select("timestamp, low, close")
+    .eq("symbol", symbol)
+    .eq("interval", "1d")
+    .order("timestamp", { ascending: true })
+    .limit(60);
+  return ((data ?? []) as { timestamp: number; low: number; close: number }[]).map((r) => ({
+    t: r.timestamp < 1e12 ? r.timestamp * 1000 : r.timestamp, // normalize s → ms
+    low: Number(r.low),
+    close: Number(r.close),
   }));
 }
 
@@ -42,24 +50,16 @@ Deno.serve(async (req) => {
     const since = new Date(Date.now() - 35 * DAY).toISOString();
 
     const [{ data: snaps }, { data: outs }] = await Promise.all([
-      supabase
-        .from("signal_snapshots")
-        .select("id, symbol, asset_type, price_at_signal, created_at")
-        .eq("asset_type", "crypto")
-        .gte("created_at", since)
-        .limit(500),
+      supabase.from("signal_snapshots").select("id, symbol, asset_type, price_at_signal, created_at").gte("created_at", since).limit(800),
       supabase.from("signal_outcomes").select("snapshot_id, horizon"),
     ]);
-
     if (!snaps?.length) {
-      return new Response(JSON.stringify({ ok: true, resolved: 0 }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(JSON.stringify({ ok: true, resolved: 0 }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const done = new Set((outs ?? []).map((o) => `${o.snapshot_id}:${o.horizon}`));
     const now = Date.now();
-    const klineCache = new Map<string, Kline[]>();
+    const pathCache = new Map<string, Bar[]>();
     const rows: Record<string, unknown>[] = [];
 
     for (const s of snaps) {
@@ -70,18 +70,18 @@ Deno.serve(async (req) => {
       for (const [hz, days] of Object.entries(HORIZONS)) {
         if (done.has(`${s.id}:${hz}`)) continue;
         const endTs = start + days * DAY;
-        if (now < endTs) continue; // not matured yet
+        if (now < endTs) continue;
 
-        if (!klineCache.has(s.symbol)) klineCache.set(s.symbol, await fetchKlines(s.symbol));
-        const kl = klineCache.get(s.symbol)!;
-        if (!kl.length) continue;
-
-        const window = kl.filter((k) => k.t >= start - DAY && k.t <= endTs + DAY);
+        const key = `${s.asset_type}:${s.symbol}`;
+        if (!pathCache.has(key)) {
+          pathCache.set(key, s.asset_type === "stock" ? await stockPath(supabase, s.symbol) : await cryptoPath(s.symbol));
+        }
+        const path = pathCache.get(key)!;
+        const window = path.filter((k) => k.t >= start - DAY && k.t <= endTs + DAY);
         if (!window.length) continue;
-        // end price = close of the kline nearest to (and not after) endTs
+
         const atEnd = window.filter((k) => k.t <= endTs).at(-1) ?? window.at(-1)!;
         const minLow = Math.min(...window.map((k) => k.low));
-
         rows.push({
           snapshot_id: s.id,
           horizon: hz,

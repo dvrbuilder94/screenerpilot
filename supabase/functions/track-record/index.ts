@@ -41,9 +41,10 @@ Deno.serve(async (req) => {
 
   try {
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
-    const [{ count: recorded }, { data }] = await Promise.all([
+    const [{ count: recorded }, { data }, { data: models }] = await Promise.all([
       supabase.from("signal_snapshots").select("*", { count: "exact", head: true }),
       supabase.from("signal_outcomes").select("return_pct, max_drawdown, horizon, signal_snapshots(score)").limit(5000),
+      supabase.from("model_weights").select("asset_type, n_samples, updated_at"),
     ]);
     const rows = (data ?? []) as unknown as Row[];
 
@@ -60,7 +61,7 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ recorded: recorded ?? 0, resolved: rows.length, byHorizon, byBucket, updatedAt: new Date().toISOString() }),
+      JSON.stringify({ recorded: recorded ?? 0, resolved: rows.length, byHorizon, byBucket, models: models ?? [], updatedAt: new Date().toISOString() }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e) {

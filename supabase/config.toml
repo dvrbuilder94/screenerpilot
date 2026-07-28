@@ -77,3 +77,6 @@ verify_jwt = false
 
 [functions.track-record]
 verify_jwt = false
+
+[functions.calibrate-model]
+verify_jwt = false

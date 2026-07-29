@@ -566,6 +566,33 @@ export type Database = {
         }
         Relationships: []
       }
+      model_weights: {
+        Row: {
+          asset_type: string
+          horizon: string
+          id: string
+          n_samples: number
+          updated_at: string
+          weights: Json
+        }
+        Insert: {
+          asset_type: string
+          horizon: string
+          id?: string
+          n_samples?: number
+          updated_at?: string
+          weights: Json
+        }
+        Update: {
+          asset_type?: string
+          horizon?: string
+          id?: string
+          n_samples?: number
+          updated_at?: string
+          weights?: Json
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -717,6 +744,7 @@ export type Database = {
           asset_type: string
           confidence: number
           created_at: string
+          factors: Json | null
           id: string
           price_at_signal: number
           score: number
@@ -728,6 +756,7 @@ export type Database = {
           asset_type: string
           confidence: number
           created_at?: string
+          factors?: Json | null
           id?: string
           price_at_signal: number
           score: number
@@ -739,6 +768,7 @@ export type Database = {
           asset_type?: string
           confidence?: number
           created_at?: string
+          factors?: Json | null
           id?: string
           price_at_signal?: number
           score?: number
@@ -1070,6 +1100,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      verify_cron_secret: { Args: { candidate: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

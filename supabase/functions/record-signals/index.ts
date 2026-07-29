@@ -4,6 +4,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { scoreCrossSection, signalFor } from "../_shared/quant.ts";
+import { isAuthorizedCron } from "../_shared/cron-guard.ts";
 import {
   buildCryptoItems, buildStockItems, withWeights, CRYPTO_FACTORS, STOCK_FACTORS, type ScanRow,
 } from "../_shared/scan.ts";
@@ -15,15 +16,15 @@ const TOP_N = 20;
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const expected = Deno.env.get("CRON_SECRET");
-  if (!expected || req.headers.get("x-cron-secret") !== expected) {
+  const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+  if (!(await isAuthorizedCron(req, supabase))) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
   try {
-    const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+
 
     const [cryptoRows, stockRows] = await Promise.all([
       buildCryptoItems(),

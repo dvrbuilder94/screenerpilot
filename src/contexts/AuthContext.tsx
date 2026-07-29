@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -39,22 +39,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
+  // Tracks the current auth user so a late in-flight response can't overwrite
+  // state after a logout or user switch (stale profile/subscription).
+  const activeUserId = useRef<string | null>(null);
 
   // Fetch profile and subscription data
   const fetchUserData = async (userId: string) => {
     try {
       // @ts-ignore
       const [profileRes, subRes] = await Promise.all([
+        // maybeSingle: profile/subscription rows are optional (0 or 1) — single()
+        // returns a 406 error when the row doesn't exist yet.
         // @ts-ignore
-        supabase.from('profiles').select('*').eq('user_id', userId).single(),
+        supabase.from('profiles').select('*').eq('user_id', userId).maybeSingle(),
         // @ts-ignore
-        supabase.from('user_subscriptions').select('*').eq('user_id', userId).single(),
+        supabase.from('user_subscriptions').select('*').eq('user_id', userId).maybeSingle(),
       ]);
 
+      // Drop the result if the auth user changed while this was in flight.
+      if (activeUserId.current !== userId) return;
       // @ts-ignore
-      if (profileRes.data) setProfile(profileRes.data as any);
+      setProfile((profileRes.data as any) ?? null);
       // @ts-ignore
-      if (subRes.data) setSubscription(subRes.data as any);
+      setSubscription((subRes.data as any) ?? null);
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
@@ -66,7 +73,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       (event, currentSession) => {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
-        
+        activeUserId.current = currentSession?.user?.id ?? null;
+
         if (currentSession?.user) {
           setTimeout(() => {
             fetchUserData(currentSession.user.id);
@@ -82,7 +90,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
-      
+      activeUserId.current = currentSession?.user?.id ?? null;
+
       if (currentSession?.user) {
         fetchUserData(currentSession.user.id);
       }

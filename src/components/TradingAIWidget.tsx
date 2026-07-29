@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sparkles, X, Send, Loader2, Globe, Bitcoin, TrendingUp, Scale, Landmark, LucideIcon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getFearGreedIndex, getDominanceData } from "@/lib/cryptoMetrics";
@@ -131,8 +132,21 @@ export const TradingAIWidget = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const { subscription } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const isContextReady = marketContext.length > 0;
+
+  // The landing hero chat routes here as /home?q=... — open BEN with the
+  // question prefilled, then strip the param so it doesn't retrigger.
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (!q) return;
+    setInput(q);
+    setIsOpen(true);
+    searchParams.delete("q");
+    setSearchParams(searchParams, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /* ---------------- LIMITS ---------------- */
 

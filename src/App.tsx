@@ -29,6 +29,7 @@ import Home from "./pages/Home";
 import AssetDetail from "./pages/AssetDetail";
 import Search from "./pages/Search";
 import TokenSqueeze from "./pages/TokenSqueeze";
+import WalletPnLPage from "./pages/WalletPnL";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,7 @@ const App = () => (
                       <Route path="/search" element={<Search />} />
                       <Route path="/squeeze" element={<TokenSqueeze />} />
                       <Route path="/agent" element={<OnchainAgent />} />
+                      <Route path="/wallet" element={<WalletPnLPage />} />
                       <Route path="/markets" element={<Markets />} />
                       <Route path="/macro" element={<Macro />} />
                       <Route path="/ratios" element={<Ratios />} />

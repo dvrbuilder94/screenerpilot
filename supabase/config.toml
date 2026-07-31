@@ -84,3 +84,6 @@ verify_jwt = false
 [functions.stock-candles-collector]
 verify_jwt = false
 
+
+[functions.wallet-pnl]
+verify_jwt = false

@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Seo } from "@/components/Seo";
 import { toast } from "sonner";
-import { Zap, Bell, Radio, ArrowRight } from "lucide-react";
+import { Zap, Bell, Radio, ArrowRight, Wallet } from "lucide-react";
 
 const FEATURES = [
   { icon: Radio, title: "24/7 monitoring", desc: "On-chain markets never close. BEN watches your tokenized stocks and crypto around the clock." },
@@ -55,6 +56,24 @@ export default function OnchainAgent() {
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse-dot" /> 24/7 · always on
           </span>
         </div>
+
+        {/* Available now: Wallet PnL */}
+        <Link
+          to="/wallet"
+          className="group mt-8 flex items-center gap-4 fin-card p-5 transition-colors hover:border-primary/40"
+        >
+          <div className="w-11 h-11 rounded-xl bg-primary/[0.14] text-primary flex items-center justify-center flex-shrink-0">
+            <Wallet className="w-5 h-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold tracking-tight">Wallet PnL</h3>
+              <span className="text-[9px] uppercase tracking-[0.16em] font-mono text-primary border border-primary/30 rounded-full px-1.5 py-0.5">Live</span>
+            </div>
+            <p className="text-[13px] text-muted-foreground mt-0.5">Paste any EVM address — see net invested, in/out and gains across every chain.</p>
+          </div>
+          <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+        </Link>
 
         {/* Waitlist */}
         <div className="mt-9 fin-card p-6">

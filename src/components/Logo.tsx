@@ -1,9 +1,9 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Minimalist monogram. Uses currentColor so it inherits from the surface —
- * black on white in the marketing site, white on black inside the terminal.
- * No gradients, no drop shadows, no cyan/blue — just brand type.
+ * Brand mark — the ScreenerPilot orb: a matte periwinkle sphere with two tilted
+ * orbital rings (the "atomic core"). Fixed brand colors (not currentColor), so
+ * it reads the same on every surface and matches the hero orb + token image.
  */
 export function LogoMark({ className }: { className?: string }) {
   return (
@@ -13,16 +13,23 @@ export function LogoMark({ className }: { className?: string }) {
       fill="none"
       aria-hidden="true"
     >
-      <rect x="1" y="1" width="30" height="30" rx="7" stroke="currentColor" strokeWidth="1.5" />
-      {/* Simple ascending chart glyph */}
-      <path
-        d="M8 21 L14 15 L18 18 L24 11"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="24" cy="11" r="1.75" fill="currentColor" />
+      <defs>
+        <radialGradient id="sp-orb" cx="0.5" cy="0.5" r="0.6" fx="0.36" fy="0.30">
+          <stop offset="0%" stopColor="#EAF0FF" />
+          <stop offset="32%" stopColor="#C2CBEE" />
+          <stop offset="64%" stopColor="#8E9BE3" />
+          <stop offset="100%" stopColor="#65719C" />
+        </radialGradient>
+      </defs>
+      {/* Orbital rings */}
+      <g stroke="#A9B4FF" strokeOpacity="0.55" strokeWidth="1">
+        <ellipse cx="16" cy="16" rx="14.5" ry="5.2" transform="rotate(24 16 16)" />
+        <ellipse cx="16" cy="16" rx="13.5" ry="5" transform="rotate(-30 16 16)" />
+      </g>
+      {/* Sphere */}
+      <circle cx="16" cy="16" r="10.5" fill="url(#sp-orb)" />
+      {/* Specular highlight */}
+      <ellipse cx="12.4" cy="11.4" rx="3.4" ry="2.2" fill="#FFFFFF" opacity="0.45" transform="rotate(-24 12.4 11.4)" />
     </svg>
   );
 }

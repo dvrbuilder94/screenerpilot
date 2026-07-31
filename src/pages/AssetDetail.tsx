@@ -1,13 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useWatchlist } from "@/hooks/useWatchlist";
 import { cleanTicker } from "@/lib/ticker";
 import { Seo } from "@/components/Seo";
-import { ChevronLeft, Loader2, Bell, Heart, Sparkles } from "lucide-react";
+import { Bell, ChevronLeft, Heart, Loader2, ShieldAlert, Sparkles } from "lucide-react";
 
 type Timeframe = "daily" | "weekly" | "monthly";
+type Bias = "Bullish" | "Neutral" | "Bearish";
+
 const PERIODS: { label: string; tf: Timeframe }[] = [
   { label: "1Y", tf: "daily" },
   { label: "5Y", tf: "weekly" },
@@ -31,17 +33,111 @@ interface Analysis {
   chart?: { close: number[]; timestamps?: number[] };
 }
 
+interface DecisionSnapshot {
+  bias: Bias;
+  confidence: number;
+  summary: string;
+  evidenceFor: string[];
+  evidenceAgainst: string[];
+  invalidation: string;
+}
+
 async function fetchAnalysis(symbol: string, tf: Timeframe): Promise<Analysis> {
-  const { data, error } = await supabase.functions.invoke("analyze-stock", { body: { symbol, timeframe: tf } });
+  const { data, error } = await supabase.functions.invoke("analyze-stock", {
+    body: { symbol, timeframe: tf },
+  });
   if (error || data?.error) throw new Error(data?.error || "Could not load");
   return data as Analysis;
 }
 
-function InteractiveChart({
-  close,
-  timestamps,
-  onHover,
-}: {
+function buildDecisionSnapshot(a: Analysis): DecisionSnapshot {
+  const ind = a.indicators;
+  const scoreParts: number[] = [];
+  const evidenceFor: string[] = [];
+  const evidenceAgainst: string[] = [];
+
+  const ema20 = ind?.emas?.ema20;
+  const ema50 = ind?.emas?.ema50;
+  const ema200 = ind?.emas?.ema200;
+  const rsi = ind?.rsi?.value;
+  const macd = ind?.macd?.hist;
+
+  if (ema20 != null) {
+    const positive = a.price >= ema20;
+    scoreParts.push(positive ? 1 : -1);
+    (positive ? evidenceFor : evidenceAgainst).push(
+      `Price is ${positive ? "above" : "below"} the 20-day EMA.`
+    );
+  }
+  if (ema50 != null) {
+    const positive = a.price >= ema50;
+    scoreParts.push(positive ? 1 : -1);
+    (positive ? evidenceFor : evidenceAgainst).push(
+      `Price is ${positive ? "above" : "below"} the 50-day EMA.`
+    );
+  }
+  if (ema200 != null) {
+    const positive = a.price >= ema200;
+    scoreParts.push(positive ? 1.5 : -1.5);
+    (positive ? evidenceFor : evidenceAgainst).push(
+      `Long-term trend is ${positive ? "constructive" : "under pressure"} versus the 200-day EMA.`
+    );
+  }
+  if (macd != null) {
+    const positive = macd >= 0;
+    scoreParts.push(positive ? 1 : -1);
+    (positive ? evidenceFor : evidenceAgainst).push(
+      `MACD momentum is ${positive ? "positive" : "negative"}.`
+    );
+  }
+  if (rsi != null) {
+    if (rsi >= 70) {
+      scoreParts.push(-0.5);
+      evidenceAgainst.push("RSI is extended and raises pullback risk.");
+    } else if (rsi <= 30) {
+      scoreParts.push(0.5);
+      evidenceFor.push("RSI is deeply oversold and may support a rebound.");
+    } else if (rsi >= 50) {
+      scoreParts.push(0.5);
+      evidenceFor.push("RSI remains above the neutral 50 level.");
+    } else {
+      scoreParts.push(-0.5);
+      evidenceAgainst.push("RSI remains below the neutral 50 level.");
+    }
+  }
+
+  const score = scoreParts.reduce((sum, value) => sum + value, 0);
+  const maxScore = scoreParts.reduce((sum, value) => sum + Math.abs(value), 0) || 1;
+  const normalized = score / maxScore;
+  const bias: Bias = normalized >= 0.25 ? "Bullish" : normalized <= -0.25 ? "Bearish" : "Neutral";
+  const confidence = Math.round(55 + Math.min(Math.abs(normalized), 1) * 30);
+
+  const support = a.priceAction?.support;
+  const fallbackLevel = ema50 ?? ema200;
+  const invalidation = support
+    ? `Reassess if price loses ${support}.`
+    : fallbackLevel != null
+      ? `Reassess on a sustained move below $${fallbackLevel.toFixed(2)}.`
+      : "Reassess if the current trend and momentum signals reverse.";
+
+  const summary =
+    bias === "Bullish"
+      ? "Trend and momentum are currently aligned positively, but the setup still needs confirmation from price action."
+      : bias === "Bearish"
+        ? "Trend and momentum currently lean negative, with recovery dependent on reclaiming key moving averages."
+        : "Signals are mixed. The asset lacks enough alignment for a strong directional read."
+
+  return {
+    bias,
+    confidence,
+    summary,
+    evidenceFor: evidenceFor.slice(0, 3),
+    evidenceAgainst: evidenceAgainst.slice(0, 3),
+    invalidation,
+  };
+}
+
+function InteractiveChart({ close, timestamps, onHover }: {
   close: number[];
   timestamps?: number[];
   onHover: (info: { price: number; date: string } | null) => void;
@@ -51,77 +147,100 @@ function InteractiveChart({
   const pad = 6;
 
   const draw = useCallback(() => {
-    const cv = ref.current;
-    if (!cv || close.length < 2) return;
-    const ctx = cv.getContext("2d");
+    const canvas = ref.current;
+    if (!canvas || close.length < 2) return;
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    const r = cv.getBoundingClientRect();
-    if (r.width < 2 || r.height < 2) return;
-    const dpr = Math.min(devicePixelRatio || 1, 2);
-    cv.width = Math.round(r.width * dpr);
-    cv.height = Math.round(r.height * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const W = r.width, H = r.height;
-    const min = Math.min(...close), max = Math.max(...close);
-    const X = (i: number) => pad + (i / (close.length - 1)) * (W - pad * 2);
-    const Y = (v: number) => H - pad - ((v - min) / (max - min || 1)) * (H - pad * 2);
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width < 2 || rect.height < 2) return;
 
-    ctx.clearRect(0, 0, W, H);
-    // area
-    ctx.beginPath(); ctx.moveTo(X(0), Y(close[0]));
-    for (let i = 1; i < close.length; i++) ctx.lineTo(X(i), Y(close[i]));
-    ctx.lineTo(X(close.length - 1), H - pad); ctx.lineTo(X(0), H - pad); ctx.closePath();
-    const g = ctx.createLinearGradient(0, pad, 0, H);
-    g.addColorStop(0, "rgba(142,155,227,0.22)"); g.addColorStop(1, "rgba(142,155,227,0)");
-    ctx.fillStyle = g; ctx.fill();
-    // line
-    ctx.beginPath(); ctx.moveTo(X(0), Y(close[0]));
-    for (let i = 1; i < close.length; i++) ctx.lineTo(X(i), Y(close[i]));
-    ctx.strokeStyle = "#8E9BE3"; ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.stroke();
-    // crosshair
-    const hi = hoverRef.current;
-    if (hi != null) {
-      const hx = X(hi), hy = Y(close[hi]);
-      ctx.strokeStyle = "rgba(255,255,255,0.25)"; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(hx, pad); ctx.lineTo(hx, H - pad); ctx.stroke();
-      ctx.beginPath(); ctx.fillStyle = "#8E9BE3"; ctx.arc(hx, hy, 4, 0, 7); ctx.fill();
-      ctx.beginPath(); ctx.strokeStyle = "rgba(142,155,227,0.4)"; ctx.lineWidth = 2; ctx.arc(hx, hy, 7, 0, 7); ctx.stroke();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(rect.width * dpr);
+    canvas.height = Math.round(rect.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const min = Math.min(...close);
+    const max = Math.max(...close);
+    const x = (index: number) => pad + (index / (close.length - 1)) * (rect.width - pad * 2);
+    const y = (value: number) => rect.height - pad - ((value - min) / (max - min || 1)) * (rect.height - pad * 2);
+
+    ctx.clearRect(0, 0, rect.width, rect.height);
+    ctx.beginPath();
+    ctx.moveTo(x(0), y(close[0]));
+    for (let i = 1; i < close.length; i += 1) ctx.lineTo(x(i), y(close[i]));
+    ctx.lineTo(x(close.length - 1), rect.height - pad);
+    ctx.lineTo(x(0), rect.height - pad);
+    ctx.closePath();
+    const gradient = ctx.createLinearGradient(0, pad, 0, rect.height);
+    gradient.addColorStop(0, "rgba(142,155,227,0.22)");
+    gradient.addColorStop(1, "rgba(142,155,227,0)");
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(x(0), y(close[0]));
+    for (let i = 1; i < close.length; i += 1) ctx.lineTo(x(i), y(close[i]));
+    ctx.strokeStyle = "#8E9BE3";
+    ctx.lineWidth = 2;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.stroke();
+
+    const hoverIndex = hoverRef.current;
+    if (hoverIndex != null) {
+      const hoverX = x(hoverIndex);
+      const hoverY = y(close[hoverIndex]);
+      ctx.strokeStyle = "rgba(255,255,255,0.25)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(hoverX, pad);
+      ctx.lineTo(hoverX, rect.height - pad);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.fillStyle = "#8E9BE3";
+      ctx.arc(hoverX, hoverY, 4, 0, Math.PI * 2);
+      ctx.fill();
     }
   }, [close]);
 
-  // draw on mount + whenever the canvas actually gets a size (ResizeObserver)
   useEffect(() => {
     draw();
-    const cv = ref.current;
-    if (!cv || typeof ResizeObserver === "undefined") return;
-    const ro = new ResizeObserver(() => draw());
-    ro.observe(cv);
-    return () => ro.disconnect();
+    const canvas = ref.current;
+    if (!canvas || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(draw);
+    observer.observe(canvas);
+    return () => observer.disconnect();
   }, [draw]);
 
   const move = (clientX: number) => {
-    const cv = ref.current;
-    if (!cv) return;
-    const rect = cv.getBoundingClientRect();
-    const t = (clientX - rect.left - pad) / (rect.width - pad * 2);
-    const i = Math.max(0, Math.min(close.length - 1, Math.round(t * (close.length - 1))));
-    hoverRef.current = i;
+    const canvas = ref.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const progress = (clientX - rect.left - pad) / (rect.width - pad * 2);
+    const index = Math.max(0, Math.min(close.length - 1, Math.round(progress * (close.length - 1))));
+    hoverRef.current = index;
     draw();
-    const ts = timestamps?.[i];
+    const timestamp = timestamps?.[index];
     onHover({
-      price: close[i],
-      date: ts ? new Date(ts * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "",
+      price: close[index],
+      date: timestamp
+        ? new Date(timestamp * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+        : "",
     });
   };
 
   return (
     <canvas
       ref={ref}
-      className="w-full h-[190px] block"
+      className="block h-[190px] w-full"
       style={{ touchAction: "none" }}
-      onPointerMove={(e) => move(e.clientX)}
-      onPointerDown={(e) => move(e.clientX)}
-      onPointerLeave={() => { hoverRef.current = null; draw(); onHover(null); }}
+      onPointerMove={(event) => move(event.clientX)}
+      onPointerDown={(event) => move(event.clientX)}
+      onPointerLeave={() => {
+        hoverRef.current = null;
+        draw();
+        onHover(null);
+      }}
     />
   );
 }
@@ -134,52 +253,56 @@ export default function AssetDetail() {
   const { has, toggle } = useWatchlist();
   const inWatchlist = has(sym);
 
-  const analysisQ = useQuery({ queryKey: ["asset-analysis", sym, tf], queryFn: () => fetchAnalysis(sym, tf), enabled: !!sym });
-  const a = analysisQ.data;
-  const up = (a?.dayChangePercent ?? 0) >= 0;
-  const ind = a?.indicators;
-  const pa = a?.priceAction;
+  const analysisQ = useQuery({
+    queryKey: ["asset-analysis", sym, tf],
+    queryFn: () => fetchAnalysis(sym, tf),
+    enabled: Boolean(sym),
+    staleTime: 60_000,
+    retry: 1,
+  });
+
+  const analysis = analysisQ.data;
+  const snapshot = useMemo(() => analysis ? buildDecisionSnapshot(analysis) : null, [analysis]);
+  const indicators = analysis?.indicators;
+  const priceAction = analysis?.priceAction;
+  const up = (analysis?.dayChangePercent ?? 0) >= 0;
 
   return (
     <div className="assetdetail min-h-screen pb-28 lg:pb-12">
       <style>{`
-        .assetdetail { --bg:#13161F; --panel:#1B1F29; --panel2:#21262F; --ink:#F0F1F7; --ink2:#C7CBD8;
-          --muted:#9A9AA5; --faint:#5A5A62; --line:rgba(255,255,255,0.08); --lime:#8E9BE3; --up:#4ADE80; --down:#FF5252;
-          --mono:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,monospace;
-          background:var(--bg); color:var(--ink); }
-        .assetdetail .wrap { max-width:640px; margin:0 auto; padding:14px 20px 40px; }
-        .assetdetail .mono { font-family:var(--mono); }
+        .assetdetail { --bg:#13161F; --panel:#1B1F29; --ink:#F0F1F7; --muted:#9A9AA5; --faint:#656975; --line:rgba(255,255,255,0.08); --accent:#8E9BE3; --up:#4ADE80; --down:#FF6262; background:var(--bg); color:var(--ink); }
+        .assetdetail .wrap { max-width:720px; margin:0 auto; padding:14px 20px 40px; }
+        .assetdetail .mono { font-family:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,monospace; }
         .assetdetail .card { background:var(--panel); border:1px solid var(--line); border-radius:16px; }
         .assetdetail .stat { background:var(--bg); padding:11px 13px; }
-        .assetdetail .per { font-family:var(--mono); font-size:11px; padding:6px 0; border-radius:8px; border:0; background:none; color:var(--muted); cursor:pointer; flex:1; }
-        .assetdetail .per.on { background:var(--lime); color:#0A0A0A; font-weight:600; }
+        .assetdetail .period { font-family:ui-monospace,"SF Mono",monospace; font-size:11px; padding:6px 0; border-radius:8px; background:none; color:var(--muted); flex:1; }
+        .assetdetail .period.active { background:var(--accent); color:#0A0A0A; font-weight:700; }
       `}</style>
 
-      <Seo title={`${sym} | ScreenerPilot`} description={`Live chart and technicals for ${sym}.`} path={`/asset/${sym}`} />
+      <Seo title={`${sym} | ScreenerPilot`} description={`Decision snapshot, chart and technicals for ${sym}.`} path={`/asset/${sym}`} />
 
       <div className="wrap">
         <Link to="/watchlist" className="inline-flex items-center gap-1 text-[13px]" style={{ color: "var(--muted)" }}>
-          <ChevronLeft className="w-4 h-4" /> Watchlist
+          <ChevronLeft className="h-4 w-4" /> Watchlist
         </Link>
 
         {analysisQ.isLoading ? (
-          <div className="flex items-center justify-center py-24"><Loader2 className="w-6 h-6 animate-spin" style={{ color: "var(--lime)" }} /></div>
-        ) : analysisQ.error || !a ? (
-          <div className="card p-8 text-center mt-6" style={{ color: "var(--muted)" }}>Couldn't load {sym}. Is the ticker correct?</div>
+          <div className="flex items-center justify-center py-24"><Loader2 className="h-6 w-6 animate-spin" /></div>
+        ) : analysisQ.error || !analysis || !snapshot ? (
+          <div className="card mt-6 p-8 text-center" style={{ color: "var(--muted)" }}>Could not load {sym}. Check the ticker and try again.</div>
         ) : (
           <>
-            {/* Header + heart */}
             <div className="mt-3 flex items-start justify-between gap-3">
               <div>
-                <div className="flex items-baseline gap-2.5 flex-wrap">
-                  <span className="mono" style={{ fontSize: 30, fontWeight: 700, letterSpacing: "-0.02em" }}>{cleanTicker(a.symbol)}</span>
-                  <span style={{ fontSize: 14, color: "var(--muted)" }}>{a.companyName}</span>
+                <div className="flex flex-wrap items-baseline gap-2.5">
+                  <span className="mono text-[30px] font-bold tracking-tight">{cleanTicker(analysis.symbol)}</span>
+                  <span className="text-sm" style={{ color: "var(--muted)" }}>{analysis.companyName}</span>
                 </div>
-                <div className="mt-1.5 flex items-baseline gap-3">
-                  <span className="mono" style={{ fontSize: 32, fontWeight: 600, letterSpacing: "-0.02em" }}>${a.price?.toFixed(2)}</span>
-                  {a.dayChangePercent != null && (
-                    <span className="mono" style={{ fontSize: 15, fontWeight: 600, color: up ? "var(--up)" : "var(--down)" }}>
-                      {up ? "+" : ""}{a.dayChangePercent.toFixed(2)}% today
+                <div className="mt-1.5 flex flex-wrap items-baseline gap-3">
+                  <span className="mono text-[32px] font-semibold tracking-tight">${analysis.price?.toFixed(2)}</span>
+                  {analysis.dayChangePercent != null && (
+                    <span className="mono text-[15px] font-semibold" style={{ color: up ? "var(--up)" : "var(--down)" }}>
+                      {up ? "+" : ""}{analysis.dayChangePercent.toFixed(2)}% today
                     </span>
                   )}
                 </div>
@@ -187,89 +310,103 @@ export default function AssetDetail() {
               <button
                 onClick={() => toggle(sym)}
                 aria-label={inWatchlist ? "Remove from watchlist" : "Add to watchlist"}
-                className="flex-shrink-0 w-10 h-10 rounded-full grid place-items-center border transition-colors"
+                className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-full border"
                 style={{
-                  borderColor: inWatchlist ? "var(--lime)" : "var(--line)",
+                  borderColor: inWatchlist ? "var(--accent)" : "var(--line)",
                   background: inWatchlist ? "rgba(142,155,227,0.12)" : "transparent",
-                  color: inWatchlist ? "var(--lime)" : "var(--muted)",
+                  color: inWatchlist ? "var(--accent)" : "var(--muted)",
                 }}
               >
-                <Heart className="w-5 h-5" fill={inWatchlist ? "currentColor" : "none"} />
+                <Heart className="h-5 w-5" fill={inWatchlist ? "currentColor" : "none"} />
               </button>
             </div>
 
-            {/* Summary stats */}
-            <div className="mt-4 grid grid-cols-3 gap-px card overflow-hidden" style={{ background: "var(--line)" }}>
-              <div className="stat"><div style={{ fontSize: 9.5, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--faint)" }}>Market cap</div><div className="mono" style={{ fontSize: 15, fontWeight: 600, marginTop: 3 }}>{a.marketCap || "—"}</div></div>
-              <div className="stat"><div style={{ fontSize: 9.5, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--faint)" }}>RSI</div><div className="mono" style={{ fontSize: 15, fontWeight: 600, marginTop: 3 }}>{ind?.rsi?.value ?? "—"}</div></div>
-              <div className="stat"><div style={{ fontSize: 9.5, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--faint)" }}>52w range</div><div className="mono" style={{ fontSize: 12, fontWeight: 600, marginTop: 3 }}>{ind?.range52w ? `$${ind.range52w.low.toFixed(0)}–$${ind.range52w.high.toFixed(0)}` : "—"}</div></div>
+            <div className="card mt-5 overflow-hidden">
+              <div className="flex items-start justify-between gap-4 p-5">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" style={{ color: "var(--accent)" }} />
+                    <span className="mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--faint)" }}>Decision snapshot</span>
+                  </div>
+                  <h2 className="mt-3 text-xl font-semibold">{snapshot.bias} setup</h2>
+                  <p className="mt-2 text-[13px] leading-relaxed" style={{ color: "var(--muted)" }}>{snapshot.summary}</p>
+                </div>
+                <div className="mono rounded-full border px-3 py-1.5 text-[11px]" style={{ borderColor: "var(--line)", color: "var(--accent)" }}>
+                  {snapshot.confidence}% confidence
+                </div>
+              </div>
+
+              <div className="grid gap-px border-t md:grid-cols-2" style={{ background: "var(--line)", borderColor: "var(--line)" }}>
+                <Evidence title="Supporting evidence" items={snapshot.evidenceFor} tone="up" />
+                <Evidence title="Risks and contradictions" items={snapshot.evidenceAgainst} tone="down" />
+              </div>
+
+              <div className="flex gap-3 border-t p-4" style={{ borderColor: "var(--line)" }}>
+                <ShieldAlert className="mt-0.5 h-4 w-4 flex-shrink-0" style={{ color: "var(--accent)" }} />
+                <div>
+                  <div className="mono text-[9px] uppercase tracking-[0.12em]" style={{ color: "var(--faint)" }}>Invalidation</div>
+                  <p className="mt-1 text-[12.5px]" style={{ color: "var(--muted)" }}>{snapshot.invalidation}</p>
+                </div>
+              </div>
             </div>
 
-            {/* Chart — interactive */}
+            <div className="card mt-4 grid grid-cols-3 gap-px overflow-hidden" style={{ background: "var(--line)" }}>
+              <Stat label="Market cap" value={analysis.marketCap || "—"} />
+              <Stat label="RSI" value={indicators?.rsi?.value ?? "—"} />
+              <Stat label="52w range" value={indicators?.range52w ? `$${indicators.range52w.low.toFixed(0)}–$${indicators.range52w.high.toFixed(0)}` : "—"} />
+            </div>
+
             <div className="mt-5">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex gap-1 flex-1">
-                  {PERIODS.map((p) => (
-                    <button key={p.tf} className={`per ${tf === p.tf ? "on" : ""}`} style={{ maxWidth: 70 }} onClick={() => setTf(p.tf)}>{p.label}</button>
+              <div className="mb-2 flex items-center justify-between">
+                <div className="flex flex-1 gap-1">
+                  {PERIODS.map((period) => (
+                    <button key={period.tf} className={`period ${tf === period.tf ? "active" : ""}`} style={{ maxWidth: 70 }} onClick={() => setTf(period.tf)}>
+                      {period.label}
+                    </button>
                   ))}
                 </div>
                 {hover && (
-                  <div className="mono text-right" style={{ minWidth: 120 }}>
-                    <div style={{ fontSize: 15, fontWeight: 600 }}>${hover.price.toFixed(2)}</div>
-                    <div style={{ fontSize: 10.5, color: "var(--faint)" }}>{hover.date}</div>
+                  <div className="mono min-w-[120px] text-right">
+                    <div className="text-[15px] font-semibold">${hover.price.toFixed(2)}</div>
+                    <div className="text-[10.5px]" style={{ color: "var(--faint)" }}>{hover.date}</div>
                   </div>
                 )}
               </div>
-              {a.chart?.close && a.chart.close.length > 1 ? (
-                <InteractiveChart close={a.chart.close} timestamps={a.chart.timestamps} onHover={setHover} />
+              {analysis.chart?.close && analysis.chart.close.length > 1 ? (
+                <InteractiveChart close={analysis.chart.close} timestamps={analysis.chart.timestamps} onHover={setHover} />
               ) : (
-                <div className="h-[190px] flex items-center justify-center" style={{ color: "var(--faint)" }}><Loader2 className="w-4 h-4 animate-spin" /></div>
+                <div className="flex h-[190px] items-center justify-center"><Loader2 className="h-4 w-4 animate-spin" /></div>
               )}
-              <p className="mono text-center mt-1" style={{ fontSize: 10, color: "var(--faint)" }}>Drag across the chart to see prices</p>
             </div>
 
-            {/* AI thesis — upcoming */}
-            <div className="card mt-6 p-5 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl grid place-items-center flex-shrink-0" style={{ background: "rgba(142,155,227,0.12)" }}>
-                <Sparkles className="w-5 h-5" style={{ color: "var(--lime)" }} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span style={{ fontSize: 14, fontWeight: 600 }}>AI Thesis by BEN</span>
-                  <span className="mono" style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--lime)", border: "1px solid rgba(142,155,227,0.4)", borderRadius: 5, padding: "2px 6px" }}>Upcoming</span>
-                </div>
-                <p style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 3 }}>Auto-generated bull/bear thesis, coming soon. Ask BEN anything with the chat button.</p>
-              </div>
-            </div>
-
-            {/* Technicals — scroll down for detail (like the old Stock Intelligence) */}
             <div className="mt-6">
-              <div className="mono" style={{ fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--faint)", marginBottom: 10 }}>Technicals</div>
-              <div className="grid grid-cols-2 gap-2.5">
-                <TechCard label="RSI (14)" value={ind?.rsi?.value ?? "—"} sub={ind?.rsi?.label} />
-                <TechCard label="MACD hist" value={ind?.macd?.hist != null ? ind.macd.hist.toFixed(2) : "—"} sub={ind?.macd?.label} tone={ind?.macd?.hist != null ? (ind.macd.hist >= 0 ? "up" : "down") : undefined} />
-                <TechCard label="Bollinger width" value={ind?.bollinger?.width != null ? `${ind.bollinger.width.toFixed(1)}%` : "—"} sub={ind?.bollinger?.label} />
-                <TechCard label="52w position" value={ind?.range52w ? `${ind.range52w.position.toFixed(0)}%` : "—"} sub="of the range" />
-                <TechCard label="EMA 50" value={ind?.emas?.ema50 != null ? `$${ind.emas.ema50.toFixed(2)}` : "—"} />
-                <TechCard label="EMA 200" value={ind?.emas?.ema200 != null ? `$${ind.emas.ema200.toFixed(2)}` : "—"} />
+              <div className="mono mb-2.5 text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--faint)" }}>Technicals</div>
+              <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3">
+                <TechCard label="RSI (14)" value={indicators?.rsi?.value ?? "—"} sub={indicators?.rsi?.label} />
+                <TechCard label="MACD hist" value={indicators?.macd?.hist != null ? indicators.macd.hist.toFixed(2) : "—"} sub={indicators?.macd?.label} tone={indicators?.macd?.hist != null ? (indicators.macd.hist >= 0 ? "up" : "down") : undefined} />
+                <TechCard label="Bollinger width" value={indicators?.bollinger?.width != null ? `${indicators.bollinger.width.toFixed(1)}%` : "—"} sub={indicators?.bollinger?.label} />
+                <TechCard label="52w position" value={indicators?.range52w ? `${indicators.range52w.position.toFixed(0)}%` : "—"} sub="of the range" />
+                <TechCard label="EMA 50" value={indicators?.emas?.ema50 != null ? `$${indicators.emas.ema50.toFixed(2)}` : "—"} />
+                <TechCard label="EMA 200" value={indicators?.emas?.ema200 != null ? `$${indicators.emas.ema200.toFixed(2)}` : "—"} />
               </div>
 
-              {pa && (
+              {priceAction && (
                 <div className="card mt-3 divide-y" style={{ borderColor: "var(--line)" }}>
-                  <PaRow label="Trend" value={pa.trend} />
-                  <PaRow label="Momentum" value={pa.momentum} />
-                  <PaRow label="Volume" value={pa.volatility} />
-                  <PaRow label="Support" value={pa.support} />
+                  <PaRow label="Trend" value={priceAction.trend} />
+                  <PaRow label="Momentum" value={priceAction.momentum} />
+                  <PaRow label="Volatility" value={priceAction.volatility} />
+                  <PaRow label="Support" value={priceAction.support} />
                 </div>
               )}
             </div>
 
-            {/* Alert */}
-            <button className="w-full mt-6 inline-flex items-center justify-center gap-1.5 text-[13.5px] font-semibold py-3 rounded-xl" style={{ background: "var(--lime)", color: "#0A0A0A" }}>
-              <Bell className="w-4 h-4" /> Create alert
+            <button className="mt-6 inline-flex w-full items-center justify-center gap-1.5 rounded-xl py-3 text-[13.5px] font-semibold" style={{ background: "var(--accent)", color: "#0A0A0A" }}>
+              <Bell className="h-4 w-4" /> Create alert
             </button>
 
-            <p className="text-center mt-6" style={{ fontSize: 11, color: "var(--faint)" }}>Educational · not investment advice.</p>
+            <p className="mt-6 text-center text-[11px]" style={{ color: "var(--faint)" }}>
+              Rules-based interpretation of current data · educational, not investment advice.
+            </p>
           </>
         )}
       </div>
@@ -277,12 +414,36 @@ export default function AssetDetail() {
   );
 }
 
+function Evidence({ title, items, tone }: { title: string; items: string[]; tone: "up" | "down" }) {
+  return (
+    <div className="min-h-[150px] bg-[var(--panel)] p-4">
+      <div className="mono text-[9px] uppercase tracking-[0.12em]" style={{ color: tone === "up" ? "var(--up)" : "var(--down)" }}>{title}</div>
+      {items.length ? (
+        <ul className="mt-3 space-y-2">
+          {items.map((item) => <li key={item} className="text-[12.5px] leading-relaxed" style={{ color: "var(--muted)" }}>• {item}</li>)}
+        </ul>
+      ) : (
+        <p className="mt-3 text-[12.5px]" style={{ color: "var(--faint)" }}>No strong signal detected.</p>
+      )}
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="stat">
+      <div className="text-[9.5px] uppercase tracking-[0.1em]" style={{ color: "var(--faint)" }}>{label}</div>
+      <div className="mono mt-1 text-[14px] font-semibold">{value}</div>
+    </div>
+  );
+}
+
 function TechCard({ label, value, sub, tone }: { label: string; value: string | number; sub?: string; tone?: "up" | "down" }) {
   return (
     <div className="card p-3.5">
-      <div className="mono" style={{ fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--faint)" }}>{label}</div>
-      <div className="mono" style={{ fontSize: 17, fontWeight: 600, marginTop: 4, color: tone === "up" ? "var(--up)" : tone === "down" ? "var(--down)" : "var(--ink)" }}>{value}</div>
-      {sub && <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 1 }}>{sub}</div>}
+      <div className="mono text-[9px] uppercase tracking-[0.08em]" style={{ color: "var(--faint)" }}>{label}</div>
+      <div className="mono mt-1 text-[17px] font-semibold" style={{ color: tone === "up" ? "var(--up)" : tone === "down" ? "var(--down)" : "var(--ink)" }}>{value}</div>
+      {sub && <div className="mt-0.5 text-[11px]" style={{ color: "var(--muted)" }}>{sub}</div>}
     </div>
   );
 }
@@ -290,8 +451,8 @@ function TechCard({ label, value, sub, tone }: { label: string; value: string | 
 function PaRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between px-4 py-2.5">
-      <span style={{ fontSize: 12.5, color: "var(--muted)" }}>{label}</span>
-      <span style={{ fontSize: 13, fontWeight: 500 }}>{value || "—"}</span>
+      <span className="text-[12.5px]" style={{ color: "var(--muted)" }}>{label}</span>
+      <span className="text-[13px] font-medium">{value || "—"}</span>
     </div>
   );
 }

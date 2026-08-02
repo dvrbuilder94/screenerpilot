@@ -199,13 +199,12 @@ Cada función tiene límites por hora según el tier del usuario:
 - Acceso API
 - White-label options
 
-### Integración con Stripe (Próximamente)
+### Billing
 
-Para conectar Stripe:
-1. Ir a Settings -> Integrations en Lovable
-2. Habilitar Stripe
-3. Configurar productos y precios
-4. El código ya está preparado en `/pricing`
+Payments run through **Paddle** (Merchant of Record). The fiat billing surface
+is currently hidden behind the `BILLING_ENABLED` flag in `src/lib/billing.ts`
+while monetization moves to the $SCRP token; flip it back to `true` to restore
+the pricing page, plan gating and subscription paywall.
 
 ---
 

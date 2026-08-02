@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import { BILLING_ENABLED } from "@/lib/billing";
 import { NotificationBell } from "./NotificationBell";
 import { Logo } from "./Logo";
 import {
@@ -90,14 +91,16 @@ export const AppHeader = () => {
                       <Star className="h-3.5 w-3.5 mr-2" /> My Watchlist
                     </Link>
                   </DropdownMenuItem>
-                  {!isActive && (
+                  {BILLING_ENABLED && !isActive && (
                     <DropdownMenuItem asChild>
                       <Link to="/pricing">Upgrade to Pro</Link>
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem asChild>
-                    <Link to="/pricing">Billing & plan</Link>
-                  </DropdownMenuItem>
+                  {BILLING_ENABLED && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/pricing">Billing & plan</Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem asChild>
                     <Link to="/settings">Settings</Link>
                   </DropdownMenuItem>

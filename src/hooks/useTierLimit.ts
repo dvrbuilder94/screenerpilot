@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import { BILLING_ENABLED } from "@/lib/billing";
 
 const ANON_LIMIT = 5;
 
@@ -25,7 +26,8 @@ export function useTierLimit() {
     staleTime: 60_000,
   });
 
-  if (isActive) {
+  // Billing hidden → full access for everyone (paywall disabled while on $SCRP).
+  if (!BILLING_ENABLED || isActive) {
     return { tier: "paid" as Tier, limit: Infinity, isPaid: true, isLoading: false };
   }
   if (user) {

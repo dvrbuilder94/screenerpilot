@@ -8,6 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Seo } from "@/components/Seo";
+import { BILLING_ENABLED } from "@/lib/billing";
+
+const POST_AUTH = BILLING_ENABLED ? "/pricing" : "/home";
 
 export default function SignUp() {
   const { user, signUp } = useAuth();
@@ -17,7 +20,7 @@ export default function SignUp() {
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
 
-  if (user) return <Navigate to="/pricing" replace />;
+  if (user) return <Navigate to={POST_AUTH} replace />;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +36,7 @@ export default function SignUp() {
       return;
     }
     toast.success("Account created. Check your inbox to confirm your email.");
-    navigate("/pricing");
+    navigate(POST_AUTH);
   };
 
   return (

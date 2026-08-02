@@ -2,6 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useScrpAccess } from "@/hooks/useScrpAccess";
 import { SCRP_MIN_HOLD } from "@/lib/scrp";
+import { BILLING_ENABLED } from "@/lib/billing";
 import { Lock, Sparkles, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -18,6 +19,9 @@ export function ProGate({ children, preview = false, title, description }: ProGa
   const { user, loading } = useAuth();
   const { isActive, isLoading: subLoading } = useSubscription();
   const scrp = useScrpAccess();
+
+  // Paywall disabled while monetization moves to $SCRP — pass content through.
+  if (!BILLING_ENABLED) return <>{children}</>;
 
   if (loading || subLoading) {
     return <div className="h-32 flex items-center justify-center text-muted-foreground text-sm">Loading…</div>;

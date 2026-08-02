@@ -13,6 +13,7 @@ import { WorkflowPipeline } from "@/components/WorkflowPipeline";
 import { Reveal } from "@/components/Reveal";
 import { CountUp } from "@/components/CountUp";
 import { supabase } from "@/integrations/supabase/client";
+import { BILLING_ENABLED } from "@/lib/billing";
 import { toast } from "@/hooks/use-toast";
 
 export default function Landing() {
@@ -57,7 +58,7 @@ export default function Landing() {
             <Link to="/markets" className="hover:text-foreground transition-colors">Terminal</Link>
             <Link to="/squeeze" className="hover:text-foreground transition-colors">Squeeze Radar</Link>
             <Link to="/search" className="hover:text-foreground transition-colors">Search</Link>
-            <Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
+            {BILLING_ENABLED && <Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>}
           </nav>
           <div className="flex items-center gap-2">
             <Link to="/login" className="hidden sm:inline text-[13px] text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5">Sign in</Link>
@@ -234,7 +235,7 @@ export default function Landing() {
           <div className="flex gap-x-6 text-[12px] text-muted-foreground">
             <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
             <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-            <Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
+            {BILLING_ENABLED && <Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>}
           </div>
         </div>
       </footer>

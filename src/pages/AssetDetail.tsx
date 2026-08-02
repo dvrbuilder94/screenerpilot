@@ -6,8 +6,10 @@ import { useWatchlist } from "@/hooks/useWatchlist";
 import { cleanTicker } from "@/lib/ticker";
 import type { Analysis, Timeframe } from "@/types/analysis";
 import { buildDecisionSnapshot } from "@/lib/analysis/decisionSnapshot";
+import { readAssetState, diffAssetState } from "@/lib/analysis/assetChanges";
+import { loadAssetState, saveAssetState } from "@/lib/analysis/assetHistory";
 import { Seo } from "@/components/Seo";
-import { Bell, ChevronLeft, Heart, Loader2, ShieldAlert, Sparkles } from "lucide-react";
+import { Activity, Bell, ChevronLeft, Heart, Loader2, ShieldAlert, Sparkles } from "lucide-react";
 
 const PERIODS: { label: string; tf: Timeframe }[] = [
   { label: "1Y", tf: "daily" },
@@ -149,6 +151,20 @@ export default function AssetDetail() {
 
   const analysis = analysisQ.data;
   const snapshot = useMemo(() => (analysis ? buildDecisionSnapshot(analysis, { timeframe: tf }) : null), [analysis, tf]);
+
+  // "What changed" — diff the current read against the user's last view of this
+  // asset (device-local), then persist the new state. Real deltas only.
+  const currentState = useMemo(
+    () => (analysis && snapshot ? readAssetState(analysis, snapshot) : null),
+    [analysis, snapshot],
+  );
+  const changes = useMemo(
+    () => (currentState ? diffAssetState(loadAssetState(sym), currentState) : null),
+    [currentState, sym],
+  );
+  useEffect(() => {
+    if (currentState) saveAssetState(sym, currentState);
+  }, [currentState, sym]);
   const indicators = analysis?.indicators;
   const priceAction = analysis?.priceAction;
   const up = (analysis?.dayChangePercent ?? 0) >= 0;
@@ -216,9 +232,16 @@ export default function AssetDetail() {
                   </div>
                   <h2 className="mt-3 text-xl font-semibold">{snapshot.bias} setup</h2>
                   <p className="mt-2 text-[13px] leading-relaxed" style={{ color: "var(--muted)" }}>{snapshot.summary}</p>
+                  <div className="mono mt-2 text-[10px]" style={{ color: "var(--faint)" }}>
+                    {snapshot.horizon} · {snapshot.methodologyVersion} · as of {new Date(snapshot.computedAt).toLocaleString()}
+                  </div>
+                  {snapshot.warnings.length > 0 && (
+                    <p className="mt-1.5 text-[11.5px]" style={{ color: "var(--down)" }}>{snapshot.warnings.join(" ")}</p>
+                  )}
                 </div>
-                <div className="mono rounded-full border px-3 py-1.5 text-[11px]" style={{ borderColor: "var(--line)", color: "var(--accent)" }}>
-                  {snapshot.confidence}% confidence
+                <div className="mono rounded-full border px-3 py-1.5 text-center text-[11px]" title={snapshot.confidenceBasis} style={{ borderColor: "var(--line)", color: "var(--accent)" }}>
+                  {snapshot.confidence}%
+                  <div className="text-[8.5px]" style={{ color: "var(--faint)" }}>signal alignment</div>
                 </div>
               </div>
 
@@ -235,6 +258,29 @@ export default function AssetDetail() {
                 </div>
               </div>
             </div>
+
+            {changes && (changes.firstLook || changes.changes.length > 0) && (
+              <div className="card mt-4 p-4">
+                <div className="mono mb-2 flex items-center gap-1.5 text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--faint)" }}>
+                  <Activity className="h-3 w-3" /> What changed
+                </div>
+                {changes.firstLook ? (
+                  <p className="text-[12.5px]" style={{ color: "var(--muted)" }}>First look at this asset — we'll track changes from here.</p>
+                ) : (
+                  <>
+                    <ul className="space-y-1.5">
+                      {changes.changes.map((c, i) => (
+                        <li key={i} className="flex items-start gap-2 text-[12.5px]">
+                          <span style={{ color: c.tone === "positive" ? "var(--up)" : c.tone === "negative" ? "var(--down)" : "var(--muted)" }}>•</span>
+                          <span>{c.label}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mono mt-2 text-[10px]" style={{ color: "var(--faint)" }}>since your last view</div>
+                  </>
+                )}
+              </div>
+            )}
 
             <div className="card mt-4 grid grid-cols-3 gap-px overflow-hidden" style={{ background: "var(--line)" }}>
               <Stat label="Market cap" value={analysis.marketCap || "—"} />

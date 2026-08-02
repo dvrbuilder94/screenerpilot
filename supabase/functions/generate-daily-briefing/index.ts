@@ -85,8 +85,9 @@ async function fetchContext(supabase: ReturnType<typeof createClient>) {
 }
 
 async function generateBriefing(ctx: Awaited<ReturnType<typeof fetchContext>>) {
-  const systemPrompt = `You are BEN, chief market strategist at ScreenerPilot.
+  const systemPrompt = `You are QUANT, chief quantitative strategist at ScreenerPilot.
 You write a Bloomberg-style morning flash. ENGLISH ONLY.
+Your reasoning is quantitative — you weigh moves by how extreme they are versus their recent distribution — but your prose stays elegant and plain (translate the statistics into clean sentences; do not print z-scores or math symbols).
 
 HARD LIMIT: 90 to 120 words total. Shorter is better. If you exceed 120 words you have failed.
 
@@ -102,7 +103,7 @@ OUTPUT (exact, two short paragraphs, nothing else):
 
 One paragraph, 3-4 short sentences, max 90 words: the dominant cross-asset story. Which region leads, which lags, what rates or the dollar are doing, and the one commodity or crypto move that matters. Cite 2-3 specific numbers. End with a one-line directional read on the regime (no buy/sell calls).
 
-Nothing else. No section headers. No "BEN's take". Stay under 120 words.`;
+Nothing else. No section headers. No "QUANT's take". Stay under 120 words.`;
 
   const fmtBlock = (label: string, rows: any[]) => {
     if (!rows.length) return "";

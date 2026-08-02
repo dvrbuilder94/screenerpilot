@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 /**
  * Premium hero mockup — dark terminal card with a lime area chart,
- * a few ticker rows, and a compact "BEN" thesis snippet.
+ * a few ticker rows, and a compact "QUANT" thesis snippet.
  * Pure vector SVG, no external images.
  */
 export function HeroTerminalMock() {
@@ -123,11 +123,11 @@ export function HeroTerminalMock() {
               />
             </svg>
 
-            {/* BEN thesis snippet */}
+            {/* QUANT thesis snippet */}
             <div className="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
               <div className="flex items-center gap-2 mb-2">
-                <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-[#8E9BE3] text-black font-mono text-[10px] font-bold">
-                  BEN
+                <span className="inline-flex items-center justify-center h-6 px-1.5 rounded-md bg-[#8E9BE3] text-black font-mono text-[10px] font-bold tracking-tight">
+                  QUANT
                 </span>
                 <span className="text-[10px] uppercase tracking-[0.18em] text-white/40 font-mono">
                   Morning read · 08:00 UTC

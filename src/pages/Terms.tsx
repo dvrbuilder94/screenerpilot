@@ -25,7 +25,7 @@ export default function Terms() {
           <p>You will not: (a) use the Service unlawfully or fraudulently; (b) infringe third-party IP rights; (c) interfere with security (malware, probing, scraping at scale, bypassing rate limits); (d) resell, redistribute or reverse-engineer the Service; (e) use the Service to spam or to generate financial advice for others.</p>
 
           <h2>5. AI Features</h2>
-          <p>The Service includes AI-generated outputs (e.g. BEN copilot, macro insights). Outputs may be inaccurate, incomplete or outdated. You are responsible for your prompts, your interpretation of outputs, and for verifying accuracy before acting. AI outputs are not professional advice.</p>
+          <p>The Service includes AI-generated outputs (e.g. QUANT copilot, macro insights). Outputs may be inaccurate, incomplete or outdated. You are responsible for your prompts, your interpretation of outputs, and for verifying accuracy before acting. AI outputs are not professional advice.</p>
 
           <h2>6. IP & Licence</h2>
           <p>We retain all rights to the Service, including software, branding and content we produce. We grant you a limited, non-exclusive, non-transferable right to access and use the Service within your subscribed plan.</p>

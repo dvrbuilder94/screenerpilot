@@ -88,7 +88,7 @@ export const DailyBriefingCard = () => {
         <div className="flex items-center gap-3 text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
           <span className="flex items-center gap-1.5 text-[hsl(28,95%,55%)] font-semibold">
             <Radio className="h-3 w-3" />
-            BEN · MORNING WIRE
+            QUANT · MORNING WIRE
           </span>
           <span className="hidden sm:inline text-border">|</span>
           <span className="hidden sm:inline">{dateLabel}</span>

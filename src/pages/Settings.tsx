@@ -51,7 +51,7 @@ export default function Settings() {
             <div>
               <p className="text-sm font-medium text-foreground">Daily morning wire</p>
               <p className="text-sm text-muted-foreground mt-0.5">
-                Get BEN's market briefing in your inbox every morning. Sent to {user.email}.
+                Get QUANT's market briefing in your inbox every morning. Sent to {user.email}.
               </p>
             </div>
           </div>

@@ -136,7 +136,7 @@ export const TradingAIWidget = () => {
 
   const isContextReady = marketContext.length > 0;
 
-  // The landing hero chat routes here as /home?q=... — open BEN with the
+  // The landing hero chat routes here as /home?q=... — open QUANT with the
   // question prefilled, then strip the param so it doesn't retrigger.
   useEffect(() => {
     const q = searchParams.get("q");
@@ -463,8 +463,8 @@ export const TradingAIWidget = () => {
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-primary" />
               <div>
-                <p className="text-sm font-semibold text-foreground">BEN</p>
-                <p className="text-xs text-muted-foreground">Market Intelligence</p>
+                <p className="text-sm font-semibold text-foreground">QUANT</p>
+                <p className="text-xs text-muted-foreground">Quantitative Analyst</p>
               </div>
             </div>
 
@@ -501,7 +501,7 @@ export const TradingAIWidget = () => {
                 {/* Header */}
                 <div className="text-center mb-4">
                   <Sparkles className="h-6 w-6 text-primary mx-auto mb-2" />
-                  <p className="text-sm font-medium text-foreground">Market Intelligence</p>
+                  <p className="text-sm font-medium text-foreground">Quantitative Market Analysis</p>
                   <p className="text-xs text-muted-foreground">Select a category to explore</p>
                 </div>
 

@@ -45,11 +45,11 @@ export default function Search() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24 lg:pb-12">
-      <Seo title="Search — ScreenerPilot" description="Search any ticker and get a live chart, technicals and BEN's read." path="/search" />
+      <Seo title="Search — ScreenerPilot" description="Search any ticker and get a live chart, technicals and QUANT's read." path="/search" />
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10">
         <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">Search</h1>
-        <p className="text-sm text-muted-foreground mt-1">Any stock or crypto — live chart, technicals and BEN's read.</p>
+        <p className="text-sm text-muted-foreground mt-1">Any stock or crypto — live chart, technicals and QUANT's read.</p>
 
         {/* Search input */}
         <form onSubmit={(e) => { e.preventDefault(); go(q); }} className="relative mt-5">

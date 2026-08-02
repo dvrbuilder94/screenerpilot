@@ -33,7 +33,7 @@ export default function Pricing() {
     "Full Markets terminal (stocks, crypto, indices, commodities)",
     "Macro intelligence: regimes, ratios, dislocations",
     "Stock Intelligence with on-demand analysis",
-    "BEN macro copilot — unlimited messages",
+    "QUANT analyst — unlimited messages",
     "Real-time data from Binance & Yahoo Finance",
     "Email support",
   ];

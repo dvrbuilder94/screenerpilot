@@ -1,5 +1,5 @@
 // Animated "AI pipeline" visual for the landing: raw market data streams in
-// from three sources, converge into BEN (the AI engine), and a signal arrives
+// from three sources, converge into QUANT (the AI engine), and a signal arrives
 // at your terminal. Pure SVG — a traveling lime packet on each connector plus
 // an arrow that lands. No libraries, no icon clip-art. Respects reduced motion.
 
@@ -47,7 +47,7 @@ function Pill({
 }
 
 export function WorkflowPipeline() {
-  // Connector paths (source → BEN, and BEN → terminal), normalized to
+  // Connector paths (source → QUANT, and QUANT → terminal), normalized to
   // pathLength=100 so one dash travels the whole length regardless of shape.
   const paths = [
     "M150 66 C 250 66 262 150 350 150", // equities → engine
@@ -80,7 +80,7 @@ export function WorkflowPipeline() {
         className="w-full h-auto"
         preserveAspectRatio="xMidYMid meet"
         role="img"
-        aria-label="Market data flows through BEN, ScreenerPilot's AI engine, into your terminal"
+        aria-label="Market data flows through QUANT, ScreenerPilot's AI engine, into your terminal"
       >
         <defs>
           <filter id="wf-glow" x="-40%" y="-40%" width="180%" height="180%">
@@ -114,7 +114,7 @@ export function WorkflowPipeline() {
         <Pill x={40} y={150} w={110} label="Crypto" />
         <Pill x={40} y={234} w={110} label="Macro" />
 
-        {/* Engine node — BEN */}
+        {/* Engine node — QUANT */}
         <g>
           {/* pulsing ring */}
           <circle cx={423} cy={150} r={54} fill="none" stroke={LIME} strokeWidth="1">
@@ -140,7 +140,7 @@ export function WorkflowPipeline() {
             fill="#fff"
             style={{ fontFamily: "Inter, system-ui, sans-serif", letterSpacing: "0.02em" }}
           >
-            BEN
+            QUANT
           </text>
           <text
             x={423}

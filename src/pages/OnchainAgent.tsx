@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import { Zap, Bell, Radio, ArrowRight, Wallet } from "lucide-react";
 
 const FEATURES = [
-  { icon: Radio, title: "24/7 monitoring", desc: "On-chain markets never close. BEN watches your tokenized stocks and crypto around the clock." },
-  { icon: Zap, title: "Thesis, live", desc: "The moment something moves, BEN tells you what happened and whether your thesis still holds." },
+  { icon: Radio, title: "24/7 monitoring", desc: "On-chain markets never close. QUANT watches your tokenized stocks and crypto around the clock." },
+  { icon: Zap, title: "Thesis, live", desc: "The moment something moves, QUANT tells you what happened and whether your thesis still holds." },
   { icon: Bell, title: "Proactive alerts", desc: "Get pinged when an on-chain asset breaks a level or the story changes — before the crowd." },
 ];
 
@@ -27,7 +27,7 @@ export default function OnchainAgent() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24 lg:pb-12">
-      <Seo title="On-chain Agent (Beta) — ScreenerPilot" description="BEN, watching the on-chain market 24/7. Join the beta waitlist." path="/agent" />
+      <Seo title="On-chain Agent (Beta) — ScreenerPilot" description="QUANT, watching the on-chain market 24/7. Join the beta waitlist." path="/agent" />
 
       <div className="max-w-2xl mx-auto px-5 pt-10 sm:pt-16">
         {/* Badges */}
@@ -46,7 +46,7 @@ export default function OnchainAgent() {
           <br />Your analyst doesn't sleep.
         </h1>
         <p className="mt-5 text-center text-[15px] sm:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
-          On-chain Agent is BEN watching tokenized stocks and crypto 24/7 — telling you what moved,
+          On-chain Agent is QUANT watching tokenized stocks and crypto 24/7 — telling you what moved,
           why, and whether your thesis still holds. Coming soon.
         </p>
 

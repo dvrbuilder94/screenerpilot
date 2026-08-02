@@ -93,7 +93,7 @@ export default function Landing() {
                 </p>
               </Reveal>
 
-              {/* BEN chat entry */}
+              {/* QUANT chat entry */}
               <Reveal delay={220}>
                 <form
                   onSubmit={(e) => { e.preventDefault(); navigate(ask.trim() ? `/home?q=${encodeURIComponent(ask.trim())}` : "/home"); }}
@@ -169,7 +169,7 @@ export default function Landing() {
             {[
               { icon: LayoutDashboard, title: "Home dashboard", desc: "S&P, Nasdaq, VIX, BTC, rates and today's biggest movers at a glance.", to: "/home" },
               { icon: Flame, title: "Squeeze Radar", desc: "A multi-factor squeeze model for stocks & crypto — with a live track record.", to: "/squeeze" },
-              { icon: LineChart, title: "Ticker analysis", desc: "Any stock or crypto — live chart, technicals and BEN's daily read.", to: "/search" },
+              { icon: LineChart, title: "Ticker analysis", desc: "Any stock or crypto — live chart, technicals and QUANT's daily read.", to: "/search" },
               { icon: Radio, title: "On-chain agent", desc: "Whale flows, exchange balances and momentum shifts as they happen.", to: "/agent", beta: true },
             ].map((item, i) => (
               <Reveal key={i} delay={i * 80}>

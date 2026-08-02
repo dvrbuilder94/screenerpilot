@@ -34,7 +34,7 @@ const DailyDigestEmail = ({ headline, contentMd, dateLabel }: DailyDigestProps) 
       <Preview>{headline || `${SITE_NAME} morning wire`}</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Text style={kicker}>BEN · MORNING WIRE{dateLabel ? ` · ${dateLabel}` : ''}</Text>
+          <Text style={kicker}>QUANT · MORNING WIRE{dateLabel ? ` · ${dateLabel}` : ''}</Text>
           <Heading style={h1}>{headline || 'Morning Wire'}</Heading>
           <Hr style={hr} />
           {paragraphs.map((p, i) => (

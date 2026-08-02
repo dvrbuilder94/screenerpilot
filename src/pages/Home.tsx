@@ -181,7 +181,7 @@ export default function Home() {
         </span>
         <span className="text-[13px] text-foreground flex-1 min-w-0">
           <span className="font-semibold">On-chain Agent</span>
-          <span className="text-muted-foreground"> — BEN watching the on-chain market 24/7. Join the waitlist.</span>
+          <span className="text-muted-foreground"> — QUANT watching the on-chain market 24/7. Join the waitlist.</span>
         </span>
         <ArrowRight className="w-4 h-4 text-primary flex-shrink-0" />
       </Link>

@@ -30,6 +30,36 @@ export interface WalletPnL {
   period?: WalletPeriod;
 }
 
+export type PositionState = "overbought" | "oversold" | "neutral" | "unknown";
+
+export interface PositionAnalysis {
+  symbol: string;
+  name: string;
+  chain: string;
+  value: number; // USD exposure
+  price: number;
+  change1d: number; // %
+  rsi: number | null;
+  state: PositionState;
+  trendUp: boolean;
+  pctFromHigh: number; // <= 0, distance below the window high
+  note: string; // plain-language evidence for the state
+}
+
+export interface WalletAnalysis {
+  minValue: number;
+  analyzed: number;
+  positions: PositionAnalysis[];
+}
+
+// Badge label + semantic tone for a position's momentum state.
+export const STATE_META: Record<PositionState, { label: string; tone: "neg" | "pos" | "muted" }> = {
+  overbought: { label: "Overbought", tone: "neg" },
+  oversold: { label: "Oversold", tone: "pos" },
+  neutral: { label: "Neutral", tone: "muted" },
+  unknown: { label: "No data", tone: "muted" },
+};
+
 export const isEvmAddress = (a: string) => /^0x[0-9a-fA-F]{40}$/.test(a.trim());
 
 export function fmtUsd(v: number): string {
@@ -87,5 +117,20 @@ export const SAMPLE_WALLET: WalletPnL = {
     { symbol: "AERO", name: "Aerodrome", value: 4300, chain: "Base" },
     { symbol: "ARB", name: "Arbitrum", value: 3010, chain: "Arbitrum" },
     { symbol: "OP", name: "Optimism", value: 2600, chain: "Optimism" },
+  ],
+};
+
+// Sample per-position analysis (mirrors SAMPLE_WALLET). Shown only under the
+// "Sample data" banner — never presented as a real read.
+export const SAMPLE_ANALYSIS: WalletAnalysis = {
+  minValue: 10,
+  analyzed: 6,
+  positions: [
+    { symbol: "ETH", name: "Ethereum", chain: "Ethereum", value: 18400, price: 3120, change1d: 1.8, rsi: 58, state: "neutral", trendUp: true, pctFromHigh: -4, note: "RSI 58 — neutral. Above its 30d average." },
+    { symbol: "USDC", name: "USD Coin", chain: "Base", value: 9200, price: 1, change1d: 0.0, rsi: 50, state: "neutral", trendUp: true, pctFromHigh: 0, note: "RSI 50 — neutral. Stablecoin, no directional momentum." },
+    { symbol: "WBTC", name: "Wrapped BTC", chain: "Arbitrum", value: 7100, price: 67200, change1d: 2.3, rsi: 73, state: "overbought", trendUp: true, pctFromHigh: -1, note: "RSI 73 — overbought (>70), near its 30d high. Momentum extended." },
+    { symbol: "AERO", name: "Aerodrome", chain: "Base", value: 4300, price: 1.12, change1d: 5.1, rsi: 78, state: "overbought", trendUp: true, pctFromHigh: -2, note: "RSI 78 — overbought (>70), near its 30d high. Momentum extended." },
+    { symbol: "ARB", name: "Arbitrum", chain: "Arbitrum", value: 3010, price: 0.62, change1d: -3.4, rsi: 28, state: "oversold", trendUp: false, pctFromHigh: -22, note: "RSI 28 — oversold (<30). Momentum washed out; watch for stabilization." },
+    { symbol: "OP", name: "Optimism", chain: "Optimism", value: 2600, price: 1.45, change1d: -1.2, rsi: 44, state: "neutral", trendUp: false, pctFromHigh: -15, note: "RSI 44 — neutral. Below its 30d average." },
   ],
 };

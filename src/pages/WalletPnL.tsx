@@ -1,22 +1,44 @@
 import { useMemo, useState } from "react";
-import { Wallet, Search, Info, TrendingUp, TrendingDown } from "lucide-react";
+import { Wallet, Search, Info, TrendingUp, TrendingDown, Activity } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from "recharts";
 import { Seo } from "@/components/Seo";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import {
   SAMPLE_WALLET,
+  SAMPLE_ANALYSIS,
+  STATE_META,
   isEvmAddress,
   fmtUsd,
   WALLET_PERIODS,
   type WalletPnL,
   type WalletPeriod,
   type WalletPoint,
+  type WalletAnalysis,
+  type PositionAnalysis,
+  type PositionState,
 } from "@/lib/walletPnl";
 
 const POS = "hsl(152 46% 56%)";
 const NEG = "hsl(356 72% 66%)";
 const ret = (v: number) => (v > 0 ? POS : v < 0 ? NEG : "hsl(var(--muted-foreground))");
+
+function StateBadge({ state }: { state: PositionState }) {
+  const meta = STATE_META[state];
+  const color = meta.tone === "neg" ? NEG : meta.tone === "pos" ? POS : "hsl(var(--muted-foreground))";
+  return (
+    <span
+      className="text-[9px] font-mono uppercase tracking-wider rounded px-1.5 py-0.5 border"
+      style={{
+        color,
+        borderColor: `color-mix(in srgb, ${color}, transparent 62%)`,
+        backgroundColor: `color-mix(in srgb, ${color}, transparent 88%)`,
+      }}
+    >
+      {meta.label}
+    </span>
+  );
+}
 
 function Tile({ label, value, tone }: { label: string; value: number; tone?: "gain" | "plain" }) {
   const color = tone === "gain" ? ret(value) : undefined;
@@ -160,6 +182,9 @@ export default function WalletPnLPage() {
   const [chartLoading, setChartLoading] = useState(false);
   const [live, setLive] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [analysis, setAnalysis] = useState<WalletAnalysis | null>(null);
+  const [analysisLive, setAnalysisLive] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
 
   const fetchWallet = async (addr: string, per: WalletPeriod): Promise<WalletPnL | null> => {
     const { data: res, error: err } = await supabase.functions.invoke("wallet-pnl", { body: { address: addr, period: per } });
@@ -173,6 +198,8 @@ export default function WalletPnLPage() {
     if (!isEvmAddress(addr)) { setError("Enter a valid EVM address (0x…)"); return; }
     setError(null);
     setLoading(true);
+    setAnalysis(null); // a new wallet invalidates the previous position read
+    setAnalysisLive(false);
     try {
       const res = await fetchWallet(addr, period);
       setData(res ?? SAMPLE_WALLET);
@@ -199,6 +226,48 @@ export default function WalletPnLPage() {
       setChartLoading(false);
     }
   };
+
+  // Technical read of each position worth > $10 (overbought / oversold / trend).
+  const runAnalysis = async () => {
+    if (!analyzedAddr) return;
+    setAnalyzing(true);
+    try {
+      if (!live) { setAnalysis(SAMPLE_ANALYSIS); setAnalysisLive(false); return; }
+      const { data: res, error: err } = await supabase.functions.invoke("wallet-analyze", { body: { address: analyzedAddr } });
+      if (err || !res || (res as any).error || (res as any).needsKey) {
+        setAnalysis(SAMPLE_ANALYSIS);
+        setAnalysisLive(false);
+      } else {
+        setAnalysis(res as WalletAnalysis);
+        setAnalysisLive(true);
+      }
+    } catch {
+      setAnalysis(SAMPLE_ANALYSIS);
+      setAnalysisLive(false);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const posBySymbol = useMemo(() => {
+    const m = new Map<string, PositionAnalysis>();
+    (analysis?.positions ?? []).forEach((p) => m.set(p.symbol.toUpperCase(), p));
+    return m;
+  }, [analysis]);
+
+  const rollup = useMemo(() => {
+    const ps = analysis?.positions ?? [];
+    const total = ps.reduce((s, p) => s + p.value, 0);
+    const ob = ps.filter((p) => p.state === "overbought");
+    const obVal = ob.reduce((s, p) => s + p.value, 0);
+    return {
+      total,
+      obVal,
+      obCount: ob.length,
+      obPct: total > 0 ? (obVal / total) * 100 : 0,
+      osCount: ps.filter((p) => p.state === "oversold").length,
+    };
+  }, [analysis]);
 
   const totalPnl = data ? data.realized + data.unrealized : 0;
   const maxChain = data ? Math.max(...data.byChain.map((c) => c.value), 1) : 1;
@@ -296,21 +365,74 @@ export default function WalletPnLPage() {
               </section>
             )}
 
-            {/* Holdings */}
+            {/* Holdings + per-position technical read */}
             {data.holdings.length > 0 && (
               <section className="mt-7">
-                <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground mb-3">Top holdings</h2>
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Top holdings</h2>
+                  <button
+                    type="button"
+                    onClick={runAnalysis}
+                    disabled={analyzing}
+                    className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-border text-[12px] font-medium text-foreground hover:border-primary/40 hover:text-primary transition-colors disabled:opacity-60"
+                  >
+                    <Activity className="w-3.5 h-3.5" />
+                    {analyzing ? "Analyzing…" : analysis ? "Re-analyze" : "Analyze positions"}
+                  </button>
+                </div>
+
+                {analysis && (
+                  <div className="fin-card p-3.5 mb-3">
+                    <p className="text-[12.5px] leading-relaxed">
+                      {rollup.obCount > 0 ? (
+                        <>
+                          <span className="font-mono font-semibold" style={{ color: NEG }}>{rollup.obPct.toFixed(0)}%</span> of analyzed
+                          exposure ({fmtUsd(rollup.obVal)}) is in{" "}
+                          <span style={{ color: NEG }}>overbought</span> tokens — momentum extended, higher pullback risk.
+                        </>
+                      ) : (
+                        <>No analyzed position is overbought right now.</>
+                      )}
+                      {rollup.osCount > 0 && (
+                        <> {rollup.osCount} position{rollup.osCount > 1 ? "s are" : " is"}{" "}
+                          <span style={{ color: POS }}>oversold</span>.</>
+                      )}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground mt-1.5">
+                      RSI(14) on ~30d of price. Only positions over ${analysis.minValue} are scored.
+                      {!analysisLive && live && " · sample — deploy wallet-analyze to score your real positions."}
+                    </p>
+                  </div>
+                )}
+
                 <div className="fin-card divide-y divide-border/40 overflow-hidden">
-                  {data.holdings.map((h, i) => (
-                    <div key={`${h.symbol}-${i}`} className="flex items-center justify-between px-4 py-3">
-                      <div className="min-w-0">
-                        <span className="font-mono font-semibold text-[14px]">{h.symbol}</span>
-                        <span className="text-[12px] text-muted-foreground ml-2">{h.name}</span>
-                        {h.chain && <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5 ml-2">{h.chain}</span>}
+                  {data.holdings.map((h, i) => {
+                    const a = posBySymbol.get(h.symbol.toUpperCase());
+                    return (
+                      <div key={`${h.symbol}-${i}`} className="flex items-start justify-between gap-3 px-4 py-3">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-mono font-semibold text-[14px]">{h.symbol}</span>
+                            <span className="text-[12px] text-muted-foreground">{h.name}</span>
+                            {h.chain && <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">{h.chain}</span>}
+                            {a && a.state !== "unknown" && <StateBadge state={a.state} />}
+                          </div>
+                          {a?.note && <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">{a.note}</p>}
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <div className="font-mono text-[13px] tabular-nums">{fmtUsd(h.value)}</div>
+                          {a?.rsi != null && (
+                            <div className="text-[11px] font-mono text-muted-foreground tabular-nums mt-0.5">
+                              RSI {a.rsi}
+                              <span className="ml-1.5" style={{ color: ret(a.change1d) }}>
+                                {a.change1d >= 0 ? "+" : ""}{a.change1d.toFixed(1)}%
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <span className="font-mono text-[13px] tabular-nums">{fmtUsd(h.value)}</span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
             )}

@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
     const portfolio = await getJson(`/wallets/${addr}/portfolio?currency=usd`);
     const pnl = await getJson(`/wallets/${addr}/pnl?currency=usd`);
     const positions = await getJson(
-      `/wallets/${addr}/positions?currency=usd&filter[trash]=only_non_trash&sort=-value&page[size]=20`,
+      `/wallets/${addr}/positions?currency=usd&filter[trash]=only_non_trash&filter[position_types]=wallet&sort=-value&page[size]=100`,
     );
 
     if (!portfolio && !pnl) return json({ error: "Upstream error" }, 502);

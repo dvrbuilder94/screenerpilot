@@ -4,6 +4,16 @@
 
 export interface WalletHolding { symbol: string; name: string; value: number; chain: string }
 export interface WalletChain { chain: string; value: number }
+export interface WalletPoint { t: number; v: number } // t = epoch ms, v = portfolio value USD
+
+// Chart periods mirror Zerion's chart endpoint. Labels are what the UI shows.
+export type WalletPeriod = "week" | "month" | "year" | "max";
+export const WALLET_PERIODS: { id: WalletPeriod; label: string }[] = [
+  { id: "week", label: "1W" },
+  { id: "month", label: "1M" },
+  { id: "year", label: "1Y" },
+  { id: "max", label: "Max" },
+];
 
 export interface WalletPnL {
   totalValue: number; // current portfolio value, USD
@@ -16,6 +26,8 @@ export interface WalletPnL {
   fees: number; // total gas/fees paid
   byChain: WalletChain[];
   holdings: WalletHolding[];
+  chart?: WalletPoint[]; // portfolio value over the requested period
+  period?: WalletPeriod;
 }
 
 export const isEvmAddress = (a: string) => /^0x[0-9a-fA-F]{40}$/.test(a.trim());
@@ -29,6 +41,27 @@ export function fmtUsd(v: number): string {
   return `${sign}$${abs.toFixed(2)}`;
 }
 
+// Deterministic sample portfolio-value series (90 days) so the chart renders
+// before ZERION_API_KEY is set. Always shown under the "Sample data" banner —
+// never presented as a real wallet.
+function sampleSeries(): WalletPoint[] {
+  const days = 90;
+  const now = Date.now();
+  const start = 34800;
+  const end = 48210.42;
+  let seed = 42;
+  const rand = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
+  const pts: WalletPoint[] = [];
+  for (let i = 0; i < days; i++) {
+    const p = i / (days - 1);
+    const base = start + (end - start) * p;
+    const noise = (rand() - 0.5) * 2600;
+    pts.push({ t: now - (days - 1 - i) * 86400000, v: Math.max(0, base + noise) });
+  }
+  pts[pts.length - 1].v = end; // land on the headline value
+  return pts;
+}
+
 export const SAMPLE_WALLET: WalletPnL = {
   totalValue: 48210.42,
   change1d: 2.4,
@@ -38,6 +71,8 @@ export const SAMPLE_WALLET: WalletPnL = {
   realized: 9450,
   unrealized: 7260,
   fees: 842,
+  period: "month",
+  chart: sampleSeries(),
   byChain: [
     { chain: "Ethereum", value: 22400 },
     { chain: "Base", value: 12800 },

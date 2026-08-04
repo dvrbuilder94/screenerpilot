@@ -1,9 +1,18 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Wallet, Search, Info, TrendingUp, TrendingDown } from "lucide-react";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from "recharts";
 import { Seo } from "@/components/Seo";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { SAMPLE_WALLET, isEvmAddress, fmtUsd, type WalletPnL } from "@/lib/walletPnl";
+import {
+  SAMPLE_WALLET,
+  isEvmAddress,
+  fmtUsd,
+  WALLET_PERIODS,
+  type WalletPnL,
+  type WalletPeriod,
+  type WalletPoint,
+} from "@/lib/walletPnl";
 
 const POS = "hsl(152 46% 56%)";
 const NEG = "hsl(356 72% 66%)";
@@ -20,12 +29,143 @@ function Tile({ label, value, tone }: { label: string; value: number; tone?: "ga
   );
 }
 
+function PortfolioChart({
+  chart,
+  period,
+  onPeriod,
+  loading,
+  live,
+}: {
+  chart: WalletPoint[];
+  period: WalletPeriod;
+  onPeriod: (p: WalletPeriod) => void;
+  loading: boolean;
+  live: boolean;
+}) {
+  // Live data is already the requested period (server returns it). Sample data is
+  // a fixed 90-day series, so we slice it client-side to mimic period switching.
+  const view = useMemo(() => {
+    if (live) return chart;
+    const n = period === "week" ? 7 : period === "month" ? 30 : chart.length;
+    return chart.slice(-n);
+  }, [chart, period, live]);
+
+  const first = view[0]?.v ?? 0;
+  const last = view[view.length - 1]?.v ?? 0;
+  const abs = last - first;
+  const pct = first > 0 ? (abs / first) * 100 : 0;
+  const up = abs >= 0;
+  const color = up ? POS : NEG;
+
+  const fmtTick = (t: number) => {
+    const d = new Date(t);
+    if (period === "week") return d.toLocaleDateString("en-US", { weekday: "short" });
+    if (period === "year" || period === "max") return d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  };
+
+  const ChartTooltip = ({ active, payload }: any) => {
+    if (!active || !payload?.[0]) return null;
+    const p = payload[0].payload as WalletPoint;
+    return (
+      <div className="bg-popover border border-border rounded-lg px-3 py-2 shadow-lg">
+        <p className="text-[11px] text-muted-foreground mb-0.5">{new Date(p.t).toLocaleDateString()}</p>
+        <p className="font-mono font-semibold text-foreground text-[13px] tabular-nums">{fmtUsd(p.v)}</p>
+      </div>
+    );
+  };
+
+  return (
+    <section className="fin-card p-4 mt-3">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-mono">Portfolio evolution</div>
+          <div className="text-[13px] font-mono mt-0.5 tabular-nums" style={{ color }}>
+            {up ? "+" : ""}{fmtUsd(abs)} · {up ? "+" : ""}{pct.toFixed(1)}%
+          </div>
+        </div>
+        <div className="flex rounded-lg border border-border overflow-hidden flex-shrink-0">
+          {WALLET_PERIODS.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => onPeriod(p.id)}
+              className={`px-2.5 h-8 text-[12px] font-medium transition-colors ${
+                period === p.id ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="h-56 mt-3 relative">
+        {loading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/40 text-[12px] text-muted-foreground">
+            Loading…
+          </div>
+        )}
+        {view.length < 2 ? (
+          <div className="h-full flex items-center justify-center text-[12px] text-muted-foreground">
+            No history for this period.
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={view} margin={{ top: 6, right: 6, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="walletGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={color} stopOpacity={0.28} />
+                  <stop offset="95%" stopColor={color} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis
+                dataKey="t"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                tickFormatter={fmtTick}
+                interval="preserveStartEnd"
+                minTickGap={44}
+              />
+              <YAxis
+                domain={["dataMin", "dataMax"]}
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                tickFormatter={(v) => fmtUsd(v)}
+                width={54}
+              />
+              <Tooltip content={<ChartTooltip />} />
+              <Area type="monotone" dataKey="v" stroke={color} strokeWidth={2} fill="url(#walletGradient)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+
+      <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
+        Total portfolio value across all chains over the selected window. The change is end value minus start value for the
+        window — not realized PnL (see the tiles below for that).
+      </p>
+    </section>
+  );
+}
+
 export default function WalletPnLPage() {
   const [address, setAddress] = useState("");
+  const [analyzedAddr, setAnalyzedAddr] = useState("");
   const [data, setData] = useState<WalletPnL | null>(null);
+  const [period, setPeriod] = useState<WalletPeriod>("month");
   const [loading, setLoading] = useState(false);
+  const [chartLoading, setChartLoading] = useState(false);
   const [live, setLive] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const fetchWallet = async (addr: string, per: WalletPeriod): Promise<WalletPnL | null> => {
+    const { data: res, error: err } = await supabase.functions.invoke("wallet-pnl", { body: { address: addr, period: per } });
+    if (err || !res || (res as any).error || (res as any).needsKey) return null;
+    return res as WalletPnL;
+  };
 
   const analyze = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,19 +174,29 @@ export default function WalletPnLPage() {
     setError(null);
     setLoading(true);
     try {
-      const { data: res, error: err } = await supabase.functions.invoke("wallet-pnl", { body: { address: addr } });
-      if (err || !res || res.error || res.needsKey) {
-        setData(SAMPLE_WALLET);
-        setLive(false);
-      } else {
-        setData(res as WalletPnL);
-        setLive(true);
-      }
+      const res = await fetchWallet(addr, period);
+      setData(res ?? SAMPLE_WALLET);
+      setLive(!!res);
     } catch {
       setData(SAMPLE_WALLET);
       setLive(false);
     } finally {
+      setAnalyzedAddr(addr);
       setLoading(false);
+    }
+  };
+
+  // Period switch: live wallets re-fetch that period; sample data slices client-side.
+  const changePeriod = async (per: WalletPeriod) => {
+    if (per === period) return;
+    setPeriod(per);
+    if (!live || !analyzedAddr) return;
+    setChartLoading(true);
+    try {
+      const res = await fetchWallet(analyzedAddr, per);
+      if (res) setData(res);
+    } finally {
+      setChartLoading(false);
     }
   };
 
@@ -106,6 +256,17 @@ export default function WalletPnLPage() {
                 </div>
               </div>
             </div>
+
+            {/* Portfolio value over time */}
+            {data.chart && data.chart.length >= 2 && (
+              <PortfolioChart
+                chart={data.chart}
+                period={period}
+                onPeriod={changePeriod}
+                loading={chartLoading}
+                live={live}
+              />
+            )}
 
             {/* Flows + gains */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3">

@@ -15,8 +15,12 @@ Deno.serve(async (req) => {
     new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   try {
-    const { address } = await req.json().catch(() => ({ address: "" }));
+    const { address, period: reqPeriod } = await req.json().catch(() => ({ address: "" }));
     if (!address || !isEvm(String(address))) return json({ error: "Invalid EVM address" }, 400);
+
+    // Portfolio-value chart period. Zerion accepts day/week/month/year/max.
+    const PERIODS = new Set(["day", "week", "month", "year", "max"]);
+    const period = PERIODS.has(String(reqPeriod)) ? String(reqPeriod) : "month";
 
     const key = Deno.env.get("ZERION_API_KEY");
     if (!key) return json({ needsKey: true });
@@ -25,15 +29,17 @@ Deno.serve(async (req) => {
     const headers = { Authorization: auth, accept: "application/json" };
     const addr = String(address).toLowerCase();
 
-    const [portfolioRes, pnlRes, positionsRes] = await Promise.all([
+    const [portfolioRes, pnlRes, positionsRes, chartRes] = await Promise.all([
       fetch(`${ZERION}/wallets/${addr}/portfolio?currency=usd`, { headers }),
       fetch(`${ZERION}/wallets/${addr}/pnl?currency=usd`, { headers }),
       fetch(`${ZERION}/wallets/${addr}/positions?currency=usd&filter[trash]=only_non_trash&sort=-value&page[size]=20`, { headers }),
+      fetch(`${ZERION}/wallets/${addr}/charts/${period}?currency=usd`, { headers }),
     ]);
 
     const portfolio = portfolioRes.ok ? await portfolioRes.json() : null;
     const pnl = pnlRes.ok ? await pnlRes.json() : null;
     const positions = positionsRes.ok ? await positionsRes.json() : null;
+    const chart = chartRes.ok ? await chartRes.json() : null;
 
     if (!portfolio && !pnl) return json({ error: "Upstream error" }, 502);
 
@@ -57,7 +63,15 @@ Deno.serve(async (req) => {
       .filter((h) => h.value > 0)
       .slice(0, 15);
 
+    // Portfolio value over time. Zerion returns points as [unix_seconds, value].
+    const points = (chart?.data?.attributes?.points ?? []) as Array<[number, number]>;
+    const chartOut = points
+      .map(([t, v]) => ({ t: Number(t) < 1e12 ? Number(t) * 1000 : Number(t), v: Number(v) || 0 }))
+      .filter((p) => Number.isFinite(p.t) && Number.isFinite(p.v));
+
     return json({
+      period,
+      chart: chartOut,
       totalValue: Number(pAttr.total?.positions) || 0,
       change1d: Number(pAttr.changes?.percent_1d) || 0,
       netInvested: Number(nAttr.net_invested) || 0,

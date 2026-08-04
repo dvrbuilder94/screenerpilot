@@ -48,7 +48,8 @@ export interface PositionAnalysis {
 
 export interface WalletAnalysis {
   minValue: number;
-  analyzed: number;
+  analyzed: number; // positions above minValue we attempted to score
+  scored: number; // of those, how many had enough price history to score
   positions: PositionAnalysis[];
 }
 
@@ -125,6 +126,7 @@ export const SAMPLE_WALLET: WalletPnL = {
 export const SAMPLE_ANALYSIS: WalletAnalysis = {
   minValue: 10,
   analyzed: 6,
+  scored: 6,
   positions: [
     { symbol: "ETH", name: "Ethereum", chain: "Ethereum", value: 18400, price: 3120, change1d: 1.8, rsi: 58, state: "neutral", trendUp: true, pctFromHigh: -4, note: "RSI 58 — neutral. Above its 30d average." },
     { symbol: "USDC", name: "USD Coin", chain: "Base", value: 9200, price: 1, change1d: 0.0, rsi: 50, state: "neutral", trendUp: true, pctFromHigh: 0, note: "RSI 50 — neutral. Stablecoin, no directional momentum." },

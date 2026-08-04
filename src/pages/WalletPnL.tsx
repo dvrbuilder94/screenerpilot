@@ -185,6 +185,7 @@ export default function WalletPnLPage() {
   const [analysis, setAnalysis] = useState<WalletAnalysis | null>(null);
   const [analysisLive, setAnalysisLive] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   const fetchWallet = async (addr: string, per: WalletPeriod): Promise<WalletPnL | null> => {
     const { data: res, error: err } = await supabase.functions.invoke("wallet-pnl", { body: { address: addr, period: per } });
@@ -200,6 +201,7 @@ export default function WalletPnLPage() {
     setLoading(true);
     setAnalysis(null); // a new wallet invalidates the previous position read
     setAnalysisLive(false);
+    setAnalysisError(null);
     try {
       const res = await fetchWallet(addr, period);
       setData(res ?? SAMPLE_WALLET);
@@ -228,22 +230,31 @@ export default function WalletPnLPage() {
   };
 
   // Technical read of each position worth > $10 (overbought / oversold / trend).
+  // Real wallets score via wallet-pnl's analyze mode; the sample wallet shows the
+  // sample read. A live wallet NEVER shows sample numbers — that would misstate
+  // the user's real exposure.
   const runAnalysis = async () => {
     if (!analyzedAddr) return;
     setAnalyzing(true);
+    setAnalysisError(null);
     try {
       if (!live) { setAnalysis(SAMPLE_ANALYSIS); setAnalysisLive(false); return; }
-      const { data: res, error: err } = await supabase.functions.invoke("wallet-analyze", { body: { address: analyzedAddr } });
-      if (err || !res || (res as any).error || (res as any).needsKey) {
-        setAnalysis(SAMPLE_ANALYSIS);
+      const { data: res, error: err } = await supabase.functions.invoke("wallet-pnl", {
+        body: { address: analyzedAddr, period, analyze: true },
+      });
+      const payload = res as { analysis?: WalletAnalysis; error?: string; needsKey?: boolean } | null;
+      if (err || !payload || payload.error || payload.needsKey || !payload.analysis) {
+        setAnalysis(null);
         setAnalysisLive(false);
+        setAnalysisError("Couldn't score your positions right now. Try again in a moment.");
       } else {
-        setAnalysis(res as WalletAnalysis);
+        setAnalysis(payload.analysis);
         setAnalysisLive(true);
       }
     } catch {
-      setAnalysis(SAMPLE_ANALYSIS);
+      setAnalysis(null);
       setAnalysisLive(false);
+      setAnalysisError("Couldn't score your positions right now. Try again in a moment.");
     } finally {
       setAnalyzing(false);
     }
@@ -255,17 +266,21 @@ export default function WalletPnLPage() {
     return m;
   }, [analysis]);
 
+  // Rollup is computed over SCORED positions only (those with enough price
+  // history) — so percentages reflect what was actually measured, not tokens we
+  // couldn't score.
   const rollup = useMemo(() => {
-    const ps = analysis?.positions ?? [];
-    const total = ps.reduce((s, p) => s + p.value, 0);
-    const ob = ps.filter((p) => p.state === "overbought");
+    const scored = (analysis?.positions ?? []).filter((p) => p.state !== "unknown");
+    const total = scored.reduce((s, p) => s + p.value, 0);
+    const ob = scored.filter((p) => p.state === "overbought");
     const obVal = ob.reduce((s, p) => s + p.value, 0);
     return {
+      scoredCount: scored.length,
       total,
       obVal,
       obCount: ob.length,
       obPct: total > 0 ? (obVal / total) * 100 : 0,
-      osCount: ps.filter((p) => p.state === "oversold").length,
+      osCount: scored.filter((p) => p.state === "oversold").length,
     };
   }, [analysis]);
 
@@ -381,26 +396,40 @@ export default function WalletPnLPage() {
                   </button>
                 </div>
 
+                {analysisError && (
+                  <div className="fin-card p-3.5 mb-3 flex items-start gap-2 text-[12.5px] text-muted-foreground">
+                    <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-primary" />
+                    <span>{analysisError}</span>
+                  </div>
+                )}
+
                 {analysis && (
                   <div className="fin-card p-3.5 mb-3">
-                    <p className="text-[12.5px] leading-relaxed">
-                      {rollup.obCount > 0 ? (
-                        <>
-                          <span className="font-mono font-semibold" style={{ color: NEG }}>{rollup.obPct.toFixed(0)}%</span> of analyzed
-                          exposure ({fmtUsd(rollup.obVal)}) is in{" "}
-                          <span style={{ color: NEG }}>overbought</span> tokens — momentum extended, higher pullback risk.
-                        </>
-                      ) : (
-                        <>No analyzed position is overbought right now.</>
-                      )}
-                      {rollup.osCount > 0 && (
-                        <> {rollup.osCount} position{rollup.osCount > 1 ? "s are" : " is"}{" "}
-                          <span style={{ color: POS }}>oversold</span>.</>
-                      )}
-                    </p>
+                    {rollup.scoredCount === 0 ? (
+                      <p className="text-[12.5px] leading-relaxed text-muted-foreground">
+                        These holdings don't have enough price history on Zerion yet to score momentum — common for
+                        newer on-chain tokens.
+                      </p>
+                    ) : (
+                      <p className="text-[12.5px] leading-relaxed">
+                        {rollup.obCount > 0 ? (
+                          <>
+                            <span className="font-mono font-semibold" style={{ color: NEG }}>{rollup.obPct.toFixed(0)}%</span> of scored
+                            exposure ({fmtUsd(rollup.obVal)}) is in{" "}
+                            <span style={{ color: NEG }}>overbought</span> tokens — momentum extended, higher pullback risk.
+                          </>
+                        ) : (
+                          <>None of your scored positions are overbought right now.</>
+                        )}
+                        {rollup.osCount > 0 && (
+                          <> {rollup.osCount} position{rollup.osCount > 1 ? "s are" : " is"}{" "}
+                            <span style={{ color: POS }}>oversold</span>.</>
+                        )}
+                      </p>
+                    )}
                     <p className="text-[11px] text-muted-foreground mt-1.5">
-                      RSI(14) on ~30d of price. Only positions over ${analysis.minValue} are scored.
-                      {!analysisLive && live && " · sample — deploy wallet-analyze to score your real positions."}
+                      RSI(14) on ~30d of price · {rollup.scoredCount}/{analysis.analyzed} positions over ${analysis.minValue} scored
+                      {!analysisLive && " · sample data"}.
                     </p>
                   </div>
                 )}

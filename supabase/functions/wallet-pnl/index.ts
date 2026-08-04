@@ -29,17 +29,29 @@ Deno.serve(async (req) => {
     const headers = { Authorization: auth, accept: "application/json" };
     const addr = String(address).toLowerCase();
 
-    const [portfolioRes, pnlRes, positionsRes, chartRes] = await Promise.all([
-      fetch(`${ZERION}/wallets/${addr}/portfolio?currency=usd`, { headers }),
-      fetch(`${ZERION}/wallets/${addr}/pnl?currency=usd`, { headers }),
-      fetch(`${ZERION}/wallets/${addr}/positions?currency=usd&filter[trash]=only_non_trash&sort=-value&page[size]=20`, { headers }),
-      fetch(`${ZERION}/wallets/${addr}/charts/${period}?currency=usd`, { headers }),
-    ]);
+    // Zerion throttles parallel calls on the same key (429), so fetch each
+    // endpoint sequentially with a short backoff retry.
+    const getJson = async (path: string): Promise<any | null> => {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const res = await fetch(`${ZERION}${path}`, { headers });
+        if (res.ok) return await res.json();
+        if (res.status === 429) {
+          await new Promise((r) => setTimeout(r, 700 * (attempt + 1)));
+          continue;
+        }
+        console.log("zerion error", path, res.status, (await res.text()).slice(0, 300));
+        return null;
+      }
+      console.log("zerion throttled", path);
+      return null;
+    };
 
-    const portfolio = portfolioRes.ok ? await portfolioRes.json() : null;
-    const pnl = pnlRes.ok ? await pnlRes.json() : null;
-    const positions = positionsRes.ok ? await positionsRes.json() : null;
-    const chart = chartRes.ok ? await chartRes.json() : null;
+    const portfolio = await getJson(`/wallets/${addr}/portfolio?currency=usd`);
+    const pnl = await getJson(`/wallets/${addr}/pnl?currency=usd`);
+    const positions = await getJson(
+      `/wallets/${addr}/positions?currency=usd&filter[trash]=only_non_trash&filter[position_types]=wallet&sort=-value&page[size]=100`,
+    );
+    const chart = await getJson(`/wallets/${addr}/charts/${period}?currency=usd`);
 
     if (!portfolio && !pnl) return json({ error: "Upstream error" }, 502);
 
@@ -60,7 +72,8 @@ Deno.serve(async (req) => {
         value: Number(p.attributes?.value) || 0,
         chain: cap(p.relationships?.chain?.data?.id ?? ""),
       }))
-      .filter((h) => h.value > 0)
+      .filter((h) => h.value > 0.01)
+      .sort((a, b) => b.value - a.value)
       .slice(0, 15);
 
     // Portfolio value over time. Zerion returns points as [unix_seconds, value].

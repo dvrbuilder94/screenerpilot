@@ -67,7 +67,8 @@ Deno.serve(async (req) => {
         value: Number(p.attributes?.value) || 0,
         chain: cap(p.relationships?.chain?.data?.id ?? ""),
       }))
-      .filter((h) => h.value > 0)
+      .filter((h) => h.value > 0.01)
+      .sort((a, b) => b.value - a.value)
       .slice(0, 15);
 
     return json({

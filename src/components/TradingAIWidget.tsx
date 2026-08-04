@@ -8,6 +8,7 @@ import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getFearGreedIndex, getDominanceData } from "@/lib/cryptoMetrics";
+import { useWatchlist } from "@/hooks/useWatchlist";
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -132,7 +133,10 @@ export const TradingAIWidget = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const { subscription } = useAuth();
+  const { symbols: watchSymbols } = useWatchlist();
   const [searchParams, setSearchParams] = useSearchParams();
+  const watchKeyRef = useRef("");
+  const watchKey = watchSymbols.slice(0, 20).join(",");
 
   const isContextReady = marketContext.length > 0;
 
@@ -202,6 +206,33 @@ export const TradingAIWidget = () => {
       setIsLoadingContext(true);
       const contextParts: string[] = [];
 
+      // 1) The user's watchlist + live quotes — so QUANT reasons about what THEY
+      //    actually track and can cite real prices, not generic market talk.
+      const symbols = watchSymbols.slice(0, 20);
+      if (symbols.length > 0) {
+        try {
+          const { data } = await supabase.functions.invoke("quotes", { body: { symbols } });
+          const quotes = (data?.quotes ?? []) as { symbol: string; price: number | null; changePct: number | null }[];
+          const lines = quotes
+            .filter((q) => q.price != null)
+            .map((q) => {
+              const p = Number(q.price);
+              const price = p.toLocaleString(undefined, { maximumFractionDigits: p < 1 ? 6 : 2 });
+              const chg = q.changePct != null ? ` (${q.changePct >= 0 ? "+" : ""}${q.changePct.toFixed(2)}% 1d)` : "";
+              return `- ${q.symbol}: $${price}${chg}`;
+            });
+          contextParts.push(
+            lines.length > 0
+              ? `USER WATCHLIST (they track these — prioritize them and reference the live numbers):\n${lines.join("\n")}`
+              : `USER WATCHLIST: ${symbols.join(", ")}`,
+          );
+        } catch (err) {
+          console.warn("Watchlist context failed:", err);
+          contextParts.push(`USER WATCHLIST: ${symbols.join(", ")}`);
+        }
+      }
+
+      // 2) Crypto sentiment.
       try {
         const [fearGreed, dominance] = await Promise.all([
           getFearGreedIndex(),
@@ -214,23 +245,42 @@ export const TradingAIWidget = () => {
         console.warn("Crypto context failed:", err);
       }
 
+      // 3) Recent signals from ScreenerPilot's own monitors (regime + squeeze).
+      try {
+        const { data: alerts } = await (supabase as any)
+          .from("market_alerts")
+          .select("alert_type, entity_label, title")
+          .order("created_at", { ascending: false })
+          .limit(5);
+        if (alerts && alerts.length > 0) {
+          const lines = alerts.map((a: any) => `- [${a.alert_type}] ${a.entity_label}: ${a.title}`);
+          contextParts.push(`RECENT MARKET SIGNALS (ScreenerPilot monitors):\n${lines.join("\n")}`);
+        }
+      } catch (err) {
+        console.warn("Alerts context failed:", err);
+      }
+
       const fullContext = contextParts.length > 0
-        ? `CURRENT MARKET DATA (use this to inform your responses):\n${contextParts.join('\n\n')}`
+        ? `CURRENT MARKET DATA (real and live — use it, cite the numbers, never say data is unavailable):\n${contextParts.join('\n\n')}`
         : '';
 
       setMarketContext(fullContext);
       setLastContextFetch(Date.now());
+      watchKeyRef.current = watchKey;
       setIsLoadingContext(false);
     };
 
-    const shouldRefetch = 
-      !marketContext || 
-      Date.now() - lastContextFetch > CONTEXT_CACHE_TTL;
+    const shouldRefetch =
+      !marketContext ||
+      Date.now() - lastContextFetch > CONTEXT_CACHE_TTL ||
+      watchKeyRef.current !== watchKey;
 
     if (isOpen && shouldRefetch) {
       fetchFullMarketContext();
     }
-  }, [isOpen, marketContext, lastContextFetch]);
+    // watchSymbols is tracked via watchKey (its stable string form).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, marketContext, lastContextFetch, watchKey]);
 
   /* ---------------- CLOSE HANDLER ---------------- */
 

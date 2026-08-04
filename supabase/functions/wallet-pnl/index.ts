@@ -31,6 +31,16 @@ Deno.serve(async (req) => {
       fetch(`${ZERION}/wallets/${addr}/positions?currency=usd&filter[trash]=only_non_trash&sort=-value&page[size]=20`, { headers }),
     ]);
 
+    if (!portfolioRes.ok || !pnlRes.ok || !positionsRes.ok) {
+      console.log("zerion status", {
+        portfolio: portfolioRes.status,
+        pnl: pnlRes.status,
+        positions: positionsRes.status,
+      });
+      if (!pnlRes.ok) console.log("pnl body", (await pnlRes.clone().text()).slice(0, 400));
+      if (!positionsRes.ok) console.log("positions body", (await positionsRes.clone().text()).slice(0, 400));
+    }
+
     const portfolio = portfolioRes.ok ? await portfolioRes.json() : null;
     const pnl = pnlRes.ok ? await pnlRes.json() : null;
     const positions = positionsRes.ok ? await positionsRes.json() : null;

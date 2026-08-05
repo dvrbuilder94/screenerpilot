@@ -61,6 +61,66 @@ export const STATE_META: Record<PositionState, { label: string; tone: "neg" | "p
   unknown: { label: "No data", tone: "muted" },
 };
 
+// Known stablecoin symbols — treated as "dry powder", not directional exposure.
+const STABLES = new Set([
+  "USDC", "USDT", "DAI", "USDS", "FRAX", "TUSD", "USDE", "PYUSD", "GUSD",
+  "LUSD", "CRVUSD", "USDBC", "USDP", "BUSD", "USDD", "GHO", "FDUSD",
+]);
+
+export type ConcentrationLabel = "Concentrated" | "Balanced" | "Diversified";
+
+export interface PortfolioHealth {
+  topSymbol: string;
+  topPct: number; // % of book in the single largest position
+  top3Pct: number; // % in the top 3 positions
+  effectiveHoldings: number; // 1 / HHI — how many positions the book "really" is
+  holdingsCount: number; // positions we have values for
+  diversification: number; // 0-100, derived from effectiveHoldings (8+ = full)
+  stablePct: number; // % of book sitting in stablecoins
+  dominantChain: string;
+  dominantChainPct: number;
+  concentration: ConcentrationLabel;
+}
+
+// Portfolio X-ray from the holdings/chain data we already fetch — no extra calls.
+// Every field is exact and self-explaining (concentration, effective holdings via
+// the Herfindahl index, stablecoin buffer, chain exposure).
+export function analyzePortfolio(d: WalletPnL): PortfolioHealth | null {
+  const holdingsSum = d.holdings.reduce((s, h) => s + h.value, 0);
+  const total = d.totalValue > 0 ? d.totalValue : holdingsSum;
+  if (!total || d.holdings.length === 0) return null;
+
+  const sorted = [...d.holdings].sort((a, b) => b.value - a.value);
+  const topPct = (sorted[0].value / total) * 100;
+  const top3Pct = (sorted.slice(0, 3).reduce((s, h) => s + h.value, 0) / total) * 100;
+
+  const hhi = sorted.reduce((s, h) => s + (h.value / total) ** 2, 0);
+  const effectiveHoldings = hhi > 0 ? 1 / hhi : 0;
+  // 8+ effective holdings ≈ well diversified; single-name books trend toward 0.
+  const diversification = Math.round(Math.min(effectiveHoldings / 8, 1) * 100);
+
+  const stableVal = sorted
+    .filter((h) => STABLES.has(h.symbol.toUpperCase()))
+    .reduce((s, h) => s + h.value, 0);
+  const stablePct = (stableVal / total) * 100;
+
+  const chainTotal = d.byChain.reduce((s, c) => s + c.value, 0) || total;
+  const chain = [...d.byChain].sort((a, b) => b.value - a.value)[0];
+
+  return {
+    topSymbol: sorted[0].symbol,
+    topPct,
+    top3Pct,
+    effectiveHoldings,
+    holdingsCount: sorted.length,
+    diversification,
+    stablePct,
+    dominantChain: chain?.chain ?? "—",
+    dominantChainPct: chain ? (chain.value / chainTotal) * 100 : 0,
+    concentration: topPct >= 50 ? "Concentrated" : topPct >= 30 ? "Balanced" : "Diversified",
+  };
+}
+
 export const isEvmAddress = (a: string) => /^0x[0-9a-fA-F]{40}$/.test(a.trim());
 
 export function fmtUsd(v: number): string {

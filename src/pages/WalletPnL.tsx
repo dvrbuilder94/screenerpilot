@@ -10,6 +10,7 @@ import {
   STATE_META,
   isEvmAddress,
   fmtUsd,
+  analyzePortfolio,
   WALLET_PERIODS,
   type WalletPnL,
   type WalletPeriod,
@@ -17,6 +18,7 @@ import {
   type WalletAnalysis,
   type PositionAnalysis,
   type PositionState,
+  type PortfolioHealth,
 } from "@/lib/walletPnl";
 
 const POS = "hsl(152 46% 56%)";
@@ -37,6 +39,62 @@ function StateBadge({ state }: { state: PositionState }) {
     >
       {meta.label}
     </span>
+  );
+}
+
+function HealthStat({ label, value, sub }: { label: string; value: string; sub?: string; }) {
+  return (
+    <div className="rounded-lg bg-secondary/40 px-3 py-2.5">
+      <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground font-mono">{label}</div>
+      <div className="text-[15px] font-semibold mt-0.5 font-mono tabular-nums">{value}</div>
+      {sub && <div className="text-[11px] text-muted-foreground mt-0.5 leading-tight">{sub}</div>}
+    </div>
+  );
+}
+
+function PortfolioHealthPanel({ h }: { h: PortfolioHealth }) {
+  const concColor = h.concentration === "Concentrated" ? NEG : h.concentration === "Diversified" ? POS : "hsl(var(--muted-foreground))";
+  return (
+    <section className="mt-7">
+      <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground mb-3">Portfolio health</h2>
+      <div className="fin-card p-4">
+        <p className="text-[12.5px] leading-relaxed">
+          Your largest position (<span className="font-mono font-semibold">{h.topSymbol}</span>) is{" "}
+          <span className="font-mono font-semibold" style={{ color: concColor }}>{h.topPct.toFixed(0)}%</span> of the book and your
+          top 3 are {h.top3Pct.toFixed(0)}% — <span style={{ color: concColor }}>{h.concentration.toLowerCase()}</span>.
+          {h.stablePct >= 1 && <> {h.stablePct.toFixed(0)}% sits in stablecoins as dry powder.</>}
+          {h.dominantChainPct >= 1 && <> {h.dominantChainPct.toFixed(0)}% of value is on {h.dominantChain}.</>}
+        </p>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-3">
+          <HealthStat
+            label="Concentration"
+            value={h.concentration}
+            sub={`Top holding ${h.topPct.toFixed(0)}%`}
+          />
+          <HealthStat
+            label="Effective holdings"
+            value={h.effectiveHoldings.toFixed(1)}
+            sub={`of ${h.holdingsCount} · diversification ${h.diversification}/100`}
+          />
+          <HealthStat
+            label="Stablecoin buffer"
+            value={`${h.stablePct.toFixed(0)}%`}
+            sub={h.stablePct >= 15 ? "defensive" : h.stablePct < 3 ? "fully deployed" : "some dry powder"}
+          />
+          <HealthStat
+            label="Top chain"
+            value={h.dominantChain}
+            sub={`${h.dominantChainPct.toFixed(0)}% of value`}
+          />
+        </div>
+
+        <p className="text-[11px] text-muted-foreground mt-3 leading-relaxed">
+          Effective holdings = 1 / Herfindahl index — how many positions the book behaves like once you weight by size.
+          Lower means a few names dominate.
+        </p>
+      </div>
+    </section>
   );
 }
 
@@ -284,6 +342,8 @@ export default function WalletPnLPage() {
     };
   }, [analysis]);
 
+  const health = useMemo(() => (data ? analyzePortfolio(data) : null), [data]);
+
   const totalPnl = data ? data.realized + data.unrealized : 0;
   const maxChain = data ? Math.max(...data.byChain.map((c) => c.value), 1) : 1;
 
@@ -361,6 +421,9 @@ export default function WalletPnLPage() {
               <Tile label="Unrealized gain" value={data.unrealized} tone="gain" />
               <Tile label="Fees paid" value={data.fees} />
             </div>
+
+            {/* Portfolio health (X-ray) */}
+            {health && <PortfolioHealthPanel h={health} />}
 
             {/* Chain distribution */}
             {data.byChain.length > 0 && (

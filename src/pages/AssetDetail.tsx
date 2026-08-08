@@ -7,7 +7,7 @@ import { cleanTicker } from "@/lib/ticker";
 import type { Analysis, Timeframe } from "@/types/analysis";
 import { buildDecisionSnapshot } from "@/lib/analysis/decisionSnapshot";
 import { readAssetState, diffAssetState } from "@/lib/analysis/assetChanges";
-import { loadAssetState, saveAssetState } from "@/lib/analysis/assetHistory";
+import { loadAssetState, saveAssetChangeDigest, saveAssetState } from "@/lib/analysis/assetHistory";
 import { Seo } from "@/components/Seo";
 import { Activity, Bell, ChevronLeft, Heart, Loader2, ShieldAlert, Sparkles } from "lucide-react";
 
@@ -163,8 +163,16 @@ export default function AssetDetail() {
     [currentState, sym],
   );
   useEffect(() => {
-    if (currentState) saveAssetState(sym, currentState);
-  }, [currentState, sym]);
+    if (!currentState) return;
+    if (changes && !changes.firstLook && changes.since && changes.changes.length > 0) {
+      saveAssetChangeDigest(sym, {
+        changes: changes.changes,
+        since: changes.since,
+        detectedAt: currentState.at,
+      });
+    }
+    saveAssetState(sym, currentState);
+  }, [changes, currentState, sym]);
   const indicators = analysis?.indicators;
   const priceAction = analysis?.priceAction;
   const up = (analysis?.dayChangePercent ?? 0) >= 0;

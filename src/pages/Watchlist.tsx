@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Loader2, Star, Plus, X, TrendingUp, TrendingDown, Search, LayoutGrid, List } from "lucide-react";
+import { Activity, Loader2, Star, Plus, X, TrendingUp, TrendingDown, Search, LayoutGrid, List, ShieldAlert } from "lucide-react";
 import { useWatchlist } from "@/hooks/useWatchlist";
 import { useQuotes } from "@/hooks/useQuotes";
 import { Seo } from "@/components/Seo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { loadAssetChangeDigest, loadAssetState } from "@/lib/analysis/assetHistory";
 
 // Custom themes rather than rigid GICS sectors — how a trader groups ideas.
 const SECTORS = [
@@ -37,6 +38,15 @@ export default function Watchlist() {
   const [pickSector, setPickSector] = useState<string>("");
   const [grouped, setGrouped] = useState(true);
 
+  // Reuse reads produced in Asset Detail. This keeps Watchlist fast and avoids
+  // triggering one paid analysis request per ticker on every visit.
+  const intelligence = Object.fromEntries(symbols.map((symbol) => {
+    const state = loadAssetState(symbol);
+    const digest = loadAssetChangeDigest(symbol);
+    const importance = digest?.changes.reduce((max, change) => Math.max(max, change.importance ?? 1), 0) ?? 0;
+    return [symbol, { state, digest, importance }];
+  }));
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const sym = input.trim().toUpperCase();
@@ -55,9 +65,15 @@ export default function Watchlist() {
       if (!byKey.has(key)) byKey.set(key, []);
       byKey.get(key)!.push(it);
     }
-    for (const key of order) if (byKey.has(key)) groups.push({ sector: key, rows: byKey.get(key)! });
+    for (const key of order) if (byKey.has(key)) {
+      const rows = byKey.get(key)!.sort((a, b) => intelligence[b.symbol].importance - intelligence[a.symbol].importance);
+      groups.push({ sector: key, rows });
+    }
   } else {
-    groups.push({ sector: "", rows: items });
+    groups.push({
+      sector: "",
+      rows: [...items].sort((a, b) => intelligence[b.symbol].importance - intelligence[a.symbol].importance),
+    });
   }
 
   const Row = ({ it }: { it: (typeof items)[number] }) => {
@@ -65,13 +81,34 @@ export default function Watchlist() {
     const pct = q?.changePct ?? null;
     const up = (pct ?? 0) >= 0;
     const priceMissing = !isLoading && q?.price == null;
+    const insight = intelligence[it.symbol];
+    const state = insight?.state;
+    const latestChange = insight?.digest?.changes[0];
+    const biasTone = state?.bias === "Bullish" ? "text-emerald-400 border-emerald-400/25 bg-emerald-400/10" : state?.bias === "Bearish" ? "text-red-400 border-red-400/25 bg-red-400/10" : "text-muted-foreground border-border bg-secondary/50";
     return (
-      <div className="flex items-center gap-2.5 px-4 py-3">
+      <div className="flex items-start gap-2.5 px-4 py-3">
         <Link to={`/asset/${it.symbol}`} className="flex-1 min-w-0">
-          <div className="font-mono font-semibold text-foreground text-[15px]">{it.symbol}</div>
-          <div className="text-[11.5px] text-muted-foreground truncate">
-            {q?.name && q.name !== it.symbol ? q.name : priceMissing ? "Ticker not found" : "—"}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="font-mono font-semibold text-foreground text-[15px]">{it.symbol}</div>
+            {state && (
+              <span className={cn("rounded-full border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wide", biasTone)}>
+                {state.bias}
+              </span>
+            )}
           </div>
+          <div className="text-[11.5px] text-muted-foreground truncate">
+            {latestChange ? (
+              <span className={cn("inline-flex items-center gap-1", latestChange.tone === "positive" ? "text-emerald-400" : latestChange.tone === "negative" ? "text-red-400" : "text-muted-foreground")}>
+                <Activity className="h-3 w-3 shrink-0" /> {latestChange.label}
+              </span>
+            ) : q?.name && q.name !== it.symbol ? q.name : priceMissing ? "Ticker not found" : state ? "No new signal change" : "Open asset to establish a baseline"
+            }
+          </div>
+          {state?.levelToWatch && (
+            <div className="mt-1 flex items-center gap-1 truncate text-[10.5px] text-muted-foreground/75" title={state.levelToWatch}>
+              <ShieldAlert className="h-3 w-3 shrink-0" /> Watch: {state.levelToWatch}
+            </div>
+          )}
         </Link>
 
         {/* reassign sector inline */}
@@ -86,7 +123,7 @@ export default function Watchlist() {
           {SECTORS.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
 
-        <div className="text-right shrink-0 w-[76px]">
+        <div className="text-right shrink-0 w-[76px] pt-0.5">
           {isLoading && !q ? (
             <Loader2 className="w-4 h-4 animate-spin text-muted-foreground ml-auto" />
           ) : (
@@ -113,14 +150,14 @@ export default function Watchlist() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-5 pb-28 lg:pb-12">
-      <Seo title="My Watchlist — ScreenerPilot" description="Track any ticker with live prices, organized by your own themes." path="/watchlist" />
+      <Seo title="My Watchlist — ScreenerPilot" description="Track price, bias, signal changes and levels to watch for your assets." path="/watchlist" />
 
       <div className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight flex items-center gap-2">
             <Star className="w-6 h-6 text-primary" /> My Watchlist
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">Any ticker, live, organized by your themes.</p>
+          <p className="text-muted-foreground mt-1 text-sm">Price, bias, what changed and the level that matters next.</p>
         </div>
         {items.length > 0 && (
           <button
@@ -195,9 +232,10 @@ export default function Watchlist() {
       )}
 
       {items.length > 0 && (
-        <p className="text-[11px] text-muted-foreground text-center">
-          {error ? "Couldn't refresh prices — retrying…" : isFetching ? "Updating prices…" : "Prices from Yahoo · refreshes every minute"}
-        </p>
+        <div className="space-y-1 text-center text-[11px] text-muted-foreground">
+          <p>{error ? "Couldn't refresh prices — retrying…" : isFetching ? "Updating prices…" : "Prices from Yahoo · refreshes every minute"}</p>
+          <p>Signal reads update when you open an asset · highest-impact changes appear first</p>
+        </div>
       )}
     </div>
   );

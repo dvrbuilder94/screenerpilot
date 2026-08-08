@@ -18,12 +18,16 @@ export interface AssetState {
   rsi: RsiRegime;
   macd: MacdSign;
   rangePosition: number | null; // 0–100 within 52w range
+  /** Human-readable level/condition that invalidates the current read. */
+  levelToWatch?: string | null;
   at: string; // ISO
 }
 
 export interface AssetChange {
   label: string;
   tone: ChangeTone;
+  /** 3 = thesis change, 2 = trend/momentum event, 1 = secondary context. */
+  importance: 1 | 2 | 3;
 }
 
 export interface ChangeResult {
@@ -55,6 +59,7 @@ export function readAssetState(a: Analysis, snapshot: DecisionSnapshot): AssetSt
     rsi: rsiRegime(a.indicators?.rsi?.value),
     macd: isNum(a.indicators?.macd?.hist) ? ((a.indicators!.macd!.hist >= 0) ? "positive" : "negative") : null,
     rangePosition: isNum(rangePos) ? rangePos : null,
+    levelToWatch: snapshot.invalidation || null,
     at: snapshot.computedAt,
   };
 }
@@ -74,7 +79,7 @@ export function diffAssetState(prev: AssetState | null, curr: AssetState): Chang
   const changes: AssetChange[] = [];
 
   if (prev.bias !== curr.bias) {
-    changes.push({ label: `Read shifted from ${prev.bias} to ${curr.bias}`, tone: biasTone(curr.bias) });
+    changes.push({ label: `Read shifted from ${prev.bias} to ${curr.bias}`, tone: biasTone(curr.bias), importance: 3 });
   }
 
   ([20, 50, 200] as const).forEach((span) => {
@@ -85,23 +90,24 @@ export function diffAssetState(prev: AssetState | null, curr: AssetState): Chang
       changes.push({
         label: `Price crossed ${c} the ${span}-day EMA`,
         tone: c === "above" ? "positive" : "negative",
+        importance: span === 200 ? 3 : 2,
       });
     }
   });
 
   if (prev.rsi && curr.rsi && prev.rsi !== curr.rsi) {
-    changes.push({ label: RSI_LABEL[curr.rsi].text, tone: RSI_LABEL[curr.rsi].tone });
+    changes.push({ label: RSI_LABEL[curr.rsi].text, tone: RSI_LABEL[curr.rsi].tone, importance: 2 });
   }
 
   if (prev.macd && curr.macd && prev.macd !== curr.macd) {
-    changes.push({ label: `MACD momentum turned ${curr.macd}`, tone: curr.macd === "positive" ? "positive" : "negative" });
+    changes.push({ label: `MACD momentum turned ${curr.macd}`, tone: curr.macd === "positive" ? "positive" : "negative", importance: 2 });
   }
 
   if (isNum(prev.rangePosition) && isNum(curr.rangePosition)) {
     if (prev.rangePosition < 80 && curr.rangePosition >= 80) {
-      changes.push({ label: "Pushed into the top of its 52-week range", tone: "positive" });
+      changes.push({ label: "Pushed into the top of its 52-week range", tone: "positive", importance: 1 });
     } else if (prev.rangePosition > 20 && curr.rangePosition <= 20) {
-      changes.push({ label: "Slipped to the bottom of its 52-week range", tone: "negative" });
+      changes.push({ label: "Slipped to the bottom of its 52-week range", tone: "negative", importance: 1 });
     }
   }
 

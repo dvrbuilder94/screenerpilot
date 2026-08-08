@@ -50,7 +50,7 @@ describe("diffAssetState", () => {
 
   it("detects an EMA crossing", () => {
     const r = diffAssetState(state({ ema50: "below" }), state({ ema50: "above" }));
-    expect(r.changes).toEqual([{ label: "Price crossed above the 50-day EMA", tone: "positive" }]);
+    expect(r.changes).toEqual([{ label: "Price crossed above the 50-day EMA", tone: "positive", importance: 2 }]);
   });
 
   it("detects an RSI regime change and MACD flip", () => {
@@ -60,7 +60,15 @@ describe("diffAssetState", () => {
 
   it("detects a move into the top of the 52-week range", () => {
     const r = diffAssetState(state({ rangePosition: 60 }), state({ rangePosition: 90 }));
-    expect(r.changes).toEqual([{ label: "Pushed into the top of its 52-week range", tone: "positive" }]);
+    expect(r.changes).toEqual([{ label: "Pushed into the top of its 52-week range", tone: "positive", importance: 1 }]);
+  });
+
+  it("ranks thesis and long-term trend changes above secondary context", () => {
+    const r = diffAssetState(
+      state({ bias: "Bullish", ema200: "above", rangePosition: 60 }),
+      state({ bias: "Bearish", ema200: "below", rangePosition: 10 }),
+    );
+    expect(r.changes.map((c) => c.importance)).toEqual([3, 3, 1]);
   });
 
   it("does not invent changes from missing (null) readings", () => {

@@ -4,11 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useWatchlist } from "@/hooks/useWatchlist";
 import { cleanTicker } from "@/lib/ticker";
+import type { Analysis, Timeframe } from "@/types/analysis";
+import { buildDecisionSnapshot } from "@/lib/analysis/decisionSnapshot";
+import { readAssetState, diffAssetState } from "@/lib/analysis/assetChanges";
+import { loadAssetState, saveAssetState } from "@/lib/analysis/assetHistory";
 import { Seo } from "@/components/Seo";
-import { Bell, ChevronLeft, Heart, Loader2, ShieldAlert, Sparkles } from "lucide-react";
-
-type Timeframe = "daily" | "weekly" | "monthly";
-type Bias = "Bullish" | "Neutral" | "Bearish";
+import { Activity, Bell, ChevronLeft, Heart, Loader2, ShieldAlert, Sparkles } from "lucide-react";
 
 const PERIODS: { label: string; tf: Timeframe }[] = [
   { label: "1Y", tf: "daily" },
@@ -16,125 +17,12 @@ const PERIODS: { label: string; tf: Timeframe }[] = [
   { label: "10Y", tf: "monthly" },
 ];
 
-interface Analysis {
-  symbol: string;
-  companyName: string;
-  price: number;
-  marketCap: string;
-  dayChangePercent?: number;
-  priceAction?: { trend: string; momentum: string; volatility: string; support: string };
-  indicators?: {
-    rsi?: { value: number; label: string };
-    macd?: { hist: number; label: string };
-    bollinger?: { width: number; label: string };
-    emas?: { ema20: number | null; ema50: number | null; ema200: number | null };
-    range52w?: { high: number; low: number; position: number };
-  };
-  chart?: { close: number[]; timestamps?: number[] };
-}
-
-interface DecisionSnapshot {
-  bias: Bias;
-  confidence: number;
-  summary: string;
-  evidenceFor: string[];
-  evidenceAgainst: string[];
-  invalidation: string;
-}
-
 async function fetchAnalysis(symbol: string, tf: Timeframe): Promise<Analysis> {
   const { data, error } = await supabase.functions.invoke("analyze-stock", {
     body: { symbol, timeframe: tf },
   });
   if (error || data?.error) throw new Error(data?.error || "Could not load");
   return data as Analysis;
-}
-
-function buildDecisionSnapshot(a: Analysis): DecisionSnapshot {
-  const ind = a.indicators;
-  const scoreParts: number[] = [];
-  const evidenceFor: string[] = [];
-  const evidenceAgainst: string[] = [];
-
-  const ema20 = ind?.emas?.ema20;
-  const ema50 = ind?.emas?.ema50;
-  const ema200 = ind?.emas?.ema200;
-  const rsi = ind?.rsi?.value;
-  const macd = ind?.macd?.hist;
-
-  if (ema20 != null) {
-    const positive = a.price >= ema20;
-    scoreParts.push(positive ? 1 : -1);
-    (positive ? evidenceFor : evidenceAgainst).push(
-      `Price is ${positive ? "above" : "below"} the 20-day EMA.`
-    );
-  }
-  if (ema50 != null) {
-    const positive = a.price >= ema50;
-    scoreParts.push(positive ? 1 : -1);
-    (positive ? evidenceFor : evidenceAgainst).push(
-      `Price is ${positive ? "above" : "below"} the 50-day EMA.`
-    );
-  }
-  if (ema200 != null) {
-    const positive = a.price >= ema200;
-    scoreParts.push(positive ? 1.5 : -1.5);
-    (positive ? evidenceFor : evidenceAgainst).push(
-      `Long-term trend is ${positive ? "constructive" : "under pressure"} versus the 200-day EMA.`
-    );
-  }
-  if (macd != null) {
-    const positive = macd >= 0;
-    scoreParts.push(positive ? 1 : -1);
-    (positive ? evidenceFor : evidenceAgainst).push(
-      `MACD momentum is ${positive ? "positive" : "negative"}.`
-    );
-  }
-  if (rsi != null) {
-    if (rsi >= 70) {
-      scoreParts.push(-0.5);
-      evidenceAgainst.push("RSI is extended and raises pullback risk.");
-    } else if (rsi <= 30) {
-      scoreParts.push(0.5);
-      evidenceFor.push("RSI is deeply oversold and may support a rebound.");
-    } else if (rsi >= 50) {
-      scoreParts.push(0.5);
-      evidenceFor.push("RSI remains above the neutral 50 level.");
-    } else {
-      scoreParts.push(-0.5);
-      evidenceAgainst.push("RSI remains below the neutral 50 level.");
-    }
-  }
-
-  const score = scoreParts.reduce((sum, value) => sum + value, 0);
-  const maxScore = scoreParts.reduce((sum, value) => sum + Math.abs(value), 0) || 1;
-  const normalized = score / maxScore;
-  const bias: Bias = normalized >= 0.25 ? "Bullish" : normalized <= -0.25 ? "Bearish" : "Neutral";
-  const confidence = Math.round(55 + Math.min(Math.abs(normalized), 1) * 30);
-
-  const support = a.priceAction?.support;
-  const fallbackLevel = ema50 ?? ema200;
-  const invalidation = support
-    ? `Reassess if price loses ${support}.`
-    : fallbackLevel != null
-      ? `Reassess on a sustained move below $${fallbackLevel.toFixed(2)}.`
-      : "Reassess if the current trend and momentum signals reverse.";
-
-  const summary =
-    bias === "Bullish"
-      ? "Trend and momentum are currently aligned positively, but the setup still needs confirmation from price action."
-      : bias === "Bearish"
-        ? "Trend and momentum currently lean negative, with recovery dependent on reclaiming key moving averages."
-        : "Signals are mixed. The asset lacks enough alignment for a strong directional read."
-
-  return {
-    bias,
-    confidence,
-    summary,
-    evidenceFor: evidenceFor.slice(0, 3),
-    evidenceAgainst: evidenceAgainst.slice(0, 3),
-    invalidation,
-  };
 }
 
 function InteractiveChart({ close, timestamps, onHover }: {
@@ -262,7 +150,21 @@ export default function AssetDetail() {
   });
 
   const analysis = analysisQ.data;
-  const snapshot = useMemo(() => analysis ? buildDecisionSnapshot(analysis) : null, [analysis]);
+  const snapshot = useMemo(() => (analysis ? buildDecisionSnapshot(analysis, { timeframe: tf }) : null), [analysis, tf]);
+
+  // "What changed" — diff the current read against the user's last view of this
+  // asset (device-local), then persist the new state. Real deltas only.
+  const currentState = useMemo(
+    () => (analysis && snapshot ? readAssetState(analysis, snapshot) : null),
+    [analysis, snapshot],
+  );
+  const changes = useMemo(
+    () => (currentState ? diffAssetState(loadAssetState(sym), currentState) : null),
+    [currentState, sym],
+  );
+  useEffect(() => {
+    if (currentState) saveAssetState(sym, currentState);
+  }, [currentState, sym]);
   const indicators = analysis?.indicators;
   const priceAction = analysis?.priceAction;
   const up = (analysis?.dayChangePercent ?? 0) >= 0;
@@ -330,9 +232,16 @@ export default function AssetDetail() {
                   </div>
                   <h2 className="mt-3 text-xl font-semibold">{snapshot.bias} setup</h2>
                   <p className="mt-2 text-[13px] leading-relaxed" style={{ color: "var(--muted)" }}>{snapshot.summary}</p>
+                  <div className="mono mt-2 text-[10px]" style={{ color: "var(--faint)" }}>
+                    {snapshot.horizon} · {snapshot.methodologyVersion} · as of {new Date(snapshot.computedAt).toLocaleString()}
+                  </div>
+                  {snapshot.warnings.length > 0 && (
+                    <p className="mt-1.5 text-[11.5px]" style={{ color: "var(--down)" }}>{snapshot.warnings.join(" ")}</p>
+                  )}
                 </div>
-                <div className="mono rounded-full border px-3 py-1.5 text-[11px]" style={{ borderColor: "var(--line)", color: "var(--accent)" }}>
-                  {snapshot.confidence}% confidence
+                <div className="mono rounded-full border px-3 py-1.5 text-center text-[11px]" title={snapshot.confidenceBasis} style={{ borderColor: "var(--line)", color: "var(--accent)" }}>
+                  {snapshot.confidence}%
+                  <div className="text-[8.5px]" style={{ color: "var(--faint)" }}>signal alignment</div>
                 </div>
               </div>
 
@@ -349,6 +258,29 @@ export default function AssetDetail() {
                 </div>
               </div>
             </div>
+
+            {changes && (changes.firstLook || changes.changes.length > 0) && (
+              <div className="card mt-4 p-4">
+                <div className="mono mb-2 flex items-center gap-1.5 text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--faint)" }}>
+                  <Activity className="h-3 w-3" /> What changed
+                </div>
+                {changes.firstLook ? (
+                  <p className="text-[12.5px]" style={{ color: "var(--muted)" }}>First look at this asset — we'll track changes from here.</p>
+                ) : (
+                  <>
+                    <ul className="space-y-1.5">
+                      {changes.changes.map((c, i) => (
+                        <li key={i} className="flex items-start gap-2 text-[12.5px]">
+                          <span style={{ color: c.tone === "positive" ? "var(--up)" : c.tone === "negative" ? "var(--down)" : "var(--muted)" }}>•</span>
+                          <span>{c.label}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mono mt-2 text-[10px]" style={{ color: "var(--faint)" }}>since your last view</div>
+                  </>
+                )}
+              </div>
+            )}
 
             <div className="card mt-4 grid grid-cols-3 gap-px overflow-hidden" style={{ background: "var(--line)" }}>
               <Stat label="Market cap" value={analysis.marketCap || "—"} />

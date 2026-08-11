@@ -212,6 +212,31 @@ const RobinhoodRwa = () => {
     },
   });
 
+  // On-chain enrichment for the visible page (Blockscout, Robinhood Chain).
+  const onchainAddresses = useMemo(
+    () =>
+      visibleRows
+        .map((row) => (row.deployments?.[0] ?? row.quote?.deployments?.[0])?.contractAddress)
+        .filter((address): address is string => !!address),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [symbols],
+  );
+
+  const onchainQuery = useQuery({
+    queryKey: ["rwa-onchain", onchainAddresses.join(",")],
+    enabled: onchainAddresses.length > 0,
+    staleTime: 5 * 60_000,
+    queryFn: () => fetchOnchainTokens(onchainAddresses),
+  });
+
+  const chainStatsQuery = useQuery({
+    queryKey: ["rwa-chain-stats"],
+    staleTime: 5 * 60_000,
+    queryFn: fetchChainStats,
+  });
+
+
+
   const totalNotional = useMemo(
     () => (marketQuery.data ?? []).reduce((sum, row) => sum + (row.dailyNotional ?? 0), 0),
     [marketQuery.data],

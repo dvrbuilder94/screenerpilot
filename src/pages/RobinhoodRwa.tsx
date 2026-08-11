@@ -338,6 +338,8 @@ const RobinhoodRwa = () => {
                   <th className="text-right px-3 py-3 font-normal">Volume</th>
                   <th className="text-right px-3 py-3 font-normal">$ Liquidity</th>
                   <th className="text-right px-3 py-3 font-normal">Market cap</th>
+                  <th className="text-right px-3 py-3 font-normal">Holders</th>
+                  <th className="text-right px-3 py-3 font-normal">Token supply</th>
                   <th className="text-left px-3 py-3 font-normal">Depth</th>
                   <th className="text-left px-3 py-3 font-normal">Onchain</th>
                 </tr>

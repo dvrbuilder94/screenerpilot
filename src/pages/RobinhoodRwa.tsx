@@ -348,6 +348,9 @@ const RobinhoodRwa = () => {
                 {visibleRows.map((row) => {
                   const deployment = row.deployments?.[0] ?? row.quote?.deployments?.[0];
                   const fundamental = fundamentalsQuery.data?.[row.tokenSymbol];
+                  const onchain = deployment
+                    ? onchainQuery.data?.[deployment.contractAddress.toLowerCase()]
+                    : undefined;
                   const depth = liquidityLabel(row.spreadBps, row.dailyNotional);
                   return (
                     <tr key={row.id || row.tokenSymbol} className="hover:bg-muted/25 transition-colors">

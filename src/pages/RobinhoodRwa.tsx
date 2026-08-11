@@ -49,6 +49,25 @@ type Fundamental = {
   companyName: string;
 };
 
+// On-chain data for a Robinhood Chain token, from Blockscout.
+type OnchainToken = {
+  symbol: string;
+  holders: number;
+  totalSupply: number;
+  onchainPrice: number | null;
+  onchainMarketCap: number | null;
+  volume24h: number | null;
+};
+
+type ChainStats = {
+  totalAddresses: number;
+  totalTransactions: number;
+  transactionsToday: number;
+  averageBlockTime: number;
+  gasAverage: number;
+};
+
+
 async function fetchJson<T>(url: string): Promise<T> {
   const response = await fetch(url, { headers: { Accept: "application/json" } });
   if (!response.ok) throw new Error(`Robinhood API returned ${response.status}`);
@@ -94,6 +113,24 @@ async function fetchFundamental(symbol: string): Promise<Fundamental | null> {
     return null;
   }
 }
+
+// Blockscout (Robinhood Chain explorer) — holders and on-chain supply per token.
+async function fetchOnchainTokens(addresses: string[]): Promise<Record<string, OnchainToken>> {
+  if (addresses.length === 0) return {};
+  const { data, error } = await supabase.functions.invoke("blockscout", {
+    body: { action: "tokens", addresses },
+  });
+  if (error || data?.error) return {};
+  return (data?.tokens ?? {}) as Record<string, OnchainToken>;
+}
+
+async function fetchChainStats(): Promise<ChainStats | null> {
+  const { data, error } = await supabase.functions.invoke("blockscout", { body: { action: "stats" } });
+  if (error || data?.error) return null;
+  return data as ChainStats;
+}
+
+
 
 const compactUsd = (value: number | null) => {
   if (value == null || !Number.isFinite(value)) return "—";
@@ -175,6 +212,31 @@ const RobinhoodRwa = () => {
     },
   });
 
+  // On-chain enrichment for the visible page (Blockscout, Robinhood Chain).
+  const onchainAddresses = useMemo(
+    () =>
+      visibleRows
+        .map((row) => (row.deployments?.[0] ?? row.quote?.deployments?.[0])?.contractAddress)
+        .filter((address): address is string => !!address),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [symbols],
+  );
+
+  const onchainQuery = useQuery({
+    queryKey: ["rwa-onchain", onchainAddresses.join(",")],
+    enabled: onchainAddresses.length > 0,
+    staleTime: 5 * 60_000,
+    queryFn: () => fetchOnchainTokens(onchainAddresses),
+  });
+
+  const chainStatsQuery = useQuery({
+    queryKey: ["rwa-chain-stats"],
+    staleTime: 5 * 60_000,
+    queryFn: fetchChainStats,
+  });
+
+
+
   const totalNotional = useMemo(
     () => (marketQuery.data ?? []).reduce((sum, row) => sum + (row.dailyNotional ?? 0), 0),
     [marketQuery.data],
@@ -227,8 +289,13 @@ const RobinhoodRwa = () => {
           <div className="text-2xl font-semibold mt-1">{deepLiquidity}</div>
         </div>
         <div className="fin-card p-4">
-          <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Refresh</div>
-          <div className="text-2xl font-semibold mt-1">30s</div>
+          <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Chain txs today</div>
+          <div className="text-2xl font-semibold mt-1">
+            {chainStatsQuery.data ? compactNumber(chainStatsQuery.data.transactionsToday) : "—"}
+          </div>
+          <div className="text-[11px] text-muted-foreground mt-1">
+            {chainStatsQuery.data ? `${compactNumber(chainStatsQuery.data.totalAddresses)} addresses` : "Blockscout"}
+          </div>
         </div>
       </div>
 
@@ -261,7 +328,7 @@ const RobinhoodRwa = () => {
       ) : (
         <div className="fin-card overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1120px] text-sm">
+            <table className="w-full min-w-[1280px] text-sm">
               <thead>
                 <tr className="border-b border-border/60 text-[11px] uppercase tracking-wider text-muted-foreground">
                   <th className="text-left px-4 py-3 font-normal">Asset</th>
@@ -271,6 +338,8 @@ const RobinhoodRwa = () => {
                   <th className="text-right px-3 py-3 font-normal">Volume</th>
                   <th className="text-right px-3 py-3 font-normal">$ Liquidity</th>
                   <th className="text-right px-3 py-3 font-normal">Market cap</th>
+                  <th className="text-right px-3 py-3 font-normal">Holders</th>
+                  <th className="text-right px-3 py-3 font-normal">Token supply</th>
                   <th className="text-left px-3 py-3 font-normal">Depth</th>
                   <th className="text-left px-3 py-3 font-normal">Onchain</th>
                 </tr>
@@ -279,6 +348,9 @@ const RobinhoodRwa = () => {
                 {visibleRows.map((row) => {
                   const deployment = row.deployments?.[0] ?? row.quote?.deployments?.[0];
                   const fundamental = fundamentalsQuery.data?.[row.tokenSymbol];
+                  const onchain = deployment
+                    ? onchainQuery.data?.[deployment.contractAddress.toLowerCase()]
+                    : undefined;
                   const depth = liquidityLabel(row.spreadBps, row.dailyNotional);
                   return (
                     <tr key={row.id || row.tokenSymbol} className="hover:bg-muted/25 transition-colors">
@@ -309,13 +381,19 @@ const RobinhoodRwa = () => {
                       <td className="px-3 py-3 text-right font-mono tabular-nums">
                         {fundamentalsQuery.isFetching && !fundamental ? "…" : fundamental?.marketCap ?? "—"}
                       </td>
+                      <td className="px-3 py-3 text-right font-mono tabular-nums">
+                        {onchain ? compactNumber(onchain.holders) : onchainQuery.isFetching ? "…" : "—"}
+                      </td>
+                      <td className="px-3 py-3 text-right font-mono tabular-nums">
+                        {onchain ? compactNumber(onchain.totalSupply) : onchainQuery.isFetching ? "…" : "—"}
+                      </td>
                       <td className="px-3 py-3">
                         <span className="inline-flex rounded-full border border-border px-2 py-1 text-[11px]">{depth}</span>
                       </td>
                       <td className="px-3 py-3">
                         {deployment ? (
                           <a
-                            href={`https://explorer.robinhoodchain.com/address/${deployment.contractAddress}`}
+                            href={`https://robinhoodchain.blockscout.com/address/${deployment.contractAddress}`}
                             target="_blank"
                             rel="noreferrer"
                             className="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground hover:text-foreground"

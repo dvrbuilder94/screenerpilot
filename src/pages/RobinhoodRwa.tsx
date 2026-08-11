@@ -381,6 +381,12 @@ const RobinhoodRwa = () => {
                       <td className="px-3 py-3 text-right font-mono tabular-nums">
                         {fundamentalsQuery.isFetching && !fundamental ? "…" : fundamental?.marketCap ?? "—"}
                       </td>
+                      <td className="px-3 py-3 text-right font-mono tabular-nums">
+                        {onchain ? compactNumber(onchain.holders) : onchainQuery.isFetching ? "…" : "—"}
+                      </td>
+                      <td className="px-3 py-3 text-right font-mono tabular-nums">
+                        {onchain ? compactNumber(onchain.totalSupply) : onchainQuery.isFetching ? "…" : "—"}
+                      </td>
                       <td className="px-3 py-3">
                         <span className="inline-flex rounded-full border border-border px-2 py-1 text-[11px]">{depth}</span>
                       </td>

@@ -87,3 +87,6 @@ verify_jwt = false
 
 [functions.wallet-pnl]
 verify_jwt = false
+
+[functions.blockscout]
+verify_jwt = false

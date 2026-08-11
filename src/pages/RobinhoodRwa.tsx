@@ -114,6 +114,24 @@ async function fetchFundamental(symbol: string): Promise<Fundamental | null> {
   }
 }
 
+// Blockscout (Robinhood Chain explorer) — holders and on-chain supply per token.
+async function fetchOnchainTokens(addresses: string[]): Promise<Record<string, OnchainToken>> {
+  if (addresses.length === 0) return {};
+  const { data, error } = await supabase.functions.invoke("blockscout", {
+    body: { action: "tokens", addresses },
+  });
+  if (error || data?.error) return {};
+  return (data?.tokens ?? {}) as Record<string, OnchainToken>;
+}
+
+async function fetchChainStats(): Promise<ChainStats | null> {
+  const { data, error } = await supabase.functions.invoke("blockscout", { body: { action: "stats" } });
+  if (error || data?.error) return null;
+  return data as ChainStats;
+}
+
+
+
 const compactUsd = (value: number | null) => {
   if (value == null || !Number.isFinite(value)) return "—";
   return new Intl.NumberFormat("en-US", {

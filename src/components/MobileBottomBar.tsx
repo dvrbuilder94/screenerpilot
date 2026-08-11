@@ -1,13 +1,14 @@
-import { LineChart, Search, Star, Home, Flame } from "lucide-react";
+import { LineChart, Search, Star, Home, Flame, Database } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const items = [
   { title: "Home", url: "/home", icon: Home },
   { title: "Markets", url: "/markets", icon: LineChart },
+  { title: "RWA", url: "/rwa", icon: Database },
   { title: "Search", url: "/search", icon: Search },
   { title: "Squeeze", url: "/squeeze", icon: Flame },
-  { title: "Watchlist", url: "/watchlist", icon: Star },
+  { title: "Watch", url: "/watchlist", icon: Star },
 ];
 
 export function MobileBottomBar() {
@@ -19,7 +20,7 @@ export function MobileBottomBar() {
       className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur-md"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="grid grid-cols-5">
+      <div className="grid grid-cols-6">
         {items.map((it) => {
           const active = isActive(it.url);
           return (
@@ -27,11 +28,11 @@ export function MobileBottomBar() {
               key={it.url}
               to={it.url}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
+                "flex flex-col items-center justify-center gap-1 py-2.5 text-[9px] font-medium transition-colors",
                 active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <it.icon className={cn("w-[19px] h-[19px]", active && "text-primary")} />
+              <it.icon className={cn("w-[18px] h-[18px]", active && "text-primary")} />
               <span className="tracking-wide">{it.title}</span>
             </Link>
           );

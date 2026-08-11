@@ -289,8 +289,13 @@ const RobinhoodRwa = () => {
           <div className="text-2xl font-semibold mt-1">{deepLiquidity}</div>
         </div>
         <div className="fin-card p-4">
-          <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Refresh</div>
-          <div className="text-2xl font-semibold mt-1">30s</div>
+          <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Chain txs today</div>
+          <div className="text-2xl font-semibold mt-1">
+            {chainStatsQuery.data ? compactNumber(chainStatsQuery.data.transactionsToday) : "—"}
+          </div>
+          <div className="text-[11px] text-muted-foreground mt-1">
+            {chainStatsQuery.data ? `${compactNumber(chainStatsQuery.data.totalAddresses)} addresses` : "Blockscout"}
+          </div>
         </div>
       </div>
 

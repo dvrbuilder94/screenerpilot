@@ -1,4 +1,4 @@
-import { LineChart, Search, LogOut, User, Star, Home, Flame } from "lucide-react";
+import { LineChart, Search, LogOut, User, Star, Home, Flame, Database } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -18,10 +18,10 @@ import {
 
 type NavItem = { title: string; url: string; icon: typeof LineChart };
 
-// 4 tabs. That's it. Everything else lives inside these sections or on direct URLs.
 const NAV: NavItem[] = [
   { title: "Home", url: "/home", icon: Home },
   { title: "Markets", url: "/markets", icon: LineChart },
+  { title: "RWA", url: "/rwa", icon: Database },
   { title: "Search", url: "/search", icon: Search },
   { title: "Squeeze", url: "/squeeze", icon: Flame },
   { title: "Watchlist", url: "/watchlist", icon: Star },
@@ -41,7 +41,6 @@ export const AppHeader = () => {
           <Logo />
         </Link>
 
-        {/* Desktop nav — 4 tabs, always visible on lg+. Mobile uses bottom bar. */}
         <nav className="hidden lg:flex items-center gap-1 flex-1 ml-4">
           {NAV.map((item) => {
             const active = isItemActive(item.url);
@@ -67,7 +66,6 @@ export const AppHeader = () => {
           })}
         </nav>
 
-        {/* Right cluster */}
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 ml-auto">
           <NotificationBell />
           {user ? (

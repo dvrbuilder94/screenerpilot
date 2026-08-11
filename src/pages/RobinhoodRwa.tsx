@@ -328,7 +328,7 @@ const RobinhoodRwa = () => {
       ) : (
         <div className="fin-card overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1120px] text-sm">
+            <table className="w-full min-w-[1280px] text-sm">
               <thead>
                 <tr className="border-b border-border/60 text-[11px] uppercase tracking-wider text-muted-foreground">
                   <th className="text-left px-4 py-3 font-normal">Asset</th>
@@ -393,7 +393,7 @@ const RobinhoodRwa = () => {
                       <td className="px-3 py-3">
                         {deployment ? (
                           <a
-                            href={`https://explorer.robinhoodchain.com/address/${deployment.contractAddress}`}
+                            href={`https://robinhoodchain.blockscout.com/address/${deployment.contractAddress}`}
                             target="_blank"
                             rel="noreferrer"
                             className="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground hover:text-foreground"

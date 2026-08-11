@@ -49,6 +49,25 @@ type Fundamental = {
   companyName: string;
 };
 
+// On-chain data for a Robinhood Chain token, from Blockscout.
+type OnchainToken = {
+  symbol: string;
+  holders: number;
+  totalSupply: number;
+  onchainPrice: number | null;
+  onchainMarketCap: number | null;
+  volume24h: number | null;
+};
+
+type ChainStats = {
+  totalAddresses: number;
+  totalTransactions: number;
+  transactionsToday: number;
+  averageBlockTime: number;
+  gasAverage: number;
+};
+
+
 async function fetchJson<T>(url: string): Promise<T> {
   const response = await fetch(url, { headers: { Accept: "application/json" } });
   if (!response.ok) throw new Error(`Robinhood API returned ${response.status}`);

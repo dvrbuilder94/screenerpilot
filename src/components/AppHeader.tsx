@@ -1,4 +1,4 @@
-import { LineChart, Search, LogOut, User, Star, Home, Flame, Database, Crosshair } from "lucide-react";
+import { LineChart, Search, LogOut, User, Star, Home, Flame, Database, Crosshair, Activity } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -22,6 +22,7 @@ const NAV: NavItem[] = [
   { title: "Home", url: "/home", icon: Home },
   { title: "Setups", url: "/setups", icon: Crosshair },
   { title: "Markets", url: "/markets", icon: LineChart },
+  { title: "Crypto", url: "/crypto", icon: Activity },
   { title: "RWA", url: "/rwa", icon: Database },
   { title: "Search", url: "/search", icon: Search },
   { title: "Squeeze", url: "/squeeze", icon: Flame },

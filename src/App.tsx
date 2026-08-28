@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
 import Macro from "./pages/Macro";
 import Markets from "./pages/Markets";
+import CryptoMomentum from "./pages/CryptoMomentum";
 import Ratios from "./pages/Ratios";
 import Commodities from "./pages/Commodities";
 import NotFound from "./pages/NotFound";
@@ -75,6 +76,7 @@ const App = () => (
                       <Route path="/agent" element={<OnchainAgent />} />
                       <Route path="/wallet" element={<WalletPnLPage />} />
                       <Route path="/markets" element={<Markets />} />
+                      <Route path="/crypto" element={<CryptoMomentum />} />
                       <Route path="/rwa" element={<RobinhoodRwa />} />
                       <Route path="/macro" element={<Macro />} />
                       <Route path="/ratios" element={<Ratios />} />

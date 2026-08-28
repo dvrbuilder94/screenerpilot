@@ -1,11 +1,11 @@
-import { LineChart, Search, Star, Home, Flame, Database } from "lucide-react";
+import { LineChart, Search, Star, Home, Flame, Activity } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const items = [
   { title: "Home", url: "/home", icon: Home },
   { title: "Markets", url: "/markets", icon: LineChart },
-  { title: "RWA", url: "/rwa", icon: Database },
+  { title: "Crypto", url: "/crypto", icon: Activity },
   { title: "Search", url: "/search", icon: Search },
   { title: "Squeeze", url: "/squeeze", icon: Flame },
   { title: "Watch", url: "/watchlist", icon: Star },

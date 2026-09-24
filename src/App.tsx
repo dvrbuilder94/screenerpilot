@@ -2,96 +2,38 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useSearchParams } from "react-router-dom";
-import { LanguageProvider } from "@/contexts/LanguageContext";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
-import Macro from "./pages/Macro";
-import Markets from "./pages/Markets";
-import Ratios from "./pages/Ratios";
-import Commodities from "./pages/Commodities";
-import NotFound from "./pages/NotFound";
-import Landing from "./pages/Landing";
-import Pricing from "./pages/Pricing";
-import SignUp from "./pages/SignUp";
-import Login from "./pages/Login";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import CheckoutSuccess from "./pages/CheckoutSuccess";
+import EmergentOS from "./pages/EmergentOS";
+import Economy from "./pages/Economy";
+import Launchpad from "./pages/Launchpad";
+import AgentOS from "./pages/AgentOS";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
-import RefundPolicy from "./pages/RefundPolicy";
-import Unsubscribe from "./pages/Unsubscribe";
-import OnchainAgent from "./pages/OnchainAgent";
-import Settings from "./pages/Settings";
-import Watchlist from "./pages/Watchlist";
-import Home from "./pages/Home";
-import AssetDetail from "./pages/AssetDetail";
-import Search from "./pages/Search";
-import TokenSqueeze from "./pages/TokenSqueeze";
-import WalletPnLPage from "./pages/WalletPnL";
-import RobinhoodRwa from "./pages/RobinhoodRwa";
-import RobinhoodSetups from "./pages/RobinhoodSetups";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Old Stock Intelligence page is retired — send everyone to the clean flow.
-function StockIntelRedirect() {
-  const [params] = useSearchParams();
-  const sym = params.get("symbol");
-  return <Navigate to={sym ? `/asset/${encodeURIComponent(sym)}` : "/search"} replace />;
-}
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <LanguageProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/checkout/success" element={<CheckoutSuccess />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/refund-policy" element={<RefundPolicy />} />
-              <Route path="/unsubscribe" element={<Unsubscribe />} />
-              <Route
-                path="*"
-                element={
-                  <AppLayout>
-                    <Routes>
-                      <Route path="/home" element={<Home />} />
-                      <Route path="/asset/:symbol" element={<AssetDetail />} />
-                      <Route path="/search" element={<Search />} />
-                      <Route path="/setups" element={<RobinhoodSetups />} />
-                      <Route path="/squeeze" element={<TokenSqueeze />} />
-                      <Route path="/agent" element={<OnchainAgent />} />
-                      <Route path="/wallet" element={<WalletPnLPage />} />
-                      <Route path="/markets" element={<Markets />} />
-                      <Route path="/rwa" element={<RobinhoodRwa />} />
-                      <Route path="/macro" element={<Macro />} />
-                      <Route path="/ratios" element={<Ratios />} />
-                      <Route path="/commodities" element={<Commodities />} />
-                      <Route path="/stock-intelligence" element={<StockIntelRedirect />} />
-                      <Route path="/watchlist" element={<Watchlist />} />
-                      <Route path="/settings" element={<Settings />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </AppLayout>
-                }
-              />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </LanguageProvider>
-    </AuthProvider>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <AppLayout>
+          <Routes>
+            <Route path="/" element={<EmergentOS />} />
+            <Route path="/home" element={<Navigate to="/" replace />} />
+            <Route path="/economy" element={<Economy />} />
+            <Route path="/launchpad" element={<Launchpad />} />
+            <Route path="/agent" element={<AgentOS />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AppLayout>
+      </BrowserRouter>
+    </TooltipProvider>
   </QueryClientProvider>
 );
 

@@ -1,48 +1,25 @@
-# ScreenerPilot — AI Market Intelligence Terminal
+# emergentOS
 
-Cross-asset market intelligence terminal for monitoring regimes, dislocations, and relative value across crypto, equities, ETFs, indices and commodities.
+An autonomous onchain economy on Arc.
 
-## What it is
+This repository was previously ScreenerPilot and is being rebuilt as **emergentOS**. The first public economy is **$EGENT**.
 
-ScreenerPilot is a **read-only analytics and monitoring product**. It does not execute trades, manage funds, or provide personalised financial advice. All outputs are descriptive market readings derived from public market data.
+## V0
 
-## Capabilities
+- Economy dashboard
+- Agent transparency layer
+- Argus-powered launchpad shell
+- Public Arc wallet / onchain state
+- No private keys or signing material in the frontend
 
-- **Cross-asset monitoring**: crypto, equities, ETFs, indices, commodities, FX
-- **Macro intelligence**: regimes (RISK-ON / RISK-OFF), curve, DXY, VIX, breadth
-- **Cross-asset ratios**: z-scores and 5Y percentiles for relative-value context
-- **Stock intelligence**: on-demand descriptive analysis of individual tickers
-- **AlexIA copilot**: AI analyst that interprets market context without prescriptive recommendations
-- **Auto-refresh**: data refresh every 10 minutes
-- **Multi-language**: EN / ES
+## Architecture direction
 
-## Data sources
+Activity -> fees/revenue -> treasury -> constrained agent allocation -> product/liquidity/$EGENT ecosystem -> new activity.
 
-- **Binance** public market data API (crypto)
-- **Yahoo Finance** public market data API (equities, indices, commodities)
-- **FRED** macro indicators
+The first launchpad phase uses Argus infrastructure. Native launch infrastructure can be introduced later if the product reaches sufficient usage.
 
-## Output framing
+## Agent wallet
 
-All readings are **descriptive**, never prescriptive:
+`0x4fef4fe834ca4ee2003f08c57d76887ed68e5ecb`
 
-- Bias labels: `BULLISH` / `BEARISH` / `NEUTRAL_BIAS` describe market context, not trade actions
-- Scores and z-scores indicate statistical position vs historical baseline
-- No entry prices, stop-loss levels, or price targets are produced by the product
-- No portfolio allocation, position sizing, or trade execution guidance
-
-## Disclaimer
-
-This product is an analytics and information tool. It does not constitute financial advice and does not place or recommend trades. Users are responsible for their own decisions.
-
-## Tech stack
-
-- React 18 + TypeScript + Vite
-- Tailwind CSS + shadcn/ui
-- TanStack Query
-- Lovable Cloud (backend, auth, edge functions)
-- Lovable AI Gateway (Gemini 2.5 Flash for AlexIA)
-
-## License
-
-MIT
+Never commit private keys, seed phrases, wallet session credentials, or unrestricted signing secrets to this repository.

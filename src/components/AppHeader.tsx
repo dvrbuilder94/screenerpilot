@@ -20,6 +20,7 @@ type NavItem = { title: string; url: string; icon: typeof LineChart };
 
 const NAV: NavItem[] = [
   { title: "Home", url: "/home", icon: Home },
+  { title: "Crypto Top 200", url: "/crypto-top200", icon: Flame },
   { title: "Setups", url: "/setups", icon: Crosshair },
   { title: "High Conviction", url: "/high-conviction", icon: Gauge },
   { title: "Markets", url: "/markets", icon: LineChart },

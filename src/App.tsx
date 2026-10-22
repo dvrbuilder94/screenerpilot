@@ -33,6 +33,7 @@ import WalletPnLPage from "./pages/WalletPnL";
 import RobinhoodRwa from "./pages/RobinhoodRwa";
 import RobinhoodSetups from "./pages/RobinhoodSetups";
 import HighConviction from "./pages/HighConviction";
+import CryptoTop200 from "./pages/CryptoTop200";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const App = () => (
                       <Route path="/search" element={<Search />} />
                       <Route path="/setups" element={<RobinhoodSetups />} />
                       <Route path="/high-conviction" element={<HighConviction />} />
+                      <Route path="/crypto-top200" element={<CryptoTop200 />} />
                       <Route path="/squeeze" element={<TokenSqueeze />} />
                       <Route path="/agent" element={<OnchainAgent />} />
                       <Route path="/wallet" element={<WalletPnLPage />} />

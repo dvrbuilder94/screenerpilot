@@ -90,3 +90,6 @@ verify_jwt = false
 
 [functions.blockscout]
 verify_jwt = false
+
+[functions.crypto-top200-radar]
+verify_jwt = false
